@@ -15,3 +15,5 @@
 logs/
 outputs/
 
+# R backup files
+*.R~
