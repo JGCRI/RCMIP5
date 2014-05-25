@@ -1,0 +1,68 @@
+##Purpose: Average the depth dimention in netCDF file so that we can use the raster package to manage things better so far only coded for the soil temperature.
+##Precondition: Several folders are required to be defined before this script is run (see below).
+##Outputs: This file writes out raster files to the CMIP direction (!!)
+##Org dev date: Febuary 2014
+##Orginal programer: Kathe Todd-Brown (ktoddbrown@gmail.com)
+library(ncdf)
+library(raster)
+
+##########################################
+##Define the directories
+##!! Change this for your folder
+##########################################
+CMIPDir <- '/Volumes/DATAFILES/downloads'
+
+##Define the raster format
+RstSaveExt <- 'grd'
+
+##Define the models we are interested in
+modelToConsider <- c( "bcc-csm1-1-m", "BNU-ESM", "CanESM2", "CESM1-BGC",
+                     "GFDL-ESM2G", "HadGEM2-ES", "NorESM1-ME","NorESM1-M",
+                     "inmcm4", "IPSL-CM5A-MR", "MIROC-ESM", "MPI-ESM-MR")
+
+for(modelStr in modelToConsider){
+    varStr <- 'tsl'
+    depthCut <- 0.1 #how deep to take the weighted average
+    newVarStr <- 'tsl10'
+    for(expStr in c('historical', 'rcp85', '1pctCO2')){
+        filenames <- list.files(CMIPDir, sprintf('%s_.*%s_%s_', varStr, modelStr, expStr), full.name=TRUE)
+        for(loadFile in filenames){
+
+            ##The new file name just replaces the old variable name with the new
+            newFilename <- gsub(varStr, newVarStr, loadFile)
+            ##sadly we loose the layer names saving as a nc file so switch formats
+            newFilename <- gsub('.nc$', paste('.', RstSaveExt, sep=''), newFilename)
+
+            if(file.exists(newFilename)){
+                cat('found file [', newFilename, '] moving on\n')
+                next
+            }
+
+            cat('Pulling depth from the netcdf file [', loadFile, ']\n')
+            data.nc <- open.ncdf(loadFile)
+            depthVar <- get.var.ncdf(data.nc, varid='depth')
+            ##close this netcdf file
+            close(data.nc)
+
+            cat('depth is: [', depthVar, ']\n')
+            ##Pull the weights for each layer
+            depthVar <- c(depthVar[depthVar < depthCut], 0.1)
+            depthWeight <- (depthVar - c(0, depthVar[2:length(depthVar)-1]))/depthCut
+            cat('depth weights are: [', depthWeight, ']\n')
+
+            cat('weighing temperature layers...')
+            tempRst <- 0
+            for(ii in 1:length(depthWeight)){
+                layerRst <- brick(loadFile, varname=varStr, lvar=3, level=ii)
+                tempRst <- tempRst + layerRst*depthWeight[ii]
+            }
+            names(tempRst) <- names(layerRst)
+            cat('done\n')
+            cat('writing weighted averages to [',newFilename, ']')
+
+            writeRaster(tempRst, newFilename, varname=newVarStr, overwrite=TRUE)
+            cat('done\n')
+
+        }
+    }
+}
