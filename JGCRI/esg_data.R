@@ -35,6 +35,7 @@ LATITUDE_SUMMARY  	<- 5    # Set to >90 for N/S hemispheres; 0 for global avg
 LONGITUDE_SUMMARY 	<- 0  # zero for no longitude bands
 SKIPFILE			<- paste0( OUTPUT_DIR, "skipfile.csv" )
 RESULTS_FILE        <- "results.csv"
+RAW_RESULTS_FILE    <- "results_raw.csv"
 
 # Support functions and common definitions
 
@@ -52,10 +53,10 @@ printlog <- function( msg, ..., ts=TRUE, cr=TRUE ) {
 
 # -----------------------------------------------------------------------------
 # Write error to file that logs skips
-skiplog <- function( fname="", reason="", newfile=FALSE, skipped=T ) {
+skiplog <- function( fname, reason, skipped, newfile=FALSE ) {
 	if( newfile | !file.exists(SKIPFILE)) 
-		cat( "Date,File,Skipped,Reason\n", file=SKIPFILE )
-	if(fname!= "" | reason != "")
+		cat( "Date,File,Skipped,Reason,\n", file=SKIPFILE )
+	if( fname!= "" | reason != "" )
 		cat( date(), fname, skipped, reason, "\n", file=SKIPFILE, sep=",", append=T )
 }
 
@@ -156,7 +157,7 @@ latlon_summary <- function( d, latlon, m_area ) {
 }
 
 # -----------------------------------------------------------------------------
-# The workhorse: read a netCDF file, aggregate by lat/lon bands, return data
+# The workhorse: read a netCDF file and do first steps to process its data
 process_data <- function( fn, variable, model, ensemble, scenario,
 						  beginyear, beginmonth, endyear, endmonth, datafreq ) {
 
@@ -165,13 +166,13 @@ process_data <- function( fn, variable, model, ensemble, scenario,
 	if( is.null( cellareas[[ model ]] ) ) {
 		printlog( "*** Uh oh! Couldn't find cell area data for this model. Skipping ***" )
 		#    warning( paste( "Couldn't find cell area file entry", cellareas[[ model ]] ) )
-		skiplog( fn, "Couldn't find entry for cell area file" )
+		skiplog( fn, "Couldn't find entry for cell area file", skipped=T )
 		return( NULL )
 	}
 	if( !file.exists( cellareas[[ model ]] ) ) {
 		printlog( "*** Uh oh! Couldn't find cell area data file. Skipping ***" )
 		#    warning( paste( "Couldn't find cell area file", cellareas[[ model ]] ) )
-		skiplog( fn, "Couldn't find cell area file on disk" )
+		skiplog( fn, "Couldn't find cell area file on disk", skipped=T )
 		return( NULL )
 	}
 	ncid_a <- open.ncdf( cellareas[[ model ]] )
@@ -183,7 +184,7 @@ process_data <- function( fn, variable, model, ensemble, scenario,
 
 	printlog ('Opening file', fn )
     if( !file.exists( fn ) ) {
-        skiplog( fn, "File doesn't seem to exist anymore" )
+        skiplog( fn, "File doesn't seem to exist anymore", skipped=T )
         return( NULL )
     }
 	ncid <- open.ncdf( fn )
@@ -199,7 +200,7 @@ process_data <- function( fn, variable, model, ensemble, scenario,
 		latlon <- expand.grid( lon, lat )    
 	}  
 	if( nrow( latlon ) != nrow( m_area ) ) {
-		skiplog( fn, "Area and lat/lon grids aren't the same" )
+		skiplog( fn, "Area and lat/lon grids aren't the same", skipped=T )
 		return( NULL )
 	}
 
@@ -223,55 +224,51 @@ process_data <- function( fn, variable, model, ensemble, scenario,
     month <- beginmonth
     endyearmonth <- endyear + endmonth/12
     timespot <- 1
-    results <- data.frame()
+ 	localtf <- tempfile()
+ 	   
     while( ( year + month/12 ) <= endyearmonth ) {
-        
         startdata[ timeindex ] <- timespot
         d <- read_timepoint( ncid, variable, levels_to_avg, startdata, countdata, levindex )    
-        timespot <- timespot + 1
-        
         dsum <- latlon_summary( d, latlon, m_area )
-        
-        # Add other (unchanging) information to results data frame
-        dsum$variable <- variable
-        dsum$ensemble <- ensemble
-        dsum$scenario <- scenario
-        dsum$source <- model
-        dsum$units <- att.get.ncdf (ncid, variable,  "units" )$value
-        dsum$month <- month
-        dsum$year <- year
-        
-        results <- rbind( results, dsum )
+		dsum$month <- month
+		dsum$year <- year
+		
+        write.table( dsum, localtf, sep=",", row.names=F, col.names=( timespot==1 ), append=( timespot > 1 ) )
         
         month <- month + 1
+        timespot <- timespot + 1
         if( month > MONTHS_PER_YEAR ) {
+			if( ! year %% 10 ) printlog( year )
             month <- 1
             year <- year + 1
         }
     }
-    	
-	close.ncdf(ncid)
 
+	results <- read.csv( localtf )
+	
+	# Add other (unchanging) information to results data frame
+	results$variable <- variable
+	results$ensemble <- ensemble
+	results$scenario <- scenario
+	results$source <- model
+	results$units <- att.get.ncdf (ncid, variable,  "units" )$value
+
+	printlog( "Closing netCDF file and returning data" )    
+	close.ncdf(ncid) 	
 	return( results ) 
 }
 
 # -----------------------------------------------------------------------------
 # Process a single file, parsing information from its name and calling process_data
+# Aggregates combined data by lat/lon bands
 process_file <- function( fn, tf, skip_existing=TRUE) {
   filedata <- strsplit( basename( fn ), "_" )[[ 1 ]]
-  printlog( "------------------------" )
+  printlog( SEPARATOR )
   printlog( "File:", fn )
   variable <- filedata[ 1 ]
   model <- filedata[ 3 ]
   scenario <- filedata[ 4 ]
   ensemble <- filedata[ 5 ]
-  #outfn <- paste( fn, ".csv", sep="" )
-  
-  #if (file.exists( outfn ) & skip_existing ) {
-  #  printlog ("Skipping file", fn )
-  #  skiplog( fn, "Output filename already exists" )
-  #  return()
-  #}
   
   printlog( variable, model, scenario, ensemble )
   filename <- strsplit( filedata[ 6 ], ".", fixed=T )[[ 1 ]][ 1 ]
@@ -281,9 +278,8 @@ process_file <- function( fn, tf, skip_existing=TRUE) {
   
   if( nchar( begintime ) != nchar( endtime ) | ( nchar( begintime ) != 4 & nchar( begintime ) != 6 ) ) {
     printlog( "*** Uh oh! Something's wrong--date not 4 or 6 digits. Skipping ***" )
-    skiplog( fn, "Date not 4 or 6 digits" )
     warning( paste( "Couldn't parse filename", i ) )
-    skiplog( fn, "Couldn't parse filename" )
+    skiplog( fn, "Couldn't parse filename", skipped=T )
     return( 0 )
   }
   
@@ -316,73 +312,79 @@ process_file <- function( fn, tf, skip_existing=TRUE) {
     return( nrow( results ) )
   } else {
     printlog( "NULL results! Not writing any output" )
-    skiplog( fn, "process_data returned NULL" )
+    skiplog( fn, "process_data returned NULL", skipped=T )
     return( 0 )
   }
 }
 
 # -----------------------------------------------------------------------------
-# Process a whole directory of files
+# Process a whole directory of files, computing annual data
 process_directory <- function( dir=DATA_DIR, pattern="*.nc$" ) {
-  
-  
-  printlog( "------------------------" )
-  printlog( "Welcome to process_directory" )
-  files <- list.files( dir, pattern=pattern )
-  printlog( length( files ), "files to process" )
-  
-  resultsfile <-  paste( dir, RESULTS_FILE, sep="/" )
-  already_processed <- ""
-  if( file.exists( SKIPFILE ) & file.exists( resultsfile ) ) {
-    if( readline( "Directory has already been processed. Use existing data and process only skips? " ) %in% c( 'y', "Y" ) ) {
-        
-        already_processed <- subset( read.csv( SKIPFILE ), Skipped=FALSE )$File
-        
-    } else {
-        skiplog( newfile=T )    # erase the skip log and start a new one
-        
-    }
-      
-      
-  }
-  
-  tf <- tempfile()
-  printlog( "Using tempfile", tf )
-  total_rows <- 1
-    
-  print( system.time( {
-    for( i in files ) {
-        if( i %in% already_processed ) {
-            printlog( "Looks like", i, "has already neen processed, skipping it" )
-            next
-        }
-        tryCatch( {   # file-reading is tricky; catch any error thrown
-            total_rows <- total_rows + process_file( paste( dir, i, sep="/" ), tf ) - 1
-        }, error=function( err ) {
-            printlog( "ERROR from process_file:", as.character( err ) )
-            skiplog( i, "process_file crashed" )
-        } 
-        )
-  }
-  } ) )
+	printlog( SEPARATOR )
+	printlog( "Welcome to process_directory" )
+	files <- list.files( dir, pattern=pattern )
+	printlog( length( files ), "files to process" )
+
+	tf <- tempfile()
+	printlog( "Using tempfile", tf )
+	resultsfile <-  paste( OUTPUT_DIR, RESULTS_FILE, sep="/" )
+	resultsfile_raw <-  paste( OUTPUT_DIR, RAW_RESULTS_FILE, sep="/" )
+	already_processed <- ""
+	oldresults <- data.frame()
+
+	if( file.exists( SKIPFILE ) & file.exists( resultsfile ) & file.exists( resultsfile_raw ) ) {
+		if( readline( "Directory has already been processed. Use existing data and process only skips? " ) %in% c( 'y', "Y" ) ) {
+			already_processed <- subset( read.csv( SKIPFILE, stringsAsFactors=F ), Skipped=FALSE )$File
+			printlog( "According to log, these files have already been processed:" )
+			print( already_processed )
+			print(summary(already_processed))
+			printlog( "Copying previous results into tempfile..." )
+			oldresults <- read.csv( resultsfile_raw )
+			write.csv( oldresults, tf, row.names=F )
+		} else {
+			skiplog( fname="", reason="", skipped=NA, newfile=T )    # erase the skip log and start a new one
+		} 
+	}
+
+	total_rows <- nrow( oldresults ) + 1
+	print( system.time( {
+		for( i in files ) {
+			fullfn <- paste( dir, i, sep="/" )
+			if( fullfn %in% already_processed ) {
+				printlog( i, "has already been processed; skipping it" )
+				next
+			}
+			tryCatch( {   # file-reading is tricky; catch any error thrown
+					total_rows <- total_rows + process_file( fullfn, tf ) - 1
+				}, error=function( err ) {
+					printlog( "ERROR from process_file:", as.character( err ) )
+					skiplog( i, "process_file crashed", skipped=T )
+				} 
+			)
+			}
+	} ) )
 
 	if( !file.exists( tf ) ) {
 		printlog( "No data processed!" )
 		return()
 	}
-	
-  # Now read back in all the data from the tempfile and process it
-  printlog( "All done; reading tempfile (", total_rows, ") back in..." )
-  alldata <- read.csv( tf, nrows=total_rows )
-    printlog( "Rows =", nrow( alldata ) )
-  
-  results_grouped <- group_by( alldata, year, latband, lonband, scenario, source, ensemble )
-  results_agg <- dplyr::summarise( results_grouped, 
-                                   value=mean( value, na.rm=T ), 
-                                   sd=sd( value, na.rm=T ) )
 
-  printlog( "Data summarised, writing..." )
-  write.csv( results_agg, resultsfile, row.names=F )
+	# Now read back in all the data from the tempfile and process it
+	printlog( "All done; reading tempfile (", total_rows, ") back in..." )
+	alldata <- read.csv( tf, nrows=total_rows )
+	printlog( "Rows =", nrow( alldata ) )
+
+	printlog( "Saving raw results..." )
+	write.csv( alldata, resultsfile_raw, row.names=F )
+
+	results_grouped <- group_by( alldata, variable, year, latband, lonband, scenario, source, ensemble )
+	results_agg <- dplyr::summarise( results_grouped, 
+				   stdev=sd( value, na.rm=T ),
+				   value=mean( value, na.rm=T ), 
+				   n=n() )
+
+	printlog( "Data summarised, writing..." )
+	write.csv( results_agg, resultsfile, row.names=F )
 }
 
 
