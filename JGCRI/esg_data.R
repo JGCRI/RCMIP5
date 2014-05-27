@@ -4,11 +4,8 @@
 # combines both land and ocean data into one script with latitude and longitude bands
 
 # To use:
-#	1. Set CELL_AREA_VAR and CELL_AREA_DIR variables below
-#	2. Call process_directory or process_file as appropriate
-
-# TODO: if there's an error and we die halfway through, or if a new file is added
-# to a directory, don't want to have to re-run entire directory; instead combine with old data
+#	1. Set DATA_DIR and OUTPUT_DIR below
+#	2. Call process_directory
 
 DATA_DIR            <- "sampledata/"
 OUTPUT_DIR			<- "outputs/"
