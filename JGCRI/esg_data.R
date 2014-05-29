@@ -389,10 +389,13 @@ process_directory <- function( dir=DATA_DIR, pattern="*.nc$" ) {
 # 										MAIN
 # =============================================================================
 
+INPUT_DIR <- normalizePath( INPUT_DIR )
+OUTPUT_DIR <- normalizePath( OUTPUT_DIR )
 if( !file.exists( OUTPUT_DIR ) ) {
 	printlog( "Creating", OUTPUT_DIR )
 	dir.create( OUTPUT_DIR )
 }
+LOG_DIR <- normalizePath( LOG_DIR )
 if( !file.exists( LOG_DIR ) ) {
 	printlog( "Creating", LOG_DIR )
 	dir.create( LOG_DIR )
