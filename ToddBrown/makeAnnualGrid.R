@@ -16,8 +16,8 @@ library('ncdf')
 ##Define the directories
 ##!! Change this for your specifics
 ##########################################
-CMIPDir <- '/Volumes/DATAFILES/downloads'
-anuRstDir <- '/Volumes/DATAFILES/anuNCDF'
+#CMIPDir <- '/Volumes/DATAFILES/downloads'
+#anuRstDir <- '/Volumes/DATAFILES/anuNCDF'
 
 ##Define the raster format
 RstSaveExt <- 'grd'
@@ -26,11 +26,12 @@ forceAnnualCalc <- FALSE #force the annual multi-ensemble average calculation
 forceUnion <- FALSE #force the joining of the historical and rcp
 forceCommonScaling <- FALSE #force the rescaling to a 1x1 grid
 
-##Definine the models we are interested in
-modelToConsider <- c( "bcc-csm1-1-m", "BNU-ESM", "CanESM2", "CESM1-BGC",
-                     "GFDL-ESM2G", "HadGEM2-ES", "NorESM1-ME", "NorESM1-M",
-                     "inmcm4", "IPSL-CM5A-MR", "MIROC-ESM", "MPI-ESM-MR")
-
+##Definine the models we are interested in if not previously defined
+if(!'modelToConsider' %in% ls()){
+    modelToConsider <- c( "bcc-csm1-1-m", "BNU-ESM", "CanESM2", "CESM1-BGC",
+                         "GFDL-ESM2G", "HadGEM2-ES", "NorESM1-ME", "NorESM1-M",
+                         "inmcm4", "IPSL-CM5A-MR", "MIROC-ESM", "MPI-ESM-MR")
+}
 yrIndex <- rep(1:250, each=12)
 
 ##create the common 1x1 templet for our regridding
@@ -39,11 +40,11 @@ templetCommon <- raster(nrows=180, ncols=360,
                         xmn=-180, xmx=180, ymn=-90, ymx=90, crs=newproj)
 
 for(modelStr in modelToConsider){
-    for(varStr in c('gpp', 'ra', 'tsl10', 'cSoil', 'npp', 'rh', 'cLitter', 'cVeg', 'cCwd', 'rsds', 'pr', 'evspsbl', 'tas')){
+    for(varStr in c('tas', 'gpp', 'ra', 'tsl10', 'cSoil', 'npp', 'rh', 'cLitter', 'cVeg', 'cCwd', 'rsds', 'pr', 'evspsbl')[1]){
         cat('*********\n\nProcessing', varStr,'\n**************\n')
 
-        ##Load historical and rcp runs
-        for(expStr in c('historical', 'rcp85', 'historicalGHG', '1pctCO2')[3:4]){
+        ##Load historical, rcp, and other experimental runs
+        for(expStr in c('historical', 'rcp85', 'historicalGHG', '1pctCO2')){
             cat('***', expStr, '***\n')
 
             meanRst <- NULL

@@ -5,11 +5,11 @@ library('raster')
 library('ncdf4')
 library('abind')
 
-source('lib/rasterToArray.R') #convert raster files to our array format
+source('rasterToArray.R') #convert raster files to our array format
 
 ##Where is everything located
-CMIPDir <- '/Volumes/DATAFILES/downloads'
-anuRstDir <- '/Volumes/DATAFILES/anuNCDF'
+#CMIPDir <- '/Volumes/DATAFILES/downloads'
+#anuRstDir <- '/Volumes/DATAFILES/anuNCDF'
 
 CToK <- 273.15 ##Convert Celcius to Kalvin
 yrToSec <- 3.15569e7 ##convert seconds to years using this constant
@@ -28,9 +28,9 @@ cat('loading: ', varStrArr, '\n')
 cat('common string is: [', commonStr, ']\n')
 
 multiFactor <- list(npp=yrToSec, gpp=yrToSec, ra=yrToSec, rh=yrToSec,
-                         cSoil=1, cVeg=1, tsl10=1)
+                         cSoil=1, cVeg=1, tsl10=1, tas=1)
 addFactor <-  list(npp=0, gpp=0, ra=0, rh=0,
-                         cSoil=0, cVeg=0, tsl10=-1*CToK)
+                         cSoil=0, cVeg=0, tsl10=-1*CToK, tas=-1*CToK)
 yrStr <- NULL
 for(varStr in setdiff(varStrArr, c('cLitter', 'cCwd'))){
     cat('loading',varStr,'for', modelStr, '...')
@@ -140,7 +140,7 @@ if('npp' %in% ls()){
     npp <- npp[,,yrStr.npp %in% yrStr]
     npp_tot <- apply(npp, c(3), function(x){sum(as.vector(x*landarea), na.rm=TRUE)})/1e12
 }
-if('gpp' %in% ls() & !is.null(gpp)){
+if('gpp' %in% ls() && !is.null(gpp)){
     gpp <- gpp[,,yrStr.gpp %in% yrStr]
     gpp_tot <- apply(gpp, c(3), function(x){sum(as.vector(x*landarea), na.rm=TRUE)})/1e12
 }
@@ -151,7 +151,7 @@ if('rh' %in% ls()){
 
 }
 
-if('ra' %in% ls() & !is.null(ra)){
+if('ra' %in% ls() && !is.null(ra)){
     ra <- ra[,,yrStr.ra %in% yrStr]
     ra_tot <- apply(ra, c(3), function(x){sum(as.vector(x*landarea), na.rm=TRUE)})/1e12
 
