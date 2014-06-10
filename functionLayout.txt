@@ -23,9 +23,13 @@ Visualizations:
 -Zonal total/means
 
 Internal data representation options:
--list(time, val, sd(?)) where val is a 3D array
+-list(time, lon, lat, area, val, sd(?)) where val is a 3D array
+   **KTB: I think this is the most streight forward
 -data.frame(time, lat, lon, val)
 -raster object
+   **KTB: This has built in bilinear projection function that might be useful
+   (though not an area-weighted projection which we would need for
+   large grid shifts)
 
 ========================================================
 Basic function tasks:
@@ -41,4 +45,5 @@ Basic function tasks:
 -generate global total/mean
 -generate multi-year seasonal cycles
 -aggregate mean/total on a spatial mask
+
 
