@@ -1,0 +1,44 @@
+This document specifies the desired functions and specifications for the project.
+Started: 10 June 2014
+
+
+Input files:
+-netcdf file downloaded from CMIP5 repository
+  +deal with multiple file structures
+    -single directory
+    -one directory for each model/variable or nested structure
+
+Main outputs of interest:
+-global total/means
+  +annual
+  +monthly
+  +reported time step
+-gridded temporal mean/totals
+  +annual
+  +monthly
+  +reported time step
+
+Visualizations:
+-Global map
+-Zonal total/means
+
+Internal data representation options:
+-list(time, val, sd(?)) where val is a 3D array
+-data.frame(time, lat, lon, val)
+-raster object
+
+========================================================
+Basic function tasks:
+-list all downloaded files
+-load specific experiment, model, ensemble, variable
+   +filter values based on absolute and/or relative tolerances
+-merge ensemebles (mean, sd)
+-shift grid projection
+   +area weighted
+   +bilinear intrerpolation
+-shift units(?)
+-generate annual mean
+-generate global total/mean
+-generate multi-year seasonal cycles
+-aggregate mean/total on a spatial mask
+
