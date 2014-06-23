@@ -1,49 +1,67 @@
 This document specifies the desired functions and specifications for the project.
 Started: 10 June 2014
 
+========================================================
+
+Overall:
+	- Flexible, robust code to read, summarize, and regrid CMIP5 data.
+
+========================================================
 
 Input files:
--netcdf file downloaded from CMIP5 repository
-  +deal with multiple file structures
-    -single directory
-    -one directory for each model/variable or nested structure
+- netCDF file downloaded from CMIP5 repository
+	+ deal with arbitrary file structures: list.files( ..., recursive=TRUE )
 
 Main outputs of interest:
--global total/means
-  +annual
-  +monthly
-  +reported time step
--gridded temporal mean/totals
-  +annual
-  +monthly
-  +reported time step
+- Zonal (including global) total/means/sd
+	+ annual
+	+ monthly
+	+ reported time step
+- Gridded temporal mean/totals/sd
+	+ annual
+	+ monthly
+	+ reported time step
 
-Visualizations:
--Global map
--Zonal total/means
+Visualizations:			**BBL: necessary?
+- Global map
+- Zonal total/means
 
 Internal data representation options:
--list(time, lon, lat, area, val, sd(?)) where val is a 3D array
-   **KTB: I think this is the most streight forward
--data.frame(time, lat, lon, val)
--raster object
+- list(time, lon, lat, area, val, sd(?)) where val is a 3D array
+   **KTB: I think this is the most straightforward
+   **BBL: A list? So in this implementation, how's 'val' represented? 
+   
+- data.frame(time, lat, lon, val)
+	***BBL: possibly, esp. if we use dplyr package
+	
+- raster object
    **KTB: This has built in bilinear projection function that might be useful
    (though not an area-weighted projection which we would need for
    large grid shifts)
 
+Support for/use of parallelization?
+	- e.g. using 'parallel' package (R >2.14.0)
+	- use dplyr? Extremely fast for data frames
+	
+Output options:
+- Probably want a simple data frame option for less-experienced users
+- ?
+
+
 ========================================================
+
 Basic function tasks:
--list all downloaded files
--load specific experiment, model, ensemble, variable
-   +filter values based on absolute and/or relative tolerances
--merge ensemebles (mean, sd)
--shift grid projection
-   +area weighted
-   +bilinear intrerpolation
--shift units(?)
--generate annual mean
--generate global total/mean
--generate multi-year seasonal cycles
--aggregate mean/total on a spatial mask
-
-
+- List all downloaded files
+- Load specific experiment, model, ensemble, variable
+	+ filter values based on absolute and/or relative tolerances
+- Merge ensembles (mean, sd)
+	+ e.g. historical and RCP
+- Shift grid projection
+	+ area weighted
+	+ bilinear interpolation
+- Shift units(?)   **BBL maybe yes, we have existing code for this
+- Generate annual mean
+- Generate zonal (including global) total/mean/sd
+- Generate multi-year seasonal cycles
+- Aggregate mean/total on a spatial mask
+- Generate mean/sd/min/max across all specified models
