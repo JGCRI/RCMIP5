@@ -35,9 +35,9 @@ Formats:
 Internal data representation options:
 - list(time, lon, lat, area, val, sd(?)) where val is a 3D array
 	**KTB: I think this is the most straightforward
-	**BBL: A list? So in this implementation, how's 'val' represented? 
-	**BBL: What about depth?
-
+	**BBL: for each model/scenario/etc.?
+	**BBL: sd? Based on what?
+	
 - data.frame(time, lat, lon, val)
 	**BBL: possibly, esp. if we use dplyr package
 	
@@ -55,6 +55,7 @@ Support for/use of parallelization?
 
 Basic function tasks:
 - List all downloaded files
+	+ list available scenarios, experiments, models, time frames?
 - Load specific experiment, model, ensemble, variable
 	+ filter values based on absolute and/or relative tolerances
 - Merge ensembles (mean, sd)
@@ -71,6 +72,12 @@ Basic function tasks:
 
 ========================================================
 
+Edge/quirky cases to keep in mind:
+- Data split across arbitrary number of files
+- 
+
+========================================================
+
 Software:
 
 	roxygen2 for documentation
@@ -78,7 +85,8 @@ Software:
 	
 	RStudio for package development?
 	
-	ncdf
+	ncdf4 (what is difference between this and ncdf?)
+	
 	raster
 	
 Resources:
