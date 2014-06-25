@@ -4,12 +4,13 @@ Started: 10 June 2014
 ========================================================
 
 Overall:
-	- Flexible, robust code to read, summarize, and regrid CMIP5 data.
+- Flexible, robust code to read, summarize, and regrid CMIP5 data.
+- Basic summarized CMIP5 data included with package
 
 ========================================================
 
 Input files:
-- netCDF file downloaded from CMIP5 repository
+- netCDF file(s) downloaded from CMIP5 repository
 	+ deal with arbitrary file structures: list.files( ..., recursive=TRUE )
 
 Main outputs of interest:
@@ -26,13 +27,19 @@ Visualizations:			**BBL: necessary?
 - Global map
 - Zonal total/means
 
+Formats:
+- Probably want a simple data frame option for less-experienced users
+
+========================================================
+
 Internal data representation options:
 - list(time, lon, lat, area, val, sd(?)) where val is a 3D array
-   **KTB: I think this is the most straightforward
-   **BBL: A list? So in this implementation, how's 'val' represented? 
-   
+	**KTB: I think this is the most straightforward
+	**BBL: A list? So in this implementation, how's 'val' represented? 
+	**BBL: What about depth?
+
 - data.frame(time, lat, lon, val)
-	***BBL: possibly, esp. if we use dplyr package
+	**BBL: possibly, esp. if we use dplyr package
 	
 - raster object
    **KTB: This has built in bilinear projection function that might be useful
@@ -41,11 +48,7 @@ Internal data representation options:
 
 Support for/use of parallelization?
 	- e.g. using 'parallel' package (R >2.14.0)
-	- use dplyr? Extremely fast for data frames
-	
-Output options:
-- Probably want a simple data frame option for less-experienced users
-- ?
+	- use dplyr? *Extremely* fast for data frames
 
 
 ========================================================
@@ -65,3 +68,24 @@ Basic function tasks:
 - Generate multi-year seasonal cycles
 - Aggregate mean/total on a spatial mask
 - Generate mean/sd/min/max across all specified models
+
+========================================================
+
+Software:
+
+	roxygen2 for documentation
+	devtools to automate build and staging
+	
+	RStudio for package development?
+	
+	ncdf
+	raster
+	
+Resources:
+
+	https://support.rstudio.com/hc/en-us/articles/200486488-Developing-Packages-with-RStudio
+	http://adv-r.had.co.nz/Package-basics.html
+	http://adv-r.had.co.nz/Philosophy.html
+
+One thing we might look at as a model (both good and not-good) is RNCEP package
+	NCEP.aggregate(wx.data, YEARS = TRUE, MONTHS = TRUE, DAYS = TRUE, HOURS = TRUE, fxn = "%>0")
