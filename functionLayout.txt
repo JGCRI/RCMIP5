@@ -81,7 +81,8 @@ Basic function tasks:
 Edge/quirky cases to keep in mind:
 - Data split across arbitrary number of files
 - Monthly versus annual files
-- 
+- Duplicate files
+
 
 ========================================================
 
@@ -104,3 +105,5 @@ Resources:
 
 One thing we might look at as a model (both good and not-good) is RNCEP package
 	NCEP.aggregate(wx.data, YEARS = TRUE, MONTHS = TRUE, DAYS = TRUE, HOURS = TRUE, fxn = "%>0")
+
+Think about a technical/note paper in Biogeosciences, PeerJ, PLOS ONE, etc.?
