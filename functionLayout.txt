@@ -30,6 +30,8 @@ Visualizations:			**BBL: necessary?
 Formats:
 - Probably want a simple data frame option for less-experienced users
 
+Optional logging
+
 ========================================================
 
 Internal data representation options:
@@ -50,6 +52,9 @@ Support for/use of parallelization?
 	- e.g. using 'parallel' package (R >2.14.0)
 	- use dplyr? *Extremely* fast for data frames
 
+Will need option to write out data to disk as we process, right? And
+return a file handle to the user instead of actual data?
+Data structures could get big with multiple models, scenarios, ensembles.
 
 ========================================================
 
@@ -66,6 +71,7 @@ Basic function tasks:
 - Shift units(?)   **BBL maybe yes, we have existing code for this
 - Generate annual mean
 - Generate zonal (including global) total/mean/sd
+	+ I guess this counts as shifting grid projection
 - Generate multi-year seasonal cycles
 - Aggregate mean/total on a spatial mask
 - Generate mean/sd/min/max across all specified models
@@ -74,6 +80,7 @@ Basic function tasks:
 
 Edge/quirky cases to keep in mind:
 - Data split across arbitrary number of files
+- Monthly versus annual files
 - 
 
 ========================================================
