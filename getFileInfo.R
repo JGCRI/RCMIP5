@@ -10,6 +10,10 @@ getFileInfo <- function(CMIP5Dir='.', checkSubdirectory=TRUE){
     ##         8) time period, 9) filesize in bytes
     ##Date: 27 June 2014
 
+    ##Debug defaults
+    #CMIP5Dir <- '/Volumes/DATAFILES/downloads'
+    #checkSubdirectory <- TRUE
+
     ##Pull the full file names
     fullFile <- list.files(path=CMIP5Dir, pattern='nc$', full.names=TRUE,
                            recursive=checkSubdirectory)
@@ -25,9 +29,9 @@ getFileInfo <- function(CMIP5Dir='.', checkSubdirectory=TRUE){
     ##check how many pieces of information we have
     infoSize <- unlist(lapply(fileInfo, length))
 
-    if(all(unique(infoSize) == c(5,6))){
+    if(!all(unique(infoSize) == c(5,6))){
         ##if they are an unexpected length then abort
-        stop('Unexpected info found in file name... aborting')
+        stop('Unexpected info found in file name [',unique(infoSize),']... aborting')
     }
 
     ##Put everything together
