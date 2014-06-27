@@ -4,7 +4,7 @@ Started: 10 June 2014
 ========================================================
 
 Overall:
-- Flexible, robust code to read, summarize, and regrid CMIP5 data.
+- Flexible, robust code to read, summarize, regrid, output CMIP5 data.
 - Basic summarized CMIP5 data included with package
 
 ========================================================
@@ -31,6 +31,7 @@ Formats:
 - Probably want a simple data frame option for less-experienced users
 
 Optional logging **KTB: What do you mean by this?
+- look at DataONE provenance
 
 ========================================================
 
@@ -41,22 +42,14 @@ Internal data representation options:
 	+lists (?): 
 		-timeConst: time invariant parameters like grid area and land fraction
 		-id:contains provenance i.e. modelID, experimentID
-		
-	**KTB: I think this is the most straightforward
-	**BBL: for each model/scenario/etc.? *KTB: yes
-	**BBL: sd? Based on what? *KTB: ensembles if available
-	
-- data.frame(time, lat, lon, val)
-	**BBL: possibly, esp. if we use dplyr package
-	**KTB: how does this interact with image?
-	
+			
 - raster object
    **KTB: This has built in bilinear projection function that might be useful
    (though not an area-weighted projection which we would need for
    large grid shifts)
 
 Support for/use of parallelization?
-	- e.g. using 'parallel' package (R >2.14.0)
+	- e.g. using 'parallel' package (R >2.14.0) **KTB says raster includes
 	- use dplyr? *Extremely* fast for data frames
 
 Will need option to write out data to disk as we process, right? And
@@ -96,7 +89,7 @@ Edge/quirky cases to keep in mind:
 - Monthly versus annual files vs daily vs hourly (CMIP has multiple time period outputs)
 - Duplicate files
 	+KTB: probably not a concern given that files have informative naming conventions
-
+	+BBL: well, as long as you don't accidentally read something twice...
 
 ========================================================
 
@@ -133,3 +126,12 @@ One thing we might look at as a model (both good and not-good) is RNCEP package
 	NCEP.aggregate(wx.data, YEARS = TRUE, MONTHS = TRUE, DAYS = TRUE, HOURS = TRUE, fxn = "%>0")
 
 Think about a technical/note paper in Biogeosciences, PeerJ, PLOS ONE, etc.?
+
+========================================================
+
+Phone call 27 June 2014:
+- we'll start with the 'manage downloads task'
+- BBL will look at package creation and roxygen2
+- KTB will put up her existing code
+- summer for code, fall for ms!
+
