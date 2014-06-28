@@ -18,26 +18,42 @@ getFileInfo <- function(CMIP5Dir='.', checkSubdirectory=TRUE){
     fullFile <- list.files(path=CMIP5Dir, pattern='nc$', full.names=TRUE,
                            recursive=checkSubdirectory)
 
+    if(length(fullFile) == 0){
+        stop('No netcdf files found in specified directory.')
+    }
     ##Pull the file name w/o directory and take off the '.nc',
     ##...this is the informative part of the naming convention.
     shortFile <- unlist(lapply(strsplit(fullFile, '[\\/]'),
                                function(x){sub('\\.nc', '', rev(x)[1])}))
 
     ##split out the various components of the file name
-    fileInfo <- strsplit(shortFile, '[_]')
+    fileInfo <- strsplit(shortFile, split='_')
+    #print(fileInfo)
+    #names(fileInfo) <- NULL
 
     ##check how many pieces of information we have
     infoSize <- unlist(lapply(fileInfo, length))
+
 
     if(!all(unique(infoSize) == c(5,6))){
         ##if they are an unexpected length then abort
         stop('Unexpected info found in file name [',unique(infoSize),']... aborting')
     }
 
+    fixedInfo <- t(as.data.frame(fileInfo[infoSize == 5]))
+    fixedInfo <- cbind(fixedInfo, rep('', length=sum(infoSize == 5))) ##Deal with the fixed variables like areacella
+    row.names(fixedInfo) <-NULL ##Be sure to strip out the long row names otherwise it trips up other functions
+
+    #print(str(fixedInfo))
+    #print(fixedInfo)
+
+    temporalInfo <-  t(as.data.frame(fileInfo[infoSize==6])) ##Deal with temporal variables
+    row.names(temporalInfo) <- NULL
+
+
     ##Put everything together
     fileInfo.df <- data.frame(fullFilename=fullFile, filename=shortFile,
-                              rbind( cbind(t(as.data.frame(fileInfo[infoSize == 5])), rep('', length=sum(infoSize == 5))), ##Deal with the fixed variables like areacella
-                     t(as.data.frame(fileInfo[infoSize==6]))), ##Deal with temporal variables
+                              rbind(fixedInfo, temporalInfo),
                               unlist(lapply(fullFile, function(x){file.info(x)$size})))
 
     ##strip the non-informative row names
