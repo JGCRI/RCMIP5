@@ -1,50 +1,56 @@
-getFileInfo <- function(CMIP5Dir='.', checkSubdirectory=TRUE){
-    ##Purpose: List all CMIP5 files in a directory with their file size
-    ##         and break down the information contained in their file names.
-    ##Input: CMIP5Dir - a string identifing a valid directory
-    ##       checkSubdirectory - a boolean flagging whether or not to
-    ##                           search sub-directories
-    ##Outputs: This function returns a data frame containing the following.
-    ##         1) full file name, 2) filename without the directory or '.nc'
-    ##         3) variable, 4) domain, 5) model, 6) experiment, 7) ensemble
-    ##         8) time period, 9) filesize in bytes
-    ##Date: 27 June 2014
+#' List all CMIP5 file in a directory tree and parse their filenames
+#'
+#'
+#' @param CMIP5Dir root of directory tree
+#' @param logical. Should the listing recurse into directories? 
+#' @return data frame holding parsed filename data
+#' @examples
+#' getFileInfo()
+#' @author Kathe Todd-Brown and Ben Bond-Lamberty
+getFileInfo <- function(CMIP5Dir='.', recursive=TRUE){
 
-    ##Debug defaults
-    #CMIP5Dir <- '/Volumes/DATAFILES/downloads'
-    #checkSubdirectory <- TRUE
+	# Sanity checks
+	#CMIP5Dir <- normalizePath(CMIP5Dir)
+	stopifnot(length(CMIP5Dir)==1)
+	stopifnot(is.character(CMIP5Dir))
+	stopifnot(file.exists(CMIP5Dir))
+	stopifnot(is.logical(recursive))
+	
+    # Pull the full filenames and extract short (no path or extension) names
+    fullFile <- list.files(path=CMIP5Dir, pattern='nc$', full.names=T, recursive=recursive)
+    shortFile <- gsub(".nc$", "", basename(fullFile))
 
-    ##Pull the full file names
-    fullFile <- list.files(path=CMIP5Dir, pattern='nc$', full.names=TRUE,
-                           recursive=checkSubdirectory)
-
-    ##Pull the file name w/o directory and take off the '.nc',
-    ##...this is the informative part of the naming convention.
-    shortFile <- unlist(lapply(strsplit(fullFile, '[\\/]'),
-                               function(x){sub('\\.nc', '', rev(x)[1])}))
-
-    ##split out the various components of the file name
+	if(!length(fullFile)) return(NULL)
+	
+    # Split out the various components of the file name
     fileInfo <- strsplit(shortFile, '[_]')
 
-    ##check how many pieces of information we have
+    # Check how many pieces of information we have
     infoSize <- unlist(lapply(fileInfo, length))
 
-    if(!all(unique(infoSize) == c(5,6))){
-        ##if they are an unexpected length then abort
-        stop('Unexpected info found in file name [',unique(infoSize),']... aborting')
+	# TODO: shouldn't abort here; either ignore file, or have blank row in data frame
+	valid <- infoSize %in% c(5,6)
+    if(!all(valid)){
+        stop('Unexpected info found in files: ',fullFile[!valid],'... aborting')
     }
 
-    ##Put everything together
-    fileInfo.df <- data.frame(fullFilename=fullFile, filename=shortFile,
-                              rbind( cbind(t(as.data.frame(fileInfo[infoSize == 5])), rep('', length=sum(infoSize == 5))), ##Deal with the fixed variables like areacella
-                     t(as.data.frame(fileInfo[infoSize==6]))), ##Deal with temporal variables
-                              unlist(lapply(fullFile, function(x){file.info(x)$size})))
+	# Parse information from the two kinds of files: fixed and temporal variables
+	fivesInfo <- cbind(t(as.data.frame(fileInfo[infoSize == 5])), 
+			rep('', length=sum(infoSize == 5)))	# Deal with the fixed variables like areacella
+	if(!length(fivesInfo)) fivesInfo <- NULL
+	sixesInfo <- t(as.data.frame(fileInfo[infoSize==6]))
+	if(!length(sixesInfo)) sixesInfo <- NULL # Deal with temporal variables
+	
+    # Put everything together
+    fileInfo.df <- data.frame( row.names=NULL,
+    	fullFilename=dirname(fullFile),
+    	filename=shortFile,
+        rbind(fivesInfo,sixesInfo),
+        unlist(lapply(fullFile, function(x){paste0(round(file.info(x)$size/1024),"K")}))
+        )
 
-    ##strip the non-informative row names
-    row.names(fileInfo.df) <- NULL
-
-    ##add useful column names
-    names(fileInfo.df) <- c('fullFilename', 'filename', 'variable', 'domain', 'model', 'experiment', 'ensemble', 'time', 'fileSize')
-
+    # Add useful column names
+    names(fileInfo.df) <- c('path', 'filename', 'variable', 'domain', 'model', 
+    							'experiment', 'ensemble', 'time', 'filesize')
     return(fileInfo.df)
 }
