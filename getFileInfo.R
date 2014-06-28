@@ -46,7 +46,7 @@ getFileInfo <- function(CMIP5Dir='.', recursive=TRUE){
     infoSize <- unlist(lapply(fileInfo, length))
 
     ## TODO: shouldn't abort here; either ignore file, or have blank row in data frame
-    if(!all(unique(infoSize) == c(5,6))){
+    if(!all(infoSize %in% c(5,6))){
         ##if they are an unexpected length then abort
         stop('Unexpected info found in file name [',unique(infoSize),']... aborting')
     }
