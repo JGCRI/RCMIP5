@@ -23,47 +23,48 @@ getFileInfo <- function(path='.', recursive=TRUE){
     ## Pull the full filenames and extract short (no path or extension) names
     fullFile <- list.files(path=path, pattern='nc$',
                                full.names=TRUE, recursive=recursive)
-    if(length(fullFile) == 0){
+    if(!length(fullFile)){
         warning('No netcdf files found')
         return(NULL)
     }
 
-    ##Pull the file name w/o directory and take off the '.nc',
-    ##...this is the informative part of the naming convention.
+    # Pull the file name w/o directory and take off the '.nc',
+    # and split out the various components of the file name
     shortFile <- gsub(".nc$", "", basename(fullFile))
-
-    ##split out the various components of the file name
     fileInfo <- strsplit(shortFile, split='_')
 
-    ## Check how many pieces of information we have
+    # Check how many pieces of information we have
     infoSize <- unlist(lapply(fileInfo, length))
-
-    ## TODO: shouldn't abort here; either ignore file, or have blank row in data frame
     valid <- infoSize %in% c(5,6)
     if(!all(valid)){
-        stop('Unexpected info found in files: ',fullFile[!valid],'... aborting')
+        warning('Unexpected (not correctly formatted) files: ',fullFile[!valid])
+        fullFile <- fullFile[valid]
+        shortFile <- shortFile[valid]
+        fileInfo <- fileInfo[valid]
+        infoSize <- infoSize[valid]
+        if(!length(fullFile)) return(NULL)
     }
     
     fixedInfo <- t(as.data.frame(fileInfo[infoSize == 5], row.names=NULL))
-    fixedInfo <- cbind(fixedInfo, rep('', length=sum(infoSize == 5))) ##Deal with the fixed variables like areacella
+    fixedInfo <- cbind(fixedInfo, rep('', length=sum(infoSize == 5))) # Deal with the fixed variables like areacella
     if( !length(fixedInfo)) fixedInfo <- NULL
     
     #print(str(fixedInfo))
     #print(fixedInfo)
 
-    temporalInfo <-  t(as.data.frame(fileInfo[infoSize==6], row.names=NULL)) ##Deal with temporal variables
+    temporalInfo <-  t(as.data.frame(fileInfo[infoSize==6], row.names=NULL)) # Deal with temporal variables
     if( !length(temporalInfo)) temporalInfo <- NULL
     
     sizeInfo <- unlist(lapply(fullFile, function(x){paste0(round(file.info(x)$size/1024),"K")}))
     
-    ##Put everything together
+    # Put everything together
     fileInfo.df <- data.frame(row.names=NULL,
     						path=dirname(fullFile),
                             filename=shortFile,
                             rbind(fixedInfo, temporalInfo),
 							sizeInfo)
 
-    ##add useful column names
+    # Add useful column names
     names(fileInfo.df) <- c('path', 'filename', 'variable', 'domain', 'model', 'experiment', 'ensemble', 'time', 'size')
 
     return(fileInfo.df)
