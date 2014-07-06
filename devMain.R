@@ -52,5 +52,8 @@ countEnsembleAlt <- cast(countEnsemble, experiment+model~variable, value='numEns
 ######################################################
 prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
 
-cSoilTemp <- loadEnsemble(CMIP5dir='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2', #model='GISS-E2-R',
+#cSoilTemp <- loadEnsemble(CMIP5dir='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2', #model='GISS-E2-R',
                           ensemble='r1i1p1')
+
+
+#cSoilTemp <- loadEnsemble(CMIP5dir='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2')
