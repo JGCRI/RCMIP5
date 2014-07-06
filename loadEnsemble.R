@@ -16,8 +16,10 @@ loadEnsemble <- function(CMIP5dir='.', experiment=NULL, variable=NULL,
         if(is.null(ensembleRst)){
             ensembleRst <- brick(filename, varname=variable, lvar=3) #may also need to id lvar=3
         }else{
-            ##TODO this doesn't work with GFDL; they used non-uniform grids
-            ##Possible reason to switch to ncdf4 directly
+            ##TODO This doesn't work with GFDL; they used non-uniform grids
+            ##     Possible reason to switch to ncdf4 directly
+            ##TODO Append data more elegantly, we loose all the header info
+            ##     currently.
             ensembleRst <- addLayer(ensembleRst,
                                     brick(filename, varname=variable, lvar=3))
         }
