@@ -1,9 +1,17 @@
-library(plyr)
-library(reshape)
+library(plyr) #required in checkTimePeriod
+library(reshape) #required in devMain
+library(raster) #required in loadEnsemble,
+library(ncdf4) #required in loadEnsemble,
 
+##Manage download functions
 source('getFileInfo.R')
 source('checkTimePeriod.R')
 
+##read in varaibles
+source('loadEnsemble.R')
+
+
+if(TRUE){ ##run the management functions
 ######################################################
 ##Get the information on the files already downloaded
 ######################################################
@@ -37,3 +45,12 @@ countEnsemble <- ddply(fileInfo, .(experiment, model, variable), summarize, numE
 
 ##Report the number of ensembles of variables for model-experiment in a different way (better for tabular reporting)
 countEnsembleAlt <- cast(countEnsemble, experiment+model~variable, value='numEnsembles')
+}
+
+######################################################
+##Load variables
+######################################################
+prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
+
+cSoilTemp <- loadEnsemble(CMIP5dir='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2', #model='GISS-E2-R',
+                          ensemble='r1i1p1')
