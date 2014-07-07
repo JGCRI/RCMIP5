@@ -49,14 +49,14 @@ getFileInfo <- function(path='.', recursive=TRUE){
     fixedInfo <- cbind(fixedInfo, rep('', length=sum(infoSize == 5))) # Deal with the fixed variables like areacella
     row.names(fixedInfo) <- NULL ##Strip the to remove embeded atributes in the data frame
 
-    if( !length(fixedInfo)) fixedInfo <- NULL
+    if(length(fixedInfo) == 0) fixedInfo <- NULL
 
     #print(str(fixedInfo))
     #print(fixedInfo)
 
     temporalInfo <-  t(as.data.frame(fileInfo[infoSize==6], row.names=NULL)) # Deal with temporal variables
     row.names(temporalInfo) <- NULL
-    if( !length(temporalInfo)) temporalInfo <- NULL
+    if(length(temporalInfo) == 0) temporalInfo <- NULL
 
     sizeInfo <- unlist(lapply(fullFile, function(x){paste0(round(file.info(x)$size/1024),"K")}))
 
