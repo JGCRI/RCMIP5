@@ -63,3 +63,4 @@ prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', en
 #meanTemp <- makeAnnualMean(cSoilTemp)
 
 #seasonalTemp <- makeSeasonalMean(cSoilTemp, yrRange=list(min=1850, max=1860))
+#temp <- rasterToArray(seasonalTemp)
