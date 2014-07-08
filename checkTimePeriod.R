@@ -22,31 +22,29 @@ checkTimePeriod <- function(fileInfo_df) {
     stopifnot(all(ddplyFields %in% colnames(fileInfo_df)))
     stopifnot("time" %in% colnames(fileInfo_df))
     
-    #fileInfo_df <- fileInfo     #Debugging
-    
-    # Check that we only have monthly and fixed variables
-    # TODO: code for annual as well; or simply ignore non-monthly?
-    valid <- (grepl('mon', fileInfo_df$domain) | grepl('fx', fileInfo_df$domain))
-    if(!all(valid)){
-        stop('Time checks for non-monthly variables not currently coded. Can not handle:',
-             unique(fileInfo_df$domain[!valid]) )
-    }
-    
     # Use ddply to break up data frame, process and check time field, and return result
     ddply(fileInfo_df, ddplyFields, function(x) {
-        curCombo <- as.character(x$time) # has form 'YYYYMM-YYYYMM'
+        curCombo <- as.character(x$time)
         
-        # find the starting and ending decimal year
-        endMonth <- as.numeric(substr(curCombo, 12, 13))
-        endYear <- as.numeric(substr(curCombo, 8, 11)) + (endMonth-1)/12
-        startMonth <- as.numeric(substr(curCombo, 5, 6))
-        startYear <- as.numeric(substr(curCombo, 1, 4)) + (startMonth-1)/12
-        nextYear <- endYear + 1/12  # calculate year that next file should start with
+        # find the starting and ending decimal year, and year next file should start with
+        if(nchar(curCombo[1])==9) { # annual data ('YYYY-YYYY')
+            startYear <- as.numeric(substr(curCombo, 1, 4))
+            endYear <- as.numeric(substr(curCombo, 6, 9))
+            nextYear <- endYear + 1
+        } else if(nchar(curCombo[1])==13) { # monthly data ('YYYYMM-YYYYMM')
+            startMonth <- as.numeric(substr(curCombo, 5, 6))
+            startYear <- as.numeric(substr(curCombo, 1, 4)) + (startMonth-1)/12
+            endMonth <- as.numeric(substr(curCombo, 12, 13))
+            endYear <- as.numeric(substr(curCombo, 8, 11)) + (endMonth-1)/12
+            nextYear <- endYear + 1/12          
+        } else if(nchar(curCombo[1]==0)) { # probably an area file; ignore and bail
+            return(NULL)
+        } else stop("Incorrectly formatted time field: ",curCombo[1])
         
         startIndex <- 1
         endIndex <- 1
         allHere <- TRUE
-        if(length(startYear) > 1) {   # If multiple files specified, shift indexes to compare the right start/stop
+        if(length(startYear) > 1) {   # If multiple files, shift indexes to compare the start/stop values
             startIndex <- c(2:length(startYear))
             endIndex <- c((2:length(startYear))-1)
             allHere <- all((nextYear[endIndex] - startYear[startIndex]) < 1e-6)
