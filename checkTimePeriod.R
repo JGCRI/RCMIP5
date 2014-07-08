@@ -25,11 +25,11 @@ checkTimePeriod <- function(fileInfo_df) {
     #fileInfo_df <- fileInfo     #Debugging
     
     # Check that we only have monthly and fixed variables
-    # TODO: code for annual as well
+    # TODO: code for annual as well; or simply ignore non-monthly?
     valid <- (grepl('mon', fileInfo_df$domain) | grepl('fx', fileInfo_df$domain))
     if(!all(valid)){
         stop('Time checks for non-monthly variables not currently coded. Can not handle:',
-             unique(fileInfo_df[!valid, ]) )
+             unique(fileInfo_df$domain[!valid]) )
     }
     
     # Use ddply to break up data frame, process and check time field, and return result
@@ -41,28 +41,24 @@ checkTimePeriod <- function(fileInfo_df) {
         endYear <- as.numeric(substr(curCombo, 8, 11)) + (endMonth-1)/12
         startMonth <- as.numeric(substr(curCombo, 5, 6))
         startYear <- as.numeric(substr(curCombo, 1, 4)) + (startMonth-1)/12
-        # calculate year we shooting for to link up with the next file
-        nextYear <- endYear + 1/12
+        nextYear <- endYear + 1/12  # calculate year that next file should start with
         
         startIndex <- 1
         endIndex <- 1
         allHere <- TRUE
-        if(length(startYear) > 1) {   # If there are multiple files specified
-            # ...shift the indexes to compare the right start/stop
+        if(length(startYear) > 1) {   # If multiple files specified, shift indexes to compare the right start/stop
             startIndex <- c(2:length(startYear))
             endIndex <- c((2:length(startYear))-1)
             allHere <- all((nextYear[endIndex] - startYear[startIndex]) < 1e-6)
         }
-        # construct the answering data frame which contains
-        # yrStr - All orginal year strings for reference (useful if something is wrong).
-        # allHere - boolean saying if the strings match up
-        # startDate - earliest time stamp
-        # endDate - latest time stamp
-        ans <- data.frame(yrStr=paste(curCombo, collapse='_'),
-                          allHere=allHere,
-                          startDate=min(startYear),
-                          endDate=max(endYear))
-        
-        return(ans)  # back to ddply
+        # return answering data frame which contains
+        #   yrStr - All orginal year strings for reference (useful if something is wrong).
+        #   allHere - boolean saying if the strings match up
+        #   startDate - earliest time stamp
+        #   endDate - latest time stamp
+        data.frame(yrStr=paste(curCombo, collapse='_'),
+                   allHere=allHere,
+                   startDate=min(startYear),
+                   endDate=max(endYear))        
     })
 }
