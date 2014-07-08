@@ -12,11 +12,10 @@ library('ncdf4')
 #' @return RasterStack object with all loaded data
 #' @examples
 #' loadEnsemble(model="GFDL-CM3",variable="prc",experiment="rcp85",ensemble="r1i1p1")
-loadEnsemble <- function(path='.', experiment=NULL, variable=NULL,
-                          model=NULL, ensemble=NULL, recursive=TRUE) {
+loadEnsemble <- function(path='.', experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z0-9-]+',
+                          model='[a-zA-Z0-9-]+', ensemble='[a-zA-Z0-9-]+', recursive=TRUE) {
 
     # List all files that match specifications
-    # TODO this doesn't filter correctly if any of the above parameters is NULL
     fileList <- list.files(path=path, pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_', variable, model, experiment, ensemble), full.names=TRUE, recursive=recursive)
     
     ensembleRst <- NULL
