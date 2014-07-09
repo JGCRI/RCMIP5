@@ -1,13 +1,15 @@
-library('raster')
 library('ncdf4')
 
 source('loadEnsemble.R')
 
-loadModel <- function(CMIP5dir='.', experiment=NULL, variable=NULL,
+loadModel <- function(path='.', experiment=NULL, variable=NULL,
                           model=NULL, recursive=TRUE){
 
     ##Pull a list of all files that match specifications
-    fileList <- list.files(path=CMIP5dir, pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', variable, model, experiment), recursive=recursive)
+    fileList <- list.files(path=path,
+                           pattern=sprintf('%s_[a-zA-Z]+_%s_%s_',
+                                     variable, model, experiment),
+                           recursive=recursive)
 
     #cat('loading:\n')
     #print(fileList)
@@ -17,25 +19,37 @@ loadModel <- function(CMIP5dir='.', experiment=NULL, variable=NULL,
 
     cat('averaging ensembles:', ensembleArr, '\n')
 
-    modelRst <- NULL
+    model.ls <- NULL
+
     for(ensemble in ensembleArr){
-        if(is.null(modelRst)){
-            modelRst <- loadEnsemble(CMIP5dir=CMIP5dir,
+        if(is.null(model.ls)){
+            model.ls <- loadEnsemble(path=path,
                                      experiment=experiment, variable=variable,
                                      model=model, ensemble=ensemble,
                                      recursive=recursive)
+            model.ls$files <- list(a=model.ls$files)
+            ensembleNames <- c(ensemble)
         }else{
-            modelRst <- modelRst +
-                        loadEnsemble(CMIP5dir=CMIP5dir,
+            temp <- loadEnsemble(path=path,
                                      experiment=experiment, variable=variable,
                                      model=model, ensemble=ensemble,
                                      recursive=recursive)
+            if(all(temp$lat==model.ls$lat) &
+               all(temp$lon==model.ls$on) &
+               all(temp$time==model.ls$time)){
+
+                model.ls$val <- model.ls$val + temp$val
+                model.ls$files <- c(model.ls$files, a=temp$files)
+                ensembleNames <- c(ensembleNames, ensemble)
+            }else{
+                cat(ensemble, 'does not match previous ensembles\n')
+            }
         }
     }
+    names(model.ls$files) <- ensembleNames
 
-    modelRst <- modelRst / length(ensembleArr)
+    model.ls$val <- model.ls$val / length(ensembleNames)
 
-
-    return(modelRst)
+    return(model.ls)
 
 }
