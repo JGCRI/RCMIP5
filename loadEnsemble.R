@@ -1,5 +1,5 @@
-library('raster')
 library('ncdf4')
+library('abind')
 
 #' Load data for a particular experiment/variable/model/ensemble combination
 #'
@@ -9,28 +9,43 @@ library('ncdf4')
 #' @param model CMIP5 model to load
 #' @param ensemble CMIP5 ensemble to load
 #' @param recursive logical. Should we recurse into directories?
-#' @return RasterStack object with all loaded data
+#' @return list with files, lat, lon, time, and units
 #' @examples
 #' loadEnsemble(model="GFDL-CM3",variable="prc",experiment="rcp85",ensemble="r1i1p1")
-loadEnsemble <- function(path='.', experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z0-9-]+',
-                          model='[a-zA-Z0-9-]+', ensemble='[a-zA-Z0-9-]+', recursive=TRUE) {
+loadEnsemble <- function(path='.',
+                         experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z0-9-]+',
+                         model='[a-zA-Z0-9-]+', ensemble='[a-zA-Z0-9-]+',
+                         recursive=TRUE) {
 
     # List all files that match specifications
-    fileList <- list.files(path=path, pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_', variable, model, experiment, ensemble), full.names=TRUE, recursive=recursive)
-    
-    ensembleRst <- NULL
-    for(f in fileList) {
-        cat('Loading ',f)
-        if(is.null(ensembleRst)) {
-            ensembleRst <- brick(f, varname=variable, lvar=3) # may also need to id lvar=3
-        } else {
-            ##TODO This doesn't work with GFDL; they used non-uniform grids
-            ##     Possible reason to switch to ncdf4 directly
-            ##TODO Append data more elegantly, we lose all the header info
-            ensembleRst <- addLayer(ensembleRst,
-                                    brick(f, varname=variable, lvar=3))
-        }
+    fileList <- list.files(path=path,
+                           pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
+                                        variable, model, experiment, ensemble),
+                           full.names=TRUE, recursive=recursive)
+
+    temp <- c()
+    timeArr <- c()
+    for(fileStr in fileList) {
+        cat('Loading...',fileStr)
+        temp.nc <- nc_open(fileStr, write=FALSE)
+
+        temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
+        varUnit <- ncatt_get(temp.nc, variable, 'units')$value
+
+        timeArr <- c(timeArr, ncvar_get(temp.nc, varid='time'))
+        timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
+        calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
+
+        latArr <- ncvar_get(temp.nc, varid='lat')
+        lonArr <- ncvar_get(temp.nc, varid='lon')
+
+        nc_close(temp.nc)
+        cat('\n')
     }
 
-    return(ensembleRst)
+    ans <- list(files=fileList, val=temp,
+                valUnit=varUnit, timeUnit=timeUnit, calendarStr=calendarStr,
+                lat=latArr, lon=lonArr, time=timeArr)
+
+    return(ans)
 }
