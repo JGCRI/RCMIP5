@@ -15,7 +15,7 @@ library('abind')
 loadEnsemble <- function(path='.',
                          experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z0-9-]+',
                          model='[a-zA-Z0-9-]+', ensemble='[a-zA-Z0-9-]+',
-                         recursive=TRUE) {
+                         recursive=TRUE, verbose=FALSE) {
 
     # List all files that match specifications
     fileList <- list.files(path=path,
@@ -26,7 +26,7 @@ loadEnsemble <- function(path='.',
     temp <- c()
     timeArr <- c()
     for(fileStr in fileList) {
-        cat('Loading...',fileStr)
+        if(verbose) cat('Loading...',fileStr)
         temp.nc <- nc_open(fileStr, write=FALSE)
 
         temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
@@ -40,7 +40,7 @@ loadEnsemble <- function(path='.',
         lonArr <- ncvar_get(temp.nc, varid='lon')
 
         nc_close(temp.nc)
-        cat('\n')
+        if(verbose) cat('\n')
     }
 
     ans <- list(files=fileList, val=temp,
