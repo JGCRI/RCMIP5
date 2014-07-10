@@ -52,15 +52,17 @@ countEnsembleAlt <- cast(countEnsemble, experiment+model~variable, value='numEns
 ######################################################
 ##Load variables
 ######################################################
-prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
 
-#cSoilTemp <- loadEnsemble(CMIP5dir='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2', #model='GISS-E2-R',
-#                          ensemble='r1i1p1')
+    prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
+if(file.exists('/Volumes/DATAFILES/downloads'){
+    cSoilEns <- loadEnsemble(path='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='GISS-E2-R',#model='CanESM2',
+                          ensemble='r1i1p1')
 
 
-#cSoilTemp <- loadEnsemble(CMIP5dir='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2')
+    cSoilModel <- loadModel(CMIP5dir='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2')
 
-#meanTemp <- makeAnnualMean(cSoilTemp)
+    meanTemp <- makeAnnualMean(cSoilModel)
 
 #seasonalTemp <- makeSeasonalMean(cSoilTemp, yrRange=list(min=1850, max=1860))
 #temp <- rasterToArray(seasonalTemp)
+}
