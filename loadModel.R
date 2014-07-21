@@ -1,24 +1,17 @@
 library('ncdf4')
 source('loadEnsemble.R')
 
-#loadModel
-#
-#This averages all ensembers of the specified experiment-variable-model combination.
-#
-#param path a string specifying the directory contianing all CMIP5 netcdf files.
-#param experiment a string specifying the experimental senerio of interest
-#param variable a string specifying the variable of interest
-#param model a string specifying the model of interest
-#param recursive a boolean flagging whether or not to recursively search the directory for CMIP5 netcdf files.
-#
-#Programers:Kathe Todd-Brown (ktoddbrown@gmail.com) and Ben Bond-Lamberty (bondlamberty@pnnl.gov)
-#
-#Date: July 2014
-#
-#Example use case:
-#cSoilModel_CanESM2 <- loadModel(path='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2')
-#prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3')
-#
+#' Average all ensemble members of the specified experiment-variable-model combination
+#'
+#' @param path root of directory tree
+#' @param experiment CMIP5 experiment of interest
+#' @param variable CMIP5 variable of interest
+#' @param model CMIP5 model of interest
+#' @param recursive logical. Should we recurse into directories?
+#' @return TODO
+#' @examples
+#  cSoilModel_CanESM2 <- loadModel(path='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2')
+#  prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3')
 loadModel <- function(path='.', experiment=NULL, variable=NULL,
                           model=NULL, recursive=TRUE){
 
