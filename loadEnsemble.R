@@ -9,7 +9,9 @@ library('abind')
 #' @param model CMIP5 model to load
 #' @param ensemble CMIP5 ensemble to load
 #' @param recursive logical. Should we recurse into directories?
-#' @return list with files, lat, lon, time, and units
+#' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
+#'      'lat', 'lon', and 'time'. If no files match the requested criteria these
+#'      will all be NULL.
 #' @examples
 #' loadEnsemble(model="GFDL-CM3",variable="prc",experiment="rcp85",ensemble="r1i1p1")
 loadEnsemble <- function(path='.',
@@ -23,8 +25,17 @@ loadEnsemble <- function(path='.',
                                         variable, model, experiment, ensemble),
                            full.names=TRUE, recursive=recursive)
 
+    # TODO: warn user if lots of files specified
+    
+    # Initialize outputs
     temp <- c()
+    varUnit <- c()
+    timeUnit <- c()
+    calendarStr <- c()
+    latArr <- c()
+    lonArr <- c()
     timeArr <- c()
+    
     for(fileStr in fileList) {
         if(verbose) cat('Loading...',fileStr)
         temp.nc <- nc_open(fileStr, write=FALSE)
