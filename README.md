@@ -1,9 +1,10 @@
 CMIP5_R
 =======
 
-The purpose of this package is to provide general R scripts for processing CMIP5 outputs downloaded from the Earth System Grid Federation http://pcmdi9.llnl.gov/esgf-web-fe/.
+This package provides general R scripts for processing CMIP5 outputs downloaded from the Earth System Grid Federation http://pcmdi9.llnl.gov/esgf-web-fe/.
 
 TODO: Insert summary and citations for CMIP5
+TODO: Register this package/manuscript at http://cmip.llnl.gov/cmip5/publications/allpublications
 
 Use-case example can be found in *devMain.R*
 
@@ -26,9 +27,13 @@ Use-case example can be found in *devMain.R*
 	-Merge specified years to create a multi-year mean.
 
 ##File management
-1.*getFileInfo.R*
+1. *getFileInfo.R*
 	-Pull all .nc files and extract information based on CMIP5 file naming conventions.
 2. *checkTimePeriod.R*
-	-Check that all the start-end dates match up for multi-file ensembles.
+	-Check that all the start-end dates match up for multi-file ensembles. Example:
+    
+    ```R
+	checkTimePeriod(getFileInfo())
+	```
 
 #Use case example taken from devMain.R

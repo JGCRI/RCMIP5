@@ -22,3 +22,5 @@ ToddBrown/anuGrid
 #backup files
 *~
 .Rproj.user
+
+*.html
