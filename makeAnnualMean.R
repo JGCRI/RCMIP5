@@ -1,5 +1,15 @@
 #library('plyr')
-makeAnnualMean <- function(temp.ls){
+
+#' Compute annual mean of a variable
+#'
+#' @param temp.ls TODO
+#' @param verbose logical. Print info as we go?
+#' @return TODO
+#' @examples
+#  TODO
+makeAnnualMean <- function(temp.ls,verbose=TRUE) {
+    
+    # TODO: this line doesn't seem to work, as calendarStr is "noleap" in example files
     numDays <- as.numeric(substr(temp.ls$calendarStr, 1, 3))
 
     startYr <- as.numeric(unlist(strsplit(regmatches(temp.ls$timeUnit,

@@ -19,7 +19,7 @@ list.cmip5.files <- function(path,experiment,variable,model,ensemble,recursive) 
     f
 } # list.cmip5.files
 
-#' Load data for a particular experiment/variable/model/ensemble combination
+#' Load data for a particular set of experiment/variable/model/ensemble
 #'
 #' @param path root of directory tree
 #' @param experiment CMIP5 experiment to load
@@ -27,6 +27,7 @@ list.cmip5.files <- function(path,experiment,variable,model,ensemble,recursive) 
 #' @param model CMIP5 model to load
 #' @param ensemble CMIP5 ensemble to load
 #' @param recursive logical. Should we recurse into directories?
+#' @param verbose logical. Print info as we go?
 #' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 #'      'lat', 'lon', and 'time'. If no files match the requested criteria these
 #'      will all be NULL.
