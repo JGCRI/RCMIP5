@@ -3,8 +3,8 @@
 #'
 #' @param path root of directory tree
 #' @param recursive logical. Should the listing recurse into directories?
-#' @return  data frame containing the following parsed from file names.
-#'         1) full file name, 2) filename without the directory or '.nc'
+#' @return  data frame containing the following parsed from file names:
+#'         1) full file name, 2) filename without path or '.nc' extension,
 #'         3) variable, 4) domain, 5) model, 6) experiment, 7) ensemble
 #'         8) time period, 9) filesize in KB
 #' @examples
