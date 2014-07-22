@@ -4,6 +4,7 @@ CMIP5_R
 This package provides general R scripts for processing CMIP5 outputs downloaded from the Earth System Grid Federation http://pcmdi9.llnl.gov/esgf-web-fe/.
 
 TODO: Insert summary and citations for CMIP5
+
 TODO: Register this package/manuscript at http://cmip.llnl.gov/cmip5/publications/allpublications
 
 Use-case example can be found in *devMain.R*
@@ -14,6 +15,7 @@ Use-case example can be found in *devMain.R*
 	-example: ```R
 	output <- loadEnsemble(experiment='historical', variable='cSoil', model='GISS-E2-R', ensemble='r1i1p1')
 	```
+
 2. *loadModel.R*
 	-Averages the ensembles for a specified model-varaible-experiment.
 	-example: ```R
