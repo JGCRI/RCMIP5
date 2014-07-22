@@ -10,7 +10,7 @@
 #' @examples
 #' getFileInfo()
 #' getFileInfo('just_this_dir',recursive=F)
-getFileInfo <- function(path='.', recursive=TRUE){
+getFileInfo <- function(path='.', recursive=TRUE) {
     
     ## Sanity checks
     ##CMIP5Dir <- normalizePath(CMIP5Dir)
@@ -22,7 +22,7 @@ getFileInfo <- function(path='.', recursive=TRUE){
     ## Pull the full filenames and extract short (no path or extension) names
     fullFile <- list.files(path=path, pattern='nc$',
                            full.names=TRUE, recursive=recursive)
-    if(!length(fullFile)){
+    if(!length(fullFile)) {
         warning('No netcdf files found')
         return(NULL)
     }
