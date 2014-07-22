@@ -57,6 +57,7 @@ checkTimePeriod <- function(fileInfo_df) {
         data.frame(yrStr=paste(curCombo, collapse='_'),
                    allHere=allHere,
                    startDate=min(startYear),
-                   endDate=max(endYear))        
+                   endDate=max(endYear),
+                   files=length(startYear))        
     })
 }
