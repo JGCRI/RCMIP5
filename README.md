@@ -7,35 +7,33 @@ TODO: Insert summary and citations for CMIP5
 
 TODO: Register this package/manuscript at http://cmip.llnl.gov/cmip5/publications/allpublications
 
+TODO: citation() for this package
+
 Use-case example can be found in *devMain.R*
 
 ##Basic read/write
-1. *loadEnsemble.R*
-	-Loads a single specified ensemble run.
-	-example: ```R
+1. *loadEnsemble.R* Loads a single specified ensemble run. Example:
+    
+    ```
 	output <- loadEnsemble(experiment='historical', variable='cSoil', model='GISS-E2-R', ensemble='r1i1p1')
 	```
 
-2. *loadModel.R*
-	-Averages the ensembles for a specified model-varaible-experiment.
-	-example: ```R
+2. *loadModel.R* Averages the ensembles for a specified model-varaible-experiment. Example:
+    
+    ```
 	output <- loadModel(experiment='historical', variable='cSoil', model='CanESM2')
 	```
 	
 ##Basic data processing
-1. *makeAnnualMean.R*
-	-Construct the annual means.
-2. *makeSeasonalMean.R*
-	-Merge specified years to create a multi-year mean.
+1. *makeAnnualMean.R* Construct the annual means.
+2. *makeSeasonalMean.R* Merge specified years to create a multi-year mean.
 
 ##File management
-1. *getFileInfo.R*
-	-Pull all .nc files and extract information based on CMIP5 file naming conventions.
-2. *checkTimePeriod.R*
-	-Check that all the start-end dates match up for multi-file ensembles. Example:
+1. *getFileInfo.R* Pull all .nc files and extract information based on CMIP5 file naming conventions.
+2. *checkTimePeriod.R* Check that all the start-end dates match up for multi-file ensembles. Example:
     
-    ```R
+    ```
 	checkTimePeriod(getFileInfo())
 	```
 
-#Use case example taken from devMain.R
+##Use case example taken from devMain.R
