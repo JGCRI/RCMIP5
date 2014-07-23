@@ -21,10 +21,11 @@ test_that("getFileInfo handles bad input", {
 })
 
 test_that("getFileInfo handles no input", {                 # no netcdf files found
+    w <- getOption('warn')
     options(warn=-1)
     expect_warning(getFileInfo("testdata_none/"),"No netcdf files found")   
     expect_is(getFileInfo("testdata_none/"),'NULL')
-    options(warn=0)
+    options(warn=w)
 })
 
 test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf filenames
