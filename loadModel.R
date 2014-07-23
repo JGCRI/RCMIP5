@@ -1,4 +1,4 @@
-library('ncdf4')
+library(ncdf4)
 source('loadEnsemble.R')
 
 #' Average all ensemble members of the specified experiment-variable-model combination
@@ -16,7 +16,10 @@ loadModel <- function(path='.', experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z0-9
                       model='[a-zA-Z0-9-]+', recursive=TRUE, verbose=FALSE) {
  
     # List all files that match specifications
-    fileList <- list.cmip5.files(path,experiment,variable,model,ensemble='[a-zA-Z0-9-]+',recursive)
+    fileList <- list.files(path=path,
+                           pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
+                                           variable, model, experiment, ensemble),
+                           full.names=TRUE, recursive=recursive)
     
     # Parse out the ensemble strings
     ensembleArr <- unique(unlist(lapply(strsplit(fileList, '_'),

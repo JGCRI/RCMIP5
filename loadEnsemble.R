@@ -1,66 +1,46 @@
-library('ncdf4')
-library('abind')
-
-#' List CMIP5 files matching an  experiment/variable/model/ensemble combination
-#' 
-#' @param path root of directory tree
-#' @param experiment CMIP5 experiment to load
-#' @param variable CMIP5 variable to load
-#' @param model CMIP5 model to load
-#' @param ensemble CMIP5 ensemble to load
-#' @param recursive logical. Should we recurse into directories?
-#' @return vector of filenames
-list.cmip5.files <- function(path,experiment,variable,model,ensemble,recursive) {
-    f <- list.files(path=path,
-               pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
-                               variable, model, experiment, ensemble),
-               full.names=TRUE, recursive=recursive)
-    if(length(f)==0) warning("No matching CMIP5 files")
-    f
-} # list.cmip5.files
+library(ncdf4)
+library(abind)
 
 #' Load data for a particular set of experiment/variable/model/ensemble
 #'
-#' @param path root of directory tree
-#' @param experiment CMIP5 experiment to load
 #' @param variable CMIP5 variable to load
 #' @param model CMIP5 model to load
+#' @param experiment CMIP5 experiment to load
 #' @param ensemble CMIP5 ensemble to load
+#' @param path root of directory tree
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
-#'      'lat', 'lon', and 'time'. If no files match the requested criteria these
-#'      will all be NULL.
+#'      'lat', 'lon', and 'time'. If no files match the requested criteria function
+#'      will return NULL with a warning.
 #' @examples
 #' loadEnsemble(model="GFDL-CM3",variable="prc",experiment="rcp85",ensemble="r1i1p1")
-loadEnsemble <- function(path='.', experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z0-9-]+',
-                         model='[a-zA-Z0-9-]+', ensemble='[a-zA-Z0-9-]+',
-                         recursive=TRUE, verbose=FALSE) {
+loadEnsemble <- function(variable, model, experiment, ensemble,
+                         path='.', recursive=TRUE, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(file.exists(path))
-    stopifnot(length(path)==1 & is.character(path))
-    stopifnot(length(experiment)==1 & is.character(experiment))
     stopifnot(length(variable==1) & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
+    stopifnot(length(experiment)==1 & is.character(experiment))
     stopifnot(length(ensemble)==1 & is.character(ensemble))
+    stopifnot(file.exists(path))
+    stopifnot(length(path)==1 & is.character(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
     # List all files that match specifications
-    fileList <- list.cmip5.files(path,experiment,variable,model,ensemble,recursive)
+    fileList <- list.files(path=path,
+                           pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
+                                           variable, model, experiment, ensemble),
+                           full.names=TRUE, recursive=recursive)
     
-    # TODO: warn user if lots of files specified?
+    if(length(fileList)==0) {
+        warning("Could not find any matching files")
+        return(NULL)
+    }
     
-    # Initialize outputs
     temp <- c()
-    varUnit <- c()
-    timeUnit <- c()
-    calendarStr <- c()
-    latArr <- c()
-    lonArr <- c()
     timeArr <- c()
-    
     for(fileStr in fileList) {
         if(verbose) cat('Loading...',fileStr)
         temp.nc <- nc_open(fileStr, write=FALSE)
