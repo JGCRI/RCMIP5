@@ -6,6 +6,7 @@ library(testthat)
 #source("getFileInfo.R")    # can't do this here
 
 # To run this code: 
+#   source("getFileInfo.R")
 #   test_dir("tests/")
 # which will run everything in the 'tests' directory
 
@@ -24,22 +25,34 @@ test_that("getFileInfo handles no input", {                 # no netcdf files fo
     w <- getOption('warn')
     options(warn=-1)
     expect_warning(getFileInfo("testdata_none/"),"No netcdf files found")   
-    expect_is(getFileInfo("testdata_none/"),'NULL')
+    expect_is(getFileInfo("testdata_none/"),"NULL")
     options(warn=w)
 })
 
 test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf filenames
     w <- getOption('warn')
     options(warn=-1)
-    expect_warning(getFileInfo("testdata_badfilename/"),"No netcdf files found")   
-    expect_is(getFileInfo("testdata_badfilename/"),'NULL')
+    expect_warning(getFileInfo("testdata_badfilename/"),"Unexpected")   
+    expect_is(getFileInfo("testdata_badfilename/"),"NULL")
     options(warn=w)
 })
 
 test_that("getFileInfo handles annual netcdfs", { 
-    # TODO
+    d <- getFileInfo("testdata/testdata_annual")
+    d <- d[complete.cases(d),]
+    expect_is(d,"data.frame")
+    expect_equal(nrow(d),1)     # should be one file
+    expect_equal(ncol(d),9)
+    expect_equal(d[1,"path"],"testdata/testdata_annual")
+    expect_equal(d[1,"time"],"2171-2172")
 })
 
 test_that("getFileInfo handles monthly netcdfs", { 
-    # TODO
+    d <- getFileInfo("testdata/testdata_monthly")
+    d <- d[complete.cases(d),]
+    expect_is(d,"data.frame")
+    expect_equal(nrow(d),3)     # should be one file
+    expect_equal(ncol(d),9)
+    expect_equal(d[1,"path"],"testdata/testdata_annual")
+    expect_equal(d[1,"time"],"2171-2172")
 })

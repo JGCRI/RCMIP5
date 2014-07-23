@@ -65,8 +65,9 @@ getFileInfo <- function(path='.', recursive=TRUE) {
                               rbind(fixedInfo, temporalInfo),
                               sizeInfo)
     
-    # Add useful column names
+    # Add useful column names and convert everything to character
     names(fileInfo.df) <- c('path', 'filename', 'variable', 'domain', 'model', 'experiment', 'ensemble', 'time', 'size')
+    fileInfo.df <- data.frame(lapply(fileInfo.df, as.character), stringsAsFactors=FALSE)
     
     return(fileInfo.df)
 }
