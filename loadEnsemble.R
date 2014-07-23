@@ -38,13 +38,14 @@ loadEnsemble <- function(path='.', experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z
                          recursive=TRUE, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(is.character(path))
-    stopifnot(is.character(experiment))
-    stopifnot(is.character(variable))
-    stopifnot(is.character(model))
-    stopifnot(is.character(ensemble))
-    stopifnot(is.logical(recursive))
-    stopifnot(is.logica(verbose))
+    stopifnot(file.exists(path))
+    stopifnot(length(path)==1 & is.character(path))
+    stopifnot(length(experiment)==1 & is.character(experiment))
+    stopifnot(length(variable==1) & is.character(variable))
+    stopifnot(length(model)==1 & is.character(model))
+    stopifnot(length(ensemble)==1 & is.character(ensemble))
+    stopifnot(length(recursive)==1 & is.logical(recursive))
+    stopifnot(length(verbose)==1 & is.logical(verbose))
     
     # List all files that match specifications
     fileList <- list.cmip5.files(path,experiment,variable,model,ensemble,recursive)

@@ -7,6 +7,7 @@ library(testthat)
 
 # To run this code: 
 #   source("checkTimePeriod.R")
+#   library(testthat)
 #   test_dir("tests/")
 # which will run everything in the 'tests' directory
 
