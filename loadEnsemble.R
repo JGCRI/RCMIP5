@@ -37,10 +37,19 @@ loadEnsemble <- function(path='.', experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z
                          model='[a-zA-Z0-9-]+', ensemble='[a-zA-Z0-9-]+',
                          recursive=TRUE, verbose=FALSE) {
     
+    # Sanity checks
+    stopifnot(is.character(path))
+    stopifnot(is.character(experiment))
+    stopifnot(is.character(variable))
+    stopifnot(is.character(model))
+    stopifnot(is.character(ensemble))
+    stopifnot(is.logical(recursive))
+    stopifnot(is.logica(verbose))
+    
     # List all files that match specifications
     fileList <- list.cmip5.files(path,experiment,variable,model,ensemble,recursive)
     
-    # TODO: warn user if lots of files specified
+    # TODO: warn user if lots of files specified?
     
     # Initialize outputs
     temp <- c()

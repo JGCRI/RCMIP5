@@ -14,6 +14,14 @@ source('loadEnsemble.R')
 #  prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3')
 loadModel <- function(path='.', experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z0-9-]+',
                       model='[a-zA-Z0-9-]+', recursive=TRUE, verbose=FALSE) {
+ 
+    # Sanity checks
+    stopifnot(is.character(path))
+    stopifnot(is.character(experiment))
+    stopifnot(is.character(variable))
+    stopifnot(is.character(model))
+    stopifnot(is.logical(recursive))
+    stopifnot(is.logica(verbose))
     
     # List all files that match specifications
     fileList <- list.cmip5.files(path,experiment,variable,model,ensemble='[a-zA-Z0-9-]+',recursive)

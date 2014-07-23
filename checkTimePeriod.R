@@ -59,5 +59,5 @@ checkTimePeriod <- function(fileInfo_df) {
                    startDate=min(startYear),
                    endDate=max(endYear),
                    files=length(startYear))        
-    })
-}
+    }) # ddply
+} # checkTimePeriod
