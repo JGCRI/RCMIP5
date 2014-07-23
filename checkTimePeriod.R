@@ -47,7 +47,7 @@ checkTimePeriod <- function(fileInfo_df) {
         if(length(startYear) > 1) {   # If multiple files, shift indexes to compare the start/stop values
             startIndex <- c(2:length(startYear))
             endIndex <- c((2:length(startYear))-1)
-            allHere <- all((nextYear[endIndex] - startYear[startIndex]) < 1e-6)
+            allHere <- all(abs(nextYear[endIndex] - startYear[startIndex]) < 1e-6)
         }
         # return answering data frame which contains
         #   yrStr - All orginal year strings for reference (useful if something is wrong).
