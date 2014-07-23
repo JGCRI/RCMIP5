@@ -14,10 +14,9 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     
     ## Sanity checks
     ##CMIP5Dir <- normalizePath(CMIP5Dir)
-    stopifnot(length(path)==1)
-    stopifnot(is.character(path))
+    stopifnot(length(path)==1 & is.character(path))
+    stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(file.exists(path))
-    stopifnot(is.logical(recursive))
     
     ## Pull the full filenames and extract short (no path or extension) names
     fullFile <- list.files(path=path, pattern='nc$',
