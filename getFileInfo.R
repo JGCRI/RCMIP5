@@ -12,13 +12,13 @@
 #' getFileInfo('just_this_dir',recursive=F)
 getFileInfo <- function(path='.', recursive=TRUE) {
     
-    ## Sanity checks
-    ##CMIP5Dir <- normalizePath(CMIP5Dir)
+    # Sanity checks
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(file.exists(path))
     
-    ## Pull the full filenames and extract short (no path or extension) names
+    # Pull the full filenames and extract short (no path or extension) names
+    path <- normalizePath(path)
     fullFile <- list.files(path=path, pattern='nc$',
                            full.names=TRUE, recursive=recursive)
     if(!length(fullFile)) {
