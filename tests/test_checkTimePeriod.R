@@ -21,10 +21,29 @@ test_that("checkTimePeriod handles bad input", {
 })
 
 test_that("checkTimePeriod correctly finds missing files", { 
-    d <- checkTimePeriod(getFileInfo("testdata_missingfile"))
+    d <- checkTimePeriod(getFileInfo("testdata_missingfile/"))
     expect_is(d,"data.frame")
     expect_equal(nrow(d),2)     # should be two cases
     expect_equal(ncol(d),10)
-    expect_false(d$allHere[1])
-    expect_false(d$allHere[2])
+    expect_false(d$allHere[1])  # monthly data case is not complete
+    expect_false(d$allHere[2])  # annual data case is not complete
+    expect_true(all(d$files > 1))
+})
+
+test_that("checkTimePeriod correctly sees continuous files", { 
+    d <- checkTimePeriod(getFileInfo("testdata/"))
+    expect_is(d,"data.frame")
+    expect_equal(nrow(d),4)     # should be four cases
+    expect_equal(ncol(d),10)
+    expect_true(all(d$allHere))
+})
+
+test_that("checkTimePeriod correctly parses dates", { 
+    d <- checkTimePeriod(getFileInfo("testdata/"))
+    expect_is(d,"data.frame")
+    expect_is(d$startDate,"numeric")
+    expect_is(d$endDate,"numeric")
+    expect_true(all(d$endDate > d$startDate))
+    expect_true(all(d$startDate >= 1850))
+    expect_true(all(d$endDate <= 2300))
 })
