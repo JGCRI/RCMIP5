@@ -3,23 +3,36 @@ source('loadEnsemble.R')
 
 #' Average all ensemble members of the specified experiment-variable-model combination
 #'
-#' @param path root of directory tree
-#' @param experiment CMIP5 experiment of interest
 #' @param variable CMIP5 variable of interest
 #' @param model CMIP5 model of interest
+#' @param experiment CMIP5 experiment of interest
+#' @param path root of directory tree
 #' @param recursive logical. Should we recurse into directories?
+#' @param verbose logical. Print info as we go?
 #' @return TODO
 #' @examples
 #  cSoilModel_CanESM2 <- loadModel(path='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2')
 #  prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3')
-loadModel <- function(path='.', experiment='[a-zA-Z0-9-]+', variable='[a-zA-Z0-9-]+',
-                      model='[a-zA-Z0-9-]+', recursive=TRUE, verbose=FALSE) {
+loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, verbose=FALSE) {
  
+    # Sanity checks
+    stopifnot(length(variable)==1 & is.character(variable))
+    stopifnot(length(model)==1 & is.character(model))
+    stopifnot(length(experiment)==1 & is.character(experiment))
+    stopifnot(length(path)==1 & is.character(path))
+    stopifnot(file.exists(path))
+    stopifnot(length(recursive)==1 & is.logical(recursive))
+    stopifnot(length(verbose)==1 & is.logical(verbose))
+
     # List all files that match specifications
     fileList <- list.files(path=path,
-                           pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
-                                           variable, model, experiment, ensemble),
+                           pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', variable, model, experiment),
                            full.names=TRUE, recursive=recursive)
+    
+    if(length(fileList)==0) {
+        warning("Could not find any matching files")
+        return(NULL)
+    }
     
     # Parse out the ensemble strings
     ensembleArr <- unique(unlist(lapply(strsplit(fileList, '_'),

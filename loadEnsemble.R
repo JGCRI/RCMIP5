@@ -19,12 +19,12 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
                          path='.', recursive=TRUE, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(length(variable==1) & is.character(variable))
+    stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
     stopifnot(length(experiment)==1 & is.character(experiment))
     stopifnot(length(ensemble)==1 & is.character(ensemble))
-    stopifnot(file.exists(path))
     stopifnot(length(path)==1 & is.character(path))
+    stopifnot(file.exists(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     

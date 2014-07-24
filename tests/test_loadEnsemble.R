@@ -18,10 +18,14 @@ test_that("loadEnsemble handles bad input", {
     expect_error(loadEnsemble("","","","",path="does_not_exist"))  # path does not exist
     expect_error(loadEnsemble("","","","",path=c(path,path)))       # multi-value path
     expect_error(loadEnsemble("","","","",path=1))                  # non-character path
-    expect_error(loadEnsemble(1,"","",""))
-    expect_error(loadEnsemble("",1,"",""))
-    expect_error(loadEnsemble("","",1,""))
-    expect_error(loadEnsemble("","","",1))
+    expect_error(loadEnsemble(1,"","",""))                          # non-character
+    expect_error(loadEnsemble("",1,"",""))                          # non-character
+    expect_error(loadEnsemble("","",1,""))                          # non-character
+    expect_error(loadEnsemble("","","",1))                          # non-character
+    expect_error(loadEnsemble(c("",""),"","",""))                   # multi-value
+    expect_error(loadEnsemble("",c("",""),"",""))                   # multi-value
+    expect_error(loadEnsemble("","",c("",""),""))                   # multi-value
+    expect_error(loadEnsemble("","","",c("","")))                   # multi-value
     expect_error(loadEnsemble("","","","",verbose=1))               # non-logical verbose
     expect_error(loadEnsemble("","","","",recursive=1))             # non-logical recursive
 })
@@ -34,6 +38,6 @@ test_that("loadEnsemble handles no files found", {            # no netcdf files 
     options(warn=w)
 })
 
-test_that("loadEnsemble loads data", {            # no netcdf files found
+test_that("loadEnsemble loads data", {
     # TODO
 })
