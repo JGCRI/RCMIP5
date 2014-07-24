@@ -15,17 +15,25 @@ context("loadEnsemble")
 
 test_that("loadEnsemble handles bad input", {
     path <- normalizePath("testdata/")
-    expect_error(loadEnsemble(path="does_not_exist"))  # path does not exist
-    expect_error(loadEnsemble(path=c(path,path)))       # multi-value path
-    expect_error(loadEnsemble(path=1))                  # non-character path
-    
-    # TODO tests for other parameters
+    expect_error(loadEnsemble("","","","",path="does_not_exist"))  # path does not exist
+    expect_error(loadEnsemble("","","","",path=c(path,path)))       # multi-value path
+    expect_error(loadEnsemble("","","","",path=1))                  # non-character path
+    expect_error(loadEnsemble(1,"","",""))
+    expect_error(loadEnsemble("",1,"",""))
+    expect_error(loadEnsemble("","",1,""))
+    expect_error(loadEnsemble("","","",1))
+    expect_error(loadEnsemble("","","","",verbose=1))               # non-logical verbose
+    expect_error(loadEnsemble("","","","",recursive=1))             # non-logical recursive
 })
 
-test_that("loadEnsemble handles no input", {            # no netcdf files found
-    d <- loadEnsemble(path=normalizePath("testdata_none/"))
-    expect_is(d,"list")
-    expect_equal(length(names(d)),8)
-    expect_equal(length(d$files),0)
-    expect_equal(sum(unlist(lapply(d,is.null))),7)      # should have seven NULLs
+test_that("loadEnsemble handles no files found", {            # no netcdf files found
+    w <- getOption('warn')
+    options(warn=-1)
+    expect_warning(loadEnsemble("","","","",path=normalizePath("testdata_none/")))
+    expect_is(loadEnsemble("","","","",path=normalizePath("testdata_none/")),"NULL")
+    options(warn=w)
+})
+
+test_that("loadEnsemble loads data", {            # no netcdf files found
+    # TODO
 })

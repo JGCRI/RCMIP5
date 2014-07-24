@@ -42,7 +42,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
     temp <- c()
     timeArr <- c()
     for(fileStr in fileList) {
-        if(verbose) cat('Loading...',fileStr)
+        if(verbose) cat('Loading ',fileStr)
         temp.nc <- nc_open(fileStr, write=FALSE)
         
         temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
@@ -51,7 +51,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
         timeArr <- c(timeArr, ncvar_get(temp.nc, varid='time'))
         timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
         calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
-        
+        if(verbose) cat(' [',dim(temp),']')
         latArr <- ncvar_get(temp.nc, varid='lat')
         lonArr <- ncvar_get(temp.nc, varid='lon')
         
