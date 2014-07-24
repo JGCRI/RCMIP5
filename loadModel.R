@@ -35,20 +35,20 @@ loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, ver
     }
     
     # Parse out the ensemble strings
-    ensembleArr <- unique(unlist(lapply(strsplit(fileList, '_'),
+    ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
                                         function(x){x[5]})))
     
     if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
     
     model.ls <- NULL
-    for(ensemble in ensembleArr){
+    for(ensemble in ensembleArr) {
         #If this is the first model
-        if(is.null(model.ls)){
+        if(is.null(model.ls)) {
             #initialize the results with the first ensemble
             model.ls <- loadEnsemble(path=path,
                                      experiment=experiment, variable=variable,
                                      model=model, ensemble=ensemble,
-                                     recursive=recursive)
+                                     verbose=verbose, recursive=recursive)
             #record the files for the ensembles
             model.ls$files <- list(a=model.ls$files)
             #record the sucessful ensemble load
@@ -58,20 +58,20 @@ loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, ver
             temp <- loadEnsemble(path=path,
                                  experiment=experiment, variable=variable,
                                  model=model, ensemble=ensemble,
-                                 recursive=recursive)
-            #If the lat-lon-time match
+                                 verbose=verbose, recursive=recursive)
+            # If the lat-lon-time match
             if(all(temp$lat==model.ls$lat) &
                    all(temp$lon==model.ls$on) &
-                   all(temp$time==model.ls$time)){
+                   all(temp$time==model.ls$time)) {
                 #add them to the values
                 model.ls$val <- model.ls$val + temp$val
-                #record the files loaded
+                # Record the files loaded
                 model.ls$files <- c(model.ls$files, a=temp$files)
-                #record a sucessful ensemble load
+                # Record a sucessful ensemble load
                 ensembleNames <- c(ensembleNames, ensemble)
-            }else{
-                #notify user of failed load
-                cat(ensemble, 'does not match previous ensembles lon-lat-time.\n')
+            } else {
+                # Notify user of failed load
+                cat(ensemble, 'does not match previous ensembles' lon-lat-time.\n')
             }
         }
     }
