@@ -38,6 +38,22 @@ test_that("loadEnsemble handles no files found", {            # no netcdf files 
     options(warn=w)
 })
 
-test_that("loadEnsemble loads data", {
-    # TODO
+test_that("loadEnsemble loads monthly data", {
+    path <- "testdata/testdata_monthly"
+    d <- loadEnsemble('nbp','HadGEM2-ES','historical','r3i1p1',path=path)     # test data set
+    expect_is(d,"list")
+    expect_equal(length(d$files),2)                                 # should be two files
+    d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1',path=path)     
+    expect_is(d,"list")
+    expect_equal(length(d$files),1)                                 # should be one file
+})
+
+test_that("loadEnsemble loads annual data", {
+    path <- "testdata/testdata_annual"
+    d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1',path=path)     # test data set
+    expect_is(d,"list")
+    expect_equal(length(d$files),1)                                 # should be two files
+    d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1',path=path)     
+    expect_is(d,"list")
+    expect_equal(length(d$files),1)                                 # should be one file
 })

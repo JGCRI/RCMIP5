@@ -45,7 +45,7 @@ test_that("getFileInfo handles annual netcdfs", {
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
     expect_is(d,"data.frame")
-    expect_equal(nrow(d),1)     # should be one file
+    expect_more_than(nrow(d),1)     # should be several
     expect_equal(ncol(d),9)
     expect_equal(d[1,"path"],path)
     expect_equal(d[1,"time"],"2171-2172")
@@ -56,7 +56,7 @@ test_that("getFileInfo handles monthly netcdfs", {
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
     expect_is(d,"data.frame")
-    expect_equal(nrow(d),3)     # should be three files
+    expect_more_than(nrow(d),3)     # should be several
     expect_equal(ncol(d),9)
     expect_equal(d[1,"path"],path)
 })
