@@ -14,7 +14,7 @@ library(testthat)
 context("loadModel")
 
 test_that("loadModel handles bad input", {
-    path <- normalizePath("testdata/")
+    path <- normalizePath("../../sampledata/")
     expect_error(loadModel("",,"",path="does_not_exist"))  # path does not exist
     expect_error(loadModel("","","",path=c(path,path)))       # multi-value path
     expect_error(loadModel("","","",path=1))                  # non-character path
@@ -37,7 +37,7 @@ test_that("loadModel handles no files found", {            # no netcdf files fou
 })
 
 test_that("loadModel loads monthly data", {
-    path <- "testdata/testdata_monthly"
+    path <- "../../sampledata/monthly"
     d <- loadModel('nbp','HadGEM2-ES','rcp85',path=path)     # test data set
     expect_is(d,"list")
     expect_equal(length(d$files),2)                                 # should be two files

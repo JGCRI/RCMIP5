@@ -14,8 +14,8 @@ library(testthat)
 context("checkTimePeriod")
 
 test_that("checkTimePeriod handles bad input", {
-    path <- normalizePath("testdata/")
-    d <- checkTimePeriod(getFileInfo(path))
+    path <- normalizePath("../../sampledata/")
+    d <- getFileInfo(path)
     expect_error(checkTimePeriod())                     # no input
     expect_error(checkTimePeriod(c(d,d)))               # multi-value input
     expect_error(checkTimePeriod(12))                   # non-data.frame input
@@ -34,7 +34,7 @@ test_that("checkTimePeriod correctly finds missing files", {
 })
 
 test_that("checkTimePeriod correctly sees continuous files", { 
-    path <- normalizePath("testdata/")
+    path <- normalizePath("../../sampledata")
     d <- checkTimePeriod(getFileInfo(path))
     expect_is(d,"data.frame")
     expect_more_than(nrow(d),2)     # should be several cases
@@ -43,7 +43,7 @@ test_that("checkTimePeriod correctly sees continuous files", {
 })
 
 test_that("checkTimePeriod correctly parses dates", { 
-    path <- normalizePath("testdata/")
+    path <- normalizePath("../../sampledata/")
     d <- checkTimePeriod(getFileInfo(path))
     expect_is(d,"data.frame")
     expect_is(d$startDate,"numeric")

@@ -14,7 +14,7 @@ library(testthat)
 context("loadEnsemble")
 
 test_that("loadEnsemble handles bad input", {
-    path <- normalizePath("testdata/")
+    path <- normalizePath("../../sampledata/")
     expect_error(loadEnsemble("","","","",path="does_not_exist"))  # path does not exist
     expect_error(loadEnsemble("","","","",path=c(path,path)))       # multi-value path
     expect_error(loadEnsemble("","","","",path=1))                  # non-character path
@@ -39,7 +39,7 @@ test_that("loadEnsemble handles no files found", {            # no netcdf files 
 })
 
 test_that("loadEnsemble loads monthly data", {
-    path <- "testdata/testdata_monthly"
+    path <- "../../sampledata/monthly/"
     d <- loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',path=path)     # test data set
     expect_is(d,"list")
     expect_equal(length(d$files),2)                                 # should be two files
@@ -49,7 +49,7 @@ test_that("loadEnsemble loads monthly data", {
 })
 
 test_that("loadEnsemble loads annual data", {
-    path <- "testdata/testdata_annual"
+    path <- "../../sampledata/annual/"
     d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1',path=path)     # test data set
     expect_is(d,"list")
     expect_equal(length(d$files),1)                                 # should be two files

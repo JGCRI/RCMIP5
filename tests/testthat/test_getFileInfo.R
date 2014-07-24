@@ -41,7 +41,7 @@ test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf fi
 })
 
 test_that("getFileInfo handles annual netcdfs", { 
-    path <- normalizePath("testdata/testdata_annual")
+    path <- normalizePath("../../sampledata/annual")
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
     expect_is(d,"data.frame")
@@ -52,7 +52,7 @@ test_that("getFileInfo handles annual netcdfs", {
 })
 
 test_that("getFileInfo handles monthly netcdfs", { 
-    path <- normalizePath("testdata/testdata_monthly")
+    path <- normalizePath("../../sampledata/monthly")
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
     expect_is(d,"data.frame")
