@@ -36,6 +36,17 @@ test_that("loadModel handles no files found", {            # no netcdf files fou
     options(warn=w)
 })
 
-test_that("loadModel loads data", {
-    # TODO
+test_that("loadModel loads monthly data", {
+    path <- "testdata/testdata_monthly"
+    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=path)     # test data set
+    expect_is(d,"list")
+    expect_equal(length(d$files),2)                                 # should be two files
+    d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1',path=path)     
+    expect_is(d,"list")
+    expect_equal(length(d$files),1)                                 # should be one file
+})
+
+test_that("loadModel handles lat-lon-time mismatches", {
+    path <- "testdata_mismatch/"
+    expect_warning(loadModel("nbp","HadGEM2-ES","historical",path=path))
 })

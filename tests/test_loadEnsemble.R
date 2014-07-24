@@ -40,7 +40,7 @@ test_that("loadEnsemble handles no files found", {            # no netcdf files 
 
 test_that("loadEnsemble loads monthly data", {
     path <- "testdata/testdata_monthly"
-    d <- loadEnsemble('nbp','HadGEM2-ES','historical','r3i1p1',path=path)     # test data set
+    d <- loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',path=path)     # test data set
     expect_is(d,"list")
     expect_equal(length(d$files),2)                                 # should be two files
     d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1',path=path)     
