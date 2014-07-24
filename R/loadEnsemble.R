@@ -14,7 +14,7 @@ library(abind)
 #'      'lat', 'lon', and 'time'. If no files match the requested criteria function
 #'      will return NULL with a warning.
 #' @examples
-#' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',path="tests/testdata",verbose=T)
+#' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=T)
 loadEnsemble <- function(variable, model, experiment, ensemble,
                          path='.', recursive=TRUE, verbose=FALSE) {
     

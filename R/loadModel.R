@@ -13,7 +13,7 @@ source('loadEnsemble.R')
 #'      'lat', 'lon', and 'time'. If no files match the requested criteria function
 #'      will return NULL with a warning.
 #' @examples
-#'  loadModel('nbp','HadGEM2-ES','rcp85',path="tests/testdata",verbose=T)
+#'  loadModel('nbp','HadGEM2-ES','rcp85',verbose=T)
 loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, verbose=FALSE) {
     
     # Sanity checks

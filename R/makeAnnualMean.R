@@ -5,8 +5,6 @@
 #' @param temp.ls TODO
 #' @param verbose logical. Print info as we go?
 #' @return TODO
-#' @examples
-#  TODO
 makeAnnualMean <- function(temp.ls,verbose=TRUE) {
     
     # TODO: this line doesn't seem to work, as calendarStr is "noleap" in example files

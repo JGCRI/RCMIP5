@@ -1,0 +1,9 @@
+Package: RCMIP5
+Title: Tools for manipulating and summarizing CMIP5 data
+Description: Tools for manipulating and summarizing CMIP5 data
+Depends: plyr,abind,ncdf4
+Version: 0.1
+Authors@R: c(person("Ben", "Bond-Lamberty", role = "aut"),
+       person("Kathe", "Todd-Brown", role = c("aut", "cre"),
+              email = "ktoddbrown@gmail.com") )
+License: MIT
