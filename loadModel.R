@@ -43,10 +43,8 @@ loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, ver
     
     model.ls <- NULL
     for(ensemble in ensembleArr) {
-        temp <- loadEnsemble(path=path,
-                             experiment=experiment, variable=variable,
-                             model=model, ensemble=ensemble,
-                             verbose=verbose, recursive=recursive)
+        temp <- loadEnsemble(variable, model, experiment, ensemble, 
+                             path=path, verbose=verbose, recursive=recursive)
         # If this is the first model
         if(is.null(model.ls)) {
             model.ls <- temp                # initialize the results with the first ensemble
