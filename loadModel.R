@@ -13,8 +13,7 @@ source('loadEnsemble.R')
 #'      'lat', 'lon', and 'time'. If no files match the requested criteria function
 #'      will return NULL with a warning.
 #' @examples
-#  cSoilModel_CanESM2 <- loadModel(path='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2')
-#  prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3')
+#'  loadModel('nbp','HadGEM2-ES','rcp85',path="tests/testdata",verbose=T)
 loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, verbose=FALSE) {
     
     # Sanity checks
