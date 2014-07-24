@@ -59,6 +59,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
         if(verbose) cat('\n')
     }
     
-    list(files=fileList, val=temp, valUnit=varUnit, timeUnit=timeUnit, 
-         calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr)
+    invisible(list(files=fileList, val=temp, valUnit=varUnit, timeUnit=timeUnit, 
+         calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr))
 } # loadEnsemble

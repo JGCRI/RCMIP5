@@ -9,12 +9,14 @@ source('loadEnsemble.R')
 #' @param path root of directory tree
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
-#' @return TODO
+#' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
+#'      'lat', 'lon', and 'time'. If no files match the requested criteria function
+#'      will return NULL with a warning.
 #' @examples
 #  cSoilModel_CanESM2 <- loadModel(path='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='CanESM2')
 #  prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3')
 loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, verbose=FALSE) {
- 
+    
     # Sanity checks
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
@@ -23,7 +25,7 @@ loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, ver
     stopifnot(file.exists(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
-
+    
     # List all files that match specifications
     fileList <- list.files(path=path,
                            pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', variable, model, experiment),
@@ -42,45 +44,31 @@ loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, ver
     
     model.ls <- NULL
     for(ensemble in ensembleArr) {
-        #If this is the first model
+        temp <- loadEnsemble(path=path,
+                             experiment=experiment, variable=variable,
+                             model=model, ensemble=ensemble,
+                             verbose=verbose, recursive=recursive)
+        # If this is the first model
         if(is.null(model.ls)) {
-            #initialize the results with the first ensemble
-            model.ls <- loadEnsemble(path=path,
-                                     experiment=experiment, variable=variable,
-                                     model=model, ensemble=ensemble,
-                                     verbose=verbose, recursive=recursive)
-            #record the files for the ensembles
-            model.ls$files <- list(a=model.ls$files)
-            #record the sucessful ensemble load
+            model.ls <- temp                # initialize the results with the first ensemble
+            model.ls$files <- list()
+            model.ls$files[[ensemble]] <- temp$files
             ensembleNames <- c(ensemble)
         } else {
-            #load the new ensemble
-            temp <- loadEnsemble(path=path,
-                                 experiment=experiment, variable=variable,
-                                 model=model, ensemble=ensemble,
-                                 verbose=verbose, recursive=recursive)
-            # If the lat-lon-time match
-            if(all(temp$lat==model.ls$lat) &
+            if(all(temp$lat==model.ls$lat) &            # Check that lat-lon-time match
                    all(temp$lon==model.ls$on) &
                    all(temp$time==model.ls$time)) {
-                #add them to the values
-                model.ls$val <- model.ls$val + temp$val
-                # Record the files loaded
-                model.ls$files <- c(model.ls$files, a=temp$files)
-                # Record a sucessful ensemble load
+                model.ls$val <- model.ls$val + temp$val # if so, add values and record successful load
+                model.ls$files[[ensemble]] <- temp$files
                 ensembleNames <- c(ensembleNames, ensemble)
-            } else {
-                # Notify user of failed load
-                cat(ensemble, 'does not match previous ensembles' lon-lat-time.\n')
+            } else {                                    # ...if not, fail
+                warning(ensemble, 'does not match previous ensembles\' lon-lat-time.\n')
             }
         }
     }
-    #name the files with the ensemble load
-    names(model.ls$files) <- ensembleNames
+    # convert the sum to an average
+    stopifnot(length(ensembleNames)>0)
+    model.ls$val <- model.ls$val / length(ensembleNames)
     
-    #convert the sum to an average
-    if(length(ensembleNames > 0))
-        model.ls$val <- model.ls$val / length(ensembleNames)
-    
-    return(model.ls)
+    invisible(model.ls)
 } # loadModel
