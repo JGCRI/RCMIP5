@@ -9,6 +9,7 @@ library(plyr) # for BIG data.frames we want to do this fast
 #'          startYr (numeric - decimal time of minimum year
 #'          endYr (numeric - decimal time of maximum year)
 #' @details Decimal time is (year + (month-1)/12).
+#' @export
 #' @examples
 #' checkTimePeriod(getFileInfo())
 #' @seealso getFileInfo

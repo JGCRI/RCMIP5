@@ -1,6 +1,6 @@
 library(plyr) #required in checkTimePeriod
 library(reshape) #required in devMain
-library(raster) #required in loadEnsemble,
+#library(raster) #required in loadEnsemble,
 library(ncdf4) #required in loadEnsemble,
 
 ##Manage download functions
@@ -18,12 +18,12 @@ if(!TRUE){ ##run the management functions
 ######################################################
 ##Get the information on the files already downloaded
 ######################################################
-if(file.exists('/Volumes/DATAFILES/downloads')){
+if(file.exists('/Volumes/DATAFILES/downloads')) {
     cat('getting file information from [/Volumes/DATAFILES/downloads]...')
     fileInfo <- getFileInfo('/Volumes/DATAFILES/downloads')
                ##This script was tested on a directory that had >10K files
                ##...downloaded. Runtime took a few seconds
-}else{
+} else {
     cat('getting file inforation from current directory...')
     fileInfo <- getFileInfo() #runs on the current directory
 }
@@ -63,7 +63,7 @@ cat('done\n')
 ##Load variables
 ######################################################
 
-if(file.exists('/Volumes/DATAFILES/downloads')){
+if(file.exists('/Volumes/DATAFILES/downloads')) {
     cat('loading ensemble... 1...')
     cSoilEns <- loadEnsemble(path='/Volumes/DATAFILES/downloads', experiment='historical', variable='cSoil', model='GISS-E2-R',#model='CanESM2',
                           ensemble='r1i1p1')
@@ -84,6 +84,6 @@ if(file.exists('/Volumes/DATAFILES/downloads')){
     seasonalTemp <- makeSeasonalMean(cSoilModel_CanESM2, yrRange=list(min=1850, max=1860))
     cat('done\n')
 #temp <- rasterToArray(seasonalTemp)
-}else{
-    prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
+} else {
+#    prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
 }

@@ -3,7 +3,7 @@ CMIP5_R
 
 This package provides general R scripts for processing CMIP5 outputs downloaded from the Earth System Grid Federation http://pcmdi9.llnl.gov/esgf-web-fe/.
 
-TODO: Insert summary and citations for CMIP5
+More information about the CMIP5 experiment can be found in: Taylor, K. E., Stouffer, R. J., and Meehl, G. A., 2012: An overview of CMIP5 and the experiment design, Bulletin of the American Meteorological Society, 93, 485-498. doi [10.1175/BAMS-D-11-00094.1][http://dx.doi.org/10.1175/BAMS-D-11-00094.1]. 
 
 TODO: Register this package/manuscript at http://cmip.llnl.gov/cmip5/publications/allpublications
 

@@ -37,7 +37,7 @@ test_that("loadModel handles no files found", {            # no netcdf files fou
 })
 
 test_that("loadModel loads monthly data", {
-    path <- "../../sampledata/monthly"
+    path <- "../../sampledata/monthly/"
     d <- loadModel('nbp','HadGEM2-ES','rcp85',path=path)     # test data set
     expect_is(d,"list")
     expect_equal(length(d$files),2)                                 # should be two files

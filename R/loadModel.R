@@ -1,5 +1,5 @@
 library(ncdf4)
-source('loadEnsemble.R')
+#source('loadEnsemble.R')
 
 #' Average all ensemble members of the specified experiment-variable-model combination
 #'
@@ -12,6 +12,7 @@ source('loadEnsemble.R')
 #' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 #'      'lat', 'lon', and 'time'. If no files match the requested criteria function
 #'      will return NULL with a warning.
+#' @export
 #' @examples
 #'  loadModel('nbp','HadGEM2-ES','rcp85',verbose=T)
 loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, verbose=FALSE) {

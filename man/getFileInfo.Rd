@@ -12,10 +12,9 @@ getFileInfo(path = ".", recursive = TRUE)
 \item{recursive}{logical. Should the listing recurse into directories?}
 }
 \value{
-data frame containing the following parsed from file names:
-        1) full file name, 2) filename without path or '.nc' extension,
-        3) variable, 4) domain, 5) model, 6) experiment, 7) ensemble
-        8) time period, 9) filesize in KB
+data frame containing the following parsed from file names: full file name,
+         filename without path or '.nc' extension, variable, domain, model,
+         experiment, ensemble, time period, and filesize (in KB)
 }
 \description{
 List all CMIP5 file in a directory tree and parse their filenames for CMIP5

@@ -13,6 +13,7 @@ library(abind)
 #' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 #'      'lat', 'lon', and 'time'. If no files match the requested criteria function
 #'      will return NULL with a warning.
+#' @export
 #' @examples
 #' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=T)
 loadEnsemble <- function(variable, model, experiment, ensemble,
@@ -60,5 +61,5 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
     }
     
     invisible(list(files=fileList, val=temp, valUnit=varUnit, timeUnit=timeUnit, 
-         calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr))
+                   calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr))
 } # loadEnsemble
