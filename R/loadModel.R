@@ -14,7 +14,7 @@ library(ncdf4)
 #'      will return NULL with a warning.
 #' @export
 #' @examples
-#'  loadModel('nbp','HadGEM2-ES','rcp85',verbose=T)
+#' loadModel('nbp','HadGEM2-ES','rcp85',verbose=T)
 loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, verbose=FALSE) {
     
     # Sanity checks
