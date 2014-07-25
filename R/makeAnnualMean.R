@@ -3,31 +3,33 @@ require(abind)
 
 #' Compute annual mean of a variable
 #'
-#' @param temp.ls list. A structure returned from loadEnsemble() or loadModel()
+#' @param x list. A structure returned from loadEnsemble() or loadModel()
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param maxyears numeric. Limit computation to this many years (e.g. for testing)
-#' @return #' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
+#' @param FUN function. Function to apply across months of year
+#' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 #'      'lat', 'lon', and 'time'.
 #' @export
 #' @examples
 #' makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=T))
-makeAnnualMean <- function(temp.ls, verbose=TRUE, parallel=FALSE, maxyears=Inf) {
+makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, maxyears=Inf, FUN=mean) {
     
     # Sanity checks
-    stopifnot(length(temp.ls)==8 & is.list(temp.ls))
+    stopifnot(length(x)==8 & is.list(x))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(maxyears)==1 & is.numeric(maxyears))
+    stopifnot(length(FUN)==1 & is.function(FUN))
     
     # TODO: is calendarStr guaranteed to have # days in positions 1-3? 
     # Would it better to split the string based on underscore?
-    numDays <- as.numeric(substr(temp.ls$calendarStr, 1, 3))
+    numDays <- as.numeric(substr(x$calendarStr, 1, 3))
     stopifnot(numDays>0)
     
     # timeUnit is a string like "days since 1859-12-01". Extract startDate from this
     startYrArr <- as.numeric(unlist(strsplit(
-        regmatches(temp.ls$timeUnit, regexpr('\\d+.\\d+.\\d+', temp.ls$timeUnit)), '-')))
+        regmatches(x$timeUnit, regexpr('\\d+.\\d+.\\d+', x$timeUnit)), '-')))
     startYr <- startYrArr[1]+(startYrArr[2]-1)/12+(startYrArr[3]-1)/numDays
     
     # More sanity checks
@@ -35,10 +37,10 @@ makeAnnualMean <- function(temp.ls, verbose=TRUE, parallel=FALSE, maxyears=Inf) 
     stopifnot(startYrArr[3] %in% 1:31)
     stopifnot(startYr >= 1850 & startYr < 2300)
     
-    yrIndex <- temp.ls$time/numDays + startYr
+    yrIndex <- x$time/numDays + startYr
     uniqueYears <- unique(floor(yrIndex))
     uniqueYears <- uniqueYears[ 1:min(length(uniqueYears),maxyears)]    # limit to 'maxyears'
-    ans <- array(NA, dim=c(dim(temp.ls$val)[c(1,2)], length(uniqueYears)))
+    ans <- array(NA, dim=c(dim(x$val)[c(1,2)], length(uniqueYears)))
     
     timer <- system.time( # time the main computation, below; 4-5s/yr on my laptop
         
@@ -46,21 +48,20 @@ makeAnnualMean <- function(temp.ls, verbose=TRUE, parallel=FALSE, maxyears=Inf) 
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             ans <- foreach(i=1:length(uniqueYears), .combine = function(...) abind(..., along=3), .packages='plyr') %dopar% {
-                aaply(temp.ls$val[,,uniqueYears[i] == floor(yrIndex)], c(1,2), mean)
+                aaply(x$val[,,uniqueYears[i] == floor(yrIndex)], c(1,2), FUN)
             }
         } else {
             if(verbose) cat("Running in serial\n")
             for(i in 1:length(uniqueYears)) {
                 if(verbose & floor(i/1)==i/1) cat(i, " ")
-                ans[,,i] <- aaply(temp.ls$val[,,uniqueYears[i] == floor(yrIndex)], c(1,2), mean)
+                ans[,,i] <- aaply(x$val[,,uniqueYears[i] == floor(yrIndex)], c(1,2), FUN)
             }
         }   
     ) # system.time
     
     if(verbose) cat('Took',timer[3], 's\n')
     
-    invisible(list(val=ans, files=temp.ls$files,
-                   year=uniqueYears,
+    invisible(list(val=ans, files=x$files, year=uniqueYears,
                    numMonths=table(floor(yrIndex)),
-                   lat=temp.ls$lat, lon=temp.ls$lon, valUnit=temp.ls$valUnit))
+                   lat=x$lat, lon=x$lon, valUnit=x$valUnit))
 } # makeAnnualMean
