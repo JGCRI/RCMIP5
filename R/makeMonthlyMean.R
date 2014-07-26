@@ -12,13 +12,14 @@ library(plyr)
 #' @export
 #' @examples
 #' makeSeasonalMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=T))
-makeMonthlyMean <- function(x, yearRange=c(-Inf, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
+makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     # Sanity checks
     stopifnot(length(x)==8 & is.list(x))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(yearRange)==2 & is.numeric(yearRange))
+    stopifnot(all(yearRange > 0))
     stopifnot(length(FUN)==1 & is.function(FUN))
     stopifnot(dim(x$val)==c(length(x$lon),length(x$lat),length(x$time)))
     
