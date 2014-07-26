@@ -4,7 +4,7 @@
 \title{Load data for a particular set of experiment/variable/model/ensemble}
 \usage{
 loadEnsemble(variable, model, experiment, ensemble, path = ".",
-  recursive = TRUE, verbose = FALSE)
+  recursive = TRUE, verbose = FALSE, demo = FALSE)
 }
 \arguments{
 \item{variable}{CMIP5 variable to load}
@@ -17,9 +17,11 @@ loadEnsemble(variable, model, experiment, ensemble, path = ".",
 
 \item{path}{root of directory tree}
 
-\item{recursive}{logical. Should we recurse into directories?}
+\item{recursive}{logical. Recurse into directories?}
 
 \item{verbose}{logical. Print info as we go?}
+
+\item{demo}{logical. Demo mode (reading data from global environment, not disk)?}
 }
 \value{
 list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
@@ -30,6 +32,6 @@ list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 Load data for a particular set of experiment/variable/model/ensemble
 }
 \examples{
-loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=T)
+loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=TRUE,demo=TRUE)
 }
 

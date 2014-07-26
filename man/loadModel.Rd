@@ -28,6 +28,6 @@ list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 Average all ensemble members of the specified experiment-variable-model combination
 }
 \examples{
-loadModel('nbp','HadGEM2-ES','rcp85',verbose=T)
+loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE)
 }
 

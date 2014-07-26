@@ -22,6 +22,6 @@ information like experiment, model, and variable names.
 }
 \examples{
 getFileInfo()
-getFileInfo('just_this_dir',recursive=F)
+getFileInfo('.',recursive=FALSE)
 }
 

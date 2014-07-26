@@ -3,7 +3,7 @@
 \alias{makeMonthlyMean}
 \title{Compute monthly means of a variable}
 \usage{
-makeMonthlyMean(x, yearRange = c(-Inf, Inf), verbose = TRUE,
+makeMonthlyMean(x, yearRange = c(1, Inf), verbose = TRUE,
   parallel = FALSE, FUN = mean)
 }
 \arguments{
@@ -13,7 +13,7 @@ makeMonthlyMean(x, yearRange = c(-Inf, Inf), verbose = TRUE,
 
 \item{parallel}{logical. Parallelize if possible?}
 
-\item{maxyears}{numeric. Limit computation to this many years (e.g. for testing)}
+\item{yearRange}{numeric vector. Limit computation to this year range (e.g. for testing)}
 
 \item{FUN}{function. Function to apply across months of year}
 }
@@ -25,6 +25,6 @@ list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 Compute monthly means of a variable
 }
 \examples{
-makeSeasonalMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=T))
+makeMonthlyMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE))
 }
 

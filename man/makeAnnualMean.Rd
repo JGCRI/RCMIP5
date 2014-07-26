@@ -3,13 +3,13 @@
 \alias{makeAnnualMean}
 \title{Compute annual mean of a variable}
 \usage{
-makeAnnualMean(x, yearRange = c(-Inf, Inf), verbose = TRUE,
-  parallel = FALSE, FUN = mean)
+makeAnnualMean(x, yearRange = c(1, Inf), verbose = TRUE, parallel = FALSE,
+  FUN = mean)
 }
 \arguments{
 \item{x}{list. A structure returned from loadEnsemble() or loadModel()}
 
-\item{yearRange}{numeric. Limit computation to these years (e.g. for testing)}
+\item{yearRange}{numeric vector. Limit computation to this year range (e.g. for testing)}
 
 \item{verbose}{logical. Print info as we go?}
 
@@ -25,6 +25,6 @@ list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 Compute annual mean of a variable
 }
 \examples{
-makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=T))
+makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE))
 }
 
