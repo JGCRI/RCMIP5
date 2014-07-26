@@ -25,6 +25,6 @@ list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 Compute annual mean of a variable
 }
 \examples{
-makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE))
+makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 }
 

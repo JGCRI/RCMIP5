@@ -4,7 +4,7 @@
 \title{Average all ensemble members of the specified experiment-variable-model combination}
 \usage{
 loadModel(variable, model, experiment, path = ".", recursive = TRUE,
-  verbose = FALSE)
+  verbose = FALSE, demo = FALSE)
 }
 \arguments{
 \item{variable}{CMIP5 variable of interest}
@@ -18,6 +18,8 @@ loadModel(variable, model, experiment, path = ".", recursive = TRUE,
 \item{recursive}{logical. Should we recurse into directories?}
 
 \item{verbose}{logical. Print info as we go?}
+
+\item{demo}{logical. Demo mode (reading data from global environment, not disk)?}
 }
 \value{
 list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
@@ -28,6 +30,6 @@ list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 Average all ensemble members of the specified experiment-variable-model combination
 }
 \examples{
-loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE)
+loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE)
 }
 

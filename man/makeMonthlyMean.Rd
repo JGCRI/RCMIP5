@@ -25,6 +25,6 @@ list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 Compute monthly means of a variable
 }
 \examples{
-makeMonthlyMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE))
+makeMonthlyMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 }
 
