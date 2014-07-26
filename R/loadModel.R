@@ -9,13 +9,15 @@ library(ncdf4)
 #' @param path root of directory tree
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
+#' @param demo logical. Demo mode (reading data from global environment, not disk)?
 #' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 #'      'lat', 'lon', and 'time'. If no files match the requested criteria function
 #'      will return NULL with a warning.
 #' @export
 #' @examples
-#' loadModel('nbp','HadGEM2-ES','rcp85',verbose=T)
-loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, verbose=FALSE) {
+#' loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE)
+loadModel <- function(variable, model, experiment, 
+                      path='.', recursive=TRUE, verbose=FALSE, demo=FALSE) {
     
     # Sanity checks
     stopifnot(length(variable)==1 & is.character(variable))
@@ -25,11 +27,19 @@ loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, ver
     stopifnot(file.exists(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
+    stopifnot(length(demo)==1 & is.logical(demo))
     
     # List all files that match specifications
-    fileList <- list.files(path=path,
-                           pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', variable, model, experiment),
-                           full.names=TRUE, recursive=recursive)
+    if(demo) {
+        fileList <- ls(envir=.GlobalEnv)  # in demo mode pull from environment, not disk
+    } else {
+        fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
+    }
+    fileList <- fileList[grepl(pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', 
+                                               variable, model, experiment), fileList)]
+#     fileList <- list.files(path=path,
+#                            pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', variable, model, experiment),
+#                            full.names=TRUE, recursive=recursive)
     
     if(length(fileList)==0) {
         warning("Could not find any matching files")
@@ -45,7 +55,7 @@ loadModel <- function(variable, model, experiment, path='.', recursive=TRUE, ver
     model.ls <- NULL
     for(ensemble in ensembleArr) {
         temp <- loadEnsemble(variable, model, experiment, ensemble, 
-                             path=path, verbose=verbose, recursive=recursive)
+                             path=path, verbose=verbose, recursive=recursive, demo=demo)
         # If this is the first model
         if(is.null(model.ls)) {
             model.ls <- temp                # initialize the results with the first ensemble
