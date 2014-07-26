@@ -9,10 +9,9 @@ library(testthat)
 #   library(testthat)
 #   test_file("tests/testthat/test_makeAnnualMean.R")
 
-SAMPLEDATA <- normalizePath("../../sampledata/")
 dummydata <- function(years) {
     list(files="", 
-         val=array(1:2, dim=c(10,10,12*length(years))),
+         val=array(runif(10*10*12*length(years)), dim=c(10,10,12*length(years))),
          valUnit="",
          timeUnit=paste0("days since ",years[1],"-01-01"),
          calendarStr="360_day",  # don't change this
@@ -82,6 +81,29 @@ test_that("makeAnnualMean handles monthly data", {
     expect_equal(res$val, dummyans)
 })
 
+test_that("makeAnnualMean yearRange filter works", {
+    years <- 1850:1853
+    yearRange <- 1851:1852
+    d <- dummydata(years)
+    
+    yearIndex <- d$time/360 + years[1]
+    uniqueYears <- unique(floor(yearIndex))
+    uniqueYears <- uniqueYears[uniqueYears >= min(yearRange) & uniqueYears <= max(yearRange)]
+    dummyans <- array(NA_real_, dim=c(dim(d$val)[c(1,2)], length(uniqueYears)))
+    for(i in 1:length(uniqueYears)) {
+        dummyans[,,i] <- aaply(d$val[,,uniqueYears[i] == floor(yearIndex)], c(1,2), mean)
+    }
+
+    # Testing the test: check our choice of years above
+    expect_that(range(years),not(equals(range(yearRange))))
+    
+    # makeMonthlyMean should return exactly the array calculated above
+    expect_equal(makeAnnualMean(d,yearRange=yearRange,verbose=F)$val, dummyans)
+    
+    # ...unless the time ranges don't match
+    expect_that(makeAnnualMean(d,verbose=F)$val,not(equals(dummyans)))
+})
+
 test_that("makeAnnualMean parallel produces same answer", {
     #    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=SAMPLEDATA)
     years <- 1850:1851
@@ -90,7 +112,6 @@ test_that("makeAnnualMean parallel produces same answer", {
     res_p <- makeAnnualMean(d,verbose=F,parallel=T)
     expect_equal(res_s,res_p)
 })
-
 
 test_that("makeAnnualMean handles annual data", {
     # TODO
