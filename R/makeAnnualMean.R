@@ -11,7 +11,7 @@ library(plyr)
 #'      'lat', 'lon', and 'time'.
 #' @export
 #' @examples
-#' makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=T))
+#' makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     # Sanity checks
@@ -43,10 +43,10 @@ makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE,
     uniqueYears <- uniqueYears[uniqueYears >= min(yearRange) & uniqueYears <= max(yearRange)]
     ans <- array(NA_real_, dim=c(dim(x$val)[c(1,2)], length(uniqueYears)))
     
+    if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
     timer <- system.time( # time the main computation, below; 4-5s/yr on my laptop
         
-        if(parallel & 
-               require(foreach) & require(doParallel) & require(abind)) {  # go parallel, woo hoo!
+        if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             ans <- foreach(i=1:length(uniqueYears), .combine = function(...) abind(..., along=3), .packages='plyr') %dopar% {

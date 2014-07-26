@@ -11,7 +11,7 @@ library(plyr)
 #'      'lat', 'lon', and 'time'.
 #' @export
 #' @examples
-#' makeSeasonalMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=T))
+#' makeMonthlyMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     # Sanity checks
@@ -45,11 +45,10 @@ makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE
     monthIndex <- floor((yearIndex %% 1) * 12 + 1)
     ans <- array(NA_real_, dim=c(dim(x$val)[c(1,2)], 12))
     
+    if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
     timer <- system.time( # time the main computation, below
         
-        if(parallel & 
-               require(foreach) & require(doParallel) & require(abind)) {  # go parallel, woo hoo!
-            
+        if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             ans <- foreach(i=1:12, .combine = function(...) abind(..., along=3), .packages='plyr') %dopar% {
