@@ -20,11 +20,12 @@ makeMonthlyMean <- function(x, yearRange=c(-Inf, Inf), verbose=TRUE, parallel=FA
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(yearRange)==2 & is.numeric(yearRange))
     stopifnot(length(FUN)==1 & is.function(FUN))
+    stopifnot(dim(x$val)==c(length(x$lon),length(x$lat),length(x$time)))
     
     # TODO: is calendarStr guaranteed to have # days in positions 1-3? 
     # Would it better to split the string based on underscore?
     numDays <- as.numeric(substr(x$calendarStr, 1, 3))
-    stopifnot(numDays>0)
+    stopifnot(is.numeric(numDays) & numDays>0)
     
     # timeUnit is a string like "days since 1859-12-01". Extract startDate from this
     # TODO: this code shared with makeAnnualMean, could abstract into function
@@ -59,7 +60,7 @@ makeMonthlyMean <- function(x, yearRange=c(-Inf, Inf), verbose=TRUE, parallel=FA
                 if(verbose) cat(i, " ")
                 ans[,,i] <- aaply(x$val[,,(i == monthIndex) & yearFilter], c(1,2), FUN)
             }
-            cat("\n")
+            if(verbose) cat("\n")
         }
     ) # system.time
     

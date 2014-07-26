@@ -12,19 +12,21 @@ library(plyr)
 #' @export
 #' @examples
 #' makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=T))
-makeAnnualMean <- function(x, yearRange=c(-Inf, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
+makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     # Sanity checks
     stopifnot(length(x)==8 & is.list(x))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(yearRange)==2 & is.numeric(yearRange))
+    stopifnot(all(yearRange > 0))
     stopifnot(length(FUN)==1 & is.function(FUN))
+    stopifnot(dim(x$val)==c(length(x$lon),length(x$lat),length(x$time)))
     
     # TODO: is calendarStr guaranteed to have # days in positions 1-3? 
     # Would it better to split the string based on underscore?
     numDays <- as.numeric(substr(x$calendarStr, 1, 3))
-    stopifnot(numDays>0)
+    stopifnot(is.numeric(numDays) & numDays>0)
     
     # timeUnit is a string like "days since 1859-12-01". Extract startDate from this
     startYrArr <- as.numeric(unlist(strsplit(
@@ -56,7 +58,7 @@ makeAnnualMean <- function(x, yearRange=c(-Inf, Inf), verbose=TRUE, parallel=FAL
                 if(verbose & floor(i/1)==i/1) cat(i, " ")
                 ans[,,i] <- aaply(x$val[,,uniqueYears[i] == floor(yearIndex)], c(1,2), FUN)
             }
-            cat("\n")
+            if(verbose) cat("\n")
         }   
     ) # system.time
     
