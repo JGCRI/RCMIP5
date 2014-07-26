@@ -1,17 +1,17 @@
-library(plyr) #required in checkTimePeriod
-library(reshape) #required in devMain
+#library(plyr) #required in checkTimePeriod
+library(reshape2) #required in devMain
 #library(raster) #required in loadEnsemble,
-library(ncdf4) #required in loadEnsemble,
+#library(ncdf4) #required in loadEnsemble,
 
 ##Manage download functions
-source('getFileInfo.R')
-source('checkTimePeriod.R')
+#source('getFileInfo.R')
+#source('checkTimePeriod.R')
 
 ##read in varaibles
-source('loadEnsemble.R')
-source('loadModel.R')
-source('makeAnnualMean.R')
-source('makeMonthlyMean.R')
+#source('loadEnsemble.R')
+#source('loadModel.R')
+#source('makeAnnualMean.R')
+#source('makeMonthlyMean.R')
 
 
 if(!TRUE){ ##run the management functions
