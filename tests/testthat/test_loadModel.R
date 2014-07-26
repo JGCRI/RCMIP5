@@ -8,8 +8,7 @@ library(testthat)
 # To run this code: 
 #   source("loadModel.R")
 #   library(testthat)
-#   test_dir("tests/")
-# which will run everything in the 'tests' directory
+#   test_file("tests/testthat/test_loadModel.R")
 
 context("loadModel")
 
