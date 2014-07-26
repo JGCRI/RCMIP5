@@ -82,6 +82,16 @@ test_that("makeAnnualMean handles monthly data", {
     expect_equal(res$val, dummyans)
 })
 
+test_that("makeAnnualMean parallel produces same answer", {
+    #    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=SAMPLEDATA)
+    years <- 1850:1851
+    d <- dummydata(years)
+    res_s <- makeAnnualMean(d,verbose=F,parallel=F)
+    res_p <- makeAnnualMean(d,verbose=F,parallel=T)
+    expect_equal(res_s,res_p)
+})
+
+
 test_that("makeAnnualMean handles annual data", {
     # TODO
 })
