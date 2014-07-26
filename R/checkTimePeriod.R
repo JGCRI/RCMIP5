@@ -22,7 +22,7 @@ checkTimePeriod <- function(fileInfo_df) {
     stopifnot("time" %in% colnames(fileInfo_df))
     
     # Use ddply to break up data frame, process and check time field, and return result
-    ddply(fileInfo_df, ddplyFields, function(x) {
+    invisible(ddply(fileInfo_df, ddplyFields, function(x) {
         curCombo <- as.character(x$time)
         
         # find the starting and ending decimal year, and year next file should start with
@@ -58,5 +58,5 @@ checkTimePeriod <- function(fileInfo_df) {
                    startDate=min(startYear),
                    endDate=max(endYear),
                    files=length(startYear))        
-    }) # ddply
+    })) # ddply
 } # checkTimePeriod

@@ -9,7 +9,7 @@
 #' @export
 #' @examples
 #' getFileInfo()
-#' getFileInfo('just_this_dir',recursive=F)
+#' getFileInfo('.',recursive=FALSE)
 getFileInfo <- function(path='.', recursive=TRUE) {
     
     # Sanity checks
@@ -69,5 +69,5 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     names(fileInfo.df) <- c('path', 'filename', 'variable', 'domain', 'model', 'experiment', 'ensemble', 'time', 'size')
     fileInfo.df <- data.frame(lapply(fileInfo.df, as.character), stringsAsFactors=FALSE)
     
-    return(fileInfo.df)
+    invisible(fileInfo.df)
 }
