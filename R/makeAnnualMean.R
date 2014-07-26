@@ -3,7 +3,7 @@ library(plyr)
 #' Compute annual mean of a variable
 #'
 #' @param x list. A structure returned from loadEnsemble() or loadModel()
-#' @param yearRange numeric. Limit computation to these years (e.g. for testing)
+#' @param yearRange numeric vector. Limit computation to this year range (e.g. for testing)
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across months of year
@@ -56,12 +56,13 @@ makeAnnualMean <- function(x, yearRange=c(-Inf, Inf), verbose=TRUE, parallel=FAL
                 if(verbose & floor(i/1)==i/1) cat(i, " ")
                 ans[,,i] <- aaply(x$val[,,uniqueYears[i] == floor(yearIndex)], c(1,2), FUN)
             }
+            cat("\n")
         }   
     ) # system.time
     
     if(verbose) cat('Took',timer[3], 's\n')
     
-    invisible(list(val=ans, files=x$files, year=uniqueYears,
+    invisible(list(val=unname(ans), files=x$files, year=uniqueYears,
                    numMonths=table(floor(yearIndex)),
                    lat=x$lat, lon=x$lon, valUnit=x$valUnit))
 } # makeAnnualMean

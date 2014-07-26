@@ -5,7 +5,7 @@ library(plyr)
 #' @param x list. A structure returned from loadEnsemble() or loadModel()
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
-#' @param maxyears numeric. Limit computation to this many years (e.g. for testing)
+#' @param yearRange numeric vector. Limit computation to this year range (e.g. for testing)
 #' @param FUN function. Function to apply across months of year
 #' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
 #'      'lat', 'lon', and 'time'.
@@ -51,20 +51,22 @@ makeMonthlyMean <- function(x, yearRange=c(-Inf, Inf), verbose=TRUE, parallel=FA
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             ans <- foreach(i=1:12, .combine = function(...) abind(..., along=3), .packages='plyr') %dopar% {
-                aaply(x$val[,,(i == monthIndex) & yearFilter], c(1,2), FUN)            }
+                aaply(x$val[,,(i == monthIndex) & yearFilter], c(1,2), FUN)
+            }
         } else {
             if(verbose) cat("Running in serial\n")
             for(i in 1:12) {
                 if(verbose) cat(i, " ")
                 ans[,,i] <- aaply(x$val[,,(i == monthIndex) & yearFilter], c(1,2), FUN)
             }
+            cat("\n")
         }
     ) # system.time
     
     if(verbose) cat('Took',timer[3], 's\n')
     
     # TODO: do we want to add information about years summarized?
-    invisible(list(val=ans, files=x$files,
+    invisible(list(val=unname(ans), files=x$files,
                    lat=x$lat, lon=x$lon,
                    valUnit=x$valUnit))
 } # makeMonthlyMean
