@@ -1,0 +1,18 @@
+citHeader("To cite the RCMIP5 package in publications, use:")
+
+citEntry(
+  entry = "Article", 
+  author = personList(as.person("Kathe Todd-Brown"),as.person("Ben Bond-Lamberty")),
+  title = "RCMIP5: easy exploration, manipulation, and summarizing of CMIP5 data", 
+  journal = "Biogeosciences", 
+  year = 2014, 
+  volume = X, 
+  pages = "XXXX--XXXX", 
+  url = "http://www.nytimes.com", 
+  textVersion = paste(
+    "Kathe Todd-Brown and Ben Bond-Lamberty. RCMIP5: easy exploration, manipulation, and summarizing of CMIP5 data",
+    "Biogeosciences, vol. X, no. X, pp. XXXX--XXXX, 2014"
+  )
+)
+  
+citFooter("Please always cite the RCMIP5 version number as well. Find it with 'help(package=RCMIP5)'.")
