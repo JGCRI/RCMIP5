@@ -11,7 +11,7 @@ source('checkTimePeriod.R')
 source('loadEnsemble.R')
 source('loadModel.R')
 source('makeAnnualMean.R')
-source('makeSeasonalMean.R')
+source('makeMonthlyMean.R')
 
 
 if(!TRUE){ ##run the management functions
