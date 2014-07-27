@@ -56,3 +56,7 @@ test_that("loadEnsemble loads annual data", {
     expect_is(d,"list")
     expect_equal(length(d$files),1)                                 # should be one file
 })
+
+test_that("demo mode works", {
+    # TODO
+})

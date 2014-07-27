@@ -49,3 +49,7 @@ test_that("loadModel handles lat-lon-time mismatches", {
     path <- "testdata_mismatch/"
     expect_warning(loadModel("nbp","HadGEM2-ES","historical",path=path))
 })
+
+test_that("demo mode works", {
+    # TODO
+})
