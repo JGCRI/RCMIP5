@@ -45,6 +45,17 @@ cmip5data <- function(x=list()) {
     structure(x, class="cmip5data")
 }
 
+#' Print a 'cmip5data' class object
+#'
+#' @param x A \code{\link{cmip5data}} object.
+#' @details Prints a short summary of the object. 
+#' Data printed after a 'CMIP5:' prefix include
+#'  \item{variable}{Variable described by this dataset}
+#'  \item{model}{Model of this dataset}
+#'  \item{experiment}{Experiment of this dataset}
+#'  \item{years}{Range of years included}
+#'  \item{dimensions}{Dimensions of the data array}
+#'  \item{other}{Ensemble and file counts}
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
@@ -70,13 +81,11 @@ print.cmip5data <- function(x, ...) {
     
     yearRange <- round(range(yearIndex),2)
     yearString <- paste(yearRange[1],yearRange[2],sep="-")
-    paste("CMIP5:", x$variable, x$model, x$experiment, yearString,
+    cat(paste("CMIP5:", x$variable, x$model, x$experiment, yearString,
           paste0("[", paste(dim(x$val), collapse=" "), "]"),
           "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
-          nfiles, ifelse(nfiles==1,"file","files"), ...)
+          nfiles, ifelse(nfiles==1,"file","files"), ...))
 }
-
-show.cmip5data <- function(x) { print(x) }
 
 summary.cmip5data <- function(x) {
     print(x)
