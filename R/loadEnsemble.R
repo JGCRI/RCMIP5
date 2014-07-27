@@ -71,7 +71,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
         }
      }
     
-    invisible(cmip5data(list(files=fileList, val=temp, valUnit=varUnit, timeUnit=timeUnit, 
+    cmip5data(list(files=fileList, val=temp, valUnit=varUnit, timeUnit=timeUnit, 
                    calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr,
-                   variable=variable, model=model, experiment=experiment, ensembles=ensemble)))
+                   variable=variable, model=model, experiment=experiment, ensembles=ensemble))
 } # loadEnsemble

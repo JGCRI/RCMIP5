@@ -57,7 +57,6 @@ test_that("makeAnnualMean handles monthly data", {
     
     # Is 'res' correct type and size?
     expect_is(res,"cmip5data")
-    expect_equal(length(res),7)
     
     # Did unchanging info get copied correctly?
     expect_equal(res$lon,d$lon)

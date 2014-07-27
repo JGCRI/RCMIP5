@@ -26,7 +26,7 @@ NULL
 #'
 #' @param x list
 #' @return A class \code{cmip5data} object, which is a list with 
-#' (not necessarily all of) the following fields:
+#' the following fields:
 #'  \item{files}{A character vector containing the filenames data came from}
 #'  \item{val}{A multidimensional array [lon, lat, time] holding the data}
 #'  \item{valUnit}{A string containing the value units}
@@ -48,19 +48,59 @@ cmip5data <- function(x=list()) {
 #' Print a 'cmip5data' class object
 #'
 #' @param x A \code{\link{cmip5data}} object.
-#' @details Prints a short summary of the object. 
-#' Data printed after a 'CMIP5:' prefix include
-#'  \item{variable}{Variable described by this dataset}
-#'  \item{model}{Model of this dataset}
-#'  \item{experiment}{Experiment of this dataset}
-#'  \item{years}{Range of years included}
-#'  \item{dimensions}{Dimensions of the data array}
-#'  \item{other}{Ensemble and file counts}
+#' @details Prints a one-line summary of the object. 
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
+    yearRange <- round(range(compute_yearIndex(x)),2)
+    yearString <- paste(yearRange[1],yearRange[2],sep="-")
     
-    # TODO: abstract this code into a function!!!
+    cat(paste("CMIP5:", x$variable, x$model, x$experiment, yearString,
+          paste0("[", paste(dim(x$val), collapse=" "), "]"),
+          "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
+          nfiles, ifelse(nfiles==1,"file","files"), ...))
+}
+
+#' Summarize a 'cmip5data' class object
+#'
+#' @param x A \code{\link{cmip5data}} object.
+#' @details Prints a short summary of the object. 
+summary.cmip5data <- function(x) {
+    cat("CMIP5 data")
+    if(!is.null(x$numMonths)) {
+        cat(" - annual summary\n")
+        cat("(Mean months summarized:", mean(x$numMonths), "\n")
+    } else if(!is.null(x$numYears)) {
+        cat(" - monthly summary\n")
+        cat("Mean years summarized:", mean(x$numYears), "\n")
+    } else cat("\n")
+    
+    yearRange <- round(range(compute_yearIndex(x)),2)
+    yearString <- paste(yearRange[1],yearRange[2],sep="-")
+
+    cat(yearString, "\n\n")
+    cat("Variable:", x$variable)
+    cat("Model:", x$model, "\n")
+    cat("Experiment:", x$experiment, "\n")
+    cat("Ensembles:", x$ensembles, "\n")
+    cat("Data: ", x$valUnit, ", dimensions ", paste(dim(x$val), collapse=" "), "\n", sep="")
+    cat("Time: ", x$timeUnit, ", length ", length(x$time), ", calendar ", x$calendarStr, "\n", sep="")
+    cat("Size: ")
+    print(object.size(x), units="MB")
+}
+
+#' Compute year index from parsed cmip5data information
+#' 
+#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
+#' @return yearIndex A numeric vector of years
+#' @details This function uses information in a \code{\link{cmip5data}} object 
+#' to compute the yearIndex, i.e. the (perhaps fractional) years associated with
+#' each timepoint. It does this by parsing \code{calendarStr} to determine the
+#' number of days per year; parsing \code{timeUnit} to get the starting date;
+#' and then using the values in the \code{time} vector.
+#' @note This is an internal RCMIP5 function and not exported.
+compute_yearIndex <- function(x) {
+    stopifnot(class(x)=="cmip5data")
     
     # TODO: is calendarStr guaranteed to have # days in positions 1-3? 
     # Would it better to split the string based on underscore?
@@ -68,26 +108,15 @@ print.cmip5data <- function(x, ...) {
     stopifnot(is.numeric(numDays) & numDays>0)
     
     # timeUnit is a string like "days since 1859-12-01". Extract startDate from this
+    # TODO: this will not (?) handle annual data correctly
     startYrArr <- as.numeric(unlist(strsplit(
         regmatches(x$timeUnit, regexpr('\\d+.\\d+.\\d+', x$timeUnit)), '-')))
     startYr <- startYrArr[1] + (startYrArr[2]-1)/12 + (startYrArr[3]-1)/numDays
     
-    # More sanity checks
+    # Sanity checks
     stopifnot(startYrArr[2] %in% 1:12)
     stopifnot(startYrArr[3] %in% 1:31)
     stopifnot(startYr >= 1850 & startYr < 2300)
     
-    yearIndex <- x$time/numDays + startYr
-    
-    yearRange <- round(range(yearIndex),2)
-    yearString <- paste(yearRange[1],yearRange[2],sep="-")
-    cat(paste("CMIP5:", x$variable, x$model, x$experiment, yearString,
-          paste0("[", paste(dim(x$val), collapse=" "), "]"),
-          "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
-          nfiles, ifelse(nfiles==1,"file","files"), ...))
-}
-
-summary.cmip5data <- function(x) {
-    print(x)
-    # TODO: print more detailed summary
-}
+    return(x$time/numDays + startYr)
+} # compute_yearIndex

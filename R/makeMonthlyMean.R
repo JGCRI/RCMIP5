@@ -15,7 +15,8 @@ library(plyr)
 makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     # Sanity checks
-    stopifnot(length(x)==8 & class(x)=="cmip5data")
+    stopifnot(class(x)=="cmip5data")
+    stopifnot(is.null(x$numYears))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(yearRange)==2 & is.numeric(yearRange))
@@ -23,23 +24,7 @@ makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE
     stopifnot(length(FUN)==1 & is.function(FUN))
     stopifnot(dim(x$val)==c(length(x$lon),length(x$lat),length(x$time)))
     
-    # TODO: is calendarStr guaranteed to have # days in positions 1-3? 
-    # Would it better to split the string based on underscore?
-    numDays <- as.numeric(substr(x$calendarStr, 1, 3))
-    stopifnot(is.numeric(numDays) & numDays>0)
-    
-    # timeUnit is a string like "days since 1859-12-01". Extract startDate from this
-    # TODO: this code shared with makeAnnualMean, could abstract into function
-    startYrArr <- as.numeric(unlist(strsplit(
-        regmatches(x$timeUnit, regexpr('\\d+.\\d+.\\d+', x$timeUnit)), '-')))
-    startYr <- startYrArr[1] + (startYrArr[2]-1)/12 + (startYrArr[3]-1)/numDays
-    
-    # More sanity checks
-    stopifnot(startYrArr[2] %in% 1:12)
-    stopifnot(startYrArr[3] %in% 1:31)
-    stopifnot(startYr >= 1850 & startYr < 2300)
-    
-    yearIndex <- x$time/numDays + startYr
+    yearIndex <- compute_yearIndex(x)
     yearFilter <- floor(yearIndex) >= min(yearRange) & floor(yearIndex) <= max(yearRange)
     uniqueYears <- unique(floor(yearIndex))
     monthIndex <- floor((yearIndex %% 1) * 12 + 1)
@@ -66,8 +51,7 @@ makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE
     
     if(verbose) cat('Took',timer[3], 's\n')
     
-    # TODO: do we want to add information about years summarized?
-    invisible(cmip5data(list(val=unname(ans), files=x$files,
-                             lat=x$lat, lon=x$lon,
-                             valUnit=x$valUnit)))
+    x$val <- unname(ans)
+    x$numYears <- unname(table(floor(monthIndex)))
+    return(x)
 } # makeMonthlyMean
