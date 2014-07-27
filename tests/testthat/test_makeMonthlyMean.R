@@ -10,21 +10,21 @@ library(testthat)
 #   test_file("tests/testthat/test_makeMonthlyMean.R")
 
 dummydata <- function(years) {
-    list(files="", 
+    cmip5data(list(files="", 
          val=array(runif(10*10*12*length(years)), dim=c(10,10,12*length(years))),
          valUnit="",
          timeUnit=paste0("days since ",years[1],"-01-01"),
          calendarStr="360_day",  # don't change this
          lat=c(0:9),
          lon=c(0:9),
-         time=30*c(0:(length(years)*12-1) ) )
+         time=30*c(0:(length(years)*12-1) ) ))
 } # dummydata
 
 context("makeMonthlyMean")
 
 test_that("makeMonthlyMean handles bad input", {
     expect_error(makeMonthlyMean(1))                         # non-list d
-    expect_error(makeMonthlyMean(list()))                    # wrong size list d
+    expect_error(makeMonthlyMean(cmip5data()))               # wrong size list d
     expect_error(makeMonthlyMean(d,yearRange=1))             # non-vector yearRange
     expect_error(makeMonthlyMean(d,yearRange=c(-1,1)))       # illegal value yearRange
     expect_error(makeMonthlyMean(d,yearRange=c(1,2,3)))      # wrong vector size yearRange
@@ -56,7 +56,7 @@ test_that("makeMonthlyMean handles monthly data", {
     res <- makeMonthlyMean(d,verbose=F)
     
     # Is 'res' correct type and size?
-    expect_is(res,"list")
+    expect_is(res,"cmip5data")
     expect_equal(length(res),5)
     
     # Did unchanging info get copied correctly?

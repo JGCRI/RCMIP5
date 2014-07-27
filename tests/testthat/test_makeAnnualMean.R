@@ -10,21 +10,21 @@ library(testthat)
 #   test_file("tests/testthat/test_makeAnnualMean.R")
 
 dummydata <- function(years) {
-    list(files="", 
-         val=array(runif(10*10*12*length(years)), dim=c(10,10,12*length(years))),
-         valUnit="",
-         timeUnit=paste0("days since ",years[1],"-01-01"),
-         calendarStr="360_day",  # don't change this
-         lat=c(0:9),
-         lon=c(0:9),
-         time=30*c(0:(length(years)*12-1) ) )
+    cmip5data(list(files="", 
+                   val=array(runif(10*10*12*length(years)), dim=c(10,10,12*length(years))),
+                   valUnit="",
+                   timeUnit=paste0("days since ",years[1],"-01-01"),
+                   calendarStr="360_day",  # don't change this
+                   lat=c(0:9),
+                   lon=c(0:9),
+                   time=30*c(0:(length(years)*12-1) ) ))
 } # dummydata
 
 context("makeAnnualMean")
 
 test_that("makeAnnualMean handles bad input", {
     expect_error(makeAnnualMean(1))                         # non-list d
-    expect_error(makeAnnualMean(list()))                    # wrong size list d
+    expect_error(makeAnnualMean(cmpi5data()))               # wrong size list d
     expect_error(makeAnnualMean(d,yearRange=1))             # non-vector yearRange
     expect_error(makeAnnualMean(d,yearRange=c(-1,1)))       # illegal value yearRange
     expect_error(makeAnnualMean(d,yearRange=c(1,2,3)))      # wrong vector size yearRange
@@ -56,7 +56,7 @@ test_that("makeAnnualMean handles monthly data", {
     res <- makeAnnualMean(d,verbose=F)
     
     # Is 'res' correct type and size?
-    expect_is(res,"list")
+    expect_is(res,"cmip5data")
     expect_equal(length(res),7)
     
     # Did unchanging info get copied correctly?
@@ -93,7 +93,7 @@ test_that("makeAnnualMean yearRange filter works", {
     for(i in 1:length(uniqueYears)) {
         dummyans[,,i] <- aaply(d$val[,,uniqueYears[i] == floor(yearIndex)], c(1,2), mean)
     }
-
+    
     # Testing the test: check our choice of years above
     expect_that(range(years),not(equals(range(yearRange))))
     

@@ -2,20 +2,20 @@ library(plyr)
 
 #' Compute annual mean of a variable
 #'
-#' @param x list. A structure returned from loadEnsemble() or loadModel()
+#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param yearRange numeric vector. Limit computation to this year range (e.g. for testing)
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across months of year
-#' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
-#'      'lat', 'lon', and 'time'.
+#' @return A \code{\link{cmip5data}} object.
 #' @export
 #' @examples
 #' makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
+#' @seealso \code{\link{makeMonthlyMean}}
 makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     # Sanity checks
-    stopifnot(length(x)==8 & is.list(x))
+    stopifnot(length(x)==8 & class(x)=="cmip5data")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(yearRange)==2 & is.numeric(yearRange))
@@ -64,7 +64,7 @@ makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE,
     
     if(verbose) cat('Took',timer[3], 's\n')
     
-    invisible(list(val=unname(ans), files=x$files, year=uniqueYears,
+    invisible(cmip5data(list(val=unname(ans), files=x$files, year=uniqueYears,
                    numMonths=table(floor(yearIndex)),
-                   lat=x$lat, lon=x$lon, valUnit=x$valUnit))
+                   lat=x$lat, lon=x$lon, valUnit=x$valUnit)))
 } # makeAnnualMean

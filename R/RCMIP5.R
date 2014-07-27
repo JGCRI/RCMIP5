@@ -21,3 +21,31 @@
 #' @docType package
 #' @name RCMIP5
 NULL
+
+#' Constructor for 'cmip5data' class
+#'
+#' @param x list
+#' @return A class \code{cmip5data} object, which is a list with 
+#' (not necessarily all of) the following fields:
+#'  \item{files}{A character vector containing the filenames data came from}
+#'  \item{val}{A multidimensional array [lon, lat, time] holding the data}
+#'  \item{valUnit}{A string containing the value units}
+#'  \item{timeUnit}{A string containing the time units}
+#'  \item{calendarStr}{A string defining the calendar type}
+#'  \item{lat}{A numeric vector containing latitude values}
+#'  \item{lon}{A numeric vector containing longitude values}
+#'  \item{time}{A numeric vector containing time values}
+#' @docType class
+cmip5data <- function(x=list()) {
+    if (!is.list(x)) stop("x must be a list")
+    structure(x, class="cmip5data")
+}
+
+print.cmip5data <- function(x) {
+    return("CMIP5 data")
+    # TODO: print one-liner summarizing dataset
+}
+
+summary.cmip5data <- function(x) {
+    # TODO: print more detailed summary of dataset
+}
