@@ -25,6 +25,7 @@ test_that("loadModel handles bad input", {
     expect_error(loadModel("","",c("","")))                   # multi-value
     expect_error(loadModel("","","",verbose=1))               # non-logical verbose
     expect_error(loadModel("","","",recursive=1))             # non-logical recursive
+    expect_error(loadModel("","","",demo=1))                  # non-logical demo
 })
 
 test_that("loadModel handles no files found", {            # no netcdf files found
@@ -38,10 +39,10 @@ test_that("loadModel handles no files found", {            # no netcdf files fou
 test_that("loadModel loads monthly data", {
     path <- "../../sampledata/monthly/"
     d <- loadModel('nbp','HadGEM2-ES','rcp85',path=path)     # test data set
-    expect_is(d,"list")
-    expect_equal(length(d$files),2)                                 # should be two files
+    expect_is(d,"cmip5data")
+    expect_equal(length(d$files),4)                                 # should be four files
     d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1',path=path)     
-    expect_is(d,"list")
+    expect_is(d,"cmip5data")
     expect_equal(length(d$files),1)                                 # should be one file
 })
 

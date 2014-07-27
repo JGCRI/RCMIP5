@@ -10,9 +10,7 @@ library(ncdf4)
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param demo logical. Demo mode (reading data from global environment, not disk)?
-#' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
-#'      'lat', 'lon', and 'time'. If no files match the requested criteria function
-#'      will return NULL with a warning.
+#' @return A \code{\link{cmip5data}} object.
 #' @export
 #' @examples
 #' loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE)
@@ -37,9 +35,9 @@ loadModel <- function(variable, model, experiment,
     }
     fileList <- fileList[grepl(pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', 
                                                variable, model, experiment), fileList)]
-#     fileList <- list.files(path=path,
-#                            pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', variable, model, experiment),
-#                            full.names=TRUE, recursive=recursive)
+    #     fileList <- list.files(path=path,
+    #                            pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', variable, model, experiment),
+    #                            full.names=TRUE, recursive=recursive)
     
     if(length(fileList)==0) {
         warning("Could not find any matching files")
@@ -58,25 +56,27 @@ loadModel <- function(variable, model, experiment,
                              path=path, verbose=verbose, recursive=recursive, demo=demo)
         # If this is the first model
         if(is.null(model.ls)) {
-            model.ls <- temp                # initialize the results with the first ensemble
-            model.ls$files <- list()
-            model.ls$files[[ensemble]] <- temp$files
-            ensembleNames <- c(ensemble)
+            model.ls <- temp
+            #            model.ls$val <- temp                # initialize the results with the first ensemble
+            #             model.ls$variable <- temp$variable
+            #             model.ls$model <- temp$model
+            #             model.ls$experiment <- temp$experiment
+            #             ensembleNames <- c(ensemble)
         } else {
             if(all(temp$lat==model.ls$lat) &            # Check that lat-lon-time match
                    all(temp$lon==model.ls$on) &
                    all(temp$time==model.ls$time)) {
                 model.ls$val <- model.ls$val + temp$val # if so, add values and record successful load
-                model.ls$files[[ensemble]] <- temp$files
-                ensembleNames <- c(ensembleNames, ensemble)
+                model.ls$files <- c( model.ls$files, temp$files )
+                model.ls$ensembles <- c(model.ls$ensembles, ensemble)
             } else {                                    # ...if not, fail
                 warning(ensemble, 'does not match previous ensembles\' lon-lat-time.\n')
             }
         }
     }
     # convert the sum to an average
-    stopifnot(length(ensembleNames)>0)
-    model.ls$val <- model.ls$val / length(ensembleNames)
+    stopifnot(length(model.ls$ensembles)>0)
+    model.ls$val <- unname(model.ls$val / length(model.ls$ensembles))
     
     invisible(model.ls)
 } # loadModel

@@ -11,9 +11,7 @@ library(abind)
 #' @param recursive logical. Recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param demo logical. Demo mode (reading data from global environment, not disk)?
-#' @return list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
-#'      'lat', 'lon', and 'time'. If no files match the requested criteria function
-#'      will return NULL with a warning.
+#' @return A \code{\link{cmip5data}} object.
 #' @export
 #' @examples
 #' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=TRUE,demo=TRUE)
@@ -73,6 +71,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
         }
      }
     
-    invisible(list(files=fileList, val=temp, valUnit=varUnit, timeUnit=timeUnit, 
-                   calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr))
+    invisible(cmip5data(list(files=fileList, val=temp, valUnit=varUnit, timeUnit=timeUnit, 
+                   calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr,
+                   variable=variable, model=model, experiment=experiment, ensembles=ensemble)))
 } # loadEnsemble
