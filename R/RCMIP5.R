@@ -52,10 +52,21 @@ cmip5data <- function(x=list()) {
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
-    yearRange <- round(range(compute_yearIndex(x)),2)
-    yearString <- paste(yearRange[1],yearRange[2],sep="-")
+
+    yearString <- "[date parse error]"
+    try({
+        yearRange <- round(range(compute_yearIndex(x)), 2)
+        yearString <- paste(yearRange[1], yearRange[2], sep="-")
+    })
+
+    cat("CMIP5 ")
+    if(!is.null(x$numMonths)) {
+        cat("- annual summary: ")
+    } else if(!is.null(x$numYears)) {
+        cat(" - monthly summary ")
+    }
     
-    cat(paste("CMIP5:", x$variable, x$model, x$experiment, yearString,
+    cat(paste(x$variable, x$model, x$experiment, yearString,
               paste0("[", paste(dim(x$val), collapse=" "), "]"),
               "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
               nfiles, ifelse(nfiles==1,"file","files"), "\n", ...))
@@ -75,8 +86,11 @@ summary.cmip5data <- function(x) {
         cat("Mean years summarized:", mean(x$numYears), "\n")
     } else cat("\n")
     
-    yearRange <- round(range(compute_yearIndex(x)),2)
-    yearString <- paste(yearRange[1],yearRange[2],sep="-")
+    yearString <- "[date parse error]"
+    try({
+        yearRange <- round(range(compute_yearIndex(x)), 2)
+        yearString <- paste(yearRange[1], yearRange[2], sep="-")
+    })
     
     cat(yearString, "\n\n")
     cat("Variable:", x$variable)
@@ -84,43 +98,11 @@ summary.cmip5data <- function(x) {
     cat("Experiment:", x$experiment, "\n")
     cat("Ensembles:", x$ensembles, "\n")
     cat("Data: ", x$valUnit, ", dimensions ", paste(dim(x$val), collapse=" "), "\n", sep="")
+    print(summary(x$val))
     cat("Time: ", x$timeUnit, ", length ", length(x$time), ", calendar ", x$calendarStr, "\n", sep="")
     cat("Size: ")
     print(object.size(x), units="MB")
 }
-
-#' Compute year index from parsed cmip5data information
-#' 
-#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
-#' @return yearIndex A numeric vector of years
-#' @details This function uses information in a \code{\link{cmip5data}} object 
-#' to compute the yearIndex, i.e. the (perhaps fractional) years associated with
-#' each timepoint. It does this by parsing \code{calendarStr} to determine the
-#' number of days per year; parsing \code{timeUnit} to get the starting date;
-#' and then using the values in the \code{time} vector.
-#' @note This is an internal RCMIP5 function and not exported.
-compute_yearIndex <- function(x) {
-    stopifnot(class(x)=="cmip5data")
-    
-    # TODO: is calendarStr guaranteed to have # days in positions 1-3? 
-    # Would it better to split the string based on underscore?
-    # TODO: this code bombs with e.g. "proleptic gregorian"
-    numDays <- as.numeric(substr(x$calendarStr, 1, 3))
-    stopifnot(is.numeric(numDays) & numDays>0)                
-    
-    # timeUnit is a string like "days since 1859-12-01". Extract startDate from this
-    # TODO: this will not (?) handle annual data correctly
-    startYrArr <- as.numeric(unlist(strsplit(
-        regmatches(x$timeUnit, regexpr('\\d+.\\d+.\\d+', x$timeUnit)), '-')))
-    startYr <- startYrArr[1] + (startYrArr[2]-1)/12 + (startYrArr[3]-1)/numDays
-    
-    # Sanity checks
-    stopifnot(startYrArr[2] %in% 1:12)
-    stopifnot(startYrArr[3] %in% 1:31)
-    stopifnot(startYr >= 1850 & startYr < 2300)
-    
-    return(x$time/numDays + startYr)
-} # compute_yearIndex
 
 #' Make package datasets and write them to disk
 #' 
@@ -130,10 +112,12 @@ compute_yearIndex <- function(x) {
 #' @details Writes all available ensembles to disk as Rdata files, subject to 
 #' a maximum size parameter (CRAN says keep sample data < 5MB!).
 #' @note This is an internal RCMIP5 function and not exported.
-makePackageData <- function(path="./sampledata",maxSize=Inf,outpath="./data") {
+makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") {
     if(!file.exists(outpath)) dir.create(outpath)
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
+    if(is.null(datasets)) return()
+    
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,], 
@@ -149,4 +133,4 @@ makePackageData <- function(path="./sampledata",maxSize=Inf,outpath="./data") {
             cat("Too big; skipping\n")
         }
     }
-}
+} # makePackageData
