@@ -56,9 +56,9 @@ print.cmip5data <- function(x, ...) {
     yearString <- paste(yearRange[1],yearRange[2],sep="-")
     
     cat(paste("CMIP5:", x$variable, x$model, x$experiment, yearString,
-          paste0("[", paste(dim(x$val), collapse=" "), "]"),
-          "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
-          nfiles, ifelse(nfiles==1,"file","files"), ...))
+              paste0("[", paste(dim(x$val), collapse=" "), "]"),
+              "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
+              nfiles, ifelse(nfiles==1,"file","files"), "\n", ...))
 }
 
 #' Summarize a 'cmip5data' class object
@@ -77,7 +77,7 @@ summary.cmip5data <- function(x) {
     
     yearRange <- round(range(compute_yearIndex(x)),2)
     yearString <- paste(yearRange[1],yearRange[2],sep="-")
-
+    
     cat(yearString, "\n\n")
     cat("Variable:", x$variable)
     cat("Model:", x$model, "\n")
@@ -104,8 +104,9 @@ compute_yearIndex <- function(x) {
     
     # TODO: is calendarStr guaranteed to have # days in positions 1-3? 
     # Would it better to split the string based on underscore?
+    # TODO: this code bombs with e.g. "proleptic gregorian"
     numDays <- as.numeric(substr(x$calendarStr, 1, 3))
-    stopifnot(is.numeric(numDays) & numDays>0)
+    stopifnot(is.numeric(numDays) & numDays>0)                
     
     # timeUnit is a string like "days since 1859-12-01". Extract startDate from this
     # TODO: this will not (?) handle annual data correctly
@@ -120,3 +121,32 @@ compute_yearIndex <- function(x) {
     
     return(x$time/numDays + startYr)
 } # compute_yearIndex
+
+#' Make package datasets and write them to disk
+#' 
+#' @param path root of directory tree
+#' @param maxSize max size (in MB) of dataset to write
+#' @param outpath directory to write to
+#' @details Writes all available ensembles to disk as Rdata files, subject to 
+#' a maximum size parameter (CRAN says keep sample data < 5MB!).
+#' @note This is an internal RCMIP5 function and not exported.
+makePackageData <- function(path="./sampledata",maxSize=Inf,outpath="./data") {
+    if(!file.exists(outpath)) dir.create(outpath)
+    stopifnot(file.exists(outpath))
+    datasets <- getFileInfo(path)
+    for(i in 1:nrow(datasets)) {
+        cat("-----------------------\n", datasets[i, "filename"], "\n")
+        d <- with(datasets[i,], 
+                  loadEnsemble(variable, model, experiment, ensemble, path=path, verbose=T)
+        )
+        print(object.size(d), units="MB")
+        if(object.size(d)/1024/1024 <= maxSize) {
+            objname <- gsub("_[0-9]{4,}-[0-9]{4,}.nc$", "", basename(d$files[1])) # strip dates
+            assign(objname, d)
+            cat("Writing", objname, "\n")
+            save(list=objname, file=paste0(outpath, "/", objname, ".Rdata"))
+        } else {
+            cat("Too big; skipping\n")
+        }
+    }
+}
