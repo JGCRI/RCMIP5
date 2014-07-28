@@ -1,0 +1,8 @@
+source("R/checkTimePeriod.R")
+source("R/devMain.R")
+source("R/getFileInfo.R")
+source("R/loadEnsemble.R")
+source("R/loadModel.R")
+source("R/makeAnnualMean.R")
+source("R/makeMonthlyMean.R")
+source("R/RCMIP5.R")
