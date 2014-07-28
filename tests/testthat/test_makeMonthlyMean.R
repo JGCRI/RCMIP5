@@ -55,9 +55,8 @@ test_that("makeMonthlyMean handles monthly data", {
     d <- dummydata(years)
     res <- makeMonthlyMean(d,verbose=F)
     
-    # Is 'res' correct type and size?
+    # Is 'res' correct type?
     expect_is(res,"cmip5data")
-    expect_equal(length(res),5)
     
     # Did unchanging info get copied correctly?
     expect_equal(res$lon,d$lon)
