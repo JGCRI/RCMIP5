@@ -41,7 +41,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
 #                            pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
 #                                            variable, model, experiment, ensemble),
 #                            full.names=TRUE, recursive=recursive)
-    
     if(length(fileList)==0) {
         warning("Could not find any matching files")
         return(NULL)
@@ -51,8 +50,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
     timeArr <- c()
     for(fileStr in fileList) {
         if(demo) {
-            if(verbose) cat("DEMO: loading", fileStr, "from memory")
-            return(invisible(get(fileStr,envir=.GlobalEnv)))
+            if(verbose) cat("DEMO: loading", fileStr, "from package data")
+            return(get(fileStr, envir=.GlobalEnv))
         } else {
             if(verbose) cat('Loading', fileStr)
             temp.nc <- nc_open(fileStr, write=FALSE)
@@ -71,7 +70,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
         }
      }
     
-    cmip5data(list(files=fileList, val=temp, valUnit=varUnit, timeUnit=timeUnit, 
+    cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit, timeUnit=timeUnit, 
                    calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr,
                    variable=variable, model=model, experiment=experiment, ensembles=ensemble))
 } # loadEnsemble

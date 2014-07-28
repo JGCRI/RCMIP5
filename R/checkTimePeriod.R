@@ -36,7 +36,7 @@ checkTimePeriod <- function(fileInfo_df) {
             endMonth <- as.numeric(substr(curCombo, 12, 13))
             endYear <- as.numeric(substr(curCombo, 8, 11)) + (endMonth-1)/12
             nextYear <- endYear + 1/12          
-        } else if(nchar(curCombo[1]==0)) { # probably an area file; ignore and bail
+        } else if(nchar(curCombo[1]==0)) { # probably an area file; ignore
             return(NULL)
         } else stop("Incorrectly formatted time field: ",curCombo[1])
         

@@ -35,7 +35,7 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     infoSize <- unlist(lapply(fileInfo, length))
     valid <- infoSize %in% c(5,6)
     if(!all(valid)){
-        warning('Unexpected (not correctly formatted) files: ',fullFile[!valid])
+        warning('Unexpected (not correctly formatted) files: ', fullFile[!valid])
         fullFile <- fullFile[valid]
         shortFile <- shortFile[valid]
         fileInfo <- fileInfo[valid]
@@ -45,12 +45,9 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     
     fixedInfo <- t(as.data.frame(fileInfo[infoSize == 5], row.names=NULL))
     fixedInfo <- cbind(fixedInfo, rep('', length=sum(infoSize == 5))) # Deal with the fixed variables like areacella
-    row.names(fixedInfo) <- NULL ##Strip the to remove embeded atributes in the data frame
+    row.names(fixedInfo) <- NULL
     
     if(length(fixedInfo) == 0) fixedInfo <- NULL
-    
-    #print(str(fixedInfo))
-    #print(fixedInfo)
     
     temporalInfo <-  t(as.data.frame(fileInfo[infoSize==6], row.names=NULL)) # Deal with temporal variables
     row.names(temporalInfo) <- NULL
