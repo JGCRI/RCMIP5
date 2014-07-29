@@ -37,10 +37,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
     }
     fileList <- fileList[grepl(pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
                                                variable, model, experiment, ensemble), fileList)]
-#     fileList <- list.files(path=path,
-#                            pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
-#                                            variable, model, experiment, ensemble),
-#                            full.names=TRUE, recursive=recursive)
     if(length(fileList)==0) {
         warning("Could not find any matching files")
         return(NULL)
@@ -57,20 +53,22 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             temp.nc <- nc_open(fileStr, write=FALSE)
             
             temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
+            if(verbose) cat(' [',dim(temp),']\n')
             varUnit <- ncatt_get(temp.nc, variable, 'units')$value
-            
             timeArr <- c(timeArr, ncvar_get(temp.nc, varid='time'))
             timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
             calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
-            if(verbose) cat(' [',dim(temp),']\n')
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
+            levArr <- NULL
+            if(temp.nc$nvars==5)
+                levArr <- ncvar_get(temp.nc, varid='lev')
             
             nc_close(temp.nc)
         }
-     }
+    }
     
     cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit, timeUnit=timeUnit, 
-                   calendarStr=calendarStr, lat=latArr, lon=lonArr, time=timeArr,
+                   calendarStr=calendarStr, lat=latArr, lon=lonArr, lev=levArr, time=timeArr,
                    variable=variable, model=model, experiment=experiment, ensembles=ensemble))
 } # loadEnsemble

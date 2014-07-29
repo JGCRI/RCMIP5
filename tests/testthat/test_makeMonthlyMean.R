@@ -1,3 +1,5 @@
+# TODO: test new level-aware code!
+
 # Testing code for the RCMIP5 (?) 'makeMonthlyMean.R' script
 
 # Uses the testthat package

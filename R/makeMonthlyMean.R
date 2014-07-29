@@ -1,4 +1,7 @@
+# TODO: add capability to filter levels
+
 library(plyr)
+library(abind)
 
 #' Compute monthly means of a variable
 #'
@@ -22,34 +25,40 @@ makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE
     stopifnot(length(yearRange)==2 & is.numeric(yearRange))
     stopifnot(all(yearRange > 0))
     stopifnot(length(FUN)==1 & is.function(FUN))
-    stopifnot(dim(x$val)==c(length(x$lon),length(x$lat),length(x$time)))
+    stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
+    
+    timeIndex <- length(dim(x$val))  # time is always the last index
+    if(verbose) cat("Time index =", timeIndex, "\n")
+    
+    stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
     
     yearIndex <- compute_yearIndex(x)
     yearFilter <- floor(yearIndex) >= min(yearRange) & floor(yearIndex) <= max(yearRange)
     uniqueYears <- unique(floor(yearIndex))
     monthIndex <- floor((yearIndex %% 1) * 12 + 1)
-    ans <- array(NA_real_, dim=c(dim(x$val)[c(1,2)], 12))
     
-    if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
+    if(parallel) parallel <- require(foreach) & require(doParallel)
     timer <- system.time( # time the main computation, below
         
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-            ans <- foreach(i=1:12, .combine = function(...) abind(..., along=3), .packages='plyr') %dopar% {
-                aaply(x$val[,,(i == monthIndex) & yearFilter], c(1,2), FUN)
+            ans <- foreach(i=1:12, .combine=function(...) abind(..., along=timeIndex), .packages='plyr') %dopar% {
+                aaply(asub(x$val, idx=(i == monthIndex) & yearFilter, dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
         } else {
             if(verbose) cat("Running in serial\n")
+            ans <- list()
             for(i in 1:12) {
                 if(verbose) cat(i, " ")
-                ans[,,i] <- aaply(x$val[,,(i == monthIndex) & yearFilter], c(1,2), FUN)
+                ans[[i]] <- aaply(
+                    asub(x$val, idx=(i == monthIndex) & yearFilter, dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
-            if(verbose) cat("\n")
+            ans <- abind(ans, along=timeIndex)
         }
     ) # system.time
     
-    if(verbose) cat('Took',timer[3], 's\n')
+    if(verbose) cat('\nTook',timer[3], 's\n')
     
     x$val <- unname(ans)
     x$numYears <- unname(table(floor(monthIndex)))

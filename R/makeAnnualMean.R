@@ -1,4 +1,7 @@
+# TODO: add capability to filter levels
+
 library(plyr)
+library(abind)
 
 #' Compute annual mean of a variable
 #'
@@ -22,12 +25,16 @@ makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE,
     stopifnot(length(yearRange)==2 & is.numeric(yearRange))
     stopifnot(all(yearRange > 0))
     stopifnot(length(FUN)==1 & is.function(FUN))
-    stopifnot(dim(x$val)==c(length(x$lon),length(x$lat),length(x$time)))
+    stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
+    
+    timeIndex <- length(dim(x$val))  # time is always the last index
+    if(verbose) cat("Time index =", timeIndex, "\n")
+    
+    stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
     
     yearIndex <- compute_yearIndex(x)
     uniqueYears <- unique(floor(yearIndex))
     uniqueYears <- uniqueYears[uniqueYears >= min(yearRange) & uniqueYears <= max(yearRange)]
-    ans <- array(NA_real_, dim=c(dim(x$val)[c(1,2)], length(uniqueYears)))
     
     if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
     timer <- system.time( # time the main computation, below; 4-5s/yr on my laptop
@@ -35,26 +42,28 @@ makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE,
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-            ans <- foreach(i=1:length(uniqueYears), .combine = function(...) abind(..., along=3), .packages='plyr') %dopar% {
-                aaply(x$val[,,uniqueYears[i] == floor(yearIndex)], c(1,2), FUN)
-            }
+            ans <- foreach(i=1:length(uniqueYears), .combine = function(...) abind(..., along=timeIndex), .packages='plyr') %dopar% {
+                aaply(asub(x$val, idx=uniqueYears[i] == floor(yearIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN)
+            }           
         } else {
             if(verbose) cat("Running in serial\n")
+            ans <- list()
             for(i in 1:length(uniqueYears)) {
                 if(verbose & floor(i/1)==i/1) cat(i, " ")
-                ans[,,i] <- aaply(x$val[,,uniqueYears[i] == floor(yearIndex)], c(1,2), FUN)
+                ans[[i]] <- aaply(
+                    asub(x$val, idx=uniqueYears[i] == floor(yearIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
-            if(verbose) cat("\n")
+            ans <- abind(ans, along=timeIndex)
         }   
     ) # system.time
     
-    if(verbose) cat('Took',timer[3], 's\n')
+    if(verbose) cat('\nTook',timer[3], 's\n')
     
     x$val <- unname(ans)
     x$year <- uniqueYears
     x$numMonths <- table(floor(yearIndex))
     return(x)
- } # makeAnnualMean
+} # makeAnnualMean
 
 #' Compute year index from parsed cmip5data information
 #' 
@@ -69,7 +78,7 @@ makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE,
 compute_yearIndex <- function(x) {
     stopifnot(class(x)=="cmip5data")
     
-    # TODO: is calendarStr guaranteed to have # days in positions 1-3? 
+    # TODO: is calendarStr guaranteed to have # days in positions 1-3? [NO]
     # Would it better to split the string based on underscore?
     # TODO: this code bombs with e.g. "proleptic gregorian"
     numDays <- as.numeric(substr(x$calendarStr, 1, 3))

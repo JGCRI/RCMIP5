@@ -34,11 +34,7 @@ loadModel <- function(variable, model, experiment,
         fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     }
     fileList <- fileList[grepl(pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', 
-                                               variable, model, experiment), fileList)]
-    #     fileList <- list.files(path=path,
-    #                            pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', variable, model, experiment),
-    #                            full.names=TRUE, recursive=recursive)
-    
+                                               variable, model, experiment), fileList)]    
     if(length(fileList)==0) {
         warning("Could not find any matching files")
         return(NULL)
@@ -49,7 +45,6 @@ loadModel <- function(variable, model, experiment,
                                         function(x){x[5]})))
     
     if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
-    
     model.ls <- NULL
     for(ensemble in ensembleArr) {
         temp <- loadEnsemble(variable, model, experiment, ensemble, 
@@ -57,20 +52,16 @@ loadModel <- function(variable, model, experiment,
         # If this is the first model
         if(is.null(model.ls)) {
             model.ls <- temp
-            #            model.ls$val <- temp                # initialize the results with the first ensemble
-            #             model.ls$variable <- temp$variable
-            #             model.ls$model <- temp$model
-            #             model.ls$experiment <- temp$experiment
-            #             ensembleNames <- c(ensemble)
         } else {
-            if(all(temp$lat==model.ls$lat) &            # Check that lat-lon-time match
-                   all(temp$lon==model.ls$on) &
-                   all(temp$time==model.ls$time)) {
+            if(identical(temp$lat, model.ls$lat) &            # Check that lat-lon-lev-time match
+                   identical(temp$lon, model.ls$lon) &
+                   identical(temp$lev, model.ls$lev) &
+                   identical(temp$time, model.ls$time)) {
                 model.ls$val <- model.ls$val + temp$val # if so, add values and record successful load
                 model.ls$files <- c( model.ls$files, temp$files )
                 model.ls$ensembles <- c(model.ls$ensembles, ensemble)
-            } else {                                    # ...if not, fail
-                warning(ensemble, 'does not match previous ensembles\' lon-lat-time.\n')
+            } else {                                    # ...if not, don't load
+                warning(ensemble, 'not loaded: does not match previous lon-lat-lev-time.\n')
             }
         }
     }
@@ -78,5 +69,5 @@ loadModel <- function(variable, model, experiment,
     stopifnot(length(model.ls$ensembles)>0)
     model.ls$val <- unname(model.ls$val / length(model.ls$ensembles))
     
-    invisible(model.ls)
+    return(model.ls)
 } # loadModel
