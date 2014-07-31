@@ -1,6 +1,9 @@
 library(ncdf4)
 library(abind)
 
+source('internalHelpers.R')
+source('RCMIP5.R')
+
 #' Load data for a particular set of experiment/variable/model/ensemble
 #'
 #' @param variable CMIP5 variable to load
@@ -17,7 +20,7 @@ library(abind)
 #' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=TRUE,demo=TRUE)
 loadEnsemble <- function(variable, model, experiment, ensemble,
                          path='.', recursive=TRUE, verbose=FALSE, demo=FALSE) {
-    
+
     # Sanity checks
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
@@ -28,7 +31,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(demo)==1 & is.logical(demo))
-    
+
     # List all files that match specifications
     if(demo) {
         fileList <- ls(envir=.GlobalEnv)  # in demo mode pull from environment, not disk
@@ -41,7 +44,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
         warning("Could not find any matching files")
         return(NULL)
     }
-    
+
     temp <- c()
     timeArr <- c()
     for(fileStr in fileList) {
@@ -51,7 +54,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
         } else {
             if(verbose) cat('Loading', fileStr)
             temp.nc <- nc_open(fileStr, write=FALSE)
-            
+
             temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
             if(verbose) cat(' [',dim(temp),']\n')
             varUnit <- ncatt_get(temp.nc, variable, 'units')$value
@@ -63,12 +66,12 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             levArr <- NULL
             if(temp.nc$nvars==5)
                 levArr <- ncvar_get(temp.nc, varid='lev')
-            
+
             nc_close(temp.nc)
         }
     }
-    
-    cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit, timeUnit=timeUnit, 
+
+    cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit, timeUnit=timeUnit,
                    calendarStr=calendarStr, lat=latArr, lon=lonArr, lev=levArr, time=timeArr,
                    variable=variable, model=model, experiment=experiment, ensembles=ensemble))
 } # loadEnsemble
