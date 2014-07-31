@@ -1,6 +1,7 @@
 library(plyr) # for BIG data.frames we want to do this fast
 
-#' Check that all time periods match for multi-file ensembles
+#' Check that all time periods match for multi-file ensembles. This only works
+#' for files that are in the following domains: 'fx', '*mon', or '*yr'.
 #'
 #' @param fileInfo_df data.frame from getFileInfo
 #' @return data.frame from fileInfo_df: domain, experiment, model, variable, ensemble, and
@@ -14,36 +15,47 @@ library(plyr) # for BIG data.frames we want to do this fast
 #' checkTimePeriod(getFileInfo())
 #' @seealso getFileInfo
 checkTimePeriod <- function(fileInfo_df) {
-    
+
     # Sanity checks
     stopifnot(is.data.frame(fileInfo_df))
-    ddplyFields <- c("domain","experiment","model","variable","ensemble")
+    ddplyFields <- c("domain", "experiment","model","variable","ensemble")
     stopifnot(all(ddplyFields %in% colnames(fileInfo_df)))
     stopifnot("time" %in% colnames(fileInfo_df))
-    
+
     # Use ddply to break up data frame, process and check time field, and return result
     invisible(ddply(fileInfo_df, ddplyFields, function(x) {
-        curCombo <- as.character(x$time)
-        
-        # find the starting and ending decimal year, and year next file should start with
-        if(nchar(curCombo[1])==9) { # annual data ('YYYY-YYYY')
-            startYear <- as.numeric(substr(curCombo, 1, 4))
-            endYear <- as.numeric(substr(curCombo, 6, 9))
-            nextYear <- endYear + 1
-        } else if(nchar(curCombo[1])==13) { # monthly data ('YYYYMM-YYYYMM')
-            startMonth <- as.numeric(substr(curCombo, 5, 6))
-            startYear <- as.numeric(substr(curCombo, 1, 4)) + (startMonth-1)/12
-            endMonth <- as.numeric(substr(curCombo, 12, 13))
-            endYear <- as.numeric(substr(curCombo, 8, 11)) + (endMonth-1)/12
-            nextYear <- endYear + 1/12          
-        } else if(nchar(curCombo[1]==0)) { # probably an area file; ignore
+        # pull the time step from the domain name
+        if(all(x$domain %in% 'fx')){ #fixed
             return(NULL)
-        } else stop("Incorrectly formatted time field: ",curCombo[1])
-        
+        }else if(all(grepl('mon$', x$domain))){ #monthly
+            timeStep <- 1/12
+        }else if(all(grepl('yr$', x$domain))){ #annual
+            timeStep <- 1
+        }else stop("unknown or mixed time step(s): [", unique(x$domain), ']')
+
+        curCombo <- matrix(unlist(strsplit(as.character(x$time), '-')),
+                           ncol=2, byrow=TRUE)
+
+        #Find the starting and ending decimal year
+        startYear <- as.numeric(substr(curCombo[,1], 1, 4))
+        endYear <- as.numeric(substr(curCombo[,2], 1, 4))
+
+        if(timeStep == 1) { # annual data ('YYYY-YYYY')
+            #do nothing
+        } else if(timeStep == 1/12) { # monthly data ('YYYYMM-YYYYMM')
+            startYear <- startYear + (as.numeric(substr(curCombo[,1], 5, 6))-1)/12
+            endYear <- endYear +  (as.numeric(substr(curCombo[,2], 5, 6))-1)/12
+        } else stop("Bad time step set, this shouldn't happen")
+
+        #Figure out the target date for the start of the next file
+        nextYear <- endYear + timeStep
+
         startIndex <- 1
         endIndex <- 1
         allHere <- TRUE
-        if(length(startYear) > 1) {   # If multiple files, shift indexes to compare the start/stop values
+
+        # If multiple files, shift indexes to compare the start/stop values
+        if(length(startYear) > 1) {
             startIndex <- c(2:length(startYear))
             endIndex <- c((2:length(startYear))-1)
             allHere <- all(abs(nextYear[endIndex] - startYear[startIndex]) < 1e-6)
@@ -53,10 +65,10 @@ checkTimePeriod <- function(fileInfo_df) {
         #   allHere - boolean saying if the strings match up
         #   startDate - earliest time stamp
         #   endDate - latest time stamp
-        data.frame(yrStr=paste(curCombo, collapse='_'),
+        data.frame(yrStr=paste(x$time, collapse='_'),
                    allHere=allHere,
                    startDate=min(startYear),
                    endDate=max(endYear),
-                   files=length(startYear))        
+                   files=length(startYear))
     })) # ddply
 } # checkTimePeriod
