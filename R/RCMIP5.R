@@ -95,7 +95,7 @@ summary.cmip5data <- function(x) {
     })
 
     cat(yearString, "\n\n")
-    cat("Variable:", x$variable)
+    cat("Variable:", x$variable, '\n')
     cat("Model:", x$model, "\n")
     cat("Experiment:", x$experiment, "\n")
     cat("Ensembles:", x$ensembles, "\n")
