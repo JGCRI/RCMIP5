@@ -25,6 +25,7 @@ if(file.exists('/Volumes/DATAFILES/downloads')) {
                ##...downloaded. Runtime took a few seconds
 } else {
     cat('getting file inforation from current directory...')
+    #fileInfo <- getFileInfo('../sampledata') #runs on the current directory
     fileInfo <- getFileInfo() #runs on the current directory
 }
 cat('done\n')
@@ -33,7 +34,7 @@ cat('done\n')
 cat('checking that multi-file ensembles have matching time periods...')
 checkTime <- checkTimePeriod(fileInfo)
 cat('done\n')
-
+#error()
 ######################################################
 ##Examples of useful oneliners that we may want to consider
 ##...formalizing in a package
