@@ -86,5 +86,5 @@ if(file.exists('/Volumes/DATAFILES/downloads')) {
     cat('done\n')
 #temp <- rasterToArray(seasonalTemp)
 } else {
-#    prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
+    prcTemp <- loadEnsemble(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
 }
