@@ -72,6 +72,7 @@ test_that("makeAnnualMean handles monthly data", {
     # Is the answer value array correctly sized?
     expect_equal(dim(res$val)[1:2],dim(d$val)[1:2])   # spatial size match
     expect_equal(dim(res$val)[3],length(years))  # temporal size match
+    # TODO: levels! (above code)
     
     # Are the answer values numerically correct?
     yearIndex <- d$time/360 + years[1]

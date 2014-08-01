@@ -64,7 +64,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
             levArr <- NULL
-            if(temp.nc$nvars==5)
+            if(temp.nc$nvars==5)  # TODO: would be better to search variable names
                 levArr <- ncvar_get(temp.nc, varid='lev')
 
             nc_close(temp.nc)
