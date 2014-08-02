@@ -1,4 +1,6 @@
-source('internalHelpers.R')
+if(!exists("computeYearIndex")) {
+    source('internalHelpers.R')     # TODO
+}
 
 #' Exploration, manipulation, and summarizing of CMIP5 data.
 #'
@@ -57,9 +59,9 @@ print.cmip5data <- function(x, ...) {
 
     yearString <- "[date parse error]"
     try({
-        yearRange <- round(range(compute_yearIndex(x)), 2)
+        yearRange <- round(range(computeYearIndex(x)), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
-    })
+    }, silent=T)
 
     cat("CMIP5 ")
     if(!is.null(x$numMonths)) {
@@ -90,16 +92,17 @@ summary.cmip5data <- function(x) {
 
     yearString <- "[date parse error]"
     try({
-        yearRange <- round(range(compute_yearIndex(x)), 2)
+        yearRange <- round(range(computeYearIndex(x)), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
-    })
+    }, silent=T)
 
     cat(yearString, "\n\n")
     cat("Variable:", x$variable, '\n')
     cat("Model:", x$model, "\n")
     cat("Experiment:", x$experiment, "\n")
     cat("Ensembles:", x$ensembles, "\n")
-    cat("Spatial: lon", length(x$lon), "lat", length(x$lat), "lev", length(x$lev), "\n")
+    cat("Spatial: lon", length(x$lon), "lat", length(x$lat), 
+        "lev", length(x$lev), "depth", length(x$depth), "\n")
     cat("Time: ", x$timeUnit, ", length ", length(x$time), ", calendar ", x$calendarStr, "\n", sep="")
     cat("Data: ", x$valUnit, ", dimensions ", paste(dim(x$val), collapse=" "), "\n", sep="")
     print(summary(x$val))

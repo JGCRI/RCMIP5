@@ -3,12 +3,12 @@
 library(plyr)
 library(abind)
 
-if(!exists("compute_yearIndex") | !exists("cmip5data")) {
+if(!exists("computeYearIndex") | !exists("cmip5data")) {
     source('internalHelpers.R')     # TODO: KTB is running code in R directory,
     source('RCMIP5.R')              # while BBL is running one level up. Should standardize.
 }
 
-#' Compute annual mean of a variable
+#' Compute annual mean (or other function) of a variable
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param yearRange numeric vector. Limit computation to this year range (e.g. for testing)

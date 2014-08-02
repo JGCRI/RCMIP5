@@ -3,7 +3,7 @@
 library(plyr)
 library(abind)
 
-#' Compute monthly means of a variable
+#' Compute monthly means (or other function) of a variable
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param verbose logical. Print info as we go?
