@@ -1,7 +1,7 @@
 library(ncdf4)
 library(abind)
 
-if(!exists("compute_yearIndex") | !exists("cmip5data")) {
+if(!exists("computeYearIndex") | !exists("cmip5data")) {
     source('internalHelpers.R')     # TODO: KTB is running code in R directory,
     source('RCMIP5.R')              # while BBL is running one level up. Should standardize.
 }
@@ -63,20 +63,32 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
             if(verbose) cat(' [',dim(temp),']\n')
             varUnit <- ncatt_get(temp.nc, variable, 'units')$value
+            
+            # All files are guaranteed (?) to have lon,lat,time variables
+            varnames <- unlist(lapply(temp.nc$var,FUN=function(x){x$name}))
+            stopifnot(all(c("lon_bnds", "lat_bnds", "time_bnds") %in% varnames))
+            
+            # Load these guaranteed data
             timeArr <- c(timeArr, ncvar_get(temp.nc, varid='time'))
             timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
             calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
+            
+            # Some files also have lev (atmospheric levels) or depth (ocean depths)
             levArr <- NULL
-            if(temp.nc$nvars==5)  # TODO: would be better to search variable names
+            if("lev_bnds" %in% varnames)
                 levArr <- ncvar_get(temp.nc, varid='lev')
-
+            depthArr <- NULL
+            if("depth_bnds" %in% varnames)
+                depthArr <- ncvar_get(temp.nc, varid='depth')
+            
             nc_close(temp.nc)
         }
     }
 
-    cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit, timeUnit=timeUnit,
-                   calendarStr=calendarStr, lat=latArr, lon=lonArr, lev=levArr, time=timeArr,
+    cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit,
+                   lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
+                   time=timeArr, timeUnit=timeUnit, calendarStr=calendarStr, 
                    variable=variable, model=model, experiment=experiment, ensembles=ensemble))
 } # loadEnsemble
