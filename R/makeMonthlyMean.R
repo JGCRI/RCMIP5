@@ -32,7 +32,7 @@ makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE
     
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
     
-    yearIndex <- compute_yearIndex(x)
+    yearIndex <- computeYearIndex(x)
     yearFilter <- floor(yearIndex) >= min(yearRange) & floor(yearIndex) <= max(yearRange)
     uniqueYears <- unique(floor(yearIndex))
     monthIndex <- floor((yearIndex %% 1) * 12 + 1)

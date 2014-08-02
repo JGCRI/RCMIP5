@@ -37,7 +37,7 @@ makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE,
 
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
 
-    yearIndex <- compute_yearIndex(x)
+    yearIndex <- computeYearIndex(x)
     uniqueYears <- unique(floor(yearIndex))
     uniqueYears <- uniqueYears[uniqueYears >= min(yearRange) & uniqueYears <= max(yearRange)]
 
