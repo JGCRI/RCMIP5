@@ -14,7 +14,7 @@ library(reshape2) #required in devMain
 #source('makeMonthlyMean.R')
 
 
-if(!TRUE){ ##run the management functions
+if(!TRUE) { ##run the management functions
 ######################################################
 ##Get the information on the files already downloaded
 ######################################################

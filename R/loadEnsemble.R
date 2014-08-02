@@ -65,7 +65,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             varUnit <- ncatt_get(temp.nc, variable, 'units')$value
             
             # All files are guaranteed (?) to have lon,lat,time variables
-            varnames <- unlist(lapply(temp.nc$var,FUN=function(x){x$name}))
+            varnames <- unlist(lapply(temp.nc$var, FUN=function(x){x$name}))
             stopifnot(all(c("lon_bnds", "lat_bnds", "time_bnds") %in% varnames))
             
             # Load these guaranteed data

@@ -25,13 +25,13 @@ checkTimePeriod <- function(fileInfo_df) {
     # Use ddply to break up data frame, process and check time field, and return result
     invisible(ddply(fileInfo_df, ddplyFields, function(x) {
         # pull the time step from the domain name
-        if(all(x$domain %in% 'fx')){ #fixed
+        if(all(x$domain %in% 'fx')) { # fixed
             return(NULL)
-        }else if(all(grepl('mon$', x$domain))){ #monthly
+        } else if(all(grepl('mon$', x$domain))) { # monthly
             timeStep <- 1/12
-        }else if(all(grepl('yr$', x$domain))){ #annual
+        } else if(all(grepl('yr$', x$domain))) { # annual
             timeStep <- 1
-        }else stop("unknown or mixed time step(s): [", unique(x$domain), ']')
+        } else stop("unknown or mixed time step(s): [", unique(x$domain), ']')
 
         curCombo <- matrix(unlist(strsplit(as.character(x$time), '-')),
                            ncol=2, byrow=TRUE)
