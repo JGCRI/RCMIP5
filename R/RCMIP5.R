@@ -1,3 +1,5 @@
+library(reshape2)
+
 if(!exists("computeYearIndex")) {
     source('internalHelpers.R')     # TODO
 }
@@ -56,20 +58,20 @@ cmip5data <- function(x=list()) {
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
-
+    
     yearString <- "[date parse error]"
     try({
         yearRange <- round(range(computeYearIndex(x)), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
     }, silent=T)
-
+    
     cat("CMIP5 ")
     if(!is.null(x$numMonths)) {
         cat("- annual summary: ")
     } else if(!is.null(x$numYears)) {
         cat(" - monthly summary ")
     }
-
+    
     cat(paste(x$variable, x$model, x$experiment, yearString,
               paste0("[", paste(dim(x$val), collapse=" "), "]"),
               "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
@@ -89,13 +91,13 @@ summary.cmip5data <- function(x) {
         cat(" - monthly summary\n")
         cat("Mean years summarized:", mean(x$numYears), "\n")
     } else cat("\n")
-
+    
     yearString <- "[date parse error]"
     try({
         yearRange <- round(range(computeYearIndex(x)), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
     }, silent=T)
-
+    
     cat(yearString, "\n\n")
     cat("Variable:", x$variable, '\n')
     cat("Model:", x$model, "\n")
@@ -110,6 +112,42 @@ summary.cmip5data <- function(x) {
     print(object.size(x), units="MB")
 }
 
+#' Convert a cmip5data object to a data frame
+#'
+#' @param x A \code{\link{cmip5data}} object.
+#' @param verbose logical. Print info as we go?
+#' @return The object converted, as well as possible, to a data frame.
+as.data.frame.cmip5data <- function(x, verbose=FALSE) {
+    years <- computeYearIndex(x)
+    
+    if(verbose) cat("Melting...\n")
+    df <- melt(x$val)
+    
+    if(verbose) cat("Filling in dimensional data...\n")
+    df[,1] <- x$lon[df[,1]]
+    df[,2] <- x$lat[df[,2]]
+    names(df)[1:2] <- c("lon","lat")
+    timeindex <- 4   # Assume there's depth or lev
+    if(!is.null(x$lev)) {
+        if(verbose) cat("Found lev")
+        df[,3] <- x$lev[df[,3]]
+        names(df)[3] <- "lev"
+    } else if(!is.null(x$depth)) {
+        if(verbose) cat("Found depth")
+        df[,3] <- x$depth[df[,3]]
+        names(df)[3] <- "depth"
+    } else
+        timeindex <- 3
+    df[,timeindex] <- years[df[,timeindex]]
+    names(df)[timeindex] <- "time"
+    
+    df$variable <- factor(x$variable)
+    df$model <- factor(x$model)
+    df$experiment <- factor(x$experiment)
+    
+    return(df)
+} # as.data.frame.cmip5data
+
 #' Make package datasets and write them to disk
 #'
 #' @param path root of directory tree
@@ -123,7 +161,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-
+    
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],
