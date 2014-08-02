@@ -1,5 +1,3 @@
-# TODO: add capability to filter levels
-
 library(plyr)
 library(abind)
 
@@ -8,22 +6,19 @@ library(abind)
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
-#' @param yearRange numeric vector. Limit computation to this year range (e.g. for testing)
 #' @param FUN function. Function to apply across months of year
 #' @return A \code{\link{cmip5data}} object.
 #' @export
 #' @examples
 #' makeMonthlyMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 #' @seealso \code{\link{makeAnnualMean}}
-makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
+makeMonthlyMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(is.null(x$numYears))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
-    stopifnot(length(yearRange)==2 & is.numeric(yearRange))
-    stopifnot(all(yearRange > 0))
     stopifnot(length(FUN)==1 & is.function(FUN))
     stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
     
@@ -33,7 +28,6 @@ makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
     
     yearIndex <- computeYearIndex(x)
-    yearFilter <- floor(yearIndex) >= min(yearRange) & floor(yearIndex) <= max(yearRange)
     uniqueYears <- unique(floor(yearIndex))
     monthIndex <- floor((yearIndex %% 1) * 12 + 1)
     
@@ -44,7 +38,7 @@ makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             ans <- foreach(i=1:12, .combine=function(...) abind(..., along=timeIndex), .packages='plyr') %dopar% {
-                aaply(asub(x$val, idx=(i == monthIndex) & yearFilter, dims=timeIndex), c(1:(timeIndex-1)), FUN)
+                aaply(asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
         } else {
             if(verbose) cat("Running in serial\n")
@@ -52,7 +46,7 @@ makeMonthlyMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE
             for(i in 1:12) {
                 if(verbose) cat(i, " ")
                 ans[[i]] <- aaply(
-                    asub(x$val, idx=(i == monthIndex) & yearFilter, dims=timeIndex), c(1:(timeIndex-1)), FUN)
+                    asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
             ans <- abind(ans, along=timeIndex)
         }

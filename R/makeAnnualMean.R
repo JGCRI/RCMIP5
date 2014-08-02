@@ -1,5 +1,3 @@
-# TODO: add capability to filter levels
-
 library(plyr)
 library(abind)
 
@@ -11,7 +9,6 @@ if(!exists("computeYearIndex") | !exists("cmip5data")) {
 #' Compute annual mean (or other function) of a variable
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
-#' @param yearRange numeric vector. Limit computation to this year range (e.g. for testing)
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across months of year
@@ -20,15 +17,13 @@ if(!exists("computeYearIndex") | !exists("cmip5data")) {
 #' @examples
 #' makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 #' @seealso \code{\link{makeMonthlyMean}}
-makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE, FUN=mean) {
+makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
 
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(is.null(x$numMonths))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
-    stopifnot(length(yearRange)==2 & is.numeric(yearRange))
-    stopifnot(all(yearRange > 0))
     stopifnot(length(FUN)==1 & is.function(FUN))
     stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
 
@@ -38,8 +33,7 @@ makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE,
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
 
     yearIndex <- computeYearIndex(x)
-    uniqueYears <- unique(floor(yearIndex))
-    uniqueYears <- uniqueYears[uniqueYears >= min(yearRange) & uniqueYears <= max(yearRange)]
+    uniqueYears <- (floor(yearIndex))
 
     if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
     timer <- system.time( # time the main computation, below; 4-5s/yr on my laptop
@@ -62,7 +56,7 @@ makeAnnualMean <- function(x, yearRange=c(1, Inf), verbose=TRUE, parallel=FALSE,
         }
     ) # system.time
 
-    if(verbose) cat('\nTook',timer[3], 's\n')
+    if(verbose) cat('\nTook', timer[3], 's\n')
 
     x$val <- unname(ans)
     x$year <- uniqueYears
