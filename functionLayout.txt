@@ -135,3 +135,16 @@ Phone call 27 June 2014:
 - KTB will put up her existing code
 - summer for code, fall for ms!
 
+========================================================
+
+Phone call 4 August 2014 - agenda:
+
+Do we want a filterDimensions() function?
+Do we want a regrid() function? (yes)
+A globalMean - optimized for entire globe, very common
+Handling annual data
+Consistent directory and non-package stuff
+Testing - four dimensions, annual data, etc.
+Visualization - BBL needs to look at
+	- necessary? Panoply
+Testing - large number of data files
