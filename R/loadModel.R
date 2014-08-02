@@ -1,5 +1,4 @@
 library(ncdf4)
-#source('loadEnsemble.R')
 
 #' Average all ensemble members of the specified experiment-variable-model combination
 #'

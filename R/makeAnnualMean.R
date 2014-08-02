@@ -3,7 +3,10 @@
 library(plyr)
 library(abind)
 
-source('internalHelpers.R')
+if(!exists("compute_yearIndex") | !exists("cmip5data")) {
+    source('internalHelpers.R')     # TODO: KTB is running code in R directory,
+    source('RCMIP5.R')              # while BBL is running one level up. Should standardize.
+}
 
 #' Compute annual mean of a variable
 #'

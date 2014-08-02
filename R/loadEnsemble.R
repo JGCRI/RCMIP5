@@ -1,8 +1,10 @@
 library(ncdf4)
 library(abind)
 
-source('internalHelpers.R')
-source('RCMIP5.R')
+if(!exists("compute_yearIndex") | !exists("cmip5data")) {
+    source('internalHelpers.R')     # TODO: KTB is running code in R directory,
+    source('RCMIP5.R')              # while BBL is running one level up. Should standardize.
+}
 
 #' Load data for a particular set of experiment/variable/model/ensemble
 #'
@@ -15,6 +17,9 @@ source('RCMIP5.R')
 #' @param verbose logical. Print info as we go?
 #' @param demo logical. Demo mode (reading data from global environment, not disk)?
 #' @return A \code{\link{cmip5data}} object.
+#' @details This function is the core of RCMIP5's data-loading. It loads all files matching
+#' the experiment, variable, model, and ensemble supplied by the caller. We can also load
+#' from the package datasets by specifying DEMO=TRUE.
 #' @export
 #' @examples
 #' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=TRUE,demo=TRUE)
