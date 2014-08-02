@@ -24,11 +24,11 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     #################
     path <- normalizePath(path) ##make OS neutral
 
-    #Pull all nc files from the directory
+    # Pull all nc files from the directory
     fullFile <- list.files(path=path, pattern='nc$',
                            full.names=TRUE, recursive=recursive)
 
-    #Check that there are nc files to process
+    # Check that there are nc files to process
     if(!length(fullFile)) {
         warning('No netcdf files found')
         return(NULL)
@@ -48,22 +48,22 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     # Check how many components (pieces of info) we have
     infoSize <- unlist(lapply(fileInfo, length))
     valid <- infoSize %in% c(5,6)
-    if(!all(valid)){
+    if(!all(valid)) {
         warning('Unexpected (not correctly formatted) files. Cutting the following files from the list: ', fullFile[!valid])
         fullFile <- fullFile[valid]
         shortFile <- shortFile[valid]
         fileInfo <- fileInfo[valid]
         infoSize <- infoSize[valid]
-        if(length(fullFile) == 0){
+        if(length(fullFile) == 0) {
             warning('No files to process.')
             return(NULL)
         }
     }
 
-    #Pull the file size
+    # Pull the file size
     sizeInfo <- unlist(lapply(fullFile, function(x){paste0(round(file.info(x)$size/1024),"K")}))
 
-    #Deal with the 'fixed' variables  (example: areacella)
+    # Deal with the 'fixed' variables  (example: areacella)
     if(any(infoSize == 5)){
         fixedInfo <- t(as.data.frame(fileInfo[infoSize == 5], row.names=NULL))
         fixedInfo <- cbind(fixedInfo, rep('', length=sum(infoSize == 5)))
@@ -72,22 +72,21 @@ getFileInfo <- function(path='.', recursive=TRUE) {
                                 fixedInfo,
                                 size=sizeInfo[infoSize==5],
                                 row.names=NULL)
-    }else{
+    } else {
         fixedInfo <- NULL
     }
 
-    #Deal with the 'temporal' variables (example: tas)
-    if(any(infoSize == 6)){
+    # Deal with the 'temporal' variables (example: tas)
+    if(any(infoSize == 6)) {
         temporalInfo <-  t(as.data.frame(fileInfo[infoSize==6], row.names=NULL))
         temporalInfo <- data.frame(path=dirname(fullFile[infoSize == 6]),
                                 filename=shortFile[infoSize==6],
                                 temporalInfo,
                                 size=sizeInfo[infoSize==6],
                                 row.names=NULL)
-    }else{
+    } else {
         temporalInfo <- NULL
     }
-
 
     ##########################
     # Put everything together

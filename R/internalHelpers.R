@@ -11,9 +11,9 @@
 compute_yearIndex <- function(x) {
     stopifnot(class(x)=="cmip5data")
 
-    #Pull a numeric from the calendarStr and assume it's the days
+    # Pull a numeric from the calendarStr and assume it's the days
     numDays <- as.numeric(regmatches(prcTemp$calendarStr, regexpr('\\d+', prcTemp$calendarStr)))
-    #If nothing matches set it to a default of 365
+    # If nothing matches set it to a default of 365
     if(length(numDays) == 0) numDays <- 365
     stopifnot(is.numeric(numDays) & numDays>0)
 
