@@ -119,3 +119,7 @@ test_that("makeMonthlyMean parallel produces same answer", {
 test_that("makeMonthlyMean handles annual data", {
     # TODO
 })
+
+test_that("makeMonthlyMean handles 4-dimensional data", {
+    # TODO
+})
