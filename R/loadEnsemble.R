@@ -61,34 +61,40 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             temp.nc <- nc_open(fileStr, write=FALSE)
 
             temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
-            if(verbose) cat(' [',dim(temp),']\n')
             varUnit <- ncatt_get(temp.nc, variable, 'units')$value
-            
-            # All files are guaranteed (?) to have lon,lat,time variables
-            varnames <- unlist(lapply(temp.nc$var, FUN=function(x){x$name}))
-            stopifnot(all(c("lon_bnds", "lat_bnds", "time_bnds") %in% varnames))
-            
+
+            varnames <- names(temp.nc$var)
+
             # Load these guaranteed data
-            timeArr <- c(timeArr, ncvar_get(temp.nc, varid='time'))
-            timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
-            calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
+            stopifnot(any(c("lon", "lon_bnds") %in% varnames))
+            stopifnot(any(c("lat", "lat_bnds") %in% varnames))
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
-            
-            # Some files also have lev (atmospheric levels) or depth (ocean depths)
+
+            # Non-fixed files have times to load
+            if(any(c("time", "time_bnds") %in% varnames)){
+                timeArr <- c(timeArr, ncvar_get(temp.nc, varid='time'))
+                timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
+                calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
+                #calendarDayLength
+                #calendarYrStart
+            }
+
+            # Load the 4th dimentions: lev (atmospheric levels)
+            #                          depth (ocean/land depths)
             levArr <- NULL
-            if("lev_bnds" %in% varnames)
+            if(any(c("lev", "lev_bnds") %in% varnames))
                 levArr <- ncvar_get(temp.nc, varid='lev')
             depthArr <- NULL
-            if("depth_bnds" %in% varnames)
+            if(any(c("depth", "depth_bnds") %in% varnames))
                 depthArr <- ncvar_get(temp.nc, varid='depth')
-            
+
             nc_close(temp.nc)
         }
     }
 
     cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit,
                    lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
-                   time=timeArr, timeUnit=timeUnit, calendarStr=calendarStr, 
+                   time=timeArr, timeUnit=timeUnit, calendarStr=calendarStr,
                    variable=variable, model=model, experiment=experiment, ensembles=ensemble))
 } # loadEnsemble
