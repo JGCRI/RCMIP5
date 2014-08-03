@@ -139,12 +139,20 @@ Phone call 27 June 2014:
 
 Phone call 4 August 2014 - agenda:
 
+Basic overview of package structure and test case for KTB
 Do we want a filterDimensions() function?
-Do we want a regrid() function? (yes)
+   -Going to need to be smart about this. Possibly want to extend 'regridding'?
+Do we want a regrid() function? (yes, yes-KTB but possibly a wrapper)
+   -area weighted
+   -kringing
+   -bi/cubic linear interpolation 
 A globalMean - optimized for entire globe, very common
 Handling annual data
 Consistent directory and non-package stuff
 Testing - four dimensions, annual data, etc.
 Visualization - BBL needs to look at
 	- necessary? Panoply
+	- Yes, needed to sanity check files at load time and allows
+	people to use R throughout the project (KTB)
 Testing - large number of data files
+RCM as a vignette?
