@@ -58,5 +58,6 @@ makeMonthlyMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     x$numYears <- unname(table(floor(monthIndex)))
     x$timeUnit <- "months (summarized)"
     x$time <- 1:12
+    x$provenance <- addProvenance(x$provenance, paste("Calculated <mean> for months", min(x$time), "-", max(x$time)))
     return(x)
 } # makeMonthlyMean

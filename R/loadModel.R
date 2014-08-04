@@ -67,6 +67,7 @@ loadModel <- function(variable, model, experiment,
     # convert the sum to an average
     stopifnot(length(model.ls$ensembles)>0)
     model.ls$val <- unname(model.ls$val / length(model.ls$ensembles))
+    model.ls$provenance <- addProvenance(model.ls$provenance, "Computed mean of ensembles")
     
     return(model.ls)
 } # loadModel

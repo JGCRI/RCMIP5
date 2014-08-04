@@ -62,5 +62,6 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     x$time <- uniqueYears
     x$timeUnit <- "years (summarized)"
     x$numMonths <- table(floor(yearIndex))
+    x$provenance <- addProvenance(x$provenance, paste("Calculated <mean> for years", min(x$time), "-", max(x$time)))
     return(x)
 } # makeAnnualMean
