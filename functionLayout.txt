@@ -156,3 +156,20 @@ Visualization - BBL needs to look at
 	people to use R throughout the project (KTB)
 Testing - large number of data files
 RCM as a vignette?
+
+Phone call discussion:
+-- make a 'debug' member of cmip5data
+-- problem of domain - need to either require this from user, or ask if encounter multiple domains
+-- tests for fixed variables, check yearstrings on loads
+-- provenance on data - e.g. a list of operations performed w/ arguments
+    - what about dumping key dynamic variables?
+-- regridding - has to be a kriging/something already existing
+    - need to do a little research
+-- area files
+    - look automatically
+    - ask user to use different domain
+    - calculate from lon/lat grid
+-- visualization - look for packages
+-- write a netCDF file from cmip5data
+-- allow user to specify ncdf4 or ncdf
+
