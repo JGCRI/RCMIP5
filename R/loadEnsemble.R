@@ -134,7 +134,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
                    time=timeArr,
                    variable=variable, model=model,
                    experiment=experiment, ensembles=ensemble,
-                   debug=list(startYr=startYr, timeUnit=timeUnit, timeFreqStr=timeFreqStr,
-                   calendarStr=calendarStr, calendarDayLength=calendarDayLength)
+                   debug=list(startYr=startYr, timeUnit=timeUnit,
+                              timeFreqStr=timeFreqStr, calendarStr=calendarStr,
+                              calendarDayLength=calendarDayLength)
                    ))
 } # loadEnsemble
