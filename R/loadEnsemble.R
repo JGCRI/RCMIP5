@@ -1,11 +1,6 @@
 library(ncdf4)
 library(abind)
 
-if(!exists("computeYearIndex") | !exists("cmip5data")) {
-    source('internalHelpers.R')     # TODO: KTB is running code in R directory,
-    source('RCMIP5.R')              # while BBL is running one level up. Should standardize.
-}
-
 #' Load data for a particular set of experiment/variable/model/ensemble
 #'
 #' @param variable CMIP5 variable to load
