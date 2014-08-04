@@ -131,8 +131,10 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
 
     cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit,
                    lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
-                   time=timeArr, startYr=startYr, timeUnit=timeUnit, timeFreqStr=timeFreqStr,
-                   calendarStr=calendarStr, calendarDayLength=calendarDayLength,
+                   time=timeArr,
                    variable=variable, model=model,
-                   experiment=experiment, ensembles=ensemble))
+                   experiment=experiment, ensembles=ensemble,
+                   debug=list(startYr=startYr, timeUnit=timeUnit, timeFreqStr=timeFreqStr,
+                   calendarStr=calendarStr, calendarDayLength=calendarDayLength)
+                   ))
 } # loadEnsemble

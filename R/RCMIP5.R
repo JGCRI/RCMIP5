@@ -105,8 +105,11 @@ summary.cmip5data <- function(x) {
     cat("Ensembles:", x$ensembles, "\n")
     cat("Spatial: lon", length(x$lon), "lat", length(x$lat),
         "lev", length(x$lev), "depth", length(x$depth), "\n")
-    cat("Time: ", x$timeUnit, ", length ", length(x$time), ", calendar ", x$calendarStr, "\n", sep="")
-    cat("Data: ", x$valUnit, ", dimensions ", paste(dim(x$val), collapse=" "), "\n", sep="")
+    cat("Time: step size ",x$time[2] - x$time[1]," yrs, length ",
+        length(x$time), ", range [",x$time[1], ', ', rev(x$time)[1] ,"]\n",
+        sep="")
+    cat("Data: ", x$valUnit, ", dimensions ", paste(dim(x$val), collapse=" "),
+        "\n", sep="")
     print(summary(x$val))
     cat("Size: ")
     print(object.size(x), units="MB")
