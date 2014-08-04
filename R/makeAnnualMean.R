@@ -1,11 +1,6 @@
 library(plyr)
 library(abind)
 
-if(!exists("computeYearIndex") | !exists("cmip5data")) {
-    source('internalHelpers.R')     # TODO: KTB is running code in R directory,
-    source('RCMIP5.R')              # while BBL is running one level up. Should standardize.
-}
-
 #' Compute annual mean (or other function) of a variable
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
@@ -32,8 +27,7 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
 
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
 
-    yearIndex <- computeYearIndex(x)
-    uniqueYears <- unique(floor(yearIndex))
+    uniqueYears <- unique(floor(x$time))
 
     if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
     timer <- system.time( # time the main computation, below
@@ -42,7 +36,7 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             ans <- foreach(i=1:length(uniqueYears), .combine = function(...) abind(..., along=timeIndex), .packages='plyr') %dopar% {
-                aaply(asub(x$val, idx=uniqueYears[i] == floor(yearIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN)
+                aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
         } else {
             if(verbose) cat("Running in serial\n")
@@ -50,7 +44,7 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
             for(i in 1:length(uniqueYears)) {
                 if(verbose & floor(i/1)==i/1) cat(i, " ")
                 ans[[i]] <- aaply(
-                    asub(x$val, idx=uniqueYears[i] == floor(yearIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN)
+                    asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
             ans <- abind(ans, along=timeIndex)
         }
@@ -61,7 +55,7 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     x$val <- unname(ans)
     x$time <- uniqueYears
     x$timeUnit <- "years (summarized)"
-    x$numMonths <- table(floor(yearIndex))
+    x$numMonths <- table(floor(x$time))
     x$provenance <- addProvenance(x$provenance, paste("Calculated <mean> for years", min(x$time), "-", max(x$time)))
     return(x)
 } # makeAnnualMean

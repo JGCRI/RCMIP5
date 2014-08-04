@@ -1,9 +1,5 @@
 library(reshape2)
 
-if(!exists("computeYearIndex")) {
-    source('internalHelpers.R')     # TODO
-}
-
 #' Exploration, manipulation, and summarizing of CMIP5 data.
 #'
 #' Working with CMIP5 data can be tricky, forcing scientists to
@@ -121,7 +117,6 @@ summary.cmip5data <- function(x) {
 #' @param verbose logical. Print info as we go?
 #' @return The object converted, as well as possible, to a data frame.
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
-    #years <- computeYearIndex(x)
     years <- x$time
 
     if(verbose) cat("Melting...\n")

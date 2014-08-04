@@ -64,7 +64,7 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     sizeInfo <- unlist(lapply(fullFile, function(x){paste0(round(file.info(x)$size/1024),"K")}))
 
     # Deal with the 'fixed' variables  (example: areacella)
-    if(any(infoSize == 5)){
+    if(any(infoSize == 5)) {
         fixedInfo <- t(as.data.frame(fileInfo[infoSize == 5], row.names=NULL))
         fixedInfo <- cbind(fixedInfo, rep('', length=sum(infoSize == 5)))
         fixedInfo <- data.frame(path=dirname(fullFile[infoSize == 5]),

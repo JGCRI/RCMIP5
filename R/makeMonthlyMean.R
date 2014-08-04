@@ -27,9 +27,8 @@ makeMonthlyMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
     
-    yearIndex <- computeYearIndex(x)
-    uniqueYears <- unique(floor(yearIndex))
-    monthIndex <- floor((yearIndex %% 1) * 12 + 1)
+    uniqueYears <- unique(floor(x$time))
+    monthIndex <- floor((x$time %% 1) * 12 + 1)
     
     if(parallel) parallel <- require(foreach) & require(doParallel)
     timer <- system.time( # time the main computation, below
