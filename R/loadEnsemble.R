@@ -93,13 +93,19 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
                 # YYYY-MM-DD hh:mm:ss
                 if(grepl('\\d{4}-\\d{2}-\\d{2}[^\\d]\\d{2}:\\d{2}:\\d{2}',
                          calendarUnitsStr)){
-                    temp <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{2}-\\d{2}[^\\d]\\d{2}:\\d{2}:\\d{2}', calendarUnitsStr))
-                    startYr <- as.numeric(substr(temp, 1, 4))+ #YYYY
-                        (as.numeric(substr(temp, 6, 7))-1)/12 + #MM
-                        (as.numeric(substr(temp, 9, 10))-1)/calendarDayLength+#DD
-                        as.numeric(substr(temp, 12, 13))/(calendarDayLength*24)+#hh
-                        as.numeric(substr(temp, 15, 16))/(calendarDayLength*24*60)+#mm
-                        as.numeric(substr(temp, 18, 19))/(calendarDayLength*24*60*60)#ss
+                    dateStr <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{2}-\\d{2}[^\\d]\\d{2}:\\d{2}:\\d{2}', calendarUnitsStr))
+                    startYr <- as.numeric(substr(dateStr, 1, 4))+ #YYYY
+                        (as.numeric(substr(dateStr, 6, 7))-1)/12 + #MM
+                        (as.numeric(substr(dateStr, 9, 10))-1)/calendarDayLength+#DD
+                        as.numeric(substr(dateStr, 12, 13))/(calendarDayLength*24)+#hh
+                        as.numeric(substr(dateStr, 15, 16))/(calendarDayLength*24*60)+#mm
+                        as.numeric(substr(dateStr, 18, 19))/(calendarDayLength*24*60*60)#ss
+                # Alternatively YYYY-MM-DD
+                }else if(grepl('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr)){
+                    dateStr <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr))
+                    startYr <- as.numeric(substr(dateStr, 1, 4))+ #YYYY
+                        (as.numeric(substr(dateStr, 6, 7))-1)/12 + #MM
+                        (as.numeric(substr(dateStr, 9, 10))-1)/calendarDayLength#DD
                 }else{
                     startYr <- 0
                 }

@@ -58,20 +58,20 @@ cmip5data <- function(x=list()) {
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
-    
+
     yearString <- "[date parse error]"
     try({
-        yearRange <- round(range(computeYearIndex(x)), 2)
+        yearRange <- round(range(x$time), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
     }, silent=T)
-    
+
     cat("CMIP5 ")
     if(!is.null(x$numMonths)) {
         cat("- annual summary: ")
     } else if(!is.null(x$numYears)) {
         cat(" - monthly summary ")
     }
-    
+
     cat(paste(x$variable, x$model, x$experiment, yearString,
               paste0("[", paste(dim(x$val), collapse=" "), "]"),
               "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
@@ -91,19 +91,19 @@ summary.cmip5data <- function(x) {
         cat(" - monthly summary\n")
         cat("Mean years summarized:", mean(x$numYears), "\n")
     } else cat("\n")
-    
+
     yearString <- "[date parse error]"
     try({
-        yearRange <- round(range(computeYearIndex(x)), 2)
+        yearRange <- round(range(x$time), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
     }, silent=T)
-    
+
     cat(yearString, "\n\n")
     cat("Variable:", x$variable, '\n')
     cat("Model:", x$model, "\n")
     cat("Experiment:", x$experiment, "\n")
     cat("Ensembles:", x$ensembles, "\n")
-    cat("Spatial: lon", length(x$lon), "lat", length(x$lat), 
+    cat("Spatial: lon", length(x$lon), "lat", length(x$lat),
         "lev", length(x$lev), "depth", length(x$depth), "\n")
     cat("Time: ", x$timeUnit, ", length ", length(x$time), ", calendar ", x$calendarStr, "\n", sep="")
     cat("Data: ", x$valUnit, ", dimensions ", paste(dim(x$val), collapse=" "), "\n", sep="")
@@ -118,11 +118,12 @@ summary.cmip5data <- function(x) {
 #' @param verbose logical. Print info as we go?
 #' @return The object converted, as well as possible, to a data frame.
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
-    years <- computeYearIndex(x)
-    
+    #years <- computeYearIndex(x)
+    years <- x$time
+
     if(verbose) cat("Melting...\n")
     df <- melt(x$val)
-    
+
     if(verbose) cat("Filling in dimensional data...\n")
     df[,1] <- x$lon[df[,1]]
     df[,2] <- x$lat[df[,2]]
@@ -140,11 +141,11 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
         timeindex <- 3
     df[,timeindex] <- years[df[,timeindex]]
     names(df)[timeindex] <- "time"
-    
+
     df$variable <- factor(x$variable)
     df$model <- factor(x$model)
     df$experiment <- factor(x$experiment)
-    
+
     return(df)
 } # as.data.frame.cmip5data
 
@@ -161,7 +162,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-    
+
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],
