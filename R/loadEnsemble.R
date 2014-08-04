@@ -80,7 +80,9 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
     # Go through and load the data
     temp <- c()
     timeArr <- c()
+    prov <- NULL
     for(fileStr in fileList) {
+        prov <- addProvenance(prov, paste("Loaded", fileStr))
         if(demo) {
             if(verbose) cat("DEMO: loading", fileStr, "from package data")
             return(get(fileStr, envir=.GlobalEnv))
@@ -169,6 +171,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                    time=timeArr,
                    variable=variable, model=model,
                    experiment=experiment, ensembles=ensemble,
+                   provenance=prov,
                    debug=list(startYr=startYr, timeUnit=timeUnit,
                               timeFreqStr=timeFreqStr, calendarStr=calendarStr,
                               calendarDayLength=calendarDayLength)
