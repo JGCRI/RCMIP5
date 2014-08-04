@@ -59,7 +59,8 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     if(verbose) cat('\nTook', timer[3], 's\n')
 
     x$val <- unname(ans)
-    x$year <- uniqueYears  # TODO: need to change 'time', not create new 'year'
+    x$time <- uniqueYears
+    x$timeUnit <- "years (summarized)"
     x$numMonths <- table(floor(yearIndex))
     return(x)
 } # makeAnnualMean
