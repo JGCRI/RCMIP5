@@ -23,19 +23,22 @@ if(!exists("computeYearIndex") | !exists("cmip5data")) {
 #' @export
 #' @examples
 #' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=TRUE,demo=TRUE)
-loadEnsemble <- function(variable, model, experiment, ensemble,
+loadEnsemble <- function(variable='[^_]+', model='[^_]+',
+                         experiment='[^_]+', ensemble='[^_]+', domain='[^_]+',
                          path='.', recursive=TRUE, verbose=FALSE, demo=FALSE) {
+
+    ##Sanity check
+    stopifnot(length(path)==1 & is.character(path))
+    stopifnot(file.exists(path))
+    stopifnot(length(recursive)==1 & is.logical(recursive))
+    stopifnot(length(verbose)==1 & is.logical(verbose))
+    stopifnot(length(demo)==1 & is.logical(demo))
 
     # Sanity checks
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
     stopifnot(length(experiment)==1 & is.character(experiment))
     stopifnot(length(ensemble)==1 & is.character(ensemble))
-    stopifnot(length(path)==1 & is.character(path))
-    stopifnot(file.exists(path))
-    stopifnot(length(recursive)==1 & is.logical(recursive))
-    stopifnot(length(verbose)==1 & is.logical(verbose))
-    stopifnot(length(demo)==1 & is.logical(demo))
 
     # List all files that match specifications
     if(demo) {
@@ -43,13 +46,42 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
     } else {
         fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     }
-    fileList <- fileList[grepl(pattern=sprintf('%s_[a-zA-Z]+_%s_%s_%s_',
-                                               variable, model, experiment, ensemble), fileList)]
+    fileList <- fileList[grepl(pattern=sprintf('%s_%s_%s_%s_%s[_\\.]',
+                               variable, domain, model, experiment, ensemble),
+                               fileList)]
     if(length(fileList)==0) {
         warning("Could not find any matching files")
         return(NULL)
     }
 
+    # Need to deal with mix of fx and other domains which don't split to the
+    # ...same number of strings
+    domainCheck <- unname(vapply(unlist(fileList),
+                          function(x){unlist(strsplit(basename(x), '_'))[2]},
+                          FUN.VALUE=''))
+    if(length(unique(domainCheck)) > 1){
+        stop('Domain is not unique: [', paste(unique(domainCheck), collapse=' '), ']\n')
+    }
+
+    # Check that there are unique variables, domain, model, exierments
+    # ...and ensemble specified, reset them as needed
+    numSplits <- length(unlist(strsplit(basename(fileList[1]), '_')))
+    cmipName <- unname(vapply(unlist(fileList),
+                       function(x){unlist(strsplit(basename(x), '_'))},
+                       FUN.VALUE=rep('', length=numSplits)))
+
+    checkField <- list(variable=1, domain=2, model=3, experiment=4, ensemble=5)
+
+    for(checkStr in names(checkField)){
+        tempStr <- unique(cmipName[checkField[[checkStr]],])
+        if(length(tempStr) > 1){
+             stop('[',checkStr, '] is not unique: [', paste(tempStr, collapse=' '), ']\n')
+        }else{
+            eval(parse(text=paste(checkStr, ' <- "', tempStr[1], '"', sep='')))
+        }
+    }
+
+    # Go through and load the data
     temp <- c()
     timeArr <- c()
     for(fileStr in fileList) {
@@ -114,6 +146,13 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
                 timeArr <- c(timeArr,
                              ncvar_get(temp.nc, varid='time')/calendarDayLength
                                        + startYr)
+            }else{ #this is a fx variable
+                startYr <- NULL
+                timeArr <- NULL
+                timeUnit <- NULL
+                timeFreqStr <- 'fx'
+                calendarStr <- NULL
+                calendarDayLength <- NULL
             }
 
             # Load the 4th dimentions: lev (atmospheric levels)
