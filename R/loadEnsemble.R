@@ -71,10 +71,10 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             stopifnot(any(c("lat", "lat_bnds") %in% varnames))
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
-            #cat('flag2')
+
             # pull the time frequency
             timeFreqStr <- ncatt_get(temp.nc, varid=0)$frequency
-            #cat('flag1')
+
             # Non-fixed files have times to load
             if(! timeFreqStr %in% 'fx'){
 
@@ -131,7 +131,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
 
     cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit,
                    lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
-                   time=timeArr,
+                   timeFreqStr=timeFreqStr, time=timeArr,
                    startYr=startYr, timeUnit=timeUnit, timeFreqStr=timeFreqStr,
                    calendarStr=calendarStr, calendarDayLength=calendarDayLength,
                    variable=variable, model=model,
