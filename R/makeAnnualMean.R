@@ -33,10 +33,10 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
 
     yearIndex <- computeYearIndex(x)
-    uniqueYears <- (floor(yearIndex))
+    uniqueYears <- unique(floor(yearIndex))
 
     if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
-    timer <- system.time( # time the main computation, below; 4-5s/yr on my laptop
+    timer <- system.time( # time the main computation, below
 
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
@@ -59,7 +59,7 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     if(verbose) cat('\nTook', timer[3], 's\n')
 
     x$val <- unname(ans)
-    x$year <- uniqueYears
+    x$year <- uniqueYears  # TODO: need to change 'time', not create new 'year'
     x$numMonths <- table(floor(yearIndex))
     return(x)
 } # makeAnnualMean
