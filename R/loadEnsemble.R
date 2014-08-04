@@ -21,7 +21,7 @@ library(abind)
 #' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=TRUE,demo=TRUE)
 loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                          experiment='[^_]+', ensemble='[^_]+', domain='[^_]+',
-                         path='.', recursive=TRUE, verbose=FALSE, demo=FALSE) {
+                         path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
 
     ##Sanity check
     stopifnot(length(path)==1 & is.character(path))
@@ -70,9 +70,9 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
 
     for(checkStr in names(checkField)){
         tempStr <- unique(cmipName[checkField[[checkStr]],])
-        if(length(tempStr) > 1){
+        if(length(tempStr) > 1) {
              stop('[',checkStr, '] is not unique: [', paste(tempStr, collapse=' '), ']\n')
-        }else{
+        } else {
             eval(parse(text=paste(checkStr, ' <- "', tempStr[1], '"', sep='')))
         }
     }
@@ -84,11 +84,11 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
     for(fileStr in fileList) {
         prov <- addProvenance(prov, paste("Loaded", fileStr))
         if(demo) {
-            if(verbose) cat("DEMO: loading", fileStr, "from package data")
+            if(verbose) cat("DEMO: loading", fileStr, "from package data\n")
             return(get(fileStr, envir=.GlobalEnv))
         } else {
 
-            if(verbose) cat('Loading', fileStr)
+            if(verbose) cat('Loading', fileStr, "\n")
             temp.nc <- nc_open(fileStr, write=FALSE)
 
             temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
@@ -106,15 +106,15 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             timeFreqStr <- ncatt_get(temp.nc, varid=0)$frequency
 
             # Non-fixed files have times to load
-            if(! timeFreqStr %in% 'fx'){
+            if(! timeFreqStr %in% 'fx') {
 
                 timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
                 calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
                 calendarUnitsStr <- ncatt_get(temp.nc, 'time', 'units')$value
                 # Pull the number of days in a year
-                if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)){
+                if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)) {
                     calendarDayLength <- as.numeric(regmatches(calendarStr, regexpr('\\d{3}', calendarStr)))
-                }else{
+                } else {
                     calendarDayLength <- 365
                 }
 
@@ -122,21 +122,21 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                 # assume that the starting year is specified by
                 # YYYY-MM-DD hh:mm:ss
                 if(grepl('\\d{4}-\\d{2}-\\d{2}[^\\d]\\d{2}:\\d{2}:\\d{2}',
-                         calendarUnitsStr)){
+                         calendarUnitsStr)) {
                     dateStr <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{2}-\\d{2}[^\\d]\\d{2}:\\d{2}:\\d{2}', calendarUnitsStr))
-                    startYr <- as.numeric(substr(dateStr, 1, 4))+ #YYYY
-                        (as.numeric(substr(dateStr, 6, 7))-1)/12 + #MM
-                        (as.numeric(substr(dateStr, 9, 10))-1)/calendarDayLength+#DD
-                        as.numeric(substr(dateStr, 12, 13))/(calendarDayLength*24)+#hh
-                        as.numeric(substr(dateStr, 15, 16))/(calendarDayLength*24*60)+#mm
-                        as.numeric(substr(dateStr, 18, 19))/(calendarDayLength*24*60*60)#ss
+                    startYr <- as.numeric(substr(dateStr, 1, 4)) + # YYYY
+                        (as.numeric(substr(dateStr, 6, 7))-1)/12 + # MM
+                        (as.numeric(substr(dateStr, 9, 10))-1)/calendarDayLength + # DD
+                        as.numeric(substr(dateStr, 12, 13))/(calendarDayLength*24) + # hh
+                        as.numeric(substr(dateStr, 15, 16))/(calendarDayLength*24*60) + # mm
+                        as.numeric(substr(dateStr, 18, 19))/(calendarDayLength*24*60*60) # ss
                 # Alternatively YYYY-MM-DD
-                }else if(grepl('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr)){
+                } else if(grepl('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr)){
                     dateStr <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr))
-                    startYr <- as.numeric(substr(dateStr, 1, 4))+ #YYYY
-                        (as.numeric(substr(dateStr, 6, 7))-1)/12 + #MM
-                        (as.numeric(substr(dateStr, 9, 10))-1)/calendarDayLength#DD
-                }else{
+                    startYr <- as.numeric(substr(dateStr, 1, 4))+ # YYYY
+                        (as.numeric(substr(dateStr, 6, 7))-1)/12 + # MM
+                        (as.numeric(substr(dateStr, 9, 10))-1)/calendarDayLength # DD
+                } else {
                     startYr <- 0
                 }
 
@@ -144,7 +144,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                 timeArr <- c(timeArr,
                              ncvar_get(temp.nc, varid='time')/calendarDayLength
                                        + startYr)
-            }else{ #this is a fx variable
+            } else { #this is a fx variable
                 startYr <- NULL
                 timeArr <- NULL
                 timeUnit <- NULL

@@ -14,7 +14,7 @@ library(ncdf4)
 #' @examples
 #' loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE)
 loadModel <- function(variable, model, experiment, 
-                      path='.', recursive=TRUE, verbose=FALSE, demo=FALSE) {
+                      path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
     
     # Sanity checks
     stopifnot(length(variable)==1 & is.character(variable))
