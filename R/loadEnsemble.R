@@ -7,6 +7,7 @@ library(abind)
 #' @param model CMIP5 model to load
 #' @param experiment CMIP5 experiment to load
 #' @param ensemble CMIP5 ensemble to load
+#' @param domain CMIP5 domain to load
 #' @param path root of directory tree
 #' @param recursive logical. Recurse into directories?
 #' @param verbose logical. Print info as we go?
