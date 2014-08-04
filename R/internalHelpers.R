@@ -1,3 +1,4 @@
+#' DECREPIT
 #' Compute year index from parsed cmip5data information
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
@@ -32,5 +33,6 @@ computeYearIndex <- function(x, verbose=FALSE) {
     stopifnot(startYrArr[2] %in% 1:12)
     stopifnot(startYrArr[3] %in% 1:31)
 
-    return(x$time/numDays + startYr)
+    #return(x$time/numDays + startYr)
+    return(x$time)
 } # computeYearIndex

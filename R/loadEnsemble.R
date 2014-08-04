@@ -57,6 +57,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             if(verbose) cat("DEMO: loading", fileStr, "from package data")
             return(get(fileStr, envir=.GlobalEnv))
         } else {
+
             if(verbose) cat('Loading', fileStr)
             temp.nc <- nc_open(fileStr, write=FALSE)
 
@@ -70,14 +71,43 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
             stopifnot(any(c("lat", "lat_bnds") %in% varnames))
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
-
+            #cat('flag2')
+            # pull the time frequency
+            timeFreqStr <- ncatt_get(temp.nc, varid=0)$frequency
+            #cat('flag1')
             # Non-fixed files have times to load
-            if(any(c("time", "time_bnds") %in% varnames)){
-                timeArr <- c(timeArr, ncvar_get(temp.nc, varid='time'))
+            if(! timeFreqStr %in% 'fx'){
+
                 timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
                 calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
-                #calendarDayLength
-                #calendarYrStart
+                calendarUnitsStr <- ncatt_get(temp.nc, 'time', 'units')$value
+                # Pull the number of days in a year
+                if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)){
+                    calendarDayLength <- as.numeric(regmatches(calendarStr, regexpr('\\d{3}', calendarStr)))
+                }else{
+                    calendarDayLength <- 365
+                }
+
+                # Pull the start decimal year
+                # assume that the starting year is specified by
+                # YYYY-MM-DD hh:mm:ss
+                if(grepl('\\d{4}-\\d{2}-\\d{2}[^\\d]\\d{2}:\\d{2}:\\d{2}',
+                         calendarUnitsStr)){
+                    temp <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{2}-\\d{2}[^\\d]\\d{2}:\\d{2}:\\d{2}', calendarUnitsStr))
+                    startYr <- as.numeric(substr(temp, 1, 4))+ #YYYY
+                        (as.numeric(substr(temp, 6, 7))-1)/12 + #MM
+                        (as.numeric(substr(temp, 9, 10))-1)/calendarDayLength+#DD
+                        as.numeric(substr(temp, 12, 13))/(calendarDayLength*24)+#hh
+                        as.numeric(substr(temp, 15, 16))/(calendarDayLength*24*60)+#mm
+                        as.numeric(substr(temp, 18, 19))/(calendarDayLength*24*60*60)#ss
+                }else{
+                    startYr <- 0
+                }
+
+                # Pull the actual time
+                timeArr <- c(timeArr,
+                             ncvar_get(temp.nc, varid='time')/calendarDayLength
+                                       + startYr)
             }
 
             # Load the 4th dimentions: lev (atmospheric levels)
@@ -95,6 +125,9 @@ loadEnsemble <- function(variable, model, experiment, ensemble,
 
     cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit,
                    lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
-                   time=timeArr, timeUnit=timeUnit, calendarStr=calendarStr,
-                   variable=variable, model=model, experiment=experiment, ensembles=ensemble))
+                   time=timeArr,
+                   startYr=startYr, timeUnit=timeUnit, timeFreqStr=timeFreqStr,
+                   calendarStr=calendarStr, calendarDayLength=calendarDayLength,
+                   variable=variable, model=model,
+                   experiment=experiment, ensembles=ensemble))
 } # loadEnsemble
