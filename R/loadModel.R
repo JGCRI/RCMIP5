@@ -79,7 +79,7 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
     stopifnot(length(model.ls$ensembles)>0)
     model.ls$val <- unname(model.ls$val / length(model.ls$ensembles))
     model.ls$provenance <- addProvenance(NULL,
-                              c(paste("Computed mean of ensembles ", model.ls$ensembles, collapse=' '), ensembleProv))
+                              c(paste("Computed mean of ensembles", paste(model.ls$ensembles, collapse=' ')), ensembleProv))
     #model.ls$provenance <- addProvenance(model.ls$provenance, )
 
     return(model.ls)
