@@ -23,6 +23,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                          experiment='[^_]+', ensemble='[^_]+', domain='[^_]+',
                          path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
 
+    # Match the path conventions to the operating system
     path <- normalizePath(path)
 
     # Sanity checks
@@ -148,7 +149,6 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                 startYr <- NULL
                 timeArr <- NULL
                 timeUnit <- NULL
-                timeFreqStr <- 'fx'
                 calendarStr <- NULL
                 calendarDayLength <- NULL
             }
@@ -168,12 +168,12 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
 
     cmip5data(list(files=fileList, val=unname(temp), valUnit=varUnit,
                    lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
-                   time=timeArr,
-                   variable=variable, model=model,
+                   time=timeArr, timeFreqStr=timeFreqStr,
+                   variable=variable, model=model, domain=domain,
                    experiment=experiment, ensembles=ensemble,
                    provenance=prov,
                    debug=list(startYr=startYr, timeUnit=timeUnit,
-                              timeFreqStr=timeFreqStr, calendarStr=calendarStr,
+                              calendarStr=calendarStr,
                               calendarDayLength=calendarDayLength)
     ))
 } # loadEnsemble
