@@ -28,14 +28,14 @@ test_that("makeAnnualMean handles bad input", {
     expect_error(makeAnnualMean(1))                         # non-list d
     expect_error(makeAnnualMean(cmpi5data()))               # wrong size list d
     expect_error(makeAnnualMean(d,yearRange=1))             # non-vector yearRange
-    expect_error(makeAnnualMean(d,yearRange=c(-1,1)))       # illegal value yearRange
-    expect_error(makeAnnualMean(d,yearRange=c(1,2,3)))      # wrong vector size yearRange
+    expect_error(makeAnnualMean(d,yearRange=c(-1, 1)))       # illegal value yearRange
+    expect_error(makeAnnualMean(d,yearRange=c(1, 2, 3)))      # wrong vector size yearRange
     expect_error(makeAnnualMean(d,verbose=1))               # non-logical verbose
-    expect_error(makeAnnualMean(d,verbose=c(T,T)))          # multiple verbose values
+    expect_error(makeAnnualMean(d,verbose=c(T, T)))          # multiple verbose values
     expect_error(makeAnnualMean(d,parallel=1))              # non-logical parallel
-    expect_error(makeAnnualMean(d,parallel=c(T,T)))         # multiple parallel values
+    expect_error(makeAnnualMean(d,parallel=c(T, T)))         # multiple parallel values
     expect_error(makeAnnualMean(d,FUN=1))                   # non-function FUN
-    expect_error(makeAnnualMean(d,FUN=c(mean,mean)))        # multiple FUN values
+    expect_error(makeAnnualMean(d,FUN=c(mean, mean)))        # multiple FUN values
     
     d <- dummydata(1850)
     d$calendarStr <- ""
@@ -55,23 +55,23 @@ test_that("makeAnnualMean handles monthly data", {
     #    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=SAMPLEDATA)
     years <- 1850:1851
     d <- dummydata(years)
-    res <- makeAnnualMean(d,verbose=F)
+    res <- makeAnnualMean(d, verbose=F)
     
     # Is 'res' correct type and size?
     expect_is(res,"cmip5data")
     
     # Did unchanging info get copied correctly?
-    expect_equal(res$lon,d$lon)
-    expect_equal(res$lat,d$lat)
-    expect_equal(res$valUnit,d$valUnit)
-    expect_equal(res$files,d$files)
+    expect_equal(res$lon, d$lon)
+    expect_equal(res$lat, d$lat)
+    expect_equal(res$valUnit, d$valUnit)
+    expect_equal(res$files, d$files)
     
     # Do years match what we expect?
-    expect_equal(res$year,years)
+    expect_equal(res$year, years)
     
     # Is the answer value array correctly sized?
-    expect_equal(dim(res$val)[1:2],dim(d$val)[1:2])   # spatial size match
-    expect_equal(dim(res$val)[3],length(years))  # temporal size match
+    expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size match
+    expect_equal(dim(res$val)[3], length(years))  # temporal size match
     # TODO: levels! (above code)
     
     # Are the answer values numerically correct?
@@ -93,25 +93,25 @@ test_that("makeAnnualMean yearRange filter works", {
     uniqueYears <- uniqueYears[uniqueYears >= min(yearRange) & uniqueYears <= max(yearRange)]
     dummyans <- array(NA_real_, dim=c(dim(d$val)[c(1,2)], length(uniqueYears)))
     for(i in 1:length(uniqueYears)) {
-        dummyans[,,i] <- aaply(d$val[,,uniqueYears[i] == floor(yearIndex)], c(1,2), mean)
+        dummyans[,,i] <- aaply(d$val[,,uniqueYears[i] == floor(yearIndex)], c(1, 2), mean)
     }
     
     # Testing the test: check our choice of years above
-    expect_that(range(years),not(equals(range(yearRange))))
+    expect_that(range(years), not(equals(range(yearRange))))
     
     # makeMonthlyMean should return exactly the array calculated above
-    expect_equal(makeAnnualMean(d,yearRange=yearRange,verbose=F)$val, dummyans)
+    expect_equal(makeAnnualMean(d, yearRange=yearRange, verbose=F)$val, dummyans)
     
     # ...unless the time ranges don't match
-    expect_that(makeAnnualMean(d,verbose=F)$val,not(equals(dummyans)))
+    expect_that(makeAnnualMean(d, verbose=F)$val, not(equals(dummyans)))
 })
 
 test_that("makeAnnualMean parallel produces same answer", {
     #    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=SAMPLEDATA)
     years <- 1850:1851
     d <- dummydata(years)
-    res_s <- makeAnnualMean(d,verbose=F,parallel=F)
-    res_p <- makeAnnualMean(d,verbose=F,parallel=T)
+    res_s <- makeAnnualMean(d,verbose=F, parallel=F)
+    res_p <- makeAnnualMean(d,verbose=F, parallel=T)
     expect_equal(res_s,res_p)
 })
 
