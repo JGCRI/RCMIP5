@@ -2,9 +2,10 @@ library(ncdf4)
 
 #' Average all ensemble members of the specified experiment-variable-model combination
 #'
-#' @param variable CMIP5 variable of interest
-#' @param model CMIP5 model of interest
-#' @param experiment CMIP5 experiment of interest
+#' @param variable CMIP5 variable to load
+#' @param model CMIP5 model to load
+#' @param experiment CMIP5 experiment to load
+#' @param domain CMIP5 domain to load
 #' @param path root of directory tree
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
@@ -13,13 +14,16 @@ library(ncdf4)
 #' @export
 #' @examples
 #' loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE)
-loadModel <- function(variable, model, experiment, 
+loadModel <- function(variable, model, experiment, domain='[^_]+',
                       path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
+
+    path <- normalizePath(path)
     
     # Sanity checks
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
     stopifnot(length(experiment)==1 & is.character(experiment))
+    stopifnot(length(domain)==1 & is.character(domain))
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(file.exists(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
@@ -32,8 +36,9 @@ loadModel <- function(variable, model, experiment,
     } else {
         fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     }
-    fileList <- fileList[grepl(pattern=sprintf('%s_[a-zA-Z]+_%s_%s_', 
-                                               variable, model, experiment), fileList)]    
+    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_', # '%s_[a-zA-Z]+_%s_%s_' 
+                                               variable, domain, model, experiment), 
+                               basename(fileList))]    
     if(length(fileList)==0) {
         warning("Could not find any matching files")
         return(NULL)
@@ -48,8 +53,8 @@ loadModel <- function(variable, model, experiment,
     for(ensemble in ensembleArr) {
         temp <- loadEnsemble(variable, model, experiment, ensemble, 
                              path=path, verbose=verbose, recursive=recursive, demo=demo)
-        # If this is the first model
-        if(is.null(model.ls)) {
+        
+        if(is.null(model.ls)) {        # If this is the first model
             model.ls <- temp
         } else {
             if(identical(temp$lat, model.ls$lat) &            # Check that lat-lon-lev-time match

@@ -1,4 +1,4 @@
-# Testing code for the RCMIP5 (?) 'loadModel.R' script
+# Testing code for the RCMIP5 'loadModel.R' script
 
 # Uses the testthat package
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
@@ -20,9 +20,11 @@ test_that("loadModel handles bad input", {
     expect_error(loadModel(1,"",""))                          # non-character
     expect_error(loadModel("",1,""))                          # non-character
     expect_error(loadModel("","",1))                          # non-character
+    expect_error(loadModel("","","",domain=1))                # non-character
     expect_error(loadModel(c("",""),"",""))                   # multi-value
     expect_error(loadModel("",c("",""),""))                   # multi-value
     expect_error(loadModel("","",c("","")))                   # multi-value
+    expect_error(loadModel("","","",domain=c("","")))         # multi-value
     expect_error(loadModel("","","",verbose=1))               # non-logical verbose
     expect_error(loadModel("","","",recursive=1))             # non-logical recursive
     expect_error(loadModel("","","",demo=1))                  # non-logical demo
@@ -38,19 +40,26 @@ test_that("loadModel handles no files found", {            # no netcdf files fou
 
 test_that("loadModel loads monthly data", {
     path <- "../../sampledata/monthly/"
-    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=path)     # test data set
+    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=path,verbose=F)     # test data set
     expect_is(d,"cmip5data")
     expect_equal(length(d$files),4)                                 # should be four files
-    d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1',path=path)     
+    d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1',path=path,verbose=F)     
     expect_is(d,"cmip5data")
     expect_equal(length(d$files),1)                                 # should be one file
 })
 
-test_that("loadModel handles lat-lon-time mismatches", {
-    path <- "testdata_mismatch/"
-    expect_warning(loadModel("nbp","HadGEM2-ES","historical",path=path))
+test_that("loadModel loads annual data", {
+    path <- "../../sampledata/annual/"
+    d <- loadModel('co3','HadGEM2-ES','rcp85',path=path,verbose=F)
+    expect_is(d,"cmip5data")
+    expect_equal(length(d$files),1)                                 # should be one file
 })
 
-test_that("demo mode works", {
-    # TODO
+test_that("loadEnsemble checks unique domain", {
+    expect_error(loadModel("co3","fakemodel1-ES","rcp85",path='testdata_twodomains/',verbose=F))
+})
+
+test_that("loadModel handles lat-lon-time mismatches", {
+    path <- "testdata_mismatch/"
+    expect_warning(loadModel("nbp","HadGEM2-ES","historical",path=path,verbose=F))
 })
