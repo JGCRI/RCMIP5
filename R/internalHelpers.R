@@ -11,21 +11,20 @@
 #' cmip5data object. Not ideal.
 #' @note This is an internal RCMIP5 function and not exported.
 addProvenance <- function(prov=NULL, msg=NULL) {
-    MSG_PREFIX <- "--"
+    MSG_PREFIX <- "-"
     stopifnot(class(prov) %in% c("character", "NULL"))
     stopifnot(class(msg) %in% c("character", "NULL"))
-    stopifnot(length(msg) %in% c(0, 1))
-    
+
     # Get calling function's call (its name and parameters)
     parentcall <- "<parent unavailable>"
-    try({   
+    try({
         parentcall <- match.call(def=sys.function(-1), call=sys.call(-1))
         parentcall <- gsub(" ", "", paste(capture.output(parentcall), collapse=""))
         parentcall <- gsub("\\\"", "'", parentcall)
     }, silent=TRUE)
-    
+
     # TODO: would be nice to do addProvenance(x,"msg") and fake call-by-reference!
-    
+
     # Look for most recent call printed in provenance
     lastparentcall <- ""
     if(length(prov)) {
@@ -34,12 +33,15 @@ addProvenance <- function(prov=NULL, msg=NULL) {
                 lastparentcall <- prov[i]
                 break
             }
-        }  
+        }
     }
-    
+
     # Append the caller info (except when there's not been a change) and message
-    if(is.null(prov) | parentcall != lastparentcall)
+    if(is.null(prov) | parentcall != lastparentcall){
         prov <- c(prov, parentcall)
-    if(!is.null(msg)) prov <- c(prov, paste(MSG_PREFIX, msg))
-    prov
+    }
+    if(!is.null(msg)){
+        prov <- c(prov, paste(MSG_PREFIX, msg, sep=''))
+    }
+    return(prov)
 } # addProvenance
