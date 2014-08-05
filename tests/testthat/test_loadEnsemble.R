@@ -20,10 +20,12 @@ test_that("loadEnsemble handles bad input", {
     expect_error(loadEnsemble("",1,"",""))                          # non-character
     expect_error(loadEnsemble("","",1,""))                          # non-character
     expect_error(loadEnsemble("","","",1))                          # non-character
+    expect_error(loadEnsemble("","","","",domain=1))                # non-character
     expect_error(loadEnsemble(c("",""),"","",""))                   # multi-value
     expect_error(loadEnsemble("",c("",""),"",""))                   # multi-value
     expect_error(loadEnsemble("","",c("",""),""))                   # multi-value
     expect_error(loadEnsemble("","","",c("","")))                   # multi-value
+    expect_error(loadEnsemble("","","","",domain=c("","")))         # multi-value
     expect_error(loadEnsemble("","","","",verbose=1))               # non-logical verbose
     expect_error(loadEnsemble("","","","",recursive=1))             # non-logical recursive
     expect_error(loadEnsemble("","","","",demo=1))                  # non-logical demo

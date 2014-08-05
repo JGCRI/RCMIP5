@@ -30,6 +30,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
     stopifnot(length(model)==1 & is.character(model))
     stopifnot(length(experiment)==1 & is.character(experiment))
     stopifnot(length(ensemble)==1 & is.character(ensemble))
+    stopifnot(length(domain)==1 & is.character(domain))
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(file.exists(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
