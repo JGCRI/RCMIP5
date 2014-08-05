@@ -80,6 +80,7 @@ print.cmip5data <- function(x, ...) {
 #' @details Prints a short summary of the object.
 summary.cmip5data <- function(x) {
     cat("CMIP5 data")
+    ##TODO This may be unnessacary with the addition of provenance
     if(!is.null(x$numMonths)) {
         cat(" - annual summary\n")
         cat("(Mean months summarized:", mean(x$numMonths), "\n")
@@ -88,27 +89,26 @@ summary.cmip5data <- function(x) {
         cat("Mean years summarized:", mean(x$numYears), "\n")
     } else cat("\n")
 
-    yearString <- "[date parse error]"
-    try({
-        yearRange <- round(range(x$time), 2)
-        yearString <- paste(yearRange[1], yearRange[2], sep="-")
-    }, silent=T)
-
-    cat(yearString, "\n\n")
     cat("Variable:", x$variable, '\n')
+    cat("Domain:", x$domain, '\n')
     cat("Model:", x$model, "\n")
     cat("Experiment:", x$experiment, "\n")
     cat("Ensembles:", x$ensembles, "\n")
-    cat("Spatial: lon", length(x$lon), "lat", length(x$lat),
-        "lev", length(x$lev), "depth", length(x$depth), "\n")
-    cat("Time: step size ",x$time[2] - x$time[1]," yrs, length ",
-        length(x$time), ", range [",x$time[1], ', ', rev(x$time)[1] ,"]\n",
-        sep="")
-    cat("Data: ", x$valUnit, ", dimensions ", paste(dim(x$val), collapse=" "),
-        "\n", sep="")
-    print(summary(x$val))
+    cat("Spatial: lon [", length(x$lon), "] lat [", length(x$lat),
+        "] lev [", length(x$lev), "] or depth [", length(x$depth), "]\n")
+    if(!x$timeFreqStr %in% 'fx'){ ##Only show the time if not fx
+        cat("Time: step size [",x$time[2] - x$time[1],"] yrs, length ",
+            length(x$time), ", range [",x$time[1], ', ', rev(x$time)[1] ,"]\n",
+            sep="")
+    }
+    cat("Data: [", x$valUnit, "], dimensions [", paste(dim(x$val), collapse=" "),
+        "]\n", sep="")
+    print(summary(as.vector(x$val)))
     cat("Size: ")
     print(object.size(x), units="MB")
+
+    cat('\nProvenance:\n')
+    cat(paste(x$provenance, '\n', collapse=' '))
 }
 
 #' Convert a cmip5data object to a data frame
