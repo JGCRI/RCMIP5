@@ -14,9 +14,9 @@ library(testthat)
 dummydata <- function(years) {
     cmip5data(list(files="", 
          val=array(runif(10*10*12*length(years)), dim=c(10,10,12*length(years))),
-         valUnit="",
-         timeUnit=paste0("days since ",years[1],"-01-01"),
-         calendarStr="360_day",  # don't change this
+#         valUnit="",
+#         timeUnit=paste0("days since ",years[1],"-01-01"),
+#         calendarStr="360_day",  # don't change this
          lat=c(0:9),
          lon=c(0:9),
          time=30*c(0:(length(years)*12-1) ) ))
@@ -37,15 +37,6 @@ test_that("makeMonthlyMean handles bad input", {
     expect_error(makeMonthlyMean(d,FUN=1))                   # non-function FUN
     expect_error(makeMonthlyMean(d,FUN=c(mean,mean)))        # multiple FUN values
     
-    d <- dummydata(1850)
-    d$calendarStr <- ""
-    expect_error(makeMonthlyMean(d))        # corrupt calendarStr
-    d <- dummydata(1850)
-    d$timeUnit <- "days since 8767-31-54"
-    expect_error(makeMonthlyMean(d))        # corrupt timeUnit
-    d <- dummydata(1850)
-    d$timeUnit <- ""
-    expect_error(makeMonthlyMean(d))        # empty timeUnit
     d <- dummydata(1850)
     d$val <- array(1:2, dim=dim(d$val)-1)
     expect_error(makeMonthlyMean(d))        # corrupt value array
