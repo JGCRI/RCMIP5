@@ -31,7 +31,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     # Get and check area data, using 1's if nothing supplied
     areavals <- array(1, dim=dim(x$val)[1:2])
     if(is.null(area)) {
-        if(verbose) cat("Using unweighted areas\n")
+        if(verbose) cat("Using unweighted areas\n")  # TODO: should this be warning?
     } else {
         stopifnot(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
         areavals <- area$val
