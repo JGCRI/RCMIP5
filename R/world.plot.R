@@ -10,7 +10,7 @@ library(fields)
 world.plot <- function(x, time=1, main=NULL, parList=NULL,
                        centerZero=FALSE,  absNum=NULL, axisFlag=TRUE,
                        showRange=TRUE, verbose=FALSE, simple=FALSE,
-                       col=NULL, latAxis=TRUE, lonAxis=TRUE){
+                       col=NULL, latAxis=TRUE, lonAxis=TRUE) {
     ##        main - string that is the title of the plot
     ##        parList - a list of par values
     ##        centerZero - coloring of the map is centered around 0
@@ -20,6 +20,9 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     ##        simple - don't show the color key and just print the maps
     
     if(verbose) cat('******world.plot starting************\n')
+
+    # Sanity checks
+    stopifnot(class(x)=="cmip5data")
     
     # Pull the lat/lon/val/main from the cmip5 object
     lon <- x$lon
@@ -44,7 +47,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     # Figure out the color scheme and what the min/max we are plotting
     ###################################################################
     if(!is.null(absNum)) { ##are there min/max cut off's provided?
-        if(verbose){cat('setting abs min/max \n')}
+        if(verbose) cat('setting abs min/max \n')
         # set the min/max to some absolute number
         minNum <- absNum[1]
         maxNum <- absNum[2]
@@ -60,7 +63,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
         if(trueDiv < maxDiv) maxDiv <- trueDiv
         minNum <- -maxDiv
         maxNum <- maxDiv
-    } else { #set the min/max relitive to the quantiles
+    } else { # set the min/max relitive to the quantiles
         if(verbose) cat('setting quant derived min/max')
         quant <- quantile(val, na.rm=TRUE)
         minNum <- quant[[3]]-10*(quant[[3]]-quant[[2]])
@@ -86,7 +89,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
             col <- tim.colors(numBreaks-1)
         }
     } else {
-        col <- col(numBreaks-1)
+        col <- col(numBreaks-1)   # TODO: this doesn't work
     }
     
     ####################################################
@@ -102,8 +105,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     # ...change the break labels were appropreate
     if(any(val<minNum, na.rm=TRUE)) {
         if(showRange){
-            breakLabels[1] <- paste('[', signif( trueMin, digits=2)
-                                    , 'to',  breakLabels[2], ']')
+            breakLabels[1] <- paste('[', signif( trueMin, digits=2), 'to', breakLabels[2], ']')
         } else {
             breakLabels[1] <- paste(breakLabels[2], '-')
         }
@@ -131,7 +133,6 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
         cat('labelPos: [', labelPos[breakIndex],']\n')
     }
     
-    
     ################################################################
     # Set the parameter list
     ################################################################
@@ -142,7 +143,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     # Plot the figures
     #################################################################
     numlon <- length(lon)
-    half.numlon <- ceiling(length(lon)*0.527) #calculated to yeild a division at 190 for a 360 grid
+    half.numlon <- ceiling(length(lon) * 0.527) # yields a division at 190 for a 360 grid
     
     # Split at the Pacific ocean
     shiftIndex <- c(half.numlon:numlon, 1:(half.numlon-1))
