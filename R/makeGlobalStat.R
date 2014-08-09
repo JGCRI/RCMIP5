@@ -10,9 +10,11 @@ library(abind)
 #' @param FUN function. Function to apply across grid
 #' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object.
-#' @note We expect that weighted.mean and weighted.sum will be the most frequent
-#' calculations needed. The former is built into R, and we provide the latter. TODO
-#' A user-supplied function must follow weighted.mean, accepting parameters 'x' and 'w'.
+#' @note We expect that weighted.mean and a weighted sum will be the most frequent
+#' calculations needed. The former is built into R, and the latter can generally
+#' be calculated as weighted.mean * sum(area).
+#' A user-supplied function must follow the weighted.mean syntax, in particular 
+#' accepting parameters 'x' (data) and 'w' (weights) of equal size.
 #' @export
 makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weighted.mean, ...) {
     
@@ -62,3 +64,13 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     }
     return(x)
 } # makeGlobalStat
+
+#' Weighted sum--i.e., sum of weighted means. Convenience function
+#'
+#' @param x vector of data
+#' @param w vector of weights
+#' @param ... passed on to weighted.mean
+#' @return weighted mean multipled by sum of weights
+#' @export
+#' @seealso \code{\link{weighted.mean}}
+weighted.sum <- function(x, w, ...) { weighted.mean(x, w, ...) * sum(w) }
