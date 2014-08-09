@@ -7,12 +7,13 @@ library(abind)
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across months of year
+#' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object.
 #' @export
 #' @examples
 #' makeAnnualStat(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 #' @seealso \code{\link{makeMonthlyMean}}
-makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
+makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
@@ -36,7 +37,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             ans <- foreach(i=1:length(uniqueYears), .combine = function(...) abind(..., along=timeIndex), .packages='plyr') %dopar% {
-                aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), c(1:(timeIndex-1)), FUN)
+                aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), c(1:(timeIndex-1)), FUN, ...)
             }
         } else {
             if(verbose) cat("Running in serial\n")
@@ -44,7 +45,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
             for(i in 1:length(uniqueYears)) {
                 if(verbose & floor(i/1)==i/1) cat(i, " ")
                 ans[[i]] <- aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), 
-                                       dims=timeIndex), c(1:(timeIndex-1)), FUN)
+                                       dims=timeIndex), c(1:(timeIndex-1)), FUN, ...)
             }
             ans <- abind(ans, along=timeIndex)
         }

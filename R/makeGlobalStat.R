@@ -8,12 +8,13 @@ library(abind)
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across grid
+#' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object.
 #' @note We expect that weighted.mean and weighted.sum will be the most frequent
 #' calculations needed. The former is built into R, and we provide the latter. TODO
 #' A user-supplied function must follow weighted.mean, accepting parameters 'x' and 'w'.
 #' @export
-makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weighted.mean) {
+makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weighted.mean, ...) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
@@ -44,7 +45,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
     if(verbose) cat("Running in", ifelse(parallel, "parallel", "serial"), "\n")
     timer <- system.time( # time the main computation
-        x$val <- unname(aaply(x$val, c(3:timeIndex), .fun=FUN, w=areavals, .parallel=parallel))
+        x$val <- unname(aaply(x$val, c(3:timeIndex), .fun=FUN, w=areavals, .parallel=parallel, ...))
     ) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
