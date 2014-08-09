@@ -1,5 +1,3 @@
-# TODO: test new level-aware code!
-
 # Testing code for the RCMIP5 'makeAnnualStat.R' script
 
 # Uses the testthat package
@@ -17,9 +15,6 @@ context("makeAnnualStat")
 test_that("makeAnnualStat handles bad input", {
     expect_error(makeAnnualStat(1))                         # non-list d
     expect_error(makeAnnualStat(cmpi5data()))               # wrong size list d
-    expect_error(makeAnnualStat(d,yearRange=1))             # non-vector yearRange
-    expect_error(makeAnnualStat(d,yearRange=c(-1, 1)))       # illegal value yearRange
-    expect_error(makeAnnualStat(d,yearRange=c(1, 2, 3)))      # wrong vector size yearRange
     expect_error(makeAnnualStat(d,verbose=1))               # non-logical verbose
     expect_error(makeAnnualStat(d,verbose=c(T, T)))          # multiple verbose values
     expect_error(makeAnnualStat(d,parallel=1))              # non-logical parallel

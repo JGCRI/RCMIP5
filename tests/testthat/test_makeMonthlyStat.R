@@ -1,5 +1,3 @@
-# TODO: test new level-aware code!
-
 # Testing code for the RCMIP5 'makeMonthlyStat.R' script
 
 # Uses the testthat package
@@ -17,9 +15,6 @@ context("makeMonthlyStat")
 test_that("makeMonthlyStat handles bad input", {
     expect_error(makeMonthlyStat(1))                         # non-list d
     expect_error(makeMonthlyStat(cmpi5data()))               # wrong size list d
-    expect_error(makeMonthlyStat(d,yearRange=1))             # non-vector yearRange
-    expect_error(makeMonthlyStat(d,yearRange=c(-1, 1)))       # illegal value yearRange
-    expect_error(makeMonthlyStat(d,yearRange=c(1, 2, 3)))      # wrong vector size yearRange
     expect_error(makeMonthlyStat(d,verbose=1))               # non-logical verbose
     expect_error(makeMonthlyStat(d,verbose=c(T, T)))          # multiple verbose values
     expect_error(makeMonthlyStat(d,parallel=1))              # non-logical parallel
@@ -77,6 +72,12 @@ test_that("makeMonthlyStat parallel results == serial result", {
     expect_equal(res_s$time, res_p$time)
     expect_equal(res_s$timeUnit, res_p$timeUnit)
     expect_equal(res_s$numMonths, res_p$numMonths)
+})
+
+test_that("makeAnnualStat handles annual data", {
+    years <- 1850:1851
+    d <- dummydata(years, monthly=F)
+    expect_error(makeMonthlyStat(d, verbose=F))
 })
 
 test_that("makeMonthlyStat handles 4-dimensional data", {
