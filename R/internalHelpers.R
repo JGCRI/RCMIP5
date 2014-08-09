@@ -71,10 +71,12 @@ dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE) {
 #    print(valdims)
     
     cmip5data(list(files="dummy file", 
+                   variable="dummyvar",
                    val=array(1:3, dim=valdims),
                    valUnit="dummy unit",
                    timeUnit=paste0("days since ",years[1],"-01-01"),
                    calendarStr="360_day",
+                   timeFreqStr=ifelse(monthly, "mon", "yr"),
                    lat=c(0:9),
                    lon=c(0:9),
                    depth=depthdim,
