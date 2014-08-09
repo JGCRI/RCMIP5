@@ -1,7 +1,7 @@
 library(plyr)
 library(abind)
 
-#' Compute annual mean (or other function) of a variable
+#' Compute monthly means (or other function) of a variable
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param verbose logical. Print info as we go?
@@ -10,13 +10,13 @@ library(abind)
 #' @return A \code{\link{cmip5data}} object.
 #' @export
 #' @examples
-#' makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
-#' @seealso \code{\link{makeMonthlyMean}}
-makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
+#' makeMonthlyStat(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
+#' @seealso \code{\link{makeAnnualMean}}
+makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
-    stopifnot(is.null(x$numMonths))
+    stopifnot(is.null(x$numYears))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
@@ -28,35 +28,36 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
     
     uniqueYears <- unique(floor(x$time))
+    monthIndex <- floor((x$time %% 1) * 12 + 1)
     
-    if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
+    if(parallel) parallel <- require(foreach) & require(doParallel)
     timer <- system.time( # time the main computation, below
         
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-            ans <- foreach(i=1:length(uniqueYears), .combine = function(...) abind(..., along=timeIndex), .packages='plyr') %dopar% {
-                aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), c(1:(timeIndex-1)), FUN)
+            ans <- foreach(i=1:12, .combine=function(...) abind(..., along=timeIndex), .packages='plyr') %dopar% {
+                aaply(asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
         } else {
             if(verbose) cat("Running in serial\n")
             ans <- list()
-            for(i in 1:length(uniqueYears)) {
-                if(verbose & floor(i/1)==i/1) cat(i, " ")
-                ans[[i]] <- aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), 
-                                       dims=timeIndex), c(1:(timeIndex-1)), FUN)
+            for(i in 1:12) {
+                if(verbose) cat(i, " ")
+                ans[[i]] <- aaply(
+                    asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
             ans <- abind(ans, along=timeIndex)
         }
     ) # system.time
     
-    if(verbose) cat('\nTook', timer[3], 's\n')
+    if(verbose) cat('\nTook',timer[3], 's\n')
     
     x$val <- unname(ans)
-    x$time <- uniqueYears
-    x$timeUnit <- "years (summarized)"
-    x$numMonths <- table(floor(x$time))
+    x$numYears <- unname(table(floor(monthIndex)))
+    x$timeUnit <- "months (summarized)"
+    x$time <- 1:12
     x$provenance <- addProvenance(x$provenance, paste("Calculated", as.character(substitute(FUN)), 
-                                                      "for years", min(x$time), "-", max(x$time)))
+                                                      "for months", min(x$time), "-", max(x$time)))
     return(x)
-} # makeAnnualMean
+} # makeMonthlyStat
