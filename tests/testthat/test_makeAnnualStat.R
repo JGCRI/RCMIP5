@@ -41,7 +41,8 @@ test_that("makeAnnualStat handles monthly data", {
     expect_equal(res$valUnit, d$valUnit)
     expect_equal(res$files, d$files)
     
-    # Provenance updated?
+    # numMonths set and provenance updated?
+    expect_is(res$numMonths, "table")
     expect_more_than(length(res$provenance), length(d$provenance))
     
     # Do years match what we expect?
