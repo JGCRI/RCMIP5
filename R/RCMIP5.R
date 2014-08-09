@@ -66,6 +66,8 @@ print.cmip5data <- function(x, ...) {
         cat("- annual summary: ")
     } else if(!is.null(x$numYears)) {
         cat(" - monthly summary ")
+    } else if(!is.null(x$numCells)) {
+        cat(" - spatial summary ")
     }
 
     cat(paste(x$variable, x$model, x$experiment, yearString,
@@ -87,6 +89,9 @@ summary.cmip5data <- function(x) {
     } else if(!is.null(x$numYears)) {
         cat(" - monthly summary\n")
         cat("Mean years summarized:", mean(x$numYears), "\n")
+    } else if(!is.null(x$numCells)) {
+        cat(" - spatial summary\n")
+        cat("Cells summarized:", x$numCells, "\n")
     } else cat("\n")
 
     cat("Variable:", x$variable, '\n')
