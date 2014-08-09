@@ -1,0 +1,113 @@
+# Testing code for the RCMIP5 'makeGlobalStat.R' script
+
+# Uses the testthat package
+# See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
+library(testthat)
+library(plyr)
+library(abind)
+
+# To run this code: 
+#   source("makeGlobalStat.R")
+#   source("internalHelpers.R") # for dummyData
+#   library(testthat)
+#   test_file("tests/testthat/test_makeGlobalStat.R")
+
+context("makeGlobalStat")
+
+test_that("makeGlobalStat handles bad input", {
+    expect_error(makeGlobalStat(1))                         # non-list d
+    expect_error(makeGlobalStat(cmpi5data()))               # wrong size list d
+    expect_error(makeGlobalStat(d,verbose=1))               # non-logical verbose
+    expect_error(makeGlobalStat(d,verbose=c(T, T)))          # multiple verbose values
+    expect_error(makeGlobalStat(d,parallel=1))              # non-logical parallel
+    expect_error(makeGlobalStat(d,parallel=c(T, T)))         # multiple parallel values
+    expect_error(makeGlobalStat(d,FUN=1))                   # non-function FUN
+    expect_error(makeGlobalStat(d,FUN=c(mean, mean)))        # multiple FUN values
+})
+
+test_that("makeGlobalStat handles monthly data", {
+    years <- 1850:1851
+    d <- dummydata(years)
+    res <- makeGlobalStat(d, verbose=F)
+    
+    # Is 'res' correct type and size?
+    expect_is(res,"cmip5data")
+    
+    # Did unchanging info get copied correctly?
+    expect_equal(res$valUnit, d$valUnit)
+    expect_equal(res$files, d$files)
+    
+    # Lon/lat removed, numCells set, and provenance updated?
+    expect_null(res$lon)
+    expect_null(res$lat)
+    expect_is(res$numCells, "integer")
+    expect_more_than(length(res$provenance), length(d$provenance))
+    
+    # Does time match what we expect?
+    expect_equal(res$time, d$time)
+    
+    # Is the answer value array correctly sized?
+    expect_equal(length(res$val), prod(dim(d$val)[3:length(dim(d$val))]))
+    
+    # Are the answer values numerically correct?
+    expect_equal(mean(res$val), mean(d$val))
+})
+
+test_that("makeGlobalStat weights correctly", {
+    d <- dummydata(1850:1851)
+    res <- makeGlobalStat(d, area=d, verbose=F)
+    
+    # Are the answer values numerically correct?
+    areavals <- asub(d$val, list(1), dims=3)    # get spatial array    
+    dummyans <- unname(aaply(d$val, 3, .fun=weighted.mean, w=areavals))
+    expect_equal(dummyans, res$val)
+})
+
+test_that("weighted.sum works correctly", {
+    d <- dummydata(1850:1851)
+    res <- makeGlobalStat(d, area=d, verbose=F, FUN=weighted.sum)
+    
+    # Are the answer values numerically correct?
+    areavals <- asub(d$val, list(1), dims=3)    # get spatial array    
+    dummyans <- unname(aaply(d$val, 3, .fun=weighted.sum, w=areavals))
+    expect_equal(dummyans, res$val)
+    
+    # Make sure the function itself is OK
+    expect_equal(weighted.sum(1:4), 10)
+    expect_equal(weighted.sum(1:4, 1:4), 30) # 4*4 + 3*3 + 2*2 + 1*1
+})
+
+test_that("makeGlobalStat parallel results == serial result", {
+    years <- 1850:1851
+    d <- dummydata(years)
+    res_s <- makeGlobalStat(d, verbose=F, parallel=F)
+    res_p <- makeGlobalStat(d, verbose=F, parallel=T)
+    expect_equal(res_s$val, res_p$val)
+    expect_equal(res_s$time, res_p$time)
+    expect_equal(res_s$timeUnit, res_p$timeUnit)
+    expect_equal(res_s$numMonths, res_p$numMonths)
+})
+
+test_that("makeGlobalStat handles 4-dimensional data", {
+    years <- 1850:1851
+    d <- dummydata(years, depth=T)
+    res <- makeGlobalStat(d, verbose=F)
+    
+    # Do years match what we expect?
+    expect_equal(res$time, d$time)
+    
+    # Is the answer value array correctly sized?
+    expect_equal(length(res$val), prod(dim(d$val)[3:length(dim(d$val))]))
+    
+    # Same tests, but with lev
+    d <- dummydata(years, lev=T)
+    res <- makeGlobalStat(d, verbose=F)
+    expect_equal(res$time, d$time)
+    expect_equal(length(res$val), prod(dim(d$val)[3:length(dim(d$val))]))
+    
+    # Don't know if this ever will occur, but need to handle lev AND depth
+    d <- dummydata(years, depth=T, lev=T)
+    res <- makeGlobalStat(d, verbose=F)
+    expect_equal(res$time, d$time)
+    expect_equal(length(res$val), prod(dim(d$val)[3:length(dim(d$val))]))
+})
