@@ -18,6 +18,7 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(is.null(x$numYears))
+    stopifnot(x$timeFreqStr=="mon")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
