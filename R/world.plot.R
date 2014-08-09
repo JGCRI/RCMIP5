@@ -1,14 +1,12 @@
 library(fields)
 
-world.plot <- function(lon, lat, val, title='world plot', parList=NULL,
+world.plot <- function(cmip5Obj, time=1, main=NULL, parList=NULL,
                        centerZero=FALSE,  absNum=NULL, axisFlag=TRUE,
                        showRange=TRUE, debugging=FALSE, simple=FALSE,
                        col=NULL, latAxis=TRUE, lonAxis=TRUE){
     ##Purpose: create a world map with reasonable coloring
-    ##Inputs: lon - a vector with the logitudes from 0 to 360 (Note that this needs to START at 0 and END at 360-step)
-    ##        lat - a vector with the latitudes from -90 to 90 (Note this does not have to span the full latitudes but does need to match the dimentions of the val)
-    ##        val - a matrix of values that is (lon,lat)
-    ##        title - string that is the title of the plot
+    ##Inputs: cmip5Obj - a cmip5 object
+    ##        main - string that is the title of the plot
     ##        parList - a list of par values
     ##        centerZero - coloring of the map is centered around 0
     ##        absNum - absolute c(min, max) for the coloring
@@ -21,6 +19,17 @@ world.plot <- function(lon, lat, val, title='world plot', parList=NULL,
     ##Programmer: K Todd-Brown ktoddbrown@gmail.com
 
     if(debugging){cat('******world.plot starting************\n')}
+
+    ##Pull the lat/lon/val/main from the cmip5 object
+    lon <- cmip5Obj$lon
+    lat <- cmip5Obj$lat
+    if(length(dim(val)) > 2){
+        val <- cmip5Obj$val[,,time]
+    }
+
+    if(is.null(main)){
+        main <- sprintf('%s %s [%s]', cmip5Obj$model, cmip5Obj$variable, cmip5Obj$valUnit)
+    }
 
     val[!is.finite(val)] <- NA           #clean up the values to plot
 
@@ -141,8 +150,8 @@ world.plot <- function(lon, lat, val, title='world plot', parList=NULL,
     ##legend.mar set to 12 to give lots of room to the break labels
     if(!simple){
         image.plot(lon-180, lat[lat > -60], val[shiftIndex,lat > -60],
-                   main = title,
-                   col=col, breaks=breaks,
+                   main = main,
+                   col = col, breaks = breaks,
                    axis.args=list(at=labelPos[breakIndex],
                                   labels=breakLabels[breakIndex]),
                    legend.mar=12,
@@ -150,8 +159,8 @@ world.plot <- function(lon, lat, val, title='world plot', parList=NULL,
 
     }else{
         image(lon-180, lat[lat > -60], val[shiftIndex, lat > -60],
-              main=title,
-              col=col, breaks=breaks,
+              main = main,
+              col = col, breaks = breaks,
               xlab = '', ylab='', yaxt='n', xaxt='n')
 
     }
