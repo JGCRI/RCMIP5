@@ -1,52 +1,63 @@
-makeGlobalStat <- function(val, area=NULL, stat.fun=NULL,
-                           unitStr='', variable='', ...){
+library(plyr)
+library(abind)
 
-    #Sanity check val
-    stopifnot(class(val) %in% 'cmip5data')
-    #check that val only has 3 dimentions
-    if(length(dim(val$val)) != 3){
-        stop('Val$val must be 3 dimentions')
-    }
-    varProv <- c('(val provenance)', val$provenance)
-
-    if(!is.null(area)){
-        stopifnot(class(area) %in% 'cmip5data')
-        ##some of the area have a 3rd dummy dimention (ie [,,1]) deal with this
-        if(length(as.vector(area$val)) != prod(dim(area$val)[1:2])){
-            stop('Area$val can not be more then 2 dimentions')
+#' Compute global mean (or other function) of a variable
+#'
+#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
+#' @param area cmip5data An area cmip5data data structure
+#' @param verbose logical. Print info as we go?
+#' @param parallel logical. Parallelize if possible?
+#' @param FUN function. Function to apply across grid
+#' @return A \code{\link{cmip5data}} object.
+#' @note We expect that weighted.mean and weighted.sum will be the most frequent
+#' calculations needed. The former is built into R, and we provide the latter. TODO
+#' A user-supplied function must follow weighted.mean, accepting parameters 'x' and 'w'.
+#' @export
+makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weighted.mean) {
+    
+    # Sanity checks
+    stopifnot(class(x)=="cmip5data")
+    stopifnot(is.null(area) | class(area)=="cmip5data")
+    stopifnot(length(verbose)==1 & is.logical(verbose))
+    stopifnot(length(parallel)==1 & is.logical(parallel))
+    stopifnot(length(FUN)==1 & is.function(FUN))
+    
+    timeIndex <- length(dim(x$val))  # time is always the last index
+    if(verbose) cat("Time index =", timeIndex, "\n")
+    
+    # Get and check area data, using 1's if nothing supplied
+    areavals <- array(1, dim=dim(x$val)[1:2])
+    if(is.null(area)) {
+        if(verbose) cat("Using unweighted areas\n")
+    } else {
+        stopifnot(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
+        areavals <- area$val
+        dav <- dim(areavals)
+        if(length(dav) > 2) {
+            warning("Ignoring extra area dimensions")
+            areavals <- asub(areavals, as.list(rep(1, length(dav)-2)), dims=3:length(dav))       
         }
-        dim(area$val) <- dim(area$val)[1:2]
-
-        ##check that the val and area dimentions match
-        if(! (identical(val$lat, area$lat) &
-              identical(val$lon, area$lon))){
-            stop('lat-lon does not match')
-        }
-        varProv <- c(varProv, '(area provenance)', area$provenance)
     }
-
-    ans <- val
-    #remove all the spatial info
-    ans[c('depth', 'lat', 'lev', 'lon')] <- NULL
-    if(!is.null(area) & is.null(stat.fun)){
-        ans$unitStr <- val$unitStr
-        ans$variable <- val$variable
-        ans$val <- apply(val$val, c(3), function(x){
-            sum(x*area$val, na.rm=TRUE)/sum(area$val[is.finite(x)], na.rm=TRUE)
-        })
-    }else if(!is.null(area)){
-        ans$valUnit <- unitStr
-        ans$variable <- variable
-        ans$val <- apply(val$val, c(3), function(x){
-            stat.fun(x*area$val, ...)})
-    }else{
-        cat('flag1')
-        ans$valUnit <- unitStr
-        ans$variable <- variable
-        ans$val <- apply(val$val, c(3), stat.fun, ...)
+    if(verbose) cat("Area grid dimensions", dim(areavals), "\n")
+    
+    # Main computation code
+    if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
+    if(verbose) cat("Running in", ifelse(parallel, "parallel", "serial"), "\n")
+    timer <- system.time( # time the main computation
+        x$val <- unname(aaply(x$val, c(3:timeIndex), .fun=FUN, w=areavals, .parallel=parallel))
+    ) # system.time
+    
+    if(verbose) cat('\nTook', timer[3], 's\n')
+    
+    # Finish up
+    x[c('lat', 'lon')] <- NULL
+    x$variable <- paste(as.character(substitute(FUN)), "of", x$variable)
+    x$numCells <- length(areavals)
+    x$provenance <-  addProvenance(x$provenance, 
+                                   paste("Computed global", as.character(substitute(FUN))))
+    if(!is.null(area)) {
+        x$provenance <-  addProvenance(x$provenance, "Used area data:")
+        x$provenance <- addProvenance(x$provenance, area$provenance)        
     }
-
-    ans$provenance <-  addProvenance(NULL,
-                              c("Computed global stat", varProv))
-    return(ans)
-}
+    return(x)
+} # makeGlobalStat
