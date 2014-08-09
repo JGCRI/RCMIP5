@@ -19,11 +19,12 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(file.exists(path))
 
-    #################
-    # Pull the full filenames and extract short (no path or extension) names
-    #################
-    path <- normalizePath(path) ##make OS neutral
-
+    # Match the path conventions to the operating system
+    w <- getOption('warn')
+    options(warn=-1)
+    path <- normalizePath(path)
+    options(warn=w)
+    
     # Pull all nc files from the directory
     fullFile <- list.files(path=path, pattern='nc$',
                            full.names=TRUE, recursive=recursive)

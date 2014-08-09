@@ -1,6 +1,6 @@
 # TODO: test new level-aware code!
 
-# Testing code for the RCMIP5 (?) 'makeAnnualMean.R' script
+# Testing code for the RCMIP5 'makeAnnualMean.R' script
 
 # Uses the testthat package
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
@@ -8,19 +8,9 @@ library(testthat)
 
 # To run this code: 
 #   source("makeAnnualMean.R")
+#   source("internalHelpers.R") # for dummyData
 #   library(testthat)
 #   test_file("tests/testthat/test_makeAnnualMean.R")
-
-dummydata <- function(years) {
-    cmip5data(list(files="", 
-                   val=array(runif(10*10*12*length(years)), dim=c(10,10,12*length(years))),
-                   valUnit="",
-                   timeUnit=paste0("days since ",years[1],"-01-01"),
-                   calendarStr="360_day",  # don't change this
-                   lat=c(0:9),
-                   lon=c(0:9),
-                   time=30*c(0:(length(years)*12-1) ) ))
-} # dummydata
 
 context("makeAnnualMean")
 
@@ -38,21 +28,11 @@ test_that("makeAnnualMean handles bad input", {
     expect_error(makeAnnualMean(d,FUN=c(mean, mean)))        # multiple FUN values
     
     d <- dummydata(1850)
-    d$calendarStr <- ""
-    expect_error(makeAnnualMean(d))        # corrupt calendarStr
-    d <- dummydata(1850)
-    d$timeUnit <- "days since 8767-31-54"
-    expect_error(makeAnnualMean(d))        # corrupt timeUnit
-    d <- dummydata(1850)
-    d$timeUnit <- ""
-    expect_error(makeAnnualMean(d))        # empty timeUnit
-    d <- dummydata(1850)
     d$val <- array(1:2, dim=dim(d$val)-1)
-    expect_error(makeAnnualMean(d))        # corrupt value array
+    expect_error(makeAnnualMean(d, verbose=F))        # corrupt value array
 })
 
 test_that("makeAnnualMean handles monthly data", {
-    #    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=SAMPLEDATA)
     years <- 1850:1851
     d <- dummydata(years)
     res <- makeAnnualMean(d, verbose=F)
@@ -66,59 +46,90 @@ test_that("makeAnnualMean handles monthly data", {
     expect_equal(res$valUnit, d$valUnit)
     expect_equal(res$files, d$files)
     
+    # Provenance updated?
+    expect_more_than(length(res$provenance), length(d$provenance))
+    
     # Do years match what we expect?
-    expect_equal(res$year, years)
+    expect_equal(res$time, years)
     
     # Is the answer value array correctly sized?
     expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size match
-    expect_equal(dim(res$val)[3], length(years))  # temporal size match
-    # TODO: levels! (above code)
+    expect_equal(dim(res$val)[length(dim(res$val))], length(years))  # temporal size match
     
     # Are the answer values numerically correct?
-    yearIndex <- d$time/360 + years[1]
     dummyans <- array(NA_real_, dim=c(dim(d$val)[c(1,2)], length(years)))
     for(i in 1:length(years)) {
-        dummyans[,,i] <- aaply(d$val[,,years[i] == floor(yearIndex)], c(1,2), mean)
+        dummyans[,,i] <- aaply(d$val[,,years[i] == floor(d$time)], c(1,2), mean)
     }
     expect_equal(res$val, dummyans)
 })
 
-test_that("makeAnnualMean yearRange filter works", {
-    years <- 1850:1853
-    yearRange <- 1851:1852
-    d <- dummydata(years)
-    
-    yearIndex <- d$time/360 + years[1]
-    uniqueYears <- unique(floor(yearIndex))
-    uniqueYears <- uniqueYears[uniqueYears >= min(yearRange) & uniqueYears <= max(yearRange)]
-    dummyans <- array(NA_real_, dim=c(dim(d$val)[c(1,2)], length(uniqueYears)))
-    for(i in 1:length(uniqueYears)) {
-        dummyans[,,i] <- aaply(d$val[,,uniqueYears[i] == floor(yearIndex)], c(1, 2), mean)
-    }
-    
-    # Testing the test: check our choice of years above
-    expect_that(range(years), not(equals(range(yearRange))))
-    
-    # makeMonthlyMean should return exactly the array calculated above
-    expect_equal(makeAnnualMean(d, yearRange=yearRange, verbose=F)$val, dummyans)
-    
-    # ...unless the time ranges don't match
-    expect_that(makeAnnualMean(d, verbose=F)$val, not(equals(dummyans)))
-})
-
-test_that("makeAnnualMean parallel produces same answer", {
-    #    d <- loadModel('nbp','HadGEM2-ES','rcp85',path=SAMPLEDATA)
+test_that("makeAnnualMean parallel results == serial result", {
     years <- 1850:1851
     d <- dummydata(years)
-    res_s <- makeAnnualMean(d,verbose=F, parallel=F)
-    res_p <- makeAnnualMean(d,verbose=F, parallel=T)
-    expect_equal(res_s,res_p)
+    res_s <- makeAnnualMean(d, verbose=F, parallel=F)
+    res_p <- makeAnnualMean(d, verbose=F, parallel=T)
+    expect_equal(res_s$val, res_p$val)
+    expect_equal(res_s$time, res_p$time)
+    expect_equal(res_s$timeUnit, res_p$timeUnit)
+    expect_equal(res_s$numMonths, res_p$numMonths)
 })
 
 test_that("makeAnnualMean handles annual data", {
-    # TODO
+    years <- 1850:1851
+    d <- dummydata(years, monthly=F)
+    res <- makeAnnualMean(d, verbose=F)
+    
+    # Is 'res' correct type and size?
+    expect_is(res,"cmip5data")
+    
+    # Did unchanging info get copied correctly?
+    expect_equal(res$lon, d$lon)
+    expect_equal(res$lat, d$lat)
+    expect_equal(res$valUnit, d$valUnit)
+    expect_equal(res$files, d$files)
+    
+    # Provenance updated?
+    expect_more_than(length(res$provenance), length(d$provenance))
+    
+    # Do years match what we expect?
+    expect_equal(res$time, years)
+    
+    # Is the answer value array correctly sized?
+    expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size match
+    expect_equal(dim(res$val)[length(dim(res$val))], length(years))  # temporal size match
+    
+    # Are the answer values numerically correct?
+    dummyans <- array(NA_real_, dim=c(dim(d$val)[c(1,2)], length(years)))
+    for(i in 1:length(years)) {
+        dummyans[,,i] <- aaply(d$val[,,years[i] == floor(d$time)], c(1,2), mean)
+    }
+    expect_equal(res$val, dummyans)
 })
 
 test_that("makeAnnualMean handles 4-dimensional data", {
-    # TODO
+    years <- 1850:1851
+    d <- dummydata(years, depth=T)
+    res <- makeAnnualMean(d, verbose=F)
+    
+    # Do years match what we expect?
+    expect_equal(res$time, years)
+    
+    # Is the answer value array correctly sized?
+    expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
+    expect_equal(dim(res$val)[4], length(years))  # temporal size match
+    
+    # Same tests, but with lev
+    d <- dummydata(years, lev=T)
+    res <- makeAnnualMean(d, verbose=F)
+    expect_equal(res$time, years)
+    expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
+    expect_equal(dim(res$val)[4], length(years))  # temporal size match
+    
+    # Don't know if this ever will occur, but need to handle lev AND depth
+    d <- dummydata(years, depth=T, lev=T)
+    res <- makeAnnualMean(d, verbose=F)
+    expect_equal(res$time, years)
+    expect_equal(dim(res$val)[1:4], dim(d$val)[1:4])   # spatial size match
+    expect_equal(dim(res$val)[5], length(years))  # temporal size match
 })

@@ -13,8 +13,8 @@ library(testthat)
 context("addProvenance")
 
 test_that("addProvenance handles bad input", {
+    expect_error(addProvenance(prov=3))
     expect_error(addProvenance(msg=3))
-    expect_error(addProvenance(msg=c("foo","bar")))
 })
 
 test_that("addProvenance initializes", {

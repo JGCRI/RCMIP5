@@ -24,8 +24,11 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                          path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
 
     # Match the path conventions to the operating system
+    w <- getOption('warn')
+    options(warn=-1)
     path <- normalizePath(path)
-
+    options(warn=w)
+    
     # Sanity checks
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
@@ -44,7 +47,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
     } else {
         fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     }
-    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_%s[_\\.]',
+    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_%s', # ^%s_%s_%s_%s_%s[_\\.]
                                                variable, domain, model, experiment, ensemble),
                                basename(fileList))]
     if(length(fileList)==0) {

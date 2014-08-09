@@ -13,25 +13,25 @@ library(abind)
 #' makeAnnualMean(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 #' @seealso \code{\link{makeMonthlyMean}}
 makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
-
+    
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(is.null(x$numMonths))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
-    stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
-
+    stopifnot(length(dim(x$val)) %in% c(3, 4, 5)) # that's all we know
+    
     timeIndex <- length(dim(x$val))  # time is always the last index
     if(verbose) cat("Time index =", timeIndex, "\n")
-
+    
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
-
+    
     uniqueYears <- unique(floor(x$time))
-
+    
     if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
     timer <- system.time( # time the main computation, below
-
+        
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
@@ -43,19 +43,20 @@ makeAnnualMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
             ans <- list()
             for(i in 1:length(uniqueYears)) {
                 if(verbose & floor(i/1)==i/1) cat(i, " ")
-                ans[[i]] <- aaply(
-                    asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), c(1:(timeIndex-1)), FUN)
+                ans[[i]] <- aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), 
+                                       dims=timeIndex), c(1:(timeIndex-1)), FUN)
             }
             ans <- abind(ans, along=timeIndex)
         }
     ) # system.time
-
+    
     if(verbose) cat('\nTook', timer[3], 's\n')
-
+    
     x$val <- unname(ans)
     x$time <- uniqueYears
     x$timeUnit <- "years (summarized)"
     x$numMonths <- table(floor(x$time))
-    x$provenance <- addProvenance(x$provenance, paste("Calculated <mean> for years", min(x$time), "-", max(x$time)))
+    x$provenance <- addProvenance(x$provenance, paste("Calculated", as.character(substitute(FUN)), 
+                                                      "for years", min(x$time), "-", max(x$time)))
     return(x)
 } # makeAnnualMean

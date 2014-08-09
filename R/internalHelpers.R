@@ -14,7 +14,7 @@ addProvenance <- function(prov=NULL, msg=NULL) {
     MSG_PREFIX <- "-"
     stopifnot(class(prov) %in% c("character", "NULL"))
     stopifnot(class(msg) %in% c("character", "NULL"))
-
+    
     # Get calling function's call (its name and parameters)
     parentcall <- "<parent unavailable>"
     try({
@@ -22,9 +22,9 @@ addProvenance <- function(prov=NULL, msg=NULL) {
         parentcall <- gsub(" ", "", paste(capture.output(parentcall), collapse=""))
         parentcall <- gsub("\\\"", "'", parentcall)
     }, silent=TRUE)
-
+    
     # TODO: would be nice to do addProvenance(x,"msg") and fake call-by-reference!
-
+    
     # Look for most recent call printed in provenance
     lastparentcall <- ""
     if(length(prov)) {
@@ -35,7 +35,7 @@ addProvenance <- function(prov=NULL, msg=NULL) {
             }
         }
     }
-
+    
     # Append the caller info (except when there's not been a change) and message
     if(is.null(prov) | parentcall != lastparentcall){
         prov <- c(prov, parentcall)
@@ -45,3 +45,41 @@ addProvenance <- function(prov=NULL, msg=NULL) {
     }
     return(prov)
 } # addProvenance
+
+#' Generate dummy data for testing
+#'
+#' @param years years to generate data
+#' @param monthly monthly or annual data?
+#' @param depth add depth dimension?
+#' @param lev add lev dimension?
+#' @return dummy cmip5data structure
+#' @note This is an internal RCMIP5 function and not exported.
+dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE) {
+    ppy <- ifelse(monthly, 12, 1)  # periods per year
+    
+    valdims <- c(10, 10, ppy*length(years))
+    depthdim <- NULL
+    if(depth) {
+        valdims <- c(valdims[1:(length(valdims)-1)], 5, valdims[length(valdims)])
+        depthdim <- c(0:4)
+    }
+    levdim <- NULL
+    if(lev) {
+        valdims <- c(valdims[1:(length(valdims)-1)], 5, valdims[length(valdims)])
+        levdim <- c(0:4)
+}
+#    print(valdims)
+    
+    cmip5data(list(files="dummy file", 
+                   val=array(1:3, dim=valdims),
+                   valUnit="dummy unit",
+                   timeUnit=paste0("days since ",years[1],"-01-01"),
+                   calendarStr="360_day",
+                   lat=c(0:9),
+                   lon=c(0:9),
+                   depth=depthdim,
+                   lev=levdim,
+                   time=(360/ppy*c(0:(length(years)*ppy-1) )+15)/360+min(years),
+                   provenance=addProvenance(NULL, "Dummy data")
+    ))
+} # dummydata

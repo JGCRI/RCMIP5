@@ -20,7 +20,7 @@ makeMonthlyMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
-    stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
+    stopifnot(length(dim(x$val)) %in% c(3, 4, 5)) # that's all we know
     
     timeIndex <- length(dim(x$val))  # time is always the last index
     if(verbose) cat("Time index =", timeIndex, "\n")
@@ -57,6 +57,7 @@ makeMonthlyMean <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean) {
     x$numYears <- unname(table(floor(monthIndex)))
     x$timeUnit <- "months (summarized)"
     x$time <- 1:12
-    x$provenance <- addProvenance(x$provenance, paste("Calculated <mean> for months", min(x$time), "-", max(x$time)))
+    x$provenance <- addProvenance(x$provenance, paste("Calculated", as.character(substitute(FUN)), 
+                                                      "for months", min(x$time), "-", max(x$time)))
     return(x)
 } # makeMonthlyMean
