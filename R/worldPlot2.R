@@ -41,7 +41,7 @@ worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=TRU
         half.numlon <- ceiling(length(lon) * 0.527) # yields a division at 190 for a 360 grid    
         shiftIndex <- c(half.numlon:length(lon), 1:(half.numlon-1))
         if(length(time) == 1) {
-           val <- val[shiftIndex, lat > -60] 
+            val <- val[shiftIndex, lat > -60] 
         } else {
             ans <- list()
             for(i in time) {
@@ -67,8 +67,11 @@ worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=TRU
     val_df <- melt(val)
     val_df$lon <- x$lon[val_df$Var1]
     val_df$lat <- x$lat[val_df$Var2]
-    if(length(time) > 1)
+    if(length(time) > 1) {
         val_df$time <- x$time[time[val_df$Var3]]
+    } else {
+        val_df$time <- x$time[time]
+    }
     
     # Plot
     p <- ggplot(val_df, aes(lon, lat))
@@ -76,7 +79,6 @@ worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=TRU
     p <- p + scale_x_continuous(expand=c(0,0))
     p <- p + scale_y_continuous(expand=c(0,0))
     p <- p + scale_fill_gradientn(colours=rainbow(4))
-    if(length(time) > 1)
-        p <- p + facet_wrap(~time, nrow=floor(sqrt(length(time))), ncol=ceiling(sqrt(length(time))))
+    p <- p + facet_wrap(~time, nrow=floor(sqrt(length(time))), ncol=ceiling(sqrt(length(time))))
     p + ggtitle(paste0(x$model, " ", x$experiment, " ", x$variable, " (", x$valUnit, ")"))
 } # worldPlot2
