@@ -51,8 +51,10 @@ test_that("makeMonthlyStat handles monthly data", {
     expect_equal(res$time, 1:12)
     
     # Is the answer value array correctly sized?
-    expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size match
-    expect_equal(dim(res$val)[length(dim(res$val))], 12)  # temporal size match
+    dl <- length(dim(res$val))
+    expect_equal(dl, length(dim(d$val)))  # same number of dimensions
+    expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size should match
+    expect_equal(dim(res$val)[dl], 12)  # temporal size set to # of months
     
     # Are the answer values numerically correct?
     ans <- list()

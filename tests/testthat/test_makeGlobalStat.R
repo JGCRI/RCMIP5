@@ -47,7 +47,10 @@ test_that("makeGlobalStat handles monthly data", {
     expect_equal(res$time, d$time)
     
     # Is the answer value array correctly sized?
-    expect_equal(length(res$val), prod(dim(d$val)[3:length(dim(d$val))]))
+    dl <- length(dim(res$val))
+    expect_equal(dl, length(dim(d$val)))  # same number of dimensions
+    expect_equal(dim(res$val)[1:(dl-1)], rep(1, dl-1)) #  all spatial dimensions should be 1
+    expect_equal(dim(res$val), dim(d$val)[3:dl]) # temporal size should match    
     
     # Are the answer values numerically correct?
     expect_equal(mean(res$val), mean(d$val))

@@ -49,8 +49,9 @@ test_that("makeAnnualStat handles monthly data", {
     expect_equal(res$time, years)
     
     # Is the answer value array correctly sized?
-    expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size match
-    expect_equal(dim(res$val)[length(dim(res$val))], length(years))  # temporal size match
+    expect_equal(length(dim(res$val)), length(dim(d$val)))  # same number of dimensions
+    expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size should match
+    expect_equal(dim(res$val)[length(dim(res$val))], length(years))  # temporal size set to # of years
     
     # Are the answer values numerically correct?
     dummyans <- array(NA_real_, dim=c(dim(d$val)[c(1,2)], length(years)))
