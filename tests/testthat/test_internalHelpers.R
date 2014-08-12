@@ -34,3 +34,65 @@ test_that("addProvenance adds messages", {
     new.env()
     expect_equal(length(addProvenance(p2, msg="test3")), 5)  # Should add two new lines
 })
+
+
+# ===============================================
+
+context("dummydata")
+
+test_that("dummydata handles bad input", {
+    expect_error(dummydata())   
+    expect_error(dummydata("hi"))   
+    expect_error(dummydata(1, monthly=123))   
+    expect_error(dummydata(1, depth=123))
+    expect_error(dummydata(1, lev=123))
+    expect_error(dummydata(1, randomize="hi"))   
+})
+
+test_that("dummydata generates annual and monthly data", {
+    d <- dummydata(1)
+    expect_equal(length(dim(d$val)), 3)
+    expect_equal(dim(d$val)[3], 12)
+    expect_equal(length(d$time), 12)
+    expect_equal(d$timeFreqStr, "mon")
+    expect_equal(dim(d$val)[1], length(d$lon))
+    expect_equal(dim(d$val)[2], length(d$lat))
+    expect_equal(dim(d$val)[3], length(d$time))
+    
+    d <- dummydata(1, monthly=F)
+    expect_equal(length(dim(d$val)), 3)
+    expect_equal(dim(d$val)[3], 1)
+    expect_equal(length(d$time), 1)
+    expect_equal(d$timeFreqStr, "yr")
+    expect_equal(dim(d$val)[3], length(d$time))
+})
+
+test_that("dummydata fills in ancillary data", {
+    d <- dummydata(1)
+    expect_is(d$model, "character")
+    expect_is(d$variable, "character")
+    expect_is(d$experiment, "character")
+    expect_is(d$valUnit, "character")
+    expect_is(d$timeUnit, "character")
+    expect_is(d$timeFreqStr, "character")
+    expect_is(d$calendarStr, "character")
+})
+
+test_that("dummydata obeys depth and lev", {
+    d <- dummydata(1, depth=T)
+    expect_equal(length(dim(d$val)), 4)
+    expect_false(is.null(d$depth))
+    
+    d <- dummydata(1, lev=T)
+    expect_equal(length(dim(d$val)), 4)
+    expect_false(is.null(d$lev))
+
+    d <- dummydata(1, depth=T, lev=T)
+    expect_equal(length(dim(d$val)), 5)
+    expect_false(is.null(d$depth))
+    expect_false(is.null(d$lev))
+})
+
+test_that("dummydata obeys randomize", {
+    expect_true(sum(dummydata(1, randomize=T)$val) != sum(dummydata(1, randomize=T)$val))
+})

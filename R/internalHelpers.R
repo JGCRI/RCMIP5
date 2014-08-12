@@ -56,6 +56,11 @@ addProvenance <- function(prov=NULL, msg=NULL) {
 #' @return dummy cmip5data structure
 #' @note This is an internal RCMIP5 function and not exported.
 dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE) {
+    
+    # Sanity checks
+    stopifnot(is.numeric(years))
+    stopifnot(is.logical(c(monthly, depth, lev, randomize)))
+    
     ppy <- ifelse(monthly, 12, 1)  # periods per year
     
     valdims <- c(10, 10, ppy*length(years))
@@ -71,10 +76,13 @@ dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FAL
     }
     #    print(valdims)
     
-    valData  <- ifelse(randomize, runif(prod(valdims)), 1:2)
+    valData <- 1:2
+    if(randomize) valData  <- runif(prod(valdims))
     
     cmip5data(list(files="dummy file", 
                    variable="dummyvar",
+                   model="dummymodel",
+                   experiment="dummyexperiment",
                    val=array(valData, dim=valdims),
                    valUnit="dummy unit",
                    timeUnit=paste0("days since ",years[1],"-01-01"),

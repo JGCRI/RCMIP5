@@ -54,13 +54,13 @@ cmip5data <- function(x=list()) {
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
-
+    
     yearString <- "[date parse error]"
     try({
         yearRange <- round(range(x$time), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
     }, silent=T)
-
+    
     cat("CMIP5 ")
     if(!is.null(x$numMonths)) {
         cat("- annual summary: ")
@@ -69,7 +69,7 @@ print.cmip5data <- function(x, ...) {
     } else if(!is.null(x$numCells)) {
         cat(" - spatial summary ")
     }
-
+    
     cat(paste(x$variable, x$model, x$experiment, yearString,
               paste0("[", paste(dim(x$val), collapse=" "), "]"),
               "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
@@ -93,7 +93,7 @@ summary.cmip5data <- function(x) {
         cat(" - spatial summary\n")
         cat("Cells summarized:", x$numCells, "\n")
     } else cat("\n")
-
+    
     cat("Variable:", x$variable, '\n')
     cat("Domain:", x$domain, '\n')
     cat("Model:", x$model, "\n")
@@ -111,7 +111,7 @@ summary.cmip5data <- function(x) {
     print(summary(as.vector(x$val)))
     cat("Size: ")
     print(object.size(x), units="MB")
-
+    
     cat('\nProvenance:\n')
     cat(paste(x$provenance, '\n', collapse=' '))
 }
@@ -123,10 +123,10 @@ summary.cmip5data <- function(x) {
 #' @return The object converted, as well as possible, to a data frame.
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     years <- x$time
-
+    
     if(verbose) cat("Melting...\n")
     df <- melt(x$val)
-
+    
     if(verbose) cat("Filling in dimensional data...\n")
     df[,1] <- x$lon[df[,1]]
     df[,2] <- x$lat[df[,2]]
@@ -144,11 +144,14 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
         timeindex <- 3
     df[,timeindex] <- years[df[,timeindex]]
     names(df)[timeindex] <- "time"
-
-    df$variable <- factor(x$variable)
-    df$model <- factor(x$model)
-    df$experiment <- factor(x$experiment)
-
+    
+    if(!is.null(x$variable))    
+        df$variable <- factor(x$variable)
+    if(!is.null(x$model))       
+        df$model <- factor(x$model)
+    if(!is.null(x$experiment))  
+        df$experiment <- factor(x$experiment)
+    
     return(df)
 } # as.data.frame.cmip5data
 
@@ -165,7 +168,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-
+    
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],
