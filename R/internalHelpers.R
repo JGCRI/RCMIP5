@@ -52,9 +52,10 @@ addProvenance <- function(prov=NULL, msg=NULL) {
 #' @param monthly monthly or annual data?
 #' @param depth add depth dimension?
 #' @param lev add lev dimension?
+#' @param randomize random data?
 #' @return dummy cmip5data structure
 #' @note This is an internal RCMIP5 function and not exported.
-dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE) {
+dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE) {
     ppy <- ifelse(monthly, 12, 1)  # periods per year
     
     valdims <- c(10, 10, ppy*length(years))
@@ -67,12 +68,14 @@ dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE) {
     if(lev) {
         valdims <- c(valdims[1:(length(valdims)-1)], 5, valdims[length(valdims)])
         levdim <- c(0:4)
-}
-#    print(valdims)
+    }
+    #    print(valdims)
+    
+    valData  <- ifelse(randomize, runif(prod(valdims)), 1:2)
     
     cmip5data(list(files="dummy file", 
                    variable="dummyvar",
-                   val=array(1:3, dim=valdims),
+                   val=array(valData, dim=valdims),
                    valUnit="dummy unit",
                    timeUnit=paste0("days since ",years[1],"-01-01"),
                    calendarStr="360_day",
