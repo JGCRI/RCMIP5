@@ -8,7 +8,9 @@ library(abind)
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across months of year
 #' @param ... Other arguments passed on to \code{FUN}
-#' @return A \code{\link{cmip5data}} object.
+#' @return A \code{\link{cmip5data}} object, whose \code{val} field is the monthly
+#' mean of the variable. A \code{numYears} field is also added
+#' recording the number of years averaged for each month.
 #' @export
 #' @examples
 #' makeMonthlyStat(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
