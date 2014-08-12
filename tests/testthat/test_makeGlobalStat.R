@@ -47,33 +47,31 @@ test_that("makeGlobalStat handles monthly data", {
     expect_equal(res$time, d$time)
     
     # Is the answer value array correctly sized?
-    dl <- length(dim(res$val))
-    expect_equal(dl, length(dim(d$val)))  # same number of dimensions
-    expect_equal(dim(res$val)[1:(dl-1)], rep(1, dl-1)) #  all spatial dimensions should be 1
-    expect_equal(dim(res$val), dim(d$val)[3:dl]) # temporal size should match    
+    ndims <- length(dim(res$val))
+    expect_equal(ndims, length(dim(d$val)))  # same number of dimensions
+    expect_equal(dim(res$val)[1:2], c(1, 1)) #  all spatial dimensions should be 1
+    expect_equal(dim(res$val)[3:ndims], dim(d$val)[3:ndims]) # time should match    
     
     # Are the answer values numerically correct?
-    expect_equal(mean(res$val), mean(d$val))
+    expect_equal(mean(res$val), mean(d$val))  # no weighting
 })
 
 test_that("makeGlobalStat weights correctly", {
-    d <- dummydata(1850:1851)
+    d <- dummydata(1850, randomize=T, monthly=F)
     res <- makeGlobalStat(d, area=d, verbose=F)
     
     # Are the answer values numerically correct?
-    areavals <- asub(d$val, list(1), dims=3)    # get spatial array    
-    dummyans <- unname(aaply(d$val, 3, .fun=weighted.mean, w=areavals))
-    expect_equal(dummyans, res$val)
+    dummyans <- weighted.mean(d$val[,,1], w=d$val[,,1])
+    expect_equal(dummyans, res$val[,,1])
 })
 
 test_that("weighted.sum works correctly", {
-    d <- dummydata(1850:1851)
+    d <- dummydata(1850, randomize=T, monthly=F)
     res <- makeGlobalStat(d, area=d, verbose=F, FUN=weighted.sum)
     
     # Are the answer values numerically correct?
-    areavals <- asub(d$val, list(1), dims=3)    # get spatial array    
-    dummyans <- unname(aaply(d$val, 3, .fun=weighted.sum, w=areavals))
-    expect_equal(dummyans, res$val)
+    dummyans <- weighted.sum(d$val[,,1], w=d$val[,,1])
+    expect_equal(dummyans, res$val[,,1])
     
     # Make sure the function itself is OK
     expect_equal(weighted.sum(1:4), 10)
@@ -82,7 +80,7 @@ test_that("weighted.sum works correctly", {
 
 test_that("makeGlobalStat parallel results == serial result", {
     years <- 1850:1851
-    d <- dummydata(years)
+    d <- dummydata(years, randomize=T)
     res_s <- makeGlobalStat(d, verbose=F, parallel=F)
     res_p <- makeGlobalStat(d, verbose=F, parallel=T)
     expect_equal(res_s$val, res_p$val)
@@ -100,17 +98,29 @@ test_that("makeGlobalStat handles 4-dimensional data", {
     expect_equal(res$time, d$time)
     
     # Is the answer value array correctly sized?
-    expect_equal(length(res$val), prod(dim(d$val)[3:length(dim(d$val))]))
+    ndims <- length(dim(res$val))
+    expect_equal(ndims, length(dim(d$val)))  # same number of dimensions
+    expect_equal(dim(res$val)[1:2], c(1, 1)) #  all spatial dimensions should be 1
+    expect_equal(dim(res$val)[3:(ndims-1)], dim(d$val)[3:(ndims-1)]) # time should match    
+    expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
     
     # Same tests, but with lev
     d <- dummydata(years, lev=T)
     res <- makeGlobalStat(d, verbose=F)
+    ndims <- length(dim(res$val))
     expect_equal(res$time, d$time)
-    expect_equal(length(res$val), prod(dim(d$val)[3:length(dim(d$val))]))
+    expect_equal(ndims, length(dim(d$val)))  # same number of dimensions
+    expect_equal(dim(res$val)[1:2], c(1, 1)) #  all spatial dimensions should be 1
+    expect_equal(dim(res$val)[3:(ndims-1)], dim(d$val)[3:(ndims-1)]) # time should match    
+    expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
     
     # Don't know if this ever will occur, but need to handle lev AND depth
     d <- dummydata(years, depth=T, lev=T)
     res <- makeGlobalStat(d, verbose=F)
+    ndims <- length(dim(res$val))
     expect_equal(res$time, d$time)
-    expect_equal(length(res$val), prod(dim(d$val)[3:length(dim(d$val))]))
+    expect_equal(ndims, length(dim(d$val)))  # same number of dimensions
+    expect_equal(dim(res$val)[1:2], c(1, 1)) #  all spatial dimensions should be 1
+    expect_equal(dim(res$val)[3:(ndims-1)], dim(d$val)[3:(ndims-1)]) # time should match    
+    expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
 })
