@@ -11,7 +11,7 @@
 #' cmip5data object. Not ideal.
 #' @note This is an internal RCMIP5 function and not exported.
 addProvenance <- function(prov=NULL, msg=NULL) {
-    MSG_PREFIX <- "-"
+    MSG_PREFIX <- "--"
     stopifnot(class(prov) %in% c("character", "NULL"))
     stopifnot(class(msg) %in% c("character", "NULL"))
     
@@ -79,7 +79,7 @@ dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FAL
     valData <- 1:2
     if(randomize) valData  <- runif(prod(valdims))
     
-    cmip5data(list(files="dummy file", 
+    x <- cmip5data(list(files="dummy file", 
                    variable="dummyvar",
                    model="dummymodel",
                    experiment="dummyexperiment",
@@ -92,7 +92,8 @@ dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FAL
                    lon=c(0:9),
                    depth=depthdim,
                    lev=levdim,
-                   time=(360/ppy*c(0:(length(years)*ppy-1) )+15)/360+min(years),
-                   provenance=addProvenance(NULL, "Dummy data")
+                   time=(360/ppy*c(0:(length(years)*ppy-1) )+15)/360+min(years)
     ))
+    x$provenance <- addProvenance(NULL, "Dummy data")
+    x
 } # dummydata
