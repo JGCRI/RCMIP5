@@ -18,6 +18,15 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
     # for users to only care about surface CO2, for example, and they don't want
     # makeAnnualMean() to run computations on all levels.
 
+    # TODO: ask 'mask' (spatial lon/lat mask) above?
+    
+    # TODO: Should variables above be bounds, e.g. to filter to western hemisphere
+    #   lons=c(-180, 0)
+    # or straight numbers
+    #   lons=c(-180, -175, ..., 0)
+    # ? The first is simpler, while the second requires more work from the user but
+    # gives more flexibility. I'm inclined to go with simple.
+    
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(is.null(lons) | class(lons)=="numeric")

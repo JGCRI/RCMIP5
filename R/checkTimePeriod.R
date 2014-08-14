@@ -1,7 +1,6 @@
-library(plyr) # for BIG data.frames we want to do this fast
+library(plyr)
 
-#' Check that all time periods match for multi-file ensembles. This only works
-#' for files that are in the following domains: 'fx', '*mon', or '*yr'.
+#' Check that all time periods match for multi-file ensembles.
 #'
 #' @param fileInfo_df data.frame from getFileInfo
 #' @return data.frame from fileInfo_df: domain, experiment, model, variable, ensemble, and
@@ -10,6 +9,7 @@ library(plyr) # for BIG data.frames we want to do this fast
 #'          startYr (numeric - decimal time of minimum year
 #'          endYr (numeric - decimal time of maximum year)
 #' @details Decimal time is (year + (month-1)/12).
+#' @note  This only works for files that are in domains 'fx', '*mon', or '*yr'.
 #' @export
 #' @examples
 #' checkTimePeriod(getFileInfo())
