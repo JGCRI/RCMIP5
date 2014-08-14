@@ -19,15 +19,17 @@ mergeExperiments <- function(x, y, verbose=TRUE) {
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
     if(verbose) cat("Checking that ancillary data are identical\n")
-    stopifnot(x$domain == y$domain)
-    stopifnot(x$variable == y$variable)
-    stopifnot(x$model == y$model)
-    stopifnot(x$valUnit == y$valUnit)
-    stopifnot(x$lon == y$lon & x$lat == y$lat)
-    stopifnot(x$depth == y$depth & x$lev == y$lev)
+    stopifnot(identical(x$domain, y$domain))
+    stopifnot(identical(x$variable, y$variable))
+    stopifnot(identical(x$model, y$model))
+    stopifnot(identical(x$valUnit, y$valUnit))
+    stopifnot(identical(x$lon, y$lon))
+    stopifnot(identical(x$lat, y$lat))
+    stopifnot(identical(x$depth, y$depth))
+    stopifnot(identical(x$lev, y$lev))
     
     # Ensemble check
-    if(all(x$ensembles == y$ensembles)) {
+    if(identical(x$ensembles, y$ensembles)) {
         if(verbose) cat("OK: ensembles match\n")
     } else {
         warning("Ensembles differ between these objects.",
@@ -36,7 +38,7 @@ mergeExperiments <- function(x, y, verbose=TRUE) {
     
     # Time checks. This is important, and we try to identify obvious problems
     if(verbose) cat("Checking that time data match up\n")
-    stopifnot(x$timeFreqStr == y$timeFreqStr)
+    stopifnot(identical(x$timeFreqStr, y$timeFreqStr))
     
     if(mean(x$time) > mean(y$time)) { # switch them
         temp <- x
@@ -44,8 +46,7 @@ mergeExperiments <- function(x, y, verbose=TRUE) {
         y <- temp
     }
     if(length(intersect(x$time, y$time)) > 0 | max(x$time) > min(y$time)) {
-        warning("Overlap between times; can't merge")
-        return(NULL)
+        stop("Overlap between times; can't merge")
     }
     timegap <- min(y$time) - max(x$time)
     tsx <- x$time[2] - x$time[1]

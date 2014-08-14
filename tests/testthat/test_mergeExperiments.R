@@ -1,0 +1,128 @@
+# Testing code for the RCMIP5 'mergeExperiments.R' script
+
+# Uses the testthat package
+# See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
+library(testthat)
+
+# To run this code: 
+#   source("mergeExperiments.R")
+#   source("internalHelpers.R") # for dummyData
+#   library(testthat)
+#   test_file("tests/testthat/test_mergeExperiments.R")
+
+context("mergeExperiments")
+
+test_that("mergeExperiments.R handles bad input", {    
+    x <- cmip5data()
+    expect_error(mergeExperiments())                             # non-cmip5data
+    expect_error(mergeExperiments(1))                            # non-cmip5data
+    expect_error(mergeExperiments(1, x))                         # non-cmip5data
+    expect_error(mergeExperiments(x, 1))                         # non-cmip5data
+    expect_error(mergeExperiments(x, x, verbose=1))              # non-logical verbose
+    expect_error(mergeExperiments(x, x, verbose=c(T, T)))        # multiple verbose values
+})
+
+test_that("mergeExperiments identifies ancillary problems", {
+    y <- dummydata(2)
+    
+    x <- dummydata(1)
+    x$domain <- paste0(y$domain, "x")
+    expect_error(mergeExperiments(x, y, verbose=F))
+    
+    x <- dummydata(1)
+    x$variable <- paste0(y$domain, "x")
+    expect_error(mergeExperiments(x, y, verbose=F))
+    
+    x <- dummydata(1)
+    x$model <- paste0(y$domain, "x")
+    expect_error(mergeExperiments(x, y, verbose=F))
+    
+    x <- dummydata(1)
+    x$valUnit <- paste0(y$valUnit, "x")
+    expect_error(mergeExperiments(x, y, verbose=F))
+    
+    x <- dummydata(1)
+    x$lat <- c(y$lat, 0)
+    expect_error(mergeExperiments(x, y, verbose=F))
+    
+    x <- dummydata(1)
+    x$lon <- c(y$lon, 0)
+    expect_error(mergeExperiments(x, y, verbose=F))
+    
+    x <- dummydata(1)
+    x$depth <- c(y$depth, 1)
+    expect_error(mergeExperiments(x, y, verbose=F))
+    
+    x <- dummydata(1)
+    x$lev <- c(y$lev, 1) 
+    expect_error(mergeExperiments(x, y, verbose=F))
+    
+    x <- dummydata(1)
+    x$ensembles <- paste0(y$ensembles, "x")
+    expect_warning(mergeExperiments(x, y, verbose=F))
+})
+
+test_that("mergeExperiments identifies time problems", {
+    x <- dummydata(1)
+    y <- dummydata(2)    
+    x$timeFreqStr <- paste0(y$timeFreqStr, "x")
+    expect_error(mergeExperiments(x, y, verbose=F))
+ 
+    x <- dummydata(1)
+    expect_error(mergeExperiments(x, x, verbose=F)) # identical times
+    x$time[length(x$time)] <- mean(y$time[1:2]) 
+    expect_error(mergeExperiments(x, x, verbose=F)) # identical times
+    
+    x <- dummydata(4)
+    expect_warning(mergeExperiments(x, y, verbose=F)) # time gap
+})
+
+test_that("mergeExperiments merges monthly data", {
+    x <- dummydata(1:5)
+    y <- dummydata(6:10)    
+    res <- mergeExperiments(x, y, verbose=F)
+    
+    expect_equal(length(x$val) + length(y$val), length(res$val))
+    expect_equal(length(x$time) + length(y$time), length(res$time))
+    expect_equal(c(x$files, y$files), res$files)
+    expect_true(grepl(x$experiment, res$experiment)) # each experiment name should appear
+    expect_true(grepl(y$experiment, res$experiment)) # each experiment name should appear
+    
+    # Order of x and y should make no difference
+    xy <- mergeExperiments(x, y, verbose=F)
+    yx <- mergeExperiments(x, y, verbose=F)
+    expect_equal(xy$val, yx$val)
+    expect_equal(xy$time, yx$time)
+})
+
+test_that("mergeExperiments merges annual data", {
+    x <- dummydata(1:5, monthly=F)
+    y <- dummydata(6:10, monthly=F)    
+    res <- mergeExperiments(x, y, verbose=F)
+    
+    expect_equal(length(x$val) + length(y$val), length(res$val))
+    expect_equal(length(x$time) + length(y$time), length(res$time))
+})
+
+test_that("mergeExperiments merges 4-dimensional data", {
+    x <- dummydata(1:5, depth=T)
+    y <- dummydata(6:10, depth=T)    
+    res <- mergeExperiments(x, y, verbose=F)
+    
+    expect_equal(length(x$val) + length(y$val), length(res$val))
+    expect_equal(length(x$time) + length(y$time), length(res$time))
+
+    x <- dummydata(1:5, lev=T)
+    y <- dummydata(6:10, lev=T)    
+    res <- mergeExperiments(x, y, verbose=F)
+    
+    expect_equal(length(x$val) + length(y$val), length(res$val))
+    expect_equal(length(x$time) + length(y$time), length(res$time))
+
+    x <- dummydata(1:5, depth=T, lev=T)
+    y <- dummydata(6:10, depth=T, lev=T)    
+    res <- mergeExperiments(x, y, verbose=F)
+    
+    expect_equal(length(x$val) + length(y$val), length(res$val))
+    expect_equal(length(x$time) + length(y$time), length(res$time))
+})
