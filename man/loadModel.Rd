@@ -3,15 +3,17 @@
 \alias{loadModel}
 \title{Average all ensemble members of the specified experiment-variable-model combination}
 \usage{
-loadModel(variable, model, experiment, path = ".", recursive = TRUE,
-  verbose = FALSE, demo = FALSE)
+loadModel(variable, model, experiment, domain = "[^_]+", path = ".",
+  recursive = TRUE, verbose = TRUE, demo = FALSE)
 }
 \arguments{
-\item{variable}{CMIP5 variable of interest}
+\item{variable}{CMIP5 variable to load}
 
-\item{model}{CMIP5 model of interest}
+\item{model}{CMIP5 model to load}
 
-\item{experiment}{CMIP5 experiment of interest}
+\item{experiment}{CMIP5 experiment to load}
+
+\item{domain}{CMIP5 domain to load}
 
 \item{path}{root of directory tree}
 
@@ -22,14 +24,9 @@ loadModel(variable, model, experiment, path = ".", recursive = TRUE,
 \item{demo}{logical. Demo mode (reading data from global environment, not disk)?}
 }
 \value{
-list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
-     'lat', 'lon', and 'time'. If no files match the requested criteria function
-     will return NULL with a warning.
+A \code{\link{cmip5data}} object.
 }
 \description{
 Average all ensemble members of the specified experiment-variable-model combination
-}
-\examples{
-loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE)
 }
 

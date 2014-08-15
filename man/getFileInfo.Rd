@@ -7,12 +7,12 @@ information like experiment, model, and variable names.}
 getFileInfo(path = ".", recursive = TRUE)
 }
 \arguments{
-\item{path}{root of directory tree}
+\item{path}{string root of directory tree}
 
 \item{recursive}{logical. Should the listing recurse into directories?}
 }
 \value{
-data frame containing the following parsed from file names: full file name,
+data.frame containing the following parsed from file names as strings unless otherwise noted: full file name,
          filename without path or '.nc' extension, variable, domain, model,
          experiment, ensemble, time period, and filesize (in KB)
 }

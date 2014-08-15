@@ -3,8 +3,9 @@
 \alias{loadEnsemble}
 \title{Load data for a particular set of experiment/variable/model/ensemble}
 \usage{
-loadEnsemble(variable, model, experiment, ensemble, path = ".",
-  recursive = TRUE, verbose = FALSE, demo = FALSE)
+loadEnsemble(variable = "[^_]+", model = "[^_]+", experiment = "[^_]+",
+  ensemble = "[^_]+", domain = "[^_]+", path = ".", recursive = TRUE,
+  verbose = TRUE, demo = FALSE)
 }
 \arguments{
 \item{variable}{CMIP5 variable to load}
@@ -15,6 +16,8 @@ loadEnsemble(variable, model, experiment, ensemble, path = ".",
 
 \item{ensemble}{CMIP5 ensemble to load}
 
+\item{domain}{CMIP5 domain to load}
+
 \item{path}{root of directory tree}
 
 \item{recursive}{logical. Recurse into directories?}
@@ -24,14 +27,14 @@ loadEnsemble(variable, model, experiment, ensemble, path = ".",
 \item{demo}{logical. Demo mode (reading data from global environment, not disk)?}
 }
 \value{
-list with elements 'files', 'val', 'valUnit', timeUnit', 'calendarStr',
-     'lat', 'lon', and 'time'. If no files match the requested criteria function
-     will return NULL with a warning.
+A \code{\link{cmip5data}} object.
 }
 \description{
 Load data for a particular set of experiment/variable/model/ensemble
 }
-\examples{
-loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=TRUE,demo=TRUE)
+\details{
+This function is the core of RCMIP5's data-loading. It loads all files matching
+the experiment, variable, model, ensemble, and perhaps domain supplied by the caller.
+We can also load from the package datasets by specifying DEMO=TRUE.
 }
 
