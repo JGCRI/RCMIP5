@@ -1,9 +1,22 @@
 library(fields)
 
-#' Plot a quick world map with reasonable coloring
+#' Plot global data.
+#' 
+#' Plot a quick world map with reasonable coloring.
 #'
-#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
+#' @param x x
+#' @param time time
+#' @param main main
+#' @param parList parList
+#' @param centerZero centerZero
+#' @param absNum absNum
+#' @param axisFlag axisFlag
+#' @param showRange showRange
 #' @param verbose logical. Print info as we go?
+#' @param simple simple
+#' @param col col
+#' @param latAxis latAxis
+#' @param lonAxis lonAxis
 #' @export
 world.plot <- function(x, time=1, main=NULL, parList=NULL,
                        centerZero=FALSE,  absNum=NULL, axisFlag=TRUE,
@@ -171,4 +184,4 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     }
     box()
     if(verbose) cat('******world.plot ending************\n')
-}
+} # world.plot

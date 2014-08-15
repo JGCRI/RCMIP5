@@ -1,19 +1,20 @@
 library(plyr)
 
-#' Check that all time periods match for multi-file ensembles.
+#' Check for continuous time periods in CMIP5 files.
+#' 
+#' Check that all time periods match for multi-file ensembles. Before starting to 
+#' process what may be hundreds or thousands of CMIP5 files, it's a good idea to verify
+#' that your file set is complete and not missing any years.
+#' 
 #'
 #' @param fileInfo_df data.frame from getFileInfo
-#' @return data.frame from fileInfo_df: domain, experiment, model, variable, ensemble, and
-#'          yrStr (string - all year boundries in relevent files)
-#'          allHere (boolean - do the year boundries match up?)
-#'          startYr (numeric - decimal time of minimum year
-#'          endYr (numeric - decimal time of maximum year)
+#' @return A \code{\link{cmip5data}} object.#' 
 #' @details Decimal time is (year + (month-1)/12).
-#' @note  This only works for files that are in domains 'fx', '*mon', or '*yr'.
+#' Note that this only works for files that are in domains 'fx', '*mon', or '*yr'.
 #' @export
 #' @examples
 #' checkTimePeriod(getFileInfo())
-#' @seealso getFileInfo
+#' @seealso \link{getFileInfo}
 checkTimePeriod <- function(fileInfo_df) {
 
     # Sanity checks

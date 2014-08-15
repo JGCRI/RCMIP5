@@ -1,8 +1,11 @@
 #' Add provenance information to a cmip5data object
+#' 
+#' It's important to track data provenance, the steps taken to produce a particular
+#' dataset. Each operation in the RCMIP5 package adds provenance information via this function.
 #'
-#' @param prov An optional provenance (currently vector of strings)
+#' @param prov An optional provenance (currently a vector of strings)
 #' @param msg An optional message string
-#' @return An updated provenance
+#' @return An updated provenance string
 #' @details We want to track computational steps applied to a particular
 #' \code{\link{cmip5data}} object, for reproducibility and user debugging.
 #' This function logs information from the caller to a 'provenance' field.
@@ -46,16 +49,19 @@ addProvenance <- function(prov=NULL, msg=NULL) {
     return(prov)
 } # addProvenance
 
-#' Generate dummy data for testing
+#' Generate sample data for testing
+#' 
+#' CMIP5 data files are generally big--too big to be included in an R package,
+#' for example--and slow to process. This function generates sample/dummy data.
 #'
 #' @param years years to generate data
 #' @param monthly monthly or annual data?
 #' @param depth add depth dimension?
 #' @param lev add lev dimension?
 #' @param randomize random data?
-#' @return dummy cmip5data structure
+#' @return x A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.
-dummydata <- function(years, monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE) {
+dummydata <- function(years=1, monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE) {
     
     # Sanity checks
     stopifnot(is.numeric(years))

@@ -24,7 +24,7 @@ library(reshape2)
 #' @name RCMIP5
 NULL
 
-#' Constructor for 'cmip5data' class
+#' Constructor for 'cmip5data' class.
 #'
 #' @param x list
 #' @return A class \code{cmip5data} object, which is a list with
@@ -47,11 +47,11 @@ cmip5data <- function(x=list()) {
     structure(x, class="cmip5data")
 }
 
-#' Print a 'cmip5data' class object
+#' Print a 'cmip5data' class object.
 #'
-#' @param x A \code{\link{cmip5data}} object.
-#' @param ... Other parameters passed to print.
-#' @details Prints a one-line summary of the object.
+#' @param x A \code{\link{cmip5data}} object
+#' @param ... Other parameters passed to print
+#' @details Prints a one-line summary of the object
 #' @export
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
@@ -78,52 +78,53 @@ print.cmip5data <- function(x, ...) {
               nfiles, ifelse(nfiles==1,"file","files"), "\n", ...))
 }
 
-#' Summarize a 'cmip5data' class object
+#' Summarize a 'cmip5data' class object.
 #'
-#' @param x A \code{\link{cmip5data}} object.
-#' @details Prints a short summary of the object.
+#' @param object A \code{\link{cmip5data}} object
+#' @param ... Other parameters
+#' @details Prints a short summary of the object
 #' @export
-summary.cmip5data <- function(x) {
+summary.cmip5data <- function(object, ...) {
     cat("CMIP5 data")
     ##TODO This may be unnessacary with the addition of provenance
-    if(!is.null(x$numMonths)) {
+    if(!is.null(object$numMonths)) {
         cat(" - annual summary\n")
-        cat("(Mean months summarized:", mean(x$numMonths), "\n")
-    } else if(!is.null(x$numYears)) {
+        cat("(Mean months summarized:", mean(object$numMonths), "\n")
+    } else if(!is.null(object$numYears)) {
         cat(" - monthly summary\n")
-        cat("Mean years summarized:", mean(x$numYears), "\n")
-    } else if(!is.null(x$numCells)) {
+        cat("Mean years summarized:", mean(object$numYears), "\n")
+    } else if(!is.null(object$numCells)) {
         cat(" - spatial summary\n")
-        cat("Cells summarized:", x$numCells, "\n")
+        cat("Cells summarized:", object$numCells, "\n")
     } else cat("\n")
     
-    cat("Variable:", x$variable, '\n')
-    cat("Domain:", x$domain, '\n')
-    cat("Model:", x$model, "\n")
-    cat("Experiment:", x$experiment, "\n")
-    cat("Ensembles:", x$ensembles, "\n")
-    cat("Spatial: lon [", length(x$lon), "] lat [", length(x$lat),
-        "] lev [", length(x$lev), "] or depth [", length(x$depth), "]\n")
-    if(!x$timeFreqStr %in% 'fx'){ ##Only show the time if not fx
-        cat("Time: step size [",x$time[2] - x$time[1],"] yrs, length ",
-            length(x$time), ", range [",x$time[1], ', ', rev(x$time)[1] ,"]\n",
+    cat("Variable:", object$variable, '\n')
+    cat("Domain:", object$domain, '\n')
+    cat("Model:", object$model, "\n")
+    cat("Eobjectperiment:", object$eobjectperiment, "\n")
+    cat("Ensembles:", object$ensembles, "\n")
+    cat("Spatial: lon [", length(object$lon), "] lat [", length(object$lat),
+        "] lev [", length(object$lev), "] or depth [", length(object$depth), "]\n")
+    if(!object$timeFreqStr %in% 'fobject'){ ##Only show the time if not fobject
+        cat("Time: step size [",object$time[2] - object$time[1],"] yrs, length ",
+            length(object$time), ", range [",object$time[1], ', ', rev(object$time)[1] ,"]\n",
             sep="")
     }
-    cat("Data: [", x$valUnit, "], dimensions [", paste(dim(x$val), collapse=" "),
+    cat("Data: [", object$valUnit, "], dimensions [", paste(dim(object$val), collapse=" "),
         "]\n", sep="")
-    print(summary(as.vector(x$val)))
+    print(summary(as.vector(object$val)))
     cat("Size: ")
-    print(object.size(x), units="MB")
+    print(object.size(object), units="MB")
     
     cat('\nProvenance:\n')
-    cat(paste(x$provenance, '\n', collapse=' '))
+    cat(paste(object$provenance, '\n', collapse=' '))
 }
 
 #' Convert a cmip5data object to a data frame
 #'
-#' @param x A \code{\link{cmip5data}} object.
+#' @param x A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
-#' @return The object converted, as well as possible, to a data frame.
+#' @return The object converted, as well as possible, to a data frame
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     years <- x$time
     
@@ -182,7 +183,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./inst/ex
             objname <- gsub("_[0-9]{4,}-[0-9]{4,}.nc$", "", basename(d$files[1])) # strip dates
             assign(objname, d)
             cat("Writing", objname, "\n")
-            save(list=objname, file=paste0(outpath, "/", objname, ".Rdata"))
+            save(list=objname, file=paste0(outpath, "/", objname, ".rda"))
         } else {
             cat("Too big; skipping\n")
         }

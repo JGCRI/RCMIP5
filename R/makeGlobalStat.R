@@ -1,7 +1,13 @@
 library(plyr)
 library(abind)
 
-#' Compute global mean (or other function) of a variable
+#' Compute global statistic of a variable.
+#' 
+#' We frequently want a global summary for CMIP5 data, usually weighted by the 
+#' grid cell areas used by each particular model. This function does that. If no
+#' area weighting is supplied, a warning is given. The default statistic is \link{mean},
+#' but any summary function that returns a numeric result can be used. If the data
+#' have 'depth' or 'lev' attributes, the statistic will be computed for each of these.
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param area cmip5data An area cmip5data data structure

@@ -1,20 +1,28 @@
-#' List all CMIP5 file in a directory tree and parse their filenames for CMIP5
+#' List all CMIP5 file in a directory tree.
+#' 
+#' List all CMIP5 files in a directory tree, parsing their filenames for
 #' information like experiment, model, and variable names.
 #'
 #' @param path string root of directory tree
 #' @param recursive logical. Should the listing recurse into directories?
-#' @return  data.frame containing the following parsed from file names as strings unless otherwise noted: full file name,
-#'          filename without path or '.nc' extension, variable, domain, model,
-#'          experiment, ensemble, time period, and filesize (in KB)
+#' @return  data.frame containing the following parsed from file names:
+#' \item{filename}{Full filename, including path}
+#' \item{variable}{File variable}
+#' \item{domain}{File domain}
+#' \item{model}{Model that produced this file}
+#' \item{experiment}{File experiment}
+#' \item{ensemble}{File ensemble}
+#' \item{time}{year (and often month) range of file}
+#' \item{size}{File size, in kilobytes}
+#' @details For more information on CMIP5 filename structure and data description, 
+#' see \url{http://cmip-pcmdi.llnl.gov/cmip5/data_description.html}
 #' @export
 #' @examples
 #' getFileInfo()
 #' getFileInfo('.',recursive=FALSE)
 getFileInfo <- function(path='.', recursive=TRUE) {
 
-    ################
     # Sanity checks
-    ################
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(file.exists(path))
@@ -38,13 +46,8 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     # Pull the file name w/o directory and take off the '.nc',
     shortFile <- gsub(".nc$", "", basename(fullFile))
 
-    # Split out the various components of the file name based on
-    # ...CMIP5 convention
+    # Split out the various components of the file name based on CMIP5 convention
     fileInfo <- strsplit(shortFile, split='_')
-
-    ##################################
-    ##Extract information from the file name based on CMIP5 naming conventions
-    ##################################
 
     # Check how many components (pieces of info) we have
     infoSize <- unlist(lapply(fileInfo, length))
@@ -89,15 +92,9 @@ getFileInfo <- function(path='.', recursive=TRUE) {
         temporalInfo <- NULL
     }
 
-    ##########################
     # Put everything together
-    ##########################
     fileInfo.df <- rbind(fixedInfo, temporalInfo)
-
-    # Add useful column names
     names(fileInfo.df) <- c('path', 'filename', 'variable', 'domain', 'model', 'experiment', 'ensemble', 'time', 'size')
-
-    # Convert everything to character
     fileInfo.df <- data.frame(lapply(fileInfo.df, as.character),
                               stringsAsFactors=FALSE)
 

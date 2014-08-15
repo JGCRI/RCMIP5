@@ -1,13 +1,16 @@
 library(ggplot2)
 library(abind)
 
-#' Plot a quick world map with reasonable coloring
+#' Plot global data.
+#' 
+#' Plot a quick world map with reasonable coloring.
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
-#' @param time numeric. Which time slice should we plot?
+#' @param time numeric. Which time slice(s) should we plot?
 #' @param splitPacific logical. Try to split image in the Pacific?
-#' @param capMinMax logical. Cap data min and max by quantile?
+#' @param capMinMax logical. Cap data min and max by quantile? This may produce better coloring.
 #' @param verbose logical. Print info as we go?
+#' @details Uses ggplot's \code{\link{geom_raster}}.
 #' @export
 worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=TRUE) {
     

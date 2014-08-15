@@ -3,7 +3,8 @@ library(abind)
 
 #' Load a model-variable-experiment-ensemble.
 #' 
-#' Loads the data for a particular CMIP5 experiment/variable/model/ensemble combination (one or more files).
+#' Loads the data for a particular CMIP5 experiment/variable/model/ensemble 
+#' combination (one or more files). Returns NULL and a warning if nothing matches.
 #'
 #' @param variable CMIP5 variable to load
 #' @param model CMIP5 model to load

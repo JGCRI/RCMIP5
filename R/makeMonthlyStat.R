@@ -1,7 +1,12 @@
 library(plyr)
 library(abind)
 
-#' Compute monthly means (or other function) of a variable
+#' Compute monthly statistic of a variable.
+#' 
+#' We frequently want to summarize CMIP5 data by month, e.g. to understand how
+#' air temperature varies over the year for a particular data range. This function 
+#' does that for monthly data. The default statistic is \link{mean}, but any 
+#' summary function that returns a numeric result can be used.
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param verbose logical. Print info as we go?

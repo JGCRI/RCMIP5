@@ -1,7 +1,12 @@
 library(plyr)
 library(abind)
 
-#' Compute annual mean (or other function) of a variable
+#' Compute annual statistic of a variable.
+#' 
+#' Most CMIP5 data are monthly, and we frequently want to summarize these to annual
+#' numbers. This function does that (although annual files also occur, and will be
+#' handled as well). The default statistic is \link{mean}, but any summary
+#' function that returns a numeric result can be used.
 #'
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param verbose logical. Print info as we go?

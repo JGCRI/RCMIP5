@@ -1,12 +1,16 @@
 library(abind)
 
-#' Merge data for two separate experiments
+#' Merge data for two separate experiments.
+#' 
+#' The most common reason to merge experiments is across time periods--e.g.,
+#' merging 'historical' with one of the RCPs. This function does that, checking
+#' that the merge is appropriate and possible.
 #'
 #' @param x cmip5data
 #' @param y cmip5data
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
-#' @details Merge two separate experiments. The variable, units, spatial grid,
+#' @details The variable, units, spatial grid,
 #' depths/levels, domain, and model (TODO: ???) must all match. The timesteps must be
 #' identical, and time values non-overlapping. If the time gap between the two experiments
 #' is different than their internal timesteps (e.g., if two monthly data objects are
