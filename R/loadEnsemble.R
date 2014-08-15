@@ -1,7 +1,9 @@
 library(ncdf4)
 library(abind)
 
-#' Load data for a particular set of experiment/variable/model/ensemble
+#' Load a model-variable-experiment-ensemble.
+#' 
+#' Loads the data for a particular CMIP5 experiment/variable/model/ensemble combination (one or more files).
 #'
 #' @param variable CMIP5 variable to load
 #' @param model CMIP5 model to load
@@ -17,8 +19,6 @@ library(abind)
 #' the experiment, variable, model, ensemble, and perhaps domain supplied by the caller.
 #' We can also load from the package datasets by specifying DEMO=TRUE.
 #' @export
-#' @examples
-#' loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',verbose=TRUE,demo=TRUE)
 loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                          experiment='[^_]+', ensemble='[^_]+', domain='[^_]+',
                          path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {

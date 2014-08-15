@@ -50,7 +50,9 @@ cmip5data <- function(x=list()) {
 #' Print a 'cmip5data' class object
 #'
 #' @param x A \code{\link{cmip5data}} object.
+#' @param ... Other parameters passed to print.
 #' @details Prints a one-line summary of the object.
+#' @export
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
@@ -80,6 +82,7 @@ print.cmip5data <- function(x, ...) {
 #'
 #' @param x A \code{\link{cmip5data}} object.
 #' @details Prints a short summary of the object.
+#' @export
 summary.cmip5data <- function(x) {
     cat("CMIP5 data")
     ##TODO This may be unnessacary with the addition of provenance
@@ -125,7 +128,7 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     years <- x$time
     
     if(verbose) cat("Melting...\n")
-    df <- melt(x$val)
+    df <- reshape2::melt(x$val)
     
     if(verbose) cat("Filling in dimensional data...\n")
     df[,1] <- x$lon[df[,1]]
@@ -163,7 +166,7 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
 #' @details Writes all available ensembles to disk as Rdata files, subject to
 #' a maximum size parameter (CRAN says keep sample data < 5MB!).
 #' @note This is an internal RCMIP5 function and not exported.
-makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") {
+makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./inst/extdata") {
     if(!file.exists(outpath)) dir.create(outpath)
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)

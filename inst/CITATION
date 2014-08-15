@@ -6,12 +6,12 @@ citEntry(
   title = "RCMIP5: easy exploration, manipulation, and summarizing of CMIP5 data", 
   journal = "Biogeosciences", 
   year = 2014, 
-  volume = X, 
-  pages = "XXXX--XXXX", 
+  volume = 12, 
+  pages = "2031--2040", 
   url = "http://www.nytimes.com", 
   textVersion = paste(
     "Kathe Todd-Brown and Ben Bond-Lamberty. RCMIP5: easy exploration, manipulation, and summarizing of CMIP5 data",
-    "Biogeosciences, vol. X, no. X, pp. XXXX--XXXX, 2014"
+    "Biogeosciences, vol. 12, no. 5, pp. 2031--2040, 2014"
   )
 )
   

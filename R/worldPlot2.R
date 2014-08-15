@@ -9,7 +9,6 @@ library(abind)
 #' @param capMinMax logical. Cap data min and max by quantile?
 #' @param verbose logical. Print info as we go?
 #' @export
-#' @examples
 worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=TRUE) {
     
     # Sanity checks

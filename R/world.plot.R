@@ -5,8 +5,6 @@ library(fields)
 #' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
 #' @param verbose logical. Print info as we go?
 #' @export
-#' @examples
-#' world.plot(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
 world.plot <- function(x, time=1, main=NULL, parList=NULL,
                        centerZero=FALSE,  absNum=NULL, axisFlag=TRUE,
                        showRange=TRUE, verbose=FALSE, simple=FALSE,

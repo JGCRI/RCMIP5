@@ -10,7 +10,6 @@
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @export
-#' @examples
 filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL, 
                              years=NULL, months=NULL, verbose=FALSE) {
     

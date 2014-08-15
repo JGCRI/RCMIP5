@@ -8,7 +8,7 @@
 #' This function logs information from the caller to a 'provenance' field.
 #' @details We'd rather not pass potentially very large cmip5data structures
 #' around too much, so caller has to assign updated provenance to the
-#' cmip5data object. Not ideal.
+#' cmip5data object. Not ideal; TODO.
 #' @note This is an internal RCMIP5 function and not exported.
 addProvenance <- function(prov=NULL, msg=NULL) {
     MSG_PREFIX <- "--"
@@ -18,7 +18,7 @@ addProvenance <- function(prov=NULL, msg=NULL) {
     # Get calling function's call (its name and parameters)
     parentcall <- "<parent unavailable>"
     try({
-        parentcall <- match.call(def=sys.function(-1), call=sys.call(-1))
+        parentcall <- match.call(definition=sys.function(-1), call=sys.call(-1))
         parentcall <- gsub(" ", "", paste(capture.output(parentcall), collapse=""))
         parentcall <- gsub("\\\"", "'", parentcall)
     }, silent=TRUE)

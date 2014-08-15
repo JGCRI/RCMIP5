@@ -1,6 +1,8 @@
 library(ncdf4)
 
-#' Average all ensemble members of the specified experiment-variable-model combination
+#' Load a model-variable-experiment.
+#' 
+#' Averages all ensemble members of the specified CMIP5 experiment-variable-model combination.
 #'
 #' @param variable CMIP5 variable to load
 #' @param model CMIP5 model to load
@@ -10,10 +12,8 @@ library(ncdf4)
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param demo logical. Demo mode (reading data from global environment, not disk)?
-#' @return A \code{\link{cmip5data}} object.
+#' @return A \code{\link{cmip5data}} object
 #' @export
-#' @examples
-#' loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE)
 loadModel <- function(variable, model, experiment, domain='[^_]+',
                       path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
 

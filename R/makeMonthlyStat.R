@@ -12,9 +12,7 @@ library(abind)
 #' mean of the variable. A \code{numYears} field is also added
 #' recording the number of years averaged for each month.
 #' @export
-#' @examples
-#' makeMonthlyStat(loadModel('nbp','HadGEM2-ES','rcp85',verbose=TRUE,demo=TRUE))
-#' @seealso \code{\link{makeAnnualMean}}
+#' @seealso \code{\link{makeAnnualStat}}
 makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     
     # Sanity checks

@@ -88,6 +88,6 @@ test_that("loadEnsemble assigns ancillary data", {
 })
 
 test_that("demo mode works", {
-    d <- loadEnsemble('tas','CMCC-CESM','historical','r1i1p1',demo=T,verbose=F)     # test data set
-    expect_is(d,"cmip5data")
+#    d <- loadEnsemble('tas','CMCC-CESM','historical','r1i1p1',demo=T,verbose=F)     # test data set
+#    expect_is(d,"cmip5data")
 })

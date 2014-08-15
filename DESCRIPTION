@@ -1,10 +1,18 @@
 Package: RCMIP5
-Title: Tools for manipulating and summarizing CMIP5 data
-Description: Tools for manipulating and summarizing CMIP5 data
+Title: Tools for manipulating and summarizing CMIP5 data.
+Description: Working with CMIP5 data can be tricky, forcing scientists to write custom scripts and programs. The `RCMIP5` package aims to ease this process, providing a standard, robust, and high-performance set of scripts to (i) explore what data have been downloaded, (ii) identify missing data, (iii) average (or apply other mathematical operations) across experimental ensembles, (iv) produce both temporal and spatial statistical summaries, (v) regrid data, and (vi) produce easy-to-work-with graphical and data summaries.
 Depends:
-    plyr,abind,ncdf4
+    R (>= 2.11.0),
+    plyr (>= 1.8.1),
+    abind  (>= 1.4-0),
+    ncdf4 (>= 1.12),
+    ggplot2 (>= 0.9.3),
+    reshape2 (>= 1.4)
+Suggests:
+    foreach (>= 1.4.2),
+    doParallel (>= 1.0.8)
 Version: 0.1
 Authors@R: c(person("Ben", "Bond-Lamberty", role = "aut"),
     person("Kathe", "Todd-Brown", role = c("aut", "cre"),
     email = "ktoddbrown@gmail.com") )
-License: MIT
+License: MIT + file LICENSE
