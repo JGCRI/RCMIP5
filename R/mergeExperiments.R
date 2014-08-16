@@ -1,5 +1,3 @@
-library(abind)
-
 #' Merge data for two separate experiments.
 #' 
 #' The most common reason to merge experiments is across time periods--e.g.,

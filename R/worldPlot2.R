@@ -1,6 +1,3 @@
-library(ggplot2)
-library(abind)
-
 #' Plot global data.
 #' 
 #' Plot a quick world map with reasonable coloring.
@@ -10,16 +7,17 @@ library(abind)
 #' @param splitPacific logical. Try to split image in the Pacific?
 #' @param capMinMax logical. Cap data min and max by quantile? This may produce better coloring.
 #' @param verbose logical. Print info as we go?
-#' @details Uses ggplot's \code{\link{geom_raster}}.
+#' @details Uses \code{ggplot2::geom_raster}.
 #' @export
 worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=TRUE) {
-    
+ 
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(is.numeric(time)) 
     stopifnot(is.logical(capMinMax) & length(capMinMax)==1)
     stopifnot(is.logical(verbose) & length(verbose)==1)
     if(length(time) > 16) time <- time[1:16]  # can't see anything smaller...
+    stopifnot(require(ggplot2))
     
     # Preliminaries
     lon <- x$lon

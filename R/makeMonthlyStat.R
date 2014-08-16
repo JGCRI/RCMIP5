@@ -1,6 +1,3 @@
-library(plyr)
-library(abind)
-
 #' Compute monthly statistic of a variable.
 #' 
 #' We frequently want to summarize CMIP5 data by month, e.g. to understand how

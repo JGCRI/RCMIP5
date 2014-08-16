@@ -1,5 +1,3 @@
-library(ncdf4)
-
 #' Load a model-variable-experiment.
 #' 
 #' Averages all ensemble members of the specified CMIP5 experiment-variable-model combination.

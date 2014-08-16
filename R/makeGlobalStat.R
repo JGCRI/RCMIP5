@@ -1,6 +1,3 @@
-library(plyr)
-library(abind)
-
 #' Compute global statistic of a variable.
 #' 
 #' We frequently want a global summary for CMIP5 data, usually weighted by the 
@@ -55,7 +52,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     if(verbose) cat("Area grid dimensions", dim(areavals), "\n")
     
     # Main computation code
-    if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
+    if(parallel) parallel <- require(foreach) & require(doParallel)
     timer <- system.time({ # time the main computation
         margins <- NULL
         if(timeIndex > 3) margins <- c(3:(timeIndex-1))

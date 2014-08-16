@@ -9,7 +9,7 @@ checkTimePeriod(fileInfo_df)
 \item{fileInfo_df}{data.frame from getFileInfo}
 }
 \value{
-A \code{\link{cmip5data}} object.#'
+A \code{\link{cmip5data}} object.
 }
 \description{
 Check that all time periods match for multi-file ensembles. Before starting to

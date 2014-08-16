@@ -1,8 +1,15 @@
+# File to source if not using package-development mode
+
 library(testthat)
+library(plyr)
+library(abind)
+library(ggplot2)
+library(reshape2)
+library(ncdf4)
 
 # Load sample data, as package would
-load("data/tas_Amon_CMCC-CESM_historical_r1i1p1.Rdata")
-load("data/tas_Amon_CMCC-CESM_rcp85_r1i1p1.Rdata")
+#load("data/tas_Amon_CMCC-CESM_historical_r1i1p1.Rdata")
+#load("data/tas_Amon_CMCC-CESM_rcp85_r1i1p1.Rdata")
 
 source("R/getFileInfo.R")
 source("R/checkTimePeriod.R")

@@ -4,14 +4,14 @@ citEntry(
   entry = "Article", 
   author = personList(as.person("Kathe Todd-Brown"),as.person("Ben Bond-Lamberty")),
   title = "RCMIP5: easy exploration, manipulation, and summarizing of CMIP5 data", 
-  journal = "Biogeosciences", 
+  journal = "EOS", 
   year = 2014, 
   volume = 12, 
   pages = "2031--2040", 
-  url = "http://www.nytimes.com", 
+  url = "http://onlinelibrary.wiley.com/journal/10.1002/(ISSN)2324-9250", 
   textVersion = paste(
     "Kathe Todd-Brown and Ben Bond-Lamberty. RCMIP5: easy exploration, manipulation, and summarizing of CMIP5 data",
-    "Biogeosciences, vol. 12, no. 5, pp. 2031--2040, 2014"
+    "EOS, vol. 12, no. 5, pp. 2031--2040, 2014"
   )
 )
   

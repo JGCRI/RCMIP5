@@ -1,14 +1,11 @@
-library(plyr)
-
 #' Check for continuous time periods in CMIP5 files.
 #' 
 #' Check that all time periods match for multi-file ensembles. Before starting to 
 #' process what may be hundreds or thousands of CMIP5 files, it's a good idea to verify
 #' that your file set is complete and not missing any years.
 #' 
-#'
 #' @param fileInfo_df data.frame from getFileInfo
-#' @return A \code{\link{cmip5data}} object.#' 
+#' @return A \code{\link{cmip5data}} object.
 #' @details Decimal time is (year + (month-1)/12).
 #' Note that this only works for files that are in domains 'fx', '*mon', or '*yr'.
 #' @export

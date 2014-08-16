@@ -13,9 +13,9 @@ Depends:
     plyr (>= 1.8.1),
     abind  (>= 1.4-0),
     ncdf4 (>= 1.12),
-    ggplot2 (>= 0.9.3),
     reshape2 (>= 1.4)
 Suggests:
+    ggplot2 (>= 0.9.3),
     foreach (>= 1.4.2),
     doParallel (>= 1.0.8)
 Version: 0.1

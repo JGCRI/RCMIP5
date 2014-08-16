@@ -1,6 +1,3 @@
-library(plyr)
-library(abind)
-
 #' Compute annual statistic of a variable.
 #' 
 #' Most CMIP5 data are monthly, and we frequently want to summarize these to annual
@@ -35,7 +32,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     
     uniqueYears <- unique(floor(x$time))
     
-    if(parallel) parallel <- require(foreach) & require(doParallel) & require(abind)
+    if(parallel) parallel <- require(foreach) & require(doParallel)
     timer <- system.time( # time the main computation, below
         
         if(parallel) {  # go parallel, woo hoo!

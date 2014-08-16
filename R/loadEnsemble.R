@@ -1,6 +1,3 @@
-library(ncdf4)
-library(abind)
-
 #' Load a model-variable-experiment-ensemble.
 #' 
 #' Loads the data for a particular CMIP5 experiment/variable/model/ensemble 

@@ -12,8 +12,6 @@
 .Rdata
 
 # Specific to this project
-logs/
-outputs/
 ToddBrown/anuGrid
 
 # R backup files

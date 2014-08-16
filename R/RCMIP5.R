@@ -1,5 +1,3 @@
-library(reshape2)
-
 #' Exploration, manipulation, and summarizing of CMIP5 data.
 #'
 #' Working with CMIP5 data can be tricky, forcing scientists to
@@ -19,7 +17,7 @@ library(reshape2)
 #'   An overview of CMIP5 and the experiment design, Bulletin of the American
 #'   Meteorological Society, 93, 485-498.
 #'   \url{http://dx.doi.org/10.1175/BAMS-D-11-00094.1}
-#' @import plyr abind ncdf4
+#' @import plyr abind ncdf4 reshape2
 #' @docType package
 #' @name RCMIP5
 NULL
@@ -50,9 +48,9 @@ cmip5data <- function(x=list()) {
 #' Print a 'cmip5data' class object.
 #'
 #' @param x A \code{\link{cmip5data}} object
-#' @param ... Other parameters passed to print
+#' @param ... Other parameters passed to cat
 #' @details Prints a one-line summary of the object
-#' @export
+#' @method print cmip5data
 print.cmip5data <- function(x, ...) {
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
@@ -81,8 +79,9 @@ print.cmip5data <- function(x, ...) {
 #' Summarize a 'cmip5data' class object.
 #'
 #' @param object A \code{\link{cmip5data}} object
-#' @param ... Other parameters
-#' @details Prints a short summary of the object
+#' @param ... ignored
+#' @details Prints a short summary of the object.
+#' @method summary cmip5data
 #' @export
 summary.cmip5data <- function(object, ...) {
     cat("CMIP5 data")
@@ -165,9 +164,9 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
 #' @param maxSize max size (in MB) of dataset to write
 #' @param outpath directory to write to
 #' @details Writes all available ensembles to disk as Rdata files, subject to
-#' a maximum size parameter (CRAN says keep sample data < 5MB!).
+#' a maximum size parameter (CRAN says keep sample data < 5MB).
 #' @note This is an internal RCMIP5 function and not exported.
-makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./inst/extdata") {
+makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") {
     if(!file.exists(outpath)) dir.create(outpath)
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
