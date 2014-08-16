@@ -15,4 +15,6 @@ LaTeX: pdfLaTeX
 BuildType: Package
 PackageUseDevtools: Yes
 PackageInstallArgs: --no-multiarch --with-keep.source
+PackageBuildArgs: --resave-data
+PackageCheckArgs: --resave-data
 PackageRoxygenize: rd,namespace
