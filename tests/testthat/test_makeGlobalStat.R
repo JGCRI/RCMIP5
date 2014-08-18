@@ -8,7 +8,7 @@ library(abind)
 
 # To run this code: 
 #   source("makeGlobalStat.R")
-#   source("internalHelpers.R") # for dummyData
+#   source("RCMIP5.R") # for cmip5data
 #   library(testthat)
 #   test_file("tests/testthat/test_makeGlobalStat.R")
 
@@ -27,7 +27,7 @@ test_that("makeGlobalStat handles bad input", {
 
 test_that("makeGlobalStat handles monthly data", {
     years <- 1850:1851
-    d <- dummydata(years)
+    d <- cmip5data(years)
     res <- makeGlobalStat(d, verbose=F)
     
     # Is 'res' correct type and size?
@@ -57,7 +57,7 @@ test_that("makeGlobalStat handles monthly data", {
 })
 
 test_that("makeGlobalStat weights correctly", {
-    d <- dummydata(1850, randomize=T, monthly=F)
+    d <- cmip5data(1850, randomize=T, monthly=F)
     res <- makeGlobalStat(d, area=d, verbose=F)
     
     # Are the answer values numerically correct?
@@ -66,7 +66,7 @@ test_that("makeGlobalStat weights correctly", {
 })
 
 test_that("weighted.sum works correctly", {
-    d <- dummydata(1850, randomize=T, monthly=F)
+    d <- cmip5data(1850, randomize=T, monthly=F)
     res <- makeGlobalStat(d, area=d, verbose=F, FUN=weighted.sum)
     
     # Are the answer values numerically correct?
@@ -80,7 +80,7 @@ test_that("weighted.sum works correctly", {
 
 test_that("makeGlobalStat parallel results == serial result", {
     years <- 1850:1851
-    d <- dummydata(years, randomize=T)
+    d <- cmip5data(years, randomize=T)
     res_s <- makeGlobalStat(d, verbose=F, parallel=F)
     res_p <- makeGlobalStat(d, verbose=F, parallel=T)
     expect_equal(res_s$val, res_p$val)
@@ -91,7 +91,7 @@ test_that("makeGlobalStat parallel results == serial result", {
 
 test_that("makeGlobalStat handles 4-dimensional data", {
     years <- 1850:1851
-    d <- dummydata(years, depth=T)
+    d <- cmip5data(years, depth=T)
     res <- makeGlobalStat(d, verbose=F)
     
     # Do years match what we expect?
@@ -105,7 +105,7 @@ test_that("makeGlobalStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
     
     # Same tests, but with lev
-    d <- dummydata(years, lev=T)
+    d <- cmip5data(years, lev=T)
     res <- makeGlobalStat(d, verbose=F)
     ndims <- length(dim(res$val))
     expect_equal(res$time, d$time)
@@ -115,7 +115,7 @@ test_that("makeGlobalStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
     
     # Don't know if this ever will occur, but need to handle lev AND depth
-    d <- dummydata(years, depth=T, lev=T)
+    d <- cmip5data(years, depth=T, lev=T)
     res <- makeGlobalStat(d, verbose=F)
     ndims <- length(dim(res$val))
     expect_equal(res$time, d$time)

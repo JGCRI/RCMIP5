@@ -6,7 +6,7 @@ library(testthat)
 
 # To run this code: 
 #   source("mergeExperiments.R")
-#   source("internalHelpers.R") # for dummyData
+#   source("RCMIP5.R") # for cmip5data
 #   library(testthat)
 #   test_file("tests/testthat/test_mergeExperiments.R")
 
@@ -23,63 +23,63 @@ test_that("mergeExperiments.R handles bad input", {
 })
 
 test_that("mergeExperiments identifies ancillary problems", {
-    y <- dummydata(2)
+    y <- cmip5data(2)
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$domain <- paste0(y$domain, "x")
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$variable <- paste0(y$domain, "x")
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$model <- paste0(y$domain, "x")
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$valUnit <- paste0(y$valUnit, "x")
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$lat <- c(y$lat, 0)
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$lon <- c(y$lon, 0)
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$depth <- c(y$depth, 1)
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$lev <- c(y$lev, 1) 
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- dummydata(1)
+    x <- cmip5data(1)
     x$ensembles <- paste0(y$ensembles, "x")
     expect_warning(mergeExperiments(x, y, verbose=F))
 })
 
 test_that("mergeExperiments identifies time problems", {
-    x <- dummydata(1)
-    y <- dummydata(2)    
+    x <- cmip5data(1)
+    y <- cmip5data(2)    
     x$timeFreqStr <- paste0(y$timeFreqStr, "x")
     expect_error(mergeExperiments(x, y, verbose=F))
  
-    x <- dummydata(1)
+    x <- cmip5data(1)
     expect_error(mergeExperiments(x, x, verbose=F)) # identical times
     x$time[length(x$time)] <- mean(y$time[1:2]) 
     expect_error(mergeExperiments(x, x, verbose=F)) # identical times
     
-    x <- dummydata(4)
+    x <- cmip5data(4)
     expect_warning(mergeExperiments(x, y, verbose=F)) # time gap
 })
 
 test_that("mergeExperiments merges monthly data", {
-    x <- dummydata(1:5)
-    y <- dummydata(6:10)    
+    x <- cmip5data(1:5)
+    y <- cmip5data(6:10)    
     res <- mergeExperiments(x, y, verbose=F)
     
     expect_equal(length(x$val) + length(y$val), length(res$val))
@@ -96,8 +96,8 @@ test_that("mergeExperiments merges monthly data", {
 })
 
 test_that("mergeExperiments merges annual data", {
-    x <- dummydata(1:5, monthly=F)
-    y <- dummydata(6:10, monthly=F)    
+    x <- cmip5data(1:5, monthly=F)
+    y <- cmip5data(6:10, monthly=F)    
     res <- mergeExperiments(x, y, verbose=F)
     
     expect_equal(length(x$val) + length(y$val), length(res$val))
@@ -105,22 +105,22 @@ test_that("mergeExperiments merges annual data", {
 })
 
 test_that("mergeExperiments merges 4-dimensional data", {
-    x <- dummydata(1:5, depth=T)
-    y <- dummydata(6:10, depth=T)    
+    x <- cmip5data(1:5, depth=T)
+    y <- cmip5data(6:10, depth=T)    
     res <- mergeExperiments(x, y, verbose=F)
     
     expect_equal(length(x$val) + length(y$val), length(res$val))
     expect_equal(length(x$time) + length(y$time), length(res$time))
 
-    x <- dummydata(1:5, lev=T)
-    y <- dummydata(6:10, lev=T)    
+    x <- cmip5data(1:5, lev=T)
+    y <- cmip5data(6:10, lev=T)    
     res <- mergeExperiments(x, y, verbose=F)
     
     expect_equal(length(x$val) + length(y$val), length(res$val))
     expect_equal(length(x$time) + length(y$time), length(res$time))
 
-    x <- dummydata(1:5, depth=T, lev=T)
-    y <- dummydata(6:10, depth=T, lev=T)    
+    x <- cmip5data(1:5, depth=T, lev=T)
+    y <- cmip5data(6:10, depth=T, lev=T)    
     res <- mergeExperiments(x, y, verbose=F)
     
     expect_equal(length(x$val) + length(y$val), length(res$val))

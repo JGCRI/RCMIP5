@@ -1,4 +1,4 @@
-# Testing code for the RCMIP5 scripts in 'internalHelpers.R'
+# Testing code for the RCMIP5 scripts in 'internalHelpers.R' and 'RCMIP5.R'
 
 # Uses the testthat package
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
@@ -7,8 +7,9 @@ library(testthat)
 
 # To run this code: 
 #   source("internalHelpers.R")
+#   source("RCMIP5.R")
 #   library(testthat)
-#   test_file("tests/testthat/test_loadModel.R")
+#   test_file("tests/testthat/test_internalHelpers.R")
 
 context("addProvenance")
 
@@ -38,19 +39,18 @@ test_that("addProvenance adds messages", {
 
 # ===============================================
 
-context("dummydata")
+context("cmip5data")
 
-test_that("dummydata handles bad input", {
-    expect_error(dummydata())   
-    expect_error(dummydata("hi"))   
-    expect_error(dummydata(1, monthly=123))   
-    expect_error(dummydata(1, depth=123))
-    expect_error(dummydata(1, lev=123))
-    expect_error(dummydata(1, randomize="hi"))   
+test_that("cmip5data handles bad input", {
+    expect_error(cmip5data("hi"))   
+    expect_error(cmip5data(1, monthly=123))   
+    expect_error(cmip5data(1, depth=123))
+    expect_error(cmip5data(1, lev=123))
+    expect_error(cmip5data(1, randomize="hi"))   
 })
 
-test_that("dummydata generates annual and monthly data", {
-    d <- dummydata(1)
+test_that("cmip5data generates annual and monthly data", {
+    d <- cmip5data(1)
     expect_equal(length(dim(d$val)), 3)
     expect_equal(dim(d$val)[3], 12)
     expect_equal(length(d$time), 12)
@@ -59,7 +59,7 @@ test_that("dummydata generates annual and monthly data", {
     expect_equal(dim(d$val)[2], length(d$lat))
     expect_equal(dim(d$val)[3], length(d$time))
     
-    d <- dummydata(1, monthly=F)
+    d <- cmip5data(1, monthly=F)
     expect_equal(length(dim(d$val)), 3)
     expect_equal(dim(d$val)[3], 1)
     expect_equal(length(d$time), 1)
@@ -67,8 +67,8 @@ test_that("dummydata generates annual and monthly data", {
     expect_equal(dim(d$val)[3], length(d$time))
 })
 
-test_that("dummydata fills in ancillary data", {
-    d <- dummydata(1)
+test_that("cmip5data fills in ancillary data", {
+    d <- cmip5data(1)
     expect_is(d$model, "character")
     expect_is(d$variable, "character")
     expect_is(d$experiment, "character")
@@ -78,21 +78,21 @@ test_that("dummydata fills in ancillary data", {
     expect_is(d$calendarStr, "character")
 })
 
-test_that("dummydata obeys depth and lev", {
-    d <- dummydata(1, depth=T)
+test_that("cmip5data obeys depth and lev", {
+    d <- cmip5data(1, depth=T)
     expect_equal(length(dim(d$val)), 4)
     expect_false(is.null(d$depth))
     
-    d <- dummydata(1, lev=T)
+    d <- cmip5data(1, lev=T)
     expect_equal(length(dim(d$val)), 4)
     expect_false(is.null(d$lev))
 
-    d <- dummydata(1, depth=T, lev=T)
+    d <- cmip5data(1, depth=T, lev=T)
     expect_equal(length(dim(d$val)), 5)
     expect_false(is.null(d$depth))
     expect_false(is.null(d$lev))
 })
 
-test_that("dummydata obeys randomize", {
-    expect_true(sum(dummydata(1, randomize=T)$val) != sum(dummydata(1, randomize=T)$val))
+test_that("cmip5data obeys randomize", {
+    expect_true(sum(cmip5data(1, randomize=T)$val) != sum(cmip5data(1, randomize=T)$val))
 })

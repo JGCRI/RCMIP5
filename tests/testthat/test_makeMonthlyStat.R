@@ -6,7 +6,7 @@ library(testthat)
 
 # To run this code: 
 #   source("makeMonthlyStat.R")
-#   source("internalHelpers.R") # for dummyData
+#   source("RCMIP5.R") # for cmip5data
 #   library(testthat)
 #   test_file("tests/testthat/test_makeMonthlyStat.R")
 
@@ -22,7 +22,7 @@ test_that("makeMonthlyStat handles bad input", {
     expect_error(makeMonthlyStat(d,FUN=1))                   # non-function FUN
     expect_error(makeMonthlyStat(d,FUN=c(mean, mean)))        # multiple FUN values
     
-    d <- dummydata(1850)
+    d <- cmip5data(1850)
     d$val <- array(1:2, dim=dim(d$val)-1)
     expect_error(makeMonthlyStat(d, verbose=F))        # corrupt value array
     
@@ -31,7 +31,7 @@ test_that("makeMonthlyStat handles bad input", {
 
 test_that("makeMonthlyStat handles monthly data", {
     years <- 1850:1851
-    d <- dummydata(years)
+    d <- cmip5data(years)
     res <- makeMonthlyStat(d, verbose=F)
     
     # Is 'res' correct type and size?
@@ -68,7 +68,7 @@ test_that("makeMonthlyStat handles monthly data", {
 
 test_that("makeMonthlyStat parallel results == serial result", {
     years <- 1850:1851
-    d <- dummydata(years)
+    d <- cmip5data(years)
     res_s <- makeMonthlyStat(d, verbose=F, parallel=F)
     res_p <- makeMonthlyStat(d, verbose=F, parallel=T)
     expect_equal(res_s$val, res_p$val)
@@ -79,13 +79,13 @@ test_that("makeMonthlyStat parallel results == serial result", {
 
 test_that("makeAnnualStat handles annual data", {
     years <- 1850:1851
-    d <- dummydata(years, monthly=F)
+    d <- cmip5data(years, monthly=F)
     expect_error(makeMonthlyStat(d, verbose=F))
 })
 
 test_that("makeMonthlyStat handles 4-dimensional data", {
     years <- 1850:1851
-    d <- dummydata(years, depth=T)
+    d <- cmip5data(years, depth=T)
     res <- makeMonthlyStat(d, verbose=F)
     
     # Do years match what we expect?
@@ -96,14 +96,14 @@ test_that("makeMonthlyStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[4], 12)  # temporal size match
     
     # Same tests, but with lev
-    d <- dummydata(years, lev=T)
+    d <- cmip5data(years, lev=T)
     res <- makeMonthlyStat(d, verbose=F)
     expect_equal(res$time, 1:12)
     expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
     expect_equal(dim(res$val)[4], 12)  # temporal size match
     
     # Don't know if this ever will occur, but need to handle lev AND depth
-    d <- dummydata(years, depth=T, lev=T)
+    d <- cmip5data(years, depth=T, lev=T)
     res <- makeMonthlyStat(d, verbose=F)
     expect_equal(res$time, 1:12)
     expect_equal(dim(res$val)[1:4], dim(d$val)[1:4])   # spatial size match

@@ -23,10 +23,23 @@
 NULL
 
 #' Constructor for 'cmip5data' class.
+#' 
+#' This constructor has two functions. First, given a list, it makes the list
+#' a cmip5data-class object (no check is made that the list has appropriate
+#' fields though). Second, if given a numeric value(s), it returns sample/
+#' example data in the newly constructed object. This is used extensively by
+#' the testing code.
 #'
-#' @param x list
-#' @return A class \code{cmip5data} object, which is a list with
-#' the following fields:
+#' @param x list, or numeric (in which case is years of sample data to return)
+#' @param monthly Monthly or annual data?
+#' @param depth Create depth dimension?
+#' @param lev Create lev dimension?
+#' @param randomize Randomize initial data?
+#' @param lonsize Size of longitude dimension
+#' @param latsize Size of latitude dimension
+#' @param depthsize Size of depth dimension
+#' @param levsize Size of lev dimension
+#' @return A cmip5data object, which is a list with the following fields:
 #'  \item{files}{A character vector containing the filenames data came from}
 #'  \item{val}{A multidimensional array [lon, lat, time] holding the data}
 #'  \item{valUnit}{A string containing the value units}
@@ -34,15 +47,61 @@ NULL
 #'  \item{calendarStr}{A string defining the calendar type}
 #'  \item{lat}{A numeric vector containing latitude values}
 #'  \item{lon}{A numeric vector containing longitude values}
+#'  \item{depth}{A numeric vector depth values; optional}
+#'  \item{lev}{A numeric vector level values; optional}
 #'  \item{time}{A numeric vector containing time values}
 #'  \item{variable}{Variable described by this dataset}
 #'  \item{model}{Model of this dataset}
 #'  \item{experiment}{Experiment of this dataset}
 #'  \item{ensembles}{Ensemble(s) included in this dataset}
 #' @docType class
-cmip5data <- function(x=list()) {
-    if (!is.list(x)) stop("x must be a list")
-    structure(x, class="cmip5data")
+cmip5data <- function(x=list(), 
+                      # parameters for making sample data
+                      monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
+                      lonsize=10, latsize=10, depthsize=5, levsize=5) {
+    stopifnot(is.logical(c(monthly, depth, lev, randomize)))
+
+    if (is.list(x)) {
+        structure(x, class="cmip5data")        
+    } else if(is.numeric(x)) { 
+
+        # Create sample data. 'x' is years  
+        years <- x
+        ppy <- ifelse(monthly, 12, 1)  # periods per year
+        valdims <- c(lonsize, latsize, ppy*length(years))
+        depthdim <- NULL
+        if(depth) {
+            valdims <- c(valdims[1:(length(valdims)-1)], depthsize, valdims[length(valdims)])
+            depthdim <- c(0:(depthsize-1))
+        }
+        levdim <- NULL
+        if(lev) {
+            valdims <- c(valdims[1:(length(valdims)-1)], levsize, valdims[length(valdims)])
+            levdim <- c(0:(levsize-1))
+        }
+        
+        valData <- 1:2
+        if(randomize) valData  <- runif(prod(valdims))
+        
+        x <- cmip5data(list(files="dummy file", 
+                            variable="dummyvar",
+                            model="dummymodel",
+                            experiment="dummyexperiment",
+                            val=array(valData, dim=valdims),
+                            valUnit="dummy unit",
+                            timeUnit=paste0("days since ",years[1],"-01-01"),
+                            calendarStr="360_day",
+                            timeFreqStr=ifelse(monthly, "mon", "yr"),
+                            lat=c(0:(latsize-1)),
+                            lon=c(0:(lonsize-1)),
+                            depth=depthdim,
+                            lev=levdim,
+                            time=(360/ppy*c(0:(length(years)*ppy-1) )+15)/360+min(years)
+        ))
+        x$provenance <- addProvenance(NULL, "Dummy data")
+        x     
+    } else
+        stop("Don't know what to do with this class of parameter")
 }
 
 #' Print a 'cmip5data' class object.
@@ -52,6 +111,12 @@ cmip5data <- function(x=list()) {
 #' @details Prints a one-line summary of the object
 #' @method print cmip5data
 print.cmip5data <- function(x, ...) {
+    
+    if(is.null(x$files) | is.null(x$time) | is.null(x$variable)) {
+        cat("(Empty cmip5data object)")
+        return()
+    }
+    
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
     
@@ -74,7 +139,7 @@ print.cmip5data <- function(x, ...) {
               paste0("[", paste(dim(x$val), collapse=" "), "]"),
               "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
               nfiles, ifelse(nfiles==1,"file","files"), "\n", ...))
-}
+} # print.cmip5data
 
 #' Summarize a 'cmip5data' class object.
 #'
@@ -84,6 +149,12 @@ print.cmip5data <- function(x, ...) {
 #' @method summary cmip5data
 #' @export
 summary.cmip5data <- function(object, ...) {
+
+    if(is.null(x$files) | is.null(x$time) | is.null(x$variable)) {
+        cat("(Empty cmip5data object)\n")
+        return()
+    }
+    
     cat("CMIP5 data")
     ##TODO This may be unnessacary with the addition of provenance
     if(!is.null(object$numMonths)) {
@@ -117,7 +188,7 @@ summary.cmip5data <- function(object, ...) {
     
     cat('\nProvenance:\n')
     cat(paste(object$provenance, '\n', collapse=' '))
-}
+} # summary.cmip5data
 
 #' Convert a cmip5data object to a data frame
 #'
