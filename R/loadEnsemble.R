@@ -82,6 +82,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
 
     # Go through and load the data
     temp <- c()
+    timeRaw <- c()
     timeArr <- c()
     prov <- NULL
     for(fileStr in fileList) {
@@ -143,9 +144,9 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                 }
 
                 # Pull the actual time
-                timeArr <- c(timeArr,
-                             ncvar_get(temp.nc, varid='time')/calendarDayLength
-                             + startYr)
+                thisTimeRaw <- ncvar_get(temp.nc, varid='time')
+                timeRaw <- c(timeRaw, thisTimeRaw)
+                timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
             } else { #this is a fx variable
                 startYr <- NULL
                 timeArr <- NULL
@@ -174,7 +175,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                    experiment=experiment, ensembles=ensemble,
                    provenance=prov,
                    debug=list(startYr=startYr, timeUnit=timeUnit,
-                              calendarStr=calendarStr,
+                              calendarStr=calendarStr, timeRaw=timeRaw,
                               calendarDayLength=calendarDayLength)
     ))
 } # loadEnsemble
