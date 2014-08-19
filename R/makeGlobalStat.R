@@ -2,7 +2,7 @@
 #' 
 #' We frequently want a global summary for CMIP5 data, usually weighted by the 
 #' grid cell areas used by each particular model. This function does that. If no
-#' area weighting is supplied, a warning is given. The default statistic is \link{mean},
+#' area weighting is supplied, a warning is given. The default statistic is \link{weighted.mean},
 #' but any summary function that returns a numeric result can be used. If the data
 #' have 'depth' or 'lev' attributes, the statistic will be computed for each of these.
 #'
@@ -97,7 +97,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     return(x)
 } # makeGlobalStat
 
-#' Weighted sum--i.e., sum of weighted means. Convenience function
+#' Weighted sum--i.e., sum of weighted means. Convenience function.
 #'
 #' @param x vector of data
 #' @param w vector of weights

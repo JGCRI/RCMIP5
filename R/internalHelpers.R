@@ -1,4 +1,4 @@
-#' Add provenance information to a cmip5data object
+#' Add provenance information to a cmip5data object.
 #' 
 #' It's important to track data provenance, the steps taken to produce a particular
 #' dataset. Each operation in the RCMIP5 package adds provenance information via this function.

@@ -1,4 +1,4 @@
-#' List all CMIP5 file in a directory tree.
+#' List all CMIP5 files in a directory tree.
 #' 
 #' List all CMIP5 files in a directory tree, parsing their filenames for
 #' information like experiment, model, and variable names.

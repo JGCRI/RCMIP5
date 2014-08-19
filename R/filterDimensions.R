@@ -1,4 +1,4 @@
-#' Filter dimensions, limiting to arbitrary lon/lat/time/lev/depth
+#' Filter dimensions, limiting to arbitrary lon/lat/time/lev/depth.
 #'
 #' @param x cmip5data A \code{\link{cmip5data}} object.
 #' @param lons numeric vector. Longitudes to filter (in).
