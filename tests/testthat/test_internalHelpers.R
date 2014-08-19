@@ -73,9 +73,10 @@ test_that("cmip5data fills in ancillary data", {
     expect_is(d$variable, "character")
     expect_is(d$experiment, "character")
     expect_is(d$valUnit, "character")
-    expect_is(d$timeUnit, "character")
     expect_is(d$timeFreqStr, "character")
-    expect_is(d$calendarStr, "character")
+    expect_is(d$debug, "list")
+    expect_is(d$debug$calendarStr, "character")
+    expect_is(d$debug$timeUnit, "character")
 })
 
 test_that("cmip5data obeys depth and lev", {
@@ -86,7 +87,7 @@ test_that("cmip5data obeys depth and lev", {
     d <- cmip5data(1, lev=T)
     expect_equal(length(dim(d$val)), 4)
     expect_false(is.null(d$lev))
-
+    
     d <- cmip5data(1, depth=T, lev=T)
     expect_equal(length(dim(d$val)), 5)
     expect_false(is.null(d$depth))

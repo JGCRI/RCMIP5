@@ -60,11 +60,11 @@ cmip5data <- function(x=list(),
                       monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
                       lonsize=10, latsize=10, depthsize=5, levsize=5) {
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
-
+    
     if (is.list(x)) {
         structure(x, class="cmip5data")        
     } else if(is.numeric(x)) { 
-
+        
         # Create sample data. 'x' is years  
         years <- x
         ppy <- ifelse(monthly, 12, 1)  # periods per year
@@ -83,20 +83,26 @@ cmip5data <- function(x=list(),
         valData <- 1:2
         if(randomize) valData  <- runif(prod(valdims))
         
+        debuglist <- list(startYr=years[1],
+                          calendarStr="360_day",
+                          timeUnit=paste0("days since ",years[1],"-01-01"),
+                          timeRaw=(360/ppy*c(0:(length(years)*ppy-1) )+15)
+        )
+        
         x <- cmip5data(list(files="dummy file", 
                             variable="dummyvar",
                             model="dummymodel",
                             experiment="dummyexperiment",
                             val=array(valData, dim=valdims),
                             valUnit="dummy unit",
-                            timeUnit=paste0("days since ",years[1],"-01-01"),
                             calendarStr="360_day",
                             timeFreqStr=ifelse(monthly, "mon", "yr"),
                             lat=c(0:(latsize-1)),
                             lon=c(0:(lonsize-1)),
                             depth=depthdim,
                             lev=levdim,
-                            time=(360/ppy*c(0:(length(years)*ppy-1) )+15)/360+min(years)
+                            time=debuglist$timeRaw/360+min(years),
+                            debug=debuglist
         ))
         x$provenance <- addProvenance(NULL, "Dummy data")
         x     
@@ -149,7 +155,7 @@ print.cmip5data <- function(x, ...) {
 #' @method summary cmip5data
 #' @export
 summary.cmip5data <- function(object, ...) {
-
+    
     if(is.null(x$files) | is.null(x$time) | is.null(x$variable)) {
         cat("(Empty cmip5data object)\n")
         return()
@@ -229,7 +235,7 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     return(df)
 } # as.data.frame.cmip5data
 
-#' Make package datasets and write them to disk
+#' Make package datasets and write them to disk.
 #'
 #' @param path root of directory tree
 #' @param maxSize max size (in MB) of dataset to write
