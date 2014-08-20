@@ -34,8 +34,8 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     if(verbose) cat("Defining netCDF dimensions...")
     londim <- ncdim_def("lon", "degrees_east", x$lon)
     latdim <- ncdim_def("lat", "degrees_north", x$lat)
-    timedim <- ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw)
-    dimlist <- list(londim, latdim, timedim, calendar=x$debug$calendarStr)
+    timedim <- ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
+    dimlist <- list(londim, latdim, timedim)
     if(!is.null(x$depth)) {
         depthdim <- ncdim_def("depth", "TODO", x$depth)
         dl <- length(dimlist)
@@ -52,7 +52,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     
     # Create variable and write data
     if(verbose) cat("Defining netCDF variables\n")
-    valvar <- ncvar_def(x$variable, x$valUnit, list(londim, latdim, timedim))
+    valvar <- ncvar_def(x$variable, x$valUnit, dimlist)
     
     if(verbose) cat("Creating and writing", file, "\n")
     nc <- nc_create(fqfn, valvar)
