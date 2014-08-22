@@ -23,7 +23,7 @@
 NULL
 
 #' Constructor for 'cmip5data' class.
-#' 
+#'
 #' This constructor has two functions. First, given a list, it makes the list
 #' a cmip5data-class object (no check is made that the list has appropriate
 #' fields though). Second, if given a numeric value(s), it returns sample/
@@ -55,17 +55,17 @@ NULL
 #'  \item{experiment}{Experiment of this dataset}
 #'  \item{ensembles}{Ensemble(s) included in this dataset}
 #' @docType class
-cmip5data <- function(x=list(), 
+cmip5data <- function(x=list(),
                       # parameters for making sample data
                       monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
                       lonsize=10, latsize=10, depthsize=5, levsize=5) {
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
-    
+
     if (is.list(x)) {
-        structure(x, class="cmip5data")        
-    } else if(is.numeric(x)) { 
-        
-        # Create sample data. 'x' is years  
+        structure(x, class="cmip5data")
+    } else if(is.numeric(x)) {
+
+        # Create sample data. 'x' is years
         years <- x
         ppy <- ifelse(monthly, 12, 1)  # periods per year
         valdims <- c(lonsize, latsize, ppy*length(years))
@@ -79,17 +79,17 @@ cmip5data <- function(x=list(),
             valdims <- c(valdims[1:(length(valdims)-1)], levsize, valdims[length(valdims)])
             levdim <- c(0:(levsize-1))
         }
-        
+
         valData <- 1:2
         if(randomize) valData  <- runif(prod(valdims))
-        
+
         debuglist <- list(startYr=years[1],
                           calendarStr="360_day",
                           timeUnit=paste0("days since ",years[1],"-01-01"),
                           timeRaw=(360/ppy*c(0:(length(years)*ppy-1) )+15)
         )
-        
-        x <- cmip5data(list(files="dummy file", 
+
+        x <- cmip5data(list(files="dummy file",
                             variable="dummyvar",
                             model="dummymodel",
                             experiment="dummyexperiment",
@@ -105,7 +105,7 @@ cmip5data <- function(x=list(),
                             debug=debuglist
         ))
         x$provenance <- addProvenance(NULL, "Dummy data")
-        x     
+        x
     } else
         stop("Don't know what to do with this class of parameter")
 }
@@ -117,21 +117,21 @@ cmip5data <- function(x=list(),
 #' @details Prints a one-line summary of the object
 #' @method print cmip5data
 print.cmip5data <- function(x, ...) {
-    
+
     if(is.null(x$files) | is.null(x$time) | is.null(x$variable)) {
         cat("(Empty cmip5data object)")
         return()
     }
-    
+
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
-    
+
     yearString <- "[date parse error]"
     try({
         yearRange <- round(range(x$time), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
     }, silent=T)
-    
+
     cat("CMIP5 ")
     if(!is.null(x$numMonths)) {
         cat("- annual summary: ")
@@ -140,7 +140,7 @@ print.cmip5data <- function(x, ...) {
     } else if(!is.null(x$numCells)) {
         cat(" - spatial summary ")
     }
-    
+
     cat(paste(x$variable, x$model, x$experiment, yearString,
               paste0("[", paste(dim(x$val), collapse=" "), "]"),
               "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
@@ -155,12 +155,12 @@ print.cmip5data <- function(x, ...) {
 #' @method summary cmip5data
 #' @export
 summary.cmip5data <- function(object, ...) {
-    
-    if(is.null(x$files) | is.null(x$time) | is.null(x$variable)) {
+
+    if(is.null(object$files) | is.null(object$time) | is.null(object$variable)) {
         cat("(Empty cmip5data object)\n")
         return()
     }
-    
+
     cat("CMIP5 data")
     ##TODO This may be unnessacary with the addition of provenance
     if(!is.null(object$numMonths)) {
@@ -173,7 +173,7 @@ summary.cmip5data <- function(object, ...) {
         cat(" - spatial summary\n")
         cat("Cells summarized:", object$numCells, "\n")
     } else cat("\n")
-    
+
     cat("Variable:", object$variable, '\n')
     cat("Domain:", object$domain, '\n')
     cat("Model:", object$model, "\n")
@@ -191,7 +191,7 @@ summary.cmip5data <- function(object, ...) {
     print(summary(as.vector(object$val)))
     cat("Size: ")
     print(object.size(object), units="MB")
-    
+
     cat('\nProvenance:\n')
     cat(paste(object$provenance, '\n', collapse=' '))
 } # summary.cmip5data
@@ -203,10 +203,10 @@ summary.cmip5data <- function(object, ...) {
 #' @return The object converted, as well as possible, to a data frame
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     years <- x$time
-    
+
     if(verbose) cat("Melting...\n")
     df <- reshape2::melt(x$val)
-    
+
     if(verbose) cat("Filling in dimensional data...\n")
     df[,1] <- x$lon[df[,1]]
     df[,2] <- x$lat[df[,2]]
@@ -224,14 +224,14 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
         timeindex <- 3
     df[,timeindex] <- years[df[,timeindex]]
     names(df)[timeindex] <- "time"
-    
-    if(!is.null(x$variable))    
+
+    if(!is.null(x$variable))
         df$variable <- factor(x$variable)
-    if(!is.null(x$model))       
+    if(!is.null(x$model))
         df$model <- factor(x$model)
-    if(!is.null(x$experiment))  
+    if(!is.null(x$experiment))
         df$experiment <- factor(x$experiment)
-    
+
     return(df)
 } # as.data.frame.cmip5data
 
@@ -248,7 +248,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-    
+
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],
