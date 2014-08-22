@@ -23,5 +23,6 @@ source("R/makeAnnualStat.R")
 source("R/makeGlobalStat.R")
 source("R/makeMonthlyStat.R")
 source("R/mergeExperiments.R")
+source("R/filterDimensions.R")
 
 source("R/devMain.R")
