@@ -1,6 +1,6 @@
 #' Load a model-variable-experiment-ensemble.
-#' 
-#' Loads the data for a particular CMIP5 experiment/variable/model/ensemble 
+#'
+#' Loads the data for a particular CMIP5 experiment/variable/model/ensemble
 #' combination (one or more files). Returns NULL and a warning if nothing matches.
 #'
 #' @param variable CMIP5 variable to load
@@ -22,97 +22,138 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                          path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
 
     # Match the path conventions to the operating system
+    ##KTB: Can you clarify how these warnings are handled?
     w <- getOption('warn')
     options(warn=-1)
     path <- normalizePath(path)
     options(warn=w)
-    
-    # Sanity checks
+
+    #### Sanity checks
+    # Make sure that the ensemble parameters are strings
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
     stopifnot(length(experiment)==1 & is.character(experiment))
     stopifnot(length(ensemble)==1 & is.character(ensemble))
     stopifnot(length(domain)==1 & is.character(domain))
+    # Make sure that the path to the CMIP5 folder is valid
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(file.exists(path))
+    # Check the logicals
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(demo)==1 & is.logical(demo))
 
     # List all files that match specifications
     if(demo) {
-        fileList <- ls(envir=.GlobalEnv)  # in demo mode pull from environment, not disk
+        # in demo mode pull list of files from environment, not disk
+        fileList <- ls(envir=.GlobalEnv)
     } else {
+        # otherwise pull the file list
         fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     }
-    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_%s', # ^%s_%s_%s_%s_%s[_\\.]
-                                               variable, domain, model, experiment, ensemble),
+    # Match file names with valid CMIP5 patterns:
+    # ...variable_domain_model_experiment_ensemble followed by either
+    # ...a '_' or a '.' depending on whether a time period is specified or not.
+    # ...Note that the '[_\\.]' match differentiates between
+    # ...ensembles like 'r1i1p1' and 'r1i1p11', an unlikely but possible case.
+    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_%s[_\\.]',
+                                               variable, domain, model,
+                                               experiment, ensemble),
                                basename(fileList))]
+
+    # Check tht there are files to load
     if(length(fileList)==0) {
         warning("Could not find any matching files")
         return(NULL)
     }
 
-    # Need to deal with mix of fx and other domains which don't split to the
-    # ...same number of strings
+    # Pull the domains of all files we want to load
     domainCheck <- unname(vapply(unlist(fileList),
-                                 function(x){unlist(strsplit(basename(x), '_'))[2]},
+                                 function(x){
+                                     unlist(strsplit(basename(x), '_'))[2]
+                                 },
                                  FUN.VALUE=''))
+    # Check that we are only loading one domain, we check this before checking
+    # ...other CMIP5 specifications because 'fx' domains will split on '_' to a
+    # ...different number of strings then temporal domains.
     if(length(unique(domainCheck)) > 1){
         stop('Domain is not unique: [', paste(unique(domainCheck), collapse=' '), ']\n')
     }
 
-    # Check that there are unique variables, domain, model, experiments
-    # ...and ensemble specified, reset them as needed
+    # Get the number of pieces of CMIP5 information strings
     numSplits <- length(unlist(strsplit(basename(fileList[1]), '_')))
+
+    # Split all file names based on '_'
     cmipName <- unname(vapply(unlist(fileList),
-                              function(x){unlist(strsplit(basename(x), '_'))},
+                              function(x){
+                                  unlist(strsplit(basename(x), '_'))
+                              },
                               FUN.VALUE=rep('', length=numSplits)))
 
+    # Key in on what order the CMIP5 information is presented in the file
     checkField <- list(variable=1, domain=2, model=3, experiment=4, ensemble=5)
 
+    # Go through each information field
     for(checkStr in names(checkField)){
+        # Pull all unique strings
         tempStr <- unique(cmipName[checkField[[checkStr]],])
+        # There should only be one
         if(length(tempStr) > 1) {
+            # Throw an error if there is more then one unique string
             stop('[',checkStr, '] is not unique: [', paste(tempStr, collapse=' '), ']\n')
         } else {
+            # Set a variable by the field name to the correct string for this
+            # ...ensemble.
             eval(parse(text=paste(checkStr, ' <- "', tempStr[1], '"', sep='')))
         }
     }
 
     # Go through and load the data
-    temp <- c()
+    temp <- c() #set up variable to temporarily record the main variable
     timeRaw <- c()
     timeArr <- c()
-    prov <- NULL
+    prov <- NULL #set up variable to record provanence
+    # Note that list.file returns a sorted list so these file should already
+    # ...be in temporal order if the ensemble is split over multiple netcdf
+    # ...files.
     for(fileStr in fileList) {
+        # Note the files which are loaded in this ensemble
         prov <- addProvenance(prov, paste("Loaded", fileStr))
-        if(demo) {
+        if(demo) { # KTB Does demo load any data??
             if(verbose) cat("DEMO: loading", fileStr, "from package data\n")
             return(get(fileStr, envir=.GlobalEnv))
         } else {
-
             if(verbose) cat('Loading', fileStr, "\n")
+            # Open up the netcdf file
             temp.nc <- nc_open(fileStr, write=FALSE)
-
+            # Bind the main variable along the 3rd dimentin to previously loaded
+            # ...variable values
             temp <- abind(temp, ncvar_get(temp.nc, varid=variable), along=3)
+
+            # Get the string identifying the units of the variable
             varUnit <- ncatt_get(temp.nc, variable, 'units')$value
 
+            # Get all the variables stored in the netcdf file so that we
+            # ...can load the lon, lat and time variables if appropriate
             varnames <- names(temp.nc$var)
 
-            # Load these guaranteed data
+            # Load these guaranteed data; latitude and longitude
             stopifnot(any(c("lon", "lon_bnds") %in% varnames))
             stopifnot(any(c("lat", "lat_bnds") %in% varnames))
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
 
-            # Pull the time frequency
+            # Pull the time frequency, note that this should be related to
+            # ...the domain but really we are looking for 'fx'/fixed variables
+            # ...where we don't have to deal with time.
             timeFreqStr <- ncatt_get(temp.nc, varid=0)$frequency
 
             # Non-fixed files have times to load
             if(! timeFreqStr %in% 'fx') {
-
+                # Get the unit that the time is recorded in
+                # ...(ie 'days since 1860')
                 timeUnit <- ncatt_get(temp.nc, 'time', 'units')$value
+                # Get the type of calendar used (ie 'noleap')
                 calendarStr <- ncatt_get(temp.nc, 'time', 'calendar')$value
                 calendarUnitsStr <- ncatt_get(temp.nc, 'time', 'units')$value
                 # Pull the number of days in a year
@@ -147,7 +188,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                 thisTimeRaw <- ncvar_get(temp.nc, varid='time')
                 timeRaw <- c(timeRaw, thisTimeRaw)
                 timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
-            } else { #this is a fx variable
+            } else { #this is a fx variable with lots of null values set
                 startYr <- NULL
                 timeArr <- NULL
                 timeUnit <- NULL
@@ -155,14 +196,17 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                 calendarDayLength <- NULL
             }
 
-            # Load the 4th dimentions: lev (atmospheric levels)
+            # Load the 4th dimention identifiers: lev (atmospheric levels)
             #                          depth (ocean/land depths)
             levArr <- NULL
-            if(any(c("lev", "lev_bnds") %in% varnames))
+            if(any(c("lev", "lev_bnds") %in% varnames)){
                 levArr <- ncvar_get(temp.nc, varid='lev')
+            }
+
             depthArr <- NULL
-            if(any(c("depth", "depth_bnds") %in% varnames))
+            if(any(c("depth", "depth_bnds") %in% varnames)){
                 depthArr <- ncvar_get(temp.nc, varid='depth')
+            }
 
             nc_close(temp.nc)
         }
@@ -175,6 +219,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                    experiment=experiment, ensembles=ensemble,
                    provenance=prov,
                    debug=list(startYr=startYr, timeUnit=timeUnit,
+                              calendarUnitsStr=calendarUnitsStr,
                               calendarStr=calendarStr, timeRaw=timeRaw,
                               calendarDayLength=calendarDayLength)
     ))
