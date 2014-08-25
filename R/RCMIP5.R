@@ -118,7 +118,7 @@ cmip5data <- function(x=list(),
 #' @method print cmip5data
 print.cmip5data <- function(x, ...) {
 
-    if(is.null(x$files) | is.null(x$time) | is.null(x$variable)) {
+    if(is.null(x$files) | is.null(x$variable)) {
         cat("(Empty cmip5data object)")
         return()
     }
@@ -156,7 +156,7 @@ print.cmip5data <- function(x, ...) {
 #' @export
 summary.cmip5data <- function(object, ...) {
 
-    if(is.null(object$files) | is.null(object$time) | is.null(object$variable)) {
+    if(is.null(object$files) | is.null(object$variable)) {
         cat("(Empty cmip5data object)\n")
         return()
     }
