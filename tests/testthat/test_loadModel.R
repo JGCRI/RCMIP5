@@ -3,7 +3,6 @@
 # Uses the testthat package
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
 library(testthat)
-#source("loadModel.R")    # can't do this here
 
 # To run this code: 
 #   source("loadModel.R")
