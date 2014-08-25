@@ -25,4 +25,10 @@ source("R/makeMonthlyStat.R")
 source("R/mergeExperiments.R")
 source("R/filterDimensions.R")
 
-source("R/devMain.R")
+#KTB old area weighted regridding functions
+#...these are bloated and have lots of room
+#...for optimization but do provide a starting point.
+source("R/calcGridArea.R")
+source("R/regrid_val.R")
+source("R/regrid_data.R")
+#source("R/devMain.R")
