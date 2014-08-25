@@ -19,7 +19,7 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
     stopifnot(is.null(lats) | class(lats)=="numeric")
     stopifnot(is.null(depths) | class(depths)=="numeric")
     stopifnot(is.null(levs) | class(levs)=="numeric")
-    stopifnot(is.null(years) | class(years)=="numeric")
+    stopifnot(is.null(years) | class(years)=="numeric" | class(years) == 'integer')
     stopifnot(is.null(months) | class(months)=="numeric")
     stopifnot(length(verbose)==1 & is.logical(verbose))
 
@@ -27,9 +27,9 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
     ans <- x
     # Check to see if there is a constraint on the years we want to pull
     if(!is.null(years)){
-        if(length(dim(temp$val)) == 3){
+        if(length(dim(x$val)) == 3){
             ans$val <- ans$val[,,floor(ans$time) %in% years]
-        }else if(length(dim(temp$val)) == 4){
+        }else if(length(dim(x$val)) == 4){
             ans$val <- ans$val[,,,floor(ans$time) %in% years]
         }else{
             # do nothing since, ordering of ans$val dimentions is
