@@ -67,6 +67,10 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
         return(NULL)
     }
 
+    # Strip the .nc out of the file list
+    fileList <- gsub('\\.nc$', '', fileList)
+
+
     # Pull the domains of all files we want to load
     domainCheck <- unname(vapply(unlist(fileList),
                                  function(x){
@@ -194,6 +198,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                 timeUnit <- NULL
                 calendarStr <- NULL
                 calendarDayLength <- NULL
+                calendarUnitsStr <- NULL
             }
 
             # Load the 4th dimention identifiers: lev (atmospheric levels)

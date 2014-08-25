@@ -55,6 +55,9 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
         return(NULL)
     }
 
+    #strip the .nc out of the file list
+    fileList <- gsub('\\.nc$', '', fileList)
+
     # Parse out the ensemble strings according to CMIP5 specifications
     ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
                                         function(x){x[5]})))
