@@ -24,5 +24,6 @@ source("R/makeGlobalStat.R")
 source("R/makeMonthlyStat.R")
 source("R/mergeExperiments.R")
 source("R/filterDimensions.R")
+source("R/saveNetCDF.R")
 
 source("R/devMain.R")
