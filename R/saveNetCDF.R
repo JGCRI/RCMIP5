@@ -15,8 +15,8 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
 
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
-    stopifnot(is.null(file) | is.character(file))
-    stopifnot(is.character(path))
+    stopifnot(length(file)==1 & (is.null(file) | is.character(file)))
+    stopifnot(length(path)==1 & is.character(path))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
     # Create meaningful filename, if necessary
@@ -40,9 +40,9 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
         depthdim <- ncdim_def("depth", "TODO", x$depth)
         dl <- length(dimlist)
         dimlist[[dl+1]] <- dimlist[[dl]]
-        dimlist[[dl]] <- levdim
+        dimlist[[dl]] <- depthdim
     }
-    if(!is.null(x$depth)) {
+    if(!is.null(x$lev)) {
         levdim <- ncdim_def("lev", "TODO", x$lev)
         dl <- length(dimlist)
         dimlist[[dl+1]] <- dimlist[[dl]]
