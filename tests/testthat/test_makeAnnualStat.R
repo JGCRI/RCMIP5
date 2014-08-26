@@ -78,7 +78,7 @@ test_that("makeAnnualStat handles annual data", {
     res <- makeAnnualStat(d, verbose=F)
     
     # Is 'res' correct type and size?
-    expect_is(res,"cmip5data")
+    expect_is(res, "cmip5data")
     
     # Did unchanging info get copied correctly?
     expect_equal(res$lon, d$lon)
