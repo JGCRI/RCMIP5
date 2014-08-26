@@ -19,10 +19,11 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
 
     if(verbose) cat('starting makeAnnualStat\n')
     # Sanity checks ###################
+
     # Make sure we are dealing with the expected class
     stopifnot(class(x)=="cmip5data")
     # Is the val array in months?
-    stopifnot(x$timeFreqStr %in% 'mon')
+    #stopifnot(x$timeFreqStr %in% 'mon')
 
     # Check the boolean flags
     stopifnot(length(verbose)==1 & is.logical(verbose))
@@ -33,7 +34,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
 
     # Check that the dimentions of the value is either lon-lat-time
     # ...or lon-lat-depth-time
-    stopifnot(length(dim(x$val)) %in% c(3, 4)) # KTB what is length 5?
+    stopifnot(length(dim(x$val)) %in% c(3, 4, 5)) # KTB I don't think we need to handle level and depth in the same val
 
     # pull the time index which is always the last dimension
     timeIndex <- length(dim(x$val))
@@ -87,6 +88,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     x$val <- unname(ans)
 
     # record the number of months that were averaged for each year
+    ##KTB numMonths should be changed to numPerYr
     x$numMonths <- table(floor(x$time))
 
     # reset the time
