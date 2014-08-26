@@ -12,53 +12,90 @@
 #' @export
 filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
                              years=NULL, months=NULL, verbose=FALSE) {
-
-    ## Sanity checks
+    
+    # Sanity checks
     stopifnot(class(x)=="cmip5data")
-    stopifnot(is.null(lons) | class(lons)=="numeric")
-    stopifnot(is.null(lats) | class(lats)=="numeric")
-    stopifnot(is.null(depths) | class(depths)=="numeric")
-    stopifnot(is.null(levs) | class(levs)=="numeric")
-    stopifnot(is.null(years) | class(years)=="numeric" | class(years) == 'integer')
-    stopifnot(is.null(months) | class(months)=="numeric")
+    stopifnot(is.null(lons) | class(lons) %in% c("numeric", "integer"))
+    stopifnot(is.null(lats) | class(lats) %in% c("numeric", "integer"))
+    stopifnot(is.null(depths) | class(depths) %in% c("numeric", "integer"))
+    stopifnot(is.null(levs) | class(levs) %in% c("numeric", "integer"))
+    stopifnot(is.null(years) | class(years) %in% c("numeric", "integer"))
+    stopifnot(is.null(months) | class(months) %in% c("numeric", "integer"))
     stopifnot(length(verbose)==1 & is.logical(verbose))
-
-    # KTB do we need to copy this?
-    ans <- x
-    # Check to see if there is a constraint on the years we want to pull
-    if(!is.null(years)){
-        if(length(dim(x$val)) == 3){
-            ans$val <- ans$val[,,floor(ans$time) %in% years]
-        }else if(length(dim(x$val)) == 4){
-            ans$val <- ans$val[,,,floor(ans$time) %in% years]
-        }else{
-            # do nothing since, ordering of ans$val dimentions is
-            # ...[lon, lat, ?depth/lev, time] so anything other then 3 or 4 is
-            # ...not valid
-            warning("Years specified for time invarient value.")
-            break #skip out on the rest of the if statement
+    
+    # The ordering of x$val dimensions is lon, lat, [depth,] [lev,] time
+    # Anything else is not valid.
+    ndim <- length(dim(x$val))
+    stopifnot(ndim %in% c(3, 4, 5)) # that's all we know
+    
+    # Filter depth dimension
+    if(!is.null(depths)) {
+        ok <- TRUE
+        if(is.null(x[["depth"]])) {
+            warning("No depth data found")
+            ok <- FALSE
+        } else if(ndim == 4) {
+            x$val <- x$val[,,x$depth %in% depths,]
+        } else if(ndim == 5) {
+            x$val <- x$val[,,x$depth %in% depths,,]
+        } else {  # if we're here, there's a problem
+            stop("Unknown structure - depth filter can't be applied")
         }
-        ans$time <- ans$time[floor(ans$time) %in% years]
-        ans$provenance <- addProvenance(ans$provenance,
-                                        paste("Filtering for years in range [",
-                                              paste(range(years),
-                                                    collapse=', '), "]"))
+        if(ok) {
+            x$depth <- x$depth[x$depth %in% depths]
+            x$provenance <- addProvenance(x$provenance,
+                                          paste("Filtered for depths in range [",
+                                                paste(range(depths),
+                                                      collapse=', '), "]"))
+        }
     }
-
-    # TODO: Do we want a function that does this? It's going to be very common
-    # for users to only care about surface CO2, for example, and they don't want
-    # makeAnnualMean() to run computations on all levels.
-
-    # TODO: ask 'mask' (spatial lon/lat mask) above?
-
-    # TODO: Should variables above be bounds, e.g. to filter to western hemisphere
-    #   lons=c(-180, 0)
-    # or straight numbers
-    #   lons=c(-180, -175, ..., 0)
-    # ? The first is simpler, while the second requires more work from the user but
-    # gives more flexibility. I'm inclined to go with simple.
-
-
-
-    return(ans)
+    
+    # Filter lev dimension
+    if(!is.null(levs)) {
+        ok <- TRUE
+        if(is.null(x[["lev"]])) {
+            warning("No lev data found")
+            ok <- FALSE
+        } else if(ndim == 4) {
+            x$val <- x$val[,,x$lev %in% levs,]
+        } else if(ndim == 5) {
+            x$val <- x$val[,,,x$lev %in% levs,]
+        } else {  # if we're here, there's a problem
+            stop("Unknown structure - lev filter can't be applied")
+        }
+        if(ok) {
+            x$lev <- x$lev[x$lev %in% levs]
+            x$provenance <- addProvenance(x$provenance,
+                                          paste("Filtered for levs in range [",
+                                                paste(range(levs),
+                                                      collapse=', '), "]"))
+        }
+    }
+    
+    # Filter time (years) dimension
+    if(!is.null(years)) {
+        years <- floor(years) # no fractional years allowed
+        ok <- TRUE
+        if(is.null(x[["time"]])) {
+            warning("No time data found")
+            ok <- FALSE
+        } else if(ndim == 3) {
+            x$val <- x$val[,,floor(x$time) %in% years]
+        } else if(ndim == 4) {
+            x$val <- x$val[,,,floor(x$time) %in% years]
+        } else if(ndim == 5) {
+            x$val <- x$val[,,,,floor(x$time) %in% years]
+        } else {  # if we're here, there's a problem
+            stop("Unknown structure - time filter can't be applied")
+        }
+        if(ok) {
+            x$time <- x$time[floor(x$time) %in% years]
+            x$provenance <- addProvenance(x$provenance,
+                                          paste("Filtered for years in range [",
+                                                paste(range(years),
+                                                      collapse=', '), "]"))
+        }
+    }
+    
+    x
 } # filterDimensions
