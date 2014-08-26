@@ -1,7 +1,7 @@
 library(fields)
 
 #' Plot global data.
-#' 
+#'
 #' Plot a quick world map with reasonable coloring.
 #'
 #' @param x x
@@ -18,7 +18,7 @@ library(fields)
 #' @param latAxis latAxis
 #' @param lonAxis lonAxis
 #' @export
-world.plot <- function(x, time=1, main=NULL, parList=NULL,
+world.plot <- function(x, lon=NULL, lat=NULL, time=1, main=NULL, parList=NULL,
                        centerZero=FALSE,  absNum=NULL, axisFlag=TRUE,
                        showRange=TRUE, verbose=FALSE, simple=FALSE,
                        col=NULL, latAxis=TRUE, lonAxis=TRUE) {
@@ -29,29 +29,32 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     ##        showRange - If true then show the max value in the color labels otherwise just show +/-
     ##        verbose - true, then this code is broken and you are trying to fix it.
     ##        simple - don't show the color key and just print the maps
-    
+
     if(verbose) cat('******world.plot starting************\n')
 
     # Sanity checks
-    stopifnot(class(x)=="cmip5data")
-    
-    # Pull the lat/lon/val/main from the cmip5 object
-    lon <- x$lon
-    lat <- x$lat
-    if(length(dim(x$val)) > 2) {
-        val <- x$val[,,time]  # TODO: won't handle levels/depths correctly
+    if(class(x)=="cmip5data"){
+        # Pull the lat/lon/val/main from the cmip5 object
+        lon <- x$lon
+        lat <- x$lat
+        if(length(dim(x$val)) > 2) {
+            val <- x$val[,,time]  # TODO: won't handle levels/depths correctly
+        }
+        if(is.null(main)) {
+            main <- sprintf('%s %s [%s]', x$model, x$variable, x$valUnit)
+        }
+    }else{
+        val <- x
     }
-    
-    if(is.null(main)) {
-        main <- sprintf('%s %s [%s]', x$model, x$variable, x$valUnit)
-    }
-    
+
+
+
     val[!is.finite(val)] <- NA           # clean up the values to plot
-    
+
     # Pull the real max/min before we change anything, just in case
     trueMax <-max(val, na.rm=TRUE)
     trueMin <-min(val, na.rm=TRUE)
-    
+
     #    numBreaks <- 13 # make sure that the breakIndex plays nicely with numBreaks
     numBreaks <- 65
     ###################################################################
@@ -82,7 +85,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
         minNum <- max(minNum, quant[[1]])
         maxNum <- min(maxNum, quant[[5]])
     }
-    
+
     ##############################################################
     # Figure out what colors we are using
     ##############################################################
@@ -102,7 +105,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     } else {
         col <- col(numBreaks-1)   # TODO: this doesn't work
     }
-    
+
     ####################################################
     # Set the breaks and break labels
     ####################################################
@@ -111,7 +114,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     breakIndex <- floor(seq(1, numBreaks, length=5))
     breakLabels <- signif(breakLabels, digits=3)
     labelPos <- breaks
-    
+
     # Replace any values above/below the max/min with the max/min and
     # ...change the break labels were appropreate
     if(any(val<minNum, na.rm=TRUE)) {
@@ -135,7 +138,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
     } else if(all(val < maxNum, na.rm=TRUE)) { # all values are less then min
         breakIndex[numBreaks] <- rev(which(breaks < max(val,na.rm=TRUE)))[1]
     }
-    
+
     if(verbose) {
         cat('trueMin: [', trueMin, '], minNum: [', minNum,']\n')
         cat('breakIndex: [', breakIndex, ']\n')
@@ -143,22 +146,22 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
         cat('lables: [', breakLabels[breakIndex],']\n')
         cat('labelPos: [', labelPos[breakIndex],']\n')
     }
-    
+
     ################################################################
     # Set the parameter list
     ################################################################
     par(las=1)
     if(!is.null(parList)) par(parList)
-    
+
     #################################################################
     # Plot the figures
     #################################################################
     numlon <- length(lon)
     half.numlon <- ceiling(length(lon) * 0.527) # yields a division at 190 for a 360 grid
-    
+
     # Split at the Pacific ocean
     shiftIndex <- c(half.numlon:numlon, 1:(half.numlon-1))
-    
+
     # legend.mar set to 12 to give lots of room to the break labels
     if(!simple) {
         image.plot(lon-180, lat[lat > -60], val[shiftIndex,lat > -60],
@@ -168,7 +171,7 @@ world.plot <- function(x, time=1, main=NULL, parList=NULL,
                                   labels=breakLabels[breakIndex]),
                    legend.mar=12,
                    xlab = '', ylab='', yaxt='n', xaxt='n')
-        
+
     } else {
         image(lon-180, lat[lat > -60], val[shiftIndex, lat > -60],
               main = main,
