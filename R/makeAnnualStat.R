@@ -17,6 +17,7 @@
 #' @seealso \code{\link{makeMonthlyStat}}
 makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
 
+    if(verbose) cat('starting makeAnnualStat\n')
     # Sanity checks ###################
     # Make sure we are dealing with the expected class
     stopifnot(class(x)=="cmip5data")
@@ -100,5 +101,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
                                         as.character(substitute(FUN)),
                                         "for years",
                                         min(x$time), "-", max(x$time)))
+
+    if(verbose) cat('done with makeAnnualStat\n')
     return(x)
 } # makeAnnualStat
