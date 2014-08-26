@@ -67,10 +67,6 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
         return(NULL)
     }
 
-    # Strip the .nc out of the file list
-    fileList <- gsub('\\.nc$', '', fileList)
-
-
     # Pull the domains of all files we want to load
     domainCheck <- unname(vapply(unlist(fileList),
                                  function(x){
@@ -87,12 +83,12 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
     # Get the number of pieces of CMIP5 information strings
     numSplits <- length(unlist(strsplit(basename(fileList[1]), '_')))
 
-    # Split all file names based on '_'
+    # Split all file names based on '_' or '.'
     cmipName <- unname(vapply(unlist(fileList),
                               function(x){
-                                  unlist(strsplit(basename(x), '_'))
+                                  unlist(strsplit(basename(x), '[_\\.]'))
                               },
-                              FUN.VALUE=rep('', length=numSplits)))
+                              FUN.VALUE=rep('', length=numSplits+1)))
 
     # Key in on what order the CMIP5 information is presented in the file
     checkField <- list(variable=1, domain=2, model=3, experiment=4, ensemble=5)
@@ -178,12 +174,19 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                         as.numeric(substr(dateStr, 12, 13))/(calendarDayLength*24) + # hh
                         as.numeric(substr(dateStr, 15, 16))/(calendarDayLength*24*60) + # mm
                         as.numeric(substr(dateStr, 18, 19))/(calendarDayLength*24*60*60) # ss
+                    ##TODO: Should really split this based on '-' instead
                     # Alternatively YYYY-MM-DD
                 } else if(grepl('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr)){
                     dateStr <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr))
                     startYr <- as.numeric(substr(dateStr, 1, 4))+ # YYYY
                         (as.numeric(substr(dateStr, 6, 7))-1)/12 + # MM
                         (as.numeric(substr(dateStr, 9, 10))-1)/calendarDayLength # DD
+                    # Alternativelly YYYY-M-D
+                } else if(grepl('\\d{4}-\\d{1}-\\d{1}', calendarUnitsStr)){
+                    dateStr <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{1}-\\d{1}', calendarUnitsStr))
+                    startYr <- as.numeric(substr(dateStr, 1, 4))+ # YYYY
+                        (as.numeric(substr(dateStr, 6, 6))-1)/12 + # M
+                        (as.numeric(substr(dateStr, 8, 8))-1)/calendarDayLength # D
                 } else {
                     startYr <- 0
                 }
@@ -199,6 +202,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                 calendarStr <- NULL
                 calendarDayLength <- NULL
                 calendarUnitsStr <- NULL
+                dim(temp) <- dim(temp)[1:2]
             }
 
             # Load the 4th dimention identifiers: lev (atmospheric levels)
