@@ -16,9 +16,13 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(length(verbose)==1 & is.logical(verbose))
+
+    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # Anything else is not valid.
+    stopifnot(length(dim(x$val)) %in% c(2, 3, 4, 5)) # that's all we know
     
-    x <- filterDimensionsLon(x, lons, verbose)
-    x <- filterDimensionsLat(x, lats, verbose)
+    x <- filterDimensionLon(x, lons, verbose)
+    x <- filterDimensionLat(x, lats, verbose)
     x <- filterDimensionDepth(x, depths, verbose)
     x <- filterDimensionLev(x, levs, verbose)
     x <- filterDimensionTimeYears(x, years, verbose)
@@ -36,19 +40,19 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
 #' @note This is an internal RCMIP5 function and not exported.
 filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
     
-    # Sanity checks
+    # Sanity check
     stopifnot(is.null(lons) | class(lons) %in% c("numeric", "integer"))
     
     # Filter longitude dimension
-    ndim <- length(dim(x$val))
     if(!is.null(lons)) {
-        if(verbose) cat("Filtering by lon\n")
         if(is.null(x[["lon"]])) {
             warning("No lon data found")
         } else {
-            x$val <- asub(x$val, x$lon %in% lons, 1)
+            x$val <- asub(x$val, x$lon %in% lons, 1, drop=F)
             x$lon <- x$lon[x$lon %in% lons]
             x$provenance <- addFilterProvenance(x$provenance, lons)
+            x$filtered <- TRUE
+            if(verbose) cat("Filtered by lon, dim =", dim(x$val), "\n")
         }
     }
     x
@@ -63,23 +67,19 @@ filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
 #' @note This is an internal RCMIP5 function and not exported.
 filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
     
-    # Sanity checks
+    # Sanity check
     stopifnot(is.null(lats) | class(lats) %in% c("numeric", "integer"))
-    
-    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
-    # Anything else is not valid.
-    ndim <- length(dim(x$val))
-    stopifnot(ndim %in% c(2, 3, 4, 5)) # that's all we know
-    
+       
     # Filter latitude dimension
     if(!is.null(lats)) {
-        if(verbose) cat("Filtering by lat\n")
         if(is.null(x[["lat"]])) {
             warning("No lat data found")
         } else {
-            x$val <- asub(x$val, x$lat %in% lats, 2)
+            x$val <- asub(x$val, x$lat %in% lats, 2, drop=F)
             x$lat <- x$lat[x$lat %in% lats]
             x$provenance <- addFilterProvenance(x$provenance, lats)
+            x$filtered <- TRUE
+            if(verbose) cat("Filtered by lat, dim =", dim(x$val), "\n")
         }
     }
     x
@@ -96,17 +96,18 @@ filterDimensionDepth <- function(x, depths=NULL, verbose=FALSE) {
     
     # Sanity checks
     stopifnot(is.null(depths) | class(depths) %in% c("numeric", "integer"))
-        
+    
     # Filter depth dimension
     ndim <- length(dim(x$val))
     if(!is.null(depths)) {
-        if(verbose) cat("Filtering by depth\n")
         if(is.null(x[["depth"]])) {
             warning("No depth data found")
         } else {
-            x$val <- asub(x$val, x$depth %in% depths, ndim-1)
+            x$val <- asub(x$val, x$depth %in% depths, ndim-1, drop=F)
             x$depth <- x$depth[x$depth %in% depths]
             x$provenance <- addFilterProvenance(x$provenance, depths)
+            x$filtered <- TRUE
+            if(verbose) cat("Filtered by depth, dim =", dim(x$val), "\n")
         }
     }    
     x
@@ -127,13 +128,14 @@ filterDimensionLev <- function(x, levs=NULL, verbose=FALSE) {
     # Filter lev dimension
     ndim <- length(dim(x$val))
     if(!is.null(levs)) {
-        if(verbose) cat("Filtering by lev\n")
         if(is.null(x[["lev"]])) {
             warning("No lev data found")
         } else {
-            x$val <- asub(x$val, x$lev %in% levs, ndim-1)
+            x$val <- asub(x$val, x$lev %in% levs, ndim-1, drop=F)
             x$lev <- x$lev[x$lev %in% levs]
             x$provenance <- addFilterProvenance(x$provenance, levs)
+            x$filtered <- TRUE
+            if(verbose) cat("Filtered by lev, dim =", dim(x$val), "\n")
         }
     }
     x
@@ -154,14 +156,15 @@ filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
     # Filter time (years) dimension
     ndim <- length(dim(x$val))
     if(!is.null(years)) {
-        if(verbose) cat("Filtering by year\n")
-        years <- floor(years) # no fractional years allowed
         if(is.null(x[["time"]])) {
             warning("No time data found")
         } else {
-            x$val <- asub(x$val, floor(x$time) %in% years, ndim)
+            years <- unique(floor(years)) # no fractional or duplicate years allowed
+            x$val <- asub(x$val, floor(x$time) %in% years, ndim, drop=F)
             x$time <- x$time[floor(x$time) %in% years]
             x$provenance <- addFilterProvenance(x$provenance, years)
+            x$filtered <- TRUE
+            if(verbose) cat("Filtered by year, dim =", dim(x$val), "\n")
         }
     }
     x
@@ -182,16 +185,20 @@ filterDimensionTimeMonths <- function(x, months=NULL, verbose=FALSE) {
         
     # Filter time (months) dimension
     ndim <- length(dim(x$val))
-    if(!is.null(years)) {
-        if(verbose) cat("Filtering by month\n")
-        fracmonths <- round((months-0.5) / 12, 2) # From Jan=1, Feb=2 to Jan 15=0.042, Feb15=0.123, etc.
-        monthfilter <- round(x$time %% 1, 2) %in% fracmonths
-        if(is.null(x[["time"]])) {
+    if(!is.null(months)) {
+         if(is.null(x[["time"]])) {
             warning("No time data found")
-        } else {
-            x$val <- asub(x$val, monthfilter, ndim)
+        } else if(x$timeFreqStr != "mon") {
+            warning("A monthly filter can only be applied to monthly data")            
+        }
+        else {
+            fracmonths <- round((months-0.5) / 12, 2) # From Jan=1, Feb=2 to Jan 15=0.042, Feb15=0.123, etc.
+            monthfilter <- round(x$time %% 1, 2) %in% fracmonths
+            x$val <- asub(x$val, monthfilter, ndim, drop=F)
             x$time <- x$time[monthfilter]
             x$provenance <- addFilterProvenance(x$provenance, months)
+            x$filtered <- TRUE
+            if(verbose) cat("Filtered by month, dim =", dim(x$val), "\n")
         }
     }
     x
