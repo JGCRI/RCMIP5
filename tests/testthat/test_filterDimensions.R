@@ -25,6 +25,32 @@ test_that("filterDimensions handles bad input", {
     expect_error(filterDimensions(d, verbose=c(T, T)))      # multiple verbose values
 })
 
+test_that("filterDimensions filters lon", {
+    d <- cmip5data(1)
+    d$lon <- NULL
+    expect_warning(filterDimensions(d, lons=1))
+    
+    d <- cmip5data(1)
+    lf <- d$lon[1:(length(d$lon)-1)] # the filter
+    res <- filterDimensions(d, lons=lf)
+    expect_equal(res$lon, lf)
+    expect_true(dim(res$val)[1] == dim(d$val)[1]-1)  # stripped off one lon
+    expect_more_than(length(res$provenance), length(d$provenance))     
+})
+
+test_that("filterDimensions filters lat", {
+    d <- cmip5data(1)
+    d$lat <- NULL
+    expect_warning(filterDimensions(d, lats=1))
+    
+    d <- cmip5data(1)
+    lf <- d$lat[1:(length(d$lat)-1)] # the filter
+    res <- filterDimensions(d, lats=lf)
+    expect_equal(res$lat, lf)
+    expect_true(dim(res$val)[2] == dim(d$val)[2]-1)  # stripped off one lat
+    expect_more_than(length(res$provenance), length(d$provenance))     
+})
+
 test_that("filterDimensions filters depth", {
     expect_warning(filterDimensions(cmip5data(1), depths=1))
 
@@ -48,6 +74,8 @@ test_that("filterDimensions filters lev", {
 })
 
 test_that("filterDimensions filters time (years)", {
+    
+    # Annual data
     d <- cmip5data(1:5, monthly=F)
     d$time <- NULL
     expect_warning(filterDimensions(d, years=1))
@@ -55,7 +83,40 @@ test_that("filterDimensions filters time (years)", {
     d <- cmip5data(1:5, monthly=F)
     yf <- d$time[1:(length(d$time)-1)] # the filter
     res <- filterDimensions(d, years=yf)
-    expect_equal(res$time, yf)
-    expect_true(dim(res$val)[3] == dim(d$val)[3]-1)  # stripped off one year
-    expect_more_than(length(res$provenance), length(d$provenance))     
+    expect_equal(res$time, yf)                                      # only years in filter
+    expect_true(dim(res$val)[3] == dim(d$val)[3]-1)                 # stripped off one year
+    expect_more_than(length(res$provenance), length(d$provenance))  # provenance bigger
+    
+    # Monthly data
+    d <- cmip5data(1:5)
+    yf <- d$time[1:(length(d$time)/2)] # the filter
+    res <- filterDimensions(d, years=yf)
+    expect_equal(unique(floor(res$time)), unique(floor(yf)))        # only years in filter
+    expect_more_than(dim(d$val)[3], dim(res$val)[3])                # data should be smaller
+    expect_more_than(length(res$provenance), length(d$provenance))  # and provenance bigger
+    
+})
+
+test_that("filterDimensions filters time (months)", {
+    
+    # Annual data
+    d <- cmip5data(1:5, monthly=F)
+    expect_warning(filterDimensions(d, months=1))                   # monthly data required
+    
+    # Monthly data
+    d <- cmip5data(1:5)
+    mf <- 1:2
+    res <- filterDimensions(d, months=mf)
+    expect_equal(length(unique(round(res$time %% 1, 2))), length(mf))  # only months in filter
+    expect_more_than(dim(d$val)[3], dim(res$val)[3])                # data should be smaller
+    expect_more_than(length(res$provenance), length(d$provenance))  # and provenance bigger
+   
+    expect_error(filterDimensions(d, months=13))                    # illegal months value
+})
+
+test_that("filterDimensions handles multiple operations", {
+    d <- cmip5data(1:5, depth=T)
+    res <- filterDimensions(d, lons=d$lon[1], lats=d$lat[1], 
+                            depths=d$depth[1], years=d$time[1])
+    expect_equal(dim(res$val)[1:3], c(1, 1, 1))
 })
