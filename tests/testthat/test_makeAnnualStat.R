@@ -16,7 +16,7 @@ test_that("makeAnnualStat handles bad input", {
     expect_error(makeAnnualStat(1))                         # non-list d
     expect_error(makeAnnualStat(cmpi5data()))               # wrong size list d
     expect_error(makeAnnualStat(d,verbose=1))               # non-logical verbose
-    expect_error(makeAnnualStat(d,verbose=c(T, T)))          # multiple verbose values
+    expect_error(makeAnnualStat(d,verbose=c(F, F)))          # multiple verbose values
     expect_error(makeAnnualStat(d,parallel=1))              # non-logical parallel
     expect_error(makeAnnualStat(d,parallel=c(T, T)))         # multiple parallel values
     expect_error(makeAnnualStat(d,FUN=1))                   # non-function FUN
@@ -123,10 +123,6 @@ test_that("makeAnnualStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
     expect_equal(dim(res$val)[4], length(years))  # temporal size match
     
-    # Don't know if this ever will occur, but need to handle lev AND depth
-    d <- cmip5data(years, depth=T, lev=T)
-    res <- makeAnnualStat(d, verbose=F)
-    expect_equal(res$time, years)
-    expect_equal(dim(res$val)[1:4], dim(d$val)[1:4])   # spatial size match
-    expect_equal(dim(res$val)[5], length(years))  # temporal size match
+    # lev and depth cannot both be present
+    expect_error(makeAnnualStat(cmip5data(years, depth=T, lev=T), verbose=F))
 })
