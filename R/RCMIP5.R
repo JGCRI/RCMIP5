@@ -170,7 +170,11 @@ summary.cmip5data <- function(object, ...) {
         } else if(!is.null(object$numCells)) {
             ans$type <- paste0("spatial summary (of ", x$numCells, "cells)")
         } else {
-            ans$type <- "basic data"
+            ans$type <- "primary data"
+        }
+        
+        if(!is.null(object$filtered)) {
+            ans$type <- paste(ans$type, "(filtered)")
         }
         
         ans$variable <- x$variable
@@ -186,6 +190,7 @@ summary.cmip5data <- function(object, ...) {
         
         ans$time <- paste0(x$timeFreqStr, " [", length(x$time), "] ", x$debug$timeUnit)
         ans$size <- as.numeric(object.size(x))
+        ans$valsummary <- c(min(x$val), mean(x$val), max(x$val))
         ans$provenance <- x$provenance    
     }
     ans        
@@ -200,7 +205,9 @@ summary.cmip5data <- function(object, ...) {
 print.summary.cmip5data <- function(x, ...) {
     cat("CMIP5 data -", x$type, "\n")
     cat("Variable: ", x$variable, " (", x$valUnit, ") from model ", x$model, "\n", sep="")
-    cat("Experiment", x$experiment, "-", length(x$ensembles), "ensemble(s)\n")
+    cat("Data range: ", round(x$valsummary[1], 2), "-", round(x$valsummary[3], 2), 
+        "  Mean: ", round(x$valsummary[2], 2), "\n", sep="")
+    cat("Experiment:", x$experiment, "-", length(x$ensembles), "ensemble(s)\n")
     cat("Spatial dimensions:", x$spatial, "\n")
     cat("Time dimension:", x$time, "\n")
     cat("Size:", format(round(x$size/1024/1024, 1), nsmall=1), "MB\n")
