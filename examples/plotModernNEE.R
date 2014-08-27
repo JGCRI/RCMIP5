@@ -1,3 +1,6 @@
+##This script calculates the NEE from the annual chance in terrestrial carbon
+##...stocks for a representative subset of the CMIP5 models.
+
 setwd(gsub('/examples$', '', getwd()))
 source('sourceall.R')
 
@@ -14,10 +17,7 @@ if(! 'landC.ls' %in% ls()){
     landC.ls <- list()
 }
 
-if(! 'gpp.ls' %in% ls()){
-    gpp.ls <- list()
-}
-for(modelStr in modelArr){
+for(modelStr in setdiff(modelArr, names(landC.ls))){
     cat('loading variables for [', modelStr, ']\n')
     cat('loading grid area...')
     gridArea <- loadModel(experiment=expStr, model=modelStr, variable='areacella', path=CMIP5Path, verbose=TRUE)
@@ -38,51 +38,11 @@ for(modelStr in modelArr){
         next
     }
 
-    #Load soil
-    if(!modelStr %in% names(landC.ls)){
-        landC <- NULL
-        cat('loading land carbon\n')
-        for(varStr in c('cSoil', 'cCwd', 'cLitter', 'cVeg')){
-            cat('loading [', varStr, ']...')
-            temp <- loadModel(experiment=expStr, model=modelStr,
-                              variable=varStr, path=CMIP5Path)
-            if(is.null(gridArea)){
-                gridArea <- list(val=calcGridArea(lat=temp$lat,
-                                 lon=temp$lon))
-            }
-            if(is.null(temp)){
-                cat('no', varStr, 'found... moving on\n')
-            }else{
-                cat('pulling dC...')
-                temp10yr <- makeAnnualStat(filterDimensions(temp, years=yearArr),
-                                           FUN=mean)
-                tempdC <- temp10yr$val[,,2:11] - temp10yr$val[,,1:10]
-                tempModern <- list(val=aaply(tempdC, 1:2, mean),
-                                   area=gridArea$val*landPer$val/100,
-                                   lat=temp10yr$lat, lon=temp10yr$lon,
-                                   valUnit=paste(temp10yr$valUnit, 'yr^-1'))
-                tempRegrid <- regrid_data(tempModern, 1)
-                if(is.null(landC)){
-                    landC <- tempRegrid
-                }else{
-                    landC$val <- landC$val + tempRegrid$val
-                }
-                cat(sprintf('%.2f Pg-C yr^-1\n',
-                            sum(as.vector(tempModern$val *
-                                          gridArea$val*landPer$val/100),
-                                na.rm=TRUE)/1e12))
+                                        #Load landC
 
-            }
-        }
-        cat('done and saving\n')
-
-        landC.ls[[modelStr]] <- landC
-        save(file='examples/plotModernNEE.RData', landC.ls, gpp.ls)
-    }
-    if(!modelStr %in% names(gpp.ls)){
-        gpp <- NULL
-        cat('loading gpp\n')
-        varStr <- 'gpp'
+    landC <- NULL
+    cat('loading land carbon\n')
+    for(varStr in c('cSoil', 'cCwd', 'cLitter', 'cVeg')){
         cat('loading [', varStr, ']...')
         temp <- loadModel(experiment=expStr, model=modelStr,
                           variable=varStr, path=CMIP5Path)
@@ -93,18 +53,19 @@ for(modelStr in modelArr){
         if(is.null(temp)){
             cat('no', varStr, 'found... moving on\n')
         }else{
-            cat('pulling modern...')
+            cat('pulling dC...')
             temp10yr <- makeAnnualStat(filterDimensions(temp, years=yearArr),
                                        FUN=mean)
+            tempdC <- temp10yr$val[,,2:11] - temp10yr$val[,,1:10]
             tempModern <- list(val=aaply(tempdC, 1:2, mean),
                                area=gridArea$val*landPer$val/100,
                                lat=temp10yr$lat, lon=temp10yr$lon,
                                valUnit=paste(temp10yr$valUnit, 'yr^-1'))
             tempRegrid <- regrid_data(tempModern, 1)
-            if(is.null(gpp)){
-                gpp <- tempRegrid
+            if(is.null(landC)){
+                landC <- tempRegrid
             }else{
-                gpp$val <- gpp$val + tempRegrid$val
+                landC$val <- landC$val + tempRegrid$val
             }
             cat(sprintf('%.2f Pg-C yr^-1\n',
                         sum(as.vector(tempModern$val *
@@ -112,12 +73,12 @@ for(modelStr in modelArr){
                             na.rm=TRUE)/1e12))
 
         }
-
-        cat('done and saving\n')
-
-        gpp.ls[[modelStr]] <- gpp
-        save(file='examples/plotModernNEE.RData', landC.ls, gpp.ls)
     }
+    cat('done and saving\n')
+
+    landC.ls[[modelStr]] <- landC
+    save(file='examples/plotModernNEE.RData', landC.ls)
+
 }
 
 
@@ -128,12 +89,6 @@ for(modelStr in names(landC.ls)){
     minGrid <- pmin(minGrid, landC.ls[[modelStr]]$val)
     maxGrid <- pmax(maxGrid, landC.ls[[modelStr]]$val)
     cat(sprintf('%s: %0.2f Pg-C yr^-1\n', modelStr, sum(landC.ls[[modelStr]]$val*landC.ls[[modelStr]]$area, na.rm=TRUE)/1e12))
-}
-cat('done\n')
-
-cat('finding GPP\n')
-for(modelStr in names(gpp.ls)){
-    cat(sprintf('%s: %0.2f Pg-C yr^-1\n', modelStr, sum(gpp.ls[[modelStr]]$val*landC.ls[[modelStr]]$area, na.rm=TRUE)/1e12))
 }
 cat('done\n')
 
