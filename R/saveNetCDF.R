@@ -8,6 +8,7 @@
 #' @param file Filename desired. If omitted one will be generated automatically.
 #' @param path File path.
 #' @param verbose logical. Print info as we go?
+#' @return The fully-qualified filename that was written (invisible).
 #' @details If no filename is provided, a meaningful one will be assigned based on the
 #' CMIP5 naming convention (but appending 'RCMIP5'). \code{\link{loadEnsemble}} should be
 #' able to read this file.
@@ -70,4 +71,5 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     nc_close(nc)
     
     if(verbose) cat("Wrote", round(file.info(file)$size/1024/1024, 2), "MB\n")
+    invisible(fqfn)
 } # saveNetCDF
