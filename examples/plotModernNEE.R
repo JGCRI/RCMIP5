@@ -1,3 +1,6 @@
+##This script calculates the NEE from the annual chance in terrestrial carbon
+##...stocks for a representative subset of the CMIP5 models.
+
 setwd(gsub('/examples$', '', getwd()))
 source('sourceall.R')
 
@@ -13,6 +16,7 @@ load('examples/plotModernNEE.RData')
 if(! 'landC.ls' %in% ls()){
     landC.ls <- list()
 }
+
 for(modelStr in setdiff(modelArr, names(landC.ls))){
     cat('loading variables for [', modelStr, ']\n')
     cat('loading grid area...')
@@ -34,7 +38,8 @@ for(modelStr in setdiff(modelArr, names(landC.ls))){
         next
     }
 
-    #Load soil
+                                        #Load landC
+
     landC <- NULL
     cat('loading land carbon\n')
     for(varStr in c('cSoil', 'cCwd', 'cLitter', 'cVeg')){
@@ -43,7 +48,7 @@ for(modelStr in setdiff(modelArr, names(landC.ls))){
                           variable=varStr, path=CMIP5Path)
         if(is.null(gridArea)){
             gridArea <- list(val=calcGridArea(lat=temp$lat,
-                                              lon=temp$lon))
+                             lon=temp$lon))
         }
         if(is.null(temp)){
             cat('no', varStr, 'found... moving on\n')
@@ -76,22 +81,29 @@ for(modelStr in setdiff(modelArr, names(landC.ls))){
 
 }
 
-cat('finding min/max...')
+
+cat('finding min/max and NEE\n')
 minGrid <- landC.ls[[1]]$val
 maxGrid <- landC.ls[[1]]$val
 for(modelStr in names(landC.ls)){
     minGrid <- pmin(minGrid, landC.ls[[modelStr]]$val)
-    maxGrid <- pmax(minGrid, landC.ls[[modelStr]]$val)
+    maxGrid <- pmax(maxGrid, landC.ls[[modelStr]]$val)
+    cat(sprintf('%s: %0.2f Pg-C yr^-1\n', modelStr, sum(landC.ls[[modelStr]]$val*landC.ls[[modelStr]]$area, na.rm=TRUE)/1e12))
 }
+cat('done\n')
 
+pdf('examples/plotModernNEE.pdf', height=2*3, width=2*5)
+par(mfrow=c(2,2), mar=c(1,3,3,1), oma=c(0,0,0,3) )
 world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=minGrid,
-           main='minimum [kg m^-2 yr^-1]', centerZero=TRUE, absNum=c(-0.5, 0.5))
-dev.new()
+           main='minimum [kg m^-2 yr^-1]', centerZero=TRUE,
+           absNum=c(-0.25, 0.25))
+
 world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=maxGrid,
-           main='maximum [kg m^-2 yr^-1]', centerZero=TRUE, absNum=c(-0.5, 0.5))
-dev.new()
+           main='maximum [kg m^-2 yr^-1]', centerZero=TRUE, absNum=c(-0.25, 0.25))
+
 world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=maxGrid-minGrid,
-           main='range [kg m^-2 yr^-1]', absNum=c(0, 0.1))
+           main='range [kg m^-2 yr^-1]')
+graphics.off()
 
 globalMin <- sum(minGrid*landC.ls[[1]]$area, na.rm=TRUE)/1e12
 globalMax <- sum(maxGrid*landC.ls[[1]]$area, na.rm=TRUE)/1e12

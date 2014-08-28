@@ -60,11 +60,11 @@ cmip5data <- function(x=list(),
                       monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
                       lonsize=10, latsize=10, depthsize=5, levsize=5) {
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
-    
+
     if (is.list(x)) {
         structure(x, class="cmip5data")
     } else if(is.numeric(x)) {
-        
+
         # Create sample data. 'x' is years
         years <- x
         ppy <- ifelse(monthly, 12, 1)  # periods per year
@@ -79,16 +79,16 @@ cmip5data <- function(x=list(),
             valdims <- c(valdims[1:(length(valdims)-1)], levsize, valdims[length(valdims)])
             levdim <- c(0:(levsize-1))
         }
-        
+
         valData <- 1:2
         if(randomize) valData  <- runif(prod(valdims))
-        
+
         debuglist <- list(startYr=years[1],
                           calendarStr="360_day",
                           timeUnit=paste0("days since ",years[1],"-01-01"),
                           timeRaw=(360/ppy*c(0:(length(years)*ppy-1) )+15)
         )
-        
+
         x <- cmip5data(list(files="dummy file",
                             variable="dummyvar",
                             model="dummymodel",
@@ -117,21 +117,21 @@ cmip5data <- function(x=list(),
 #' @details Prints a one-line summary of the object
 #' @method print cmip5data
 print.cmip5data <- function(x, ...) {
-    
+
     if(is.null(x$files) | is.null(x$variable)) {
         cat("(Empty cmip5data object)")
         return()
     }
-    
+
     nfiles <- length(x$files)
     nensembles <- length(x$ensembles)
-    
+
     yearString <- "[date parse error]"
     try({
         yearRange <- round(range(x$time), 2)
         yearString <- paste(yearRange[1], yearRange[2], sep="-")
     }, silent=T)
-    
+
     cat("CMIP5 ")
     if(!is.null(x$numMonths)) {
         cat("- annual summary: ")
@@ -140,7 +140,7 @@ print.cmip5data <- function(x, ...) {
     } else if(!is.null(x$numCells)) {
         cat(" - spatial summary ")
     }
-    
+
     cat(paste(x$variable, x$model, x$experiment, yearString,
               paste0("[", paste(dim(x$val), collapse=" "), "]"),
               "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
@@ -156,13 +156,13 @@ print.cmip5data <- function(x, ...) {
 #' @method summary cmip5data
 #' @export
 summary.cmip5data <- function(object, ...) {
-    
+
     x <- object
     ans <- list()
     class(ans) <- "summary.cmip5data"
-    
-    if(!is.null(x$files) & !is.null(x$time) & !is.null(x$variable)) {
-        
+
+    if(!is.null(x$files) & !is.null(x$variable)) {
+
         if(!is.null(object$numMonths)) {
             ans$type <- paste0("annual summary (of ", mean(x$numMonths), "months)")
         } else if(!is.null(object$numYears)) {
@@ -172,28 +172,30 @@ summary.cmip5data <- function(object, ...) {
         } else {
             ans$type <- "primary data"
         }
-        
+
         if(!is.null(object$filtered)) {
             ans$type <- paste(ans$type, "(filtered)")
         }
-        
+
         ans$variable <- x$variable
         ans$valUnit <- x$valUnit
         ans$domain <- x$domain
         ans$model <- x$model
         ans$experiment <- x$experiment
         ans$ensembles <- x$ensembles
-        ans$spatial <- paste0("lon [", length(x$lon), 
+        ans$spatial <- paste0("lon [", length(x$lon),
                               "] lat [", length(x$lat),
                               "] depth [", length(x$depth),
                               "] lev [", length(x$lev), "]")
-        
+
         ans$time <- paste0(x$timeFreqStr, " [", length(x$time), "] ", x$debug$timeUnit)
         ans$size <- as.numeric(object.size(x))
-        ans$valsummary <- c(min(x$val), mean(x$val), max(x$val))
-        ans$provenance <- x$provenance    
+        ans$valsummary <- c(min(as.vector(x$val), na.rm=TRUE),
+                            mean(as.vector(x$val), na.rm=TRUE),
+                            max(as.vector(x$val), na.rm=TRUE))
+        ans$provenance <- x$provenance
     }
-    ans        
+    ans
 } # summary.cmip5data
 
 #' Print the summary for a 'cmip5data' class object.
@@ -205,7 +207,7 @@ summary.cmip5data <- function(object, ...) {
 print.summary.cmip5data <- function(x, ...) {
     cat("CMIP5 data -", x$type, "\n")
     cat("Variable: ", x$variable, " (", x$valUnit, ") from model ", x$model, "\n", sep="")
-    cat("Data range: ", round(x$valsummary[1], 2), "-", round(x$valsummary[3], 2), 
+    cat("Data range: ", round(x$valsummary[1], 2), "-", round(x$valsummary[3], 2),
         "  Mean: ", round(x$valsummary[2], 2), "\n", sep="")
     cat("Experiment:", x$experiment, "-", length(x$ensembles), "ensemble(s)\n")
     cat("Spatial dimensions:", x$spatial, "\n")
@@ -221,10 +223,10 @@ print.summary.cmip5data <- function(x, ...) {
 #' @return The object converted, as well as possible, to a data frame
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     years <- x$time
-    
+
     if(verbose) cat("Melting...\n")
     df <- reshape2::melt(x$val)
-    
+
     if(verbose) cat("Filling in dimensional data...\n")
     df[,1] <- x$lon[df[,1]]
     df[,2] <- x$lat[df[,2]]
@@ -242,18 +244,15 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
         timeindex <- 3
     df[,timeindex] <- years[df[,timeindex]]
     names(df)[timeindex] <- "time"
-    
+
     if(!is.null(x$variable))
         df$variable <- factor(x$variable)
     if(!is.null(x$model))
         df$model <- factor(x$model)
     if(!is.null(x$experiment))
         df$experiment <- factor(x$experiment)
-    if(!is.null(x$experiment))
-        df$experiment <- factor(x$experiment)
     if(!is.null(x$valUnit))
         df$valUnit <- factor(x$valUnit)
-    
     return(df)
 } # as.data.frame.cmip5data
 
@@ -270,7 +269,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-    
+
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],

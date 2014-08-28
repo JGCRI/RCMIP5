@@ -25,4 +25,9 @@ ToddBrown/anuGrid
 
 *.Rd
 
+#R data files
 *.RData
+
+#image files
+*.pdf
+*.png
