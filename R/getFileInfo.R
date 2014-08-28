@@ -98,6 +98,5 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     fileInfo.df <- data.frame(lapply(fileInfo.df, as.character),
                               stringsAsFactors=FALSE)
 
-    # This is usually large so don't dump it to the screen
-    invisible(fileInfo.df)
+    return(fileInfo.df)
 }

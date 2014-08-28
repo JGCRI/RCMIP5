@@ -211,7 +211,7 @@ print.summary.cmip5data <- function(x, ...) {
     cat("Spatial dimensions:", x$spatial, "\n")
     cat("Time dimension:", x$time, "\n")
     cat("Size:", format(round(x$size/1024/1024, 1), nsmall=1), "MB\n")
-    cat("Provenance has", length(x$provenance), "entries")
+    cat("Provenance has", length(x$provenance), "entries\n")
 } # print.summary.cmip5data
 
 #' Convert a cmip5data object to a data frame
@@ -249,6 +249,10 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
         df$model <- factor(x$model)
     if(!is.null(x$experiment))
         df$experiment <- factor(x$experiment)
+    if(!is.null(x$experiment))
+        df$experiment <- factor(x$experiment)
+    if(!is.null(x$valUnit))
+        df$valUnit <- factor(x$valUnit)
     
     return(df)
 } # as.data.frame.cmip5data

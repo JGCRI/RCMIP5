@@ -21,7 +21,7 @@ checkTimePeriod <- function(fileInfo_df) {
     stopifnot("time" %in% colnames(fileInfo_df))
 
     # Use ddply to break up data frame, process and check time field, and return result
-    invisible(ddply(fileInfo_df, ddplyFields, function(x) {
+    ddply(fileInfo_df, ddplyFields, function(x) {
         # pull the time step from the domain name
         if(all(x$domain %in% 'fx')) { # fixed
             return(NULL)
@@ -68,5 +68,5 @@ checkTimePeriod <- function(fileInfo_df) {
                    startDate=min(startYear),
                    endDate=max(endYear),
                    files=length(startYear))
-    })) # ddply
+    }) # ddply
 } # checkTimePeriod
