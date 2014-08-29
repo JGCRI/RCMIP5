@@ -92,18 +92,27 @@ for(modelStr in names(landC.ls)){
 }
 cat('done\n')
 
-pdf('examples/plotModernNEE.pdf', height=2*3, width=2*5)
-par(mfrow=c(2,2), mar=c(1,3,3,1), oma=c(0,0,0,3) )
-world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=minGrid,
-           main='minimum [kg m^-2 yr^-1]', centerZero=TRUE,
-           absNum=c(-0.25, 0.25))
+if(FALSE){
+    pdf('examples/plotModernNEE.pdf', height=2*3, width=2*5)
+    par(mfrow=c(2,2), mar=c(1,3,3,1), oma=c(0,0,0,3) )
+    world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=minGrid,
+               main='minimum [kg m^-2 yr^-1]', centerZero=TRUE,
+               absNum=c(-0.25, 0.25))
 
-world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=maxGrid,
-           main='maximum [kg m^-2 yr^-1]', centerZero=TRUE, absNum=c(-0.25, 0.25))
+    world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=maxGrid,
+               main='maximum [kg m^-2 yr^-1]', centerZero=TRUE, absNum=c(-0.25, 0.25))
 
-world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=maxGrid-minGrid,
-           main='range [kg m^-2 yr^-1]')
-graphics.off()
+    world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=maxGrid-minGrid,
+               main='range [kg m^-2 yr^-1]')
+    graphics.off()
+}else{
+    pdf('examples/plotModernNEE.pdf', height=3, width=5)
+    par(mar=c(1,1,3,1), oma=c(0,0,0,1) )
 
+    world.plot(lon=landC.ls[[1]]$lon, lat=landC.ls[[1]]$lat, x=maxGrid-minGrid,
+               main=expression(paste('NEE range [kg m'^-2,' yr'^-1,']')))
+    graphics.off()
+
+}
 globalMin <- sum(minGrid*landC.ls[[1]]$area, na.rm=TRUE)/1e12
 globalMax <- sum(maxGrid*landC.ls[[1]]$area, na.rm=TRUE)/1e12

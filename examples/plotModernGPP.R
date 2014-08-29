@@ -87,18 +87,26 @@ for(modelStr in names(gpp.ls)){
 }
 cat('done\n')
 
-pdf('examples/plotModernGPP.pdf', height=2*3, width=2*5)
-par(mfrow=c(2,2), mar=c(1,3,3,1), oma=c(0,0,0,3) )
-world.plot(lon=gpp.ls[[1]]$lon, lat=gpp.ls[[1]]$lat, x=minGrid,
-           main='minimum [kg m^-2 yr^-1]', centerZero=TRUE,
-           absNum=c(0, 4))
+if(FALSE){
+    pdf('examples/plotModernGPP.pdf', height=2*3, width=2*5)
+    par(mfrow=c(2,2), mar=c(1,3,3,1), oma=c(0,0,0,3) )
+    world.plot(lon=gpp.ls[[1]]$lon, lat=gpp.ls[[1]]$lat, x=minGrid,
+               main='minimum [kg m^-2 yr^-1]', centerZero=TRUE,
+               absNum=c(0, 4))
 
-world.plot(lon=gpp.ls[[1]]$lon, lat=gpp.ls[[1]]$lat, x=maxGrid,
-           main='maximum [kg m^-2 yr^-1]', centerZero=TRUE, absNum=c(0, 4))
+    world.plot(lon=gpp.ls[[1]]$lon, lat=gpp.ls[[1]]$lat, x=maxGrid,
+               main='maximum [kg m^-2 yr^-1]', centerZero=TRUE, absNum=c(0, 4))
 
-world.plot(lon=gpp.ls[[1]]$lon, lat=gpp.ls[[1]]$lat, x=maxGrid-minGrid,
-           main='range [kg m^-2 yr^-1]')
-graphics.off()
+    world.plot(lon=gpp.ls[[1]]$lon, lat=gpp.ls[[1]]$lat, x=maxGrid-minGrid,
+               main='range [kg m^-2 yr^-1]')
+    graphics.off()
+}else{
+    pdf('examples/plotModernGPP.pdf', height=3, width=5)
+    par(mar=c(1,1,3,1), oma=c(0,0,0,1) )
 
+    world.plot(lon=gpp.ls[[1]]$lon, lat=gpp.ls[[1]]$lat, x=maxGrid-minGrid,
+               main=expression(paste('GPP range [kg m'^-2,' yr'^-1,']')))
+    graphics.off()
+}
 globalMin <- sum(minGrid*gpp.ls[[1]]$area, na.rm=TRUE)/1e12
 globalMax <- sum(maxGrid*gpp.ls[[1]]$area, na.rm=TRUE)/1e12
