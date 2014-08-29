@@ -33,21 +33,16 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     
     # Define dimensions
     if(verbose) cat("Defining netCDF dimensions...")
-    londim <- ncdim_def("lon", "degrees_east", x$lon)
-    latdim <- ncdim_def("lat", "degrees_north", x$lat)
+    londim <- ncdim_def("lon", x$debug$lonUnit, x$lon)
+    latdim <- ncdim_def("lat", x$debug$latUnit, x$lat)
     timedim <- ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
     dimlist <- list(londim, latdim, timedim)
     if(!is.null(x$depth)) {
-        depthdim <- ncdim_def("depth", "TODO", x$depth)
-        dl <- length(dimlist)
-        dimlist[[dl+1]] <- dimlist[[dl]]
-        dimlist[[dl]] <- depthdim
-    }
-    if(!is.null(x$lev)) {
-        levdim <- ncdim_def("lev", "TODO", x$lev)
-        dl <- length(dimlist)
-        dimlist[[dl+1]] <- dimlist[[dl]]
-        dimlist[[dl]] <- levdim
+        depthdim <- ncdim_def("depth", x$debug$depthUnit, x$depth)
+        dimlist <- list(londim, latdim, depthdim, timedim)
+    } else if(!is.null(x$lev)) {
+        levdim <- ncdim_def("lev", x$debug$levUnit, x$lev)
+        dimlist <- list(londim, latdim, levdim, timedim)
     }
     if(verbose) cat(length(dimlist), "dimensions\n")
     

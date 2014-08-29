@@ -97,6 +97,8 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
     val <- c() # variable to temporarily holds main data
     timeRaw <- c()
     timeArr <- c()
+    depthUnit <- NULL
+    levUnit <- NULL
     prov <- NULL # provenance
     # Note that list.files returns a sorted list so these file should already
     # be in temporal order if the ensemble is split over multiple files.
@@ -128,6 +130,8 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             stopifnot(any(c("lat", "lat_bnds") %in% varnames))
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
+            latUnit <- ncatt_get(temp.nc, 'lat', 'units')$value
+            lonUnit <- ncatt_get(temp.nc, 'lon', 'units')$value
             
             # Get the time frequency. Note that this should be related to
             # ...the domain but really we are looking for 'fx'/fixed variables
@@ -195,11 +199,13 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             depthArr <- NULL
             if(any(c("depth", "depth_bnds") %in% varnames)){
                 depthArr <- ncvar_get(temp.nc, varid='depth')
+                depthUnit <- ncatt_get(temp.nc, 'depth', 'units')$value
             }
             
             levArr <- NULL
             if(any(c("lev", "lev_bnds") %in% varnames)){
                 levArr <- ncvar_get(temp.nc, varid='lev')
+                levUnit <- ncatt_get(temp.nc, 'lev', 'units')$value
             }
             
             nc_close(temp.nc)
@@ -222,7 +228,11 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                    variable=variable, model=model, domain=domain,
                    experiment=experiment, ensembles=ensemble,
                    provenance=prov,
-                   debug=list(startYr=startYr, timeUnit=timeUnit,
+                   
+                   debug=list(startYr=startYr, 
+                              lonUnit=lonUnit, latUnit=latUnit,
+                              depthUnit=depthUnit, levUnit=levUnit, 
+                              timeUnit=timeUnit,
                               calendarUnitsStr=calendarUnitsStr,
                               calendarStr=calendarStr, timeRaw=timeRaw,
                               calendarDayLength=calendarDayLength)
