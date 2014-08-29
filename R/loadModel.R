@@ -37,8 +37,7 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
 
     # List all files that match specifications
     if(demo) {
-        # in demo mode pull from environment, not disk
-        fileList <- ls(envir=.GlobalEnv)
+        fileList <- ls(envir=.GlobalEnv) # in demo mode pull from environment, not disk
     } else {
         fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     }
@@ -49,7 +48,6 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
                                                experiment),
                                basename(fileList))]
 
-    # Exit if we don't have any files to load
     if(length(fileList)==0) {
         warning("Could not find any matching files")
         return(NULL)
@@ -65,52 +63,44 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
     if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
 
     modelTemp <- NULL                   # Initalize the return data structure
-
-    # Go through each of the ensembles that make up the specified model
-    for(ensemble in ensembleArr) {
+    for(ensemble in ensembleArr) { # for each ensemble...
 
         # load the entire ensemble
         temp <- loadEnsemble(variable, model, experiment, ensemble, path=path,
                              verbose=verbose, recursive=recursive, demo=demo)
 
-        if(is.null(modelTemp)) {         # If this is the first model
-            modelTemp <- temp            # set the return structure
-            # Copy the provenance so we can add to it later
+        if(is.null(modelTemp)) {         # If first model, not added to anything, just copy
+            modelTemp <- temp 
             ensembleProv <- temp$provenance
         } else {
-            # Add this ensemble proveanace to the existing provenance
+            # Add this ensemble provenance to the existing provenance
             ensembleProv <- c(ensembleProv, temp$provenance)
 
-            # Check that lat-lon-lev-time match
+            # Make sure lat-lon-depth|lev-time match
             if(identical(temp$lat, modelTemp$lat) &
                    identical(temp$lon, modelTemp$lon) &
+                   identical(temp$depth, modelTemp$depth) &
                    identical(temp$lev, modelTemp$lev) &
                    identical(temp$time, modelTemp$time)) {
-                # add values which will later be nomalized to the number of
-                # ...ensembles that make up this model
+                # Add this ensemble's data and record file and ensemble loaded
                 modelTemp$val <- modelTemp$val + temp$val
-                # record the files loaded
-                # KTB: possibly redundent given provenance??
                 modelTemp$files <- c( modelTemp$files, temp$files )
-                # add the ensemble to those sucessfully loaded
                 modelTemp$ensembles <- c(modelTemp$ensembles, ensemble)
-            } else { # ...if dimentions don't match, don't load and warn user
+            } else { # ...if dimensions don't match, don't load and warn user
                 warning(ensemble,
                      'not loaded: does not match previous lon-lat-lev-time.\n')
-            } #dimentions check
-        } #is.null(modelTemp)
-    } #ensemble for-loop
+            }
+        } # is.null(modelTemp)
+    } # for
 
-    # check that an ensemble was actually loaded
+    # Make sure at least one ensemble was actually loaded
     stopifnot(length(modelTemp$ensembles)>0)
 
-    # convert the sum to an average
+    # compute mean over all ensembles, update provenance, return
     modelTemp$val <- unname(modelTemp$val / length(modelTemp$ensembles))
-    # record the provenance
     modelTemp$provenance <- addProvenance(NULL,
                               c(paste("Computed mean of ensembles",
                                      paste(modelTemp$ensembles, collapse=' ')),
                                 ensembleProv))
-
     return(modelTemp)
 } # loadModel
