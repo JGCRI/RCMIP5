@@ -129,7 +129,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             # Get all the variables stored in the netcdf file so that we
             # ...can load the lon, lat and time variables if appropriate
             varnames <- names(temp.nc$var)
-            dimensionnames <- unlist(lapply(test$dim, FUN=function(x) { x$name }))
+            dimensionnames <- unlist(lapply(temp.nc$dim, FUN=function(x) { x$name }))
             
             if(verbose) cat("- var names:", varnames, "\n")
             if(verbose) cat("- dimension names:", dimensionnames, "\n")

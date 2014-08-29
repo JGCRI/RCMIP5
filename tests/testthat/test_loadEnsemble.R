@@ -34,45 +34,39 @@ test_that("loadEnsemble handles bad input", {
 test_that("loadEnsemble handles no files found", {            # no netcdf files found
     w <- getOption('warn')
     options(warn=-1)
-    expect_warning(loadEnsemble("","","","",path=normalizePath("testdata_none/")))
-    expect_is(loadEnsemble("","","","",path=normalizePath("testdata_none/")),"NULL")
+    expect_warning(loadEnsemble("","","","", path=normalizePath("testdata_none/")))
+    expect_is(loadEnsemble("","","","", path=normalizePath("testdata_none/")), "NULL")
     options(warn=w)
 })
 
 test_that("loadEnsemble loads monthly data", {
     path <- "../../sampledata/monthly/"
-    d <- loadEnsemble('nbp','HadGEM2-ES','rcp85','r3i1p1',path=path,verbose=F)     # test data set
-    expect_is(d,"cmip5data")
-    expect_equal(length(d$files),2)                                 # should be two files
-    d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1',path=path,verbose=F)
-    expect_is(d,"cmip5data")
-    expect_equal(length(d$files),1)                                 # should be one file
+    d <- loadEnsemble('nbp','HadGEM2-ES', 'rcp85', 'r3i1p1', path=path, verbose=F)     # test data set
+    expect_is(d, "cmip5data")
+    d <- loadEnsemble('prc','GFDL-CM3', 'rcp85', 'r1i1p1', path=path, verbose=F)
+    expect_is(d, "cmip5data")
 })
 
 test_that("loadEnsemble loads annual data", {
     path <- "../../sampledata/annual/"
-    d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1',path=path,verbose=F)
+    d <- loadEnsemble('co3', 'HadGEM2-ES', 'rcp85', 'r1i1p1', path=path, verbose=F)
     expect_is(d,"cmip5data")
-    expect_equal(length(d$files),1)                                 # should be one file
 })
 
 test_that("loadEnsemble loads 4D data", {
     path <- "../../sampledata/annual/"
     d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1',path=path,verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_equal(length(d$files),1)
     expect_is(d$lev, "array")
     expect_is(d$val, "array")
     
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1',path=path,verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_equal(length(d$files),1)
     expect_is(d$lev, "array")
     
     path <- "../../sampledata/monthly/"
     d <- loadEnsemble('tsl','GFDL-CM3','historicalGHG','r1i1p1',path=path,verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_equal(length(d$files),1)
     expect_is(d$depth, "array")
 })
 
@@ -88,6 +82,6 @@ test_that("loadEnsemble assigns ancillary data", {
 })
 
 test_that("demo mode works", {
-#    d <- loadEnsemble('tas','CMCC-CESM','historical','r1i1p1',demo=T,verbose=F)     # test data set
-#    expect_is(d,"cmip5data")
+    #    d <- loadEnsemble('tas','CMCC-CESM','historical','r1i1p1',demo=T,verbose=F)     # test data set
+    #    expect_is(d,"cmip5data")
 })

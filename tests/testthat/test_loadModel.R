@@ -61,11 +61,11 @@ test_that("loadEnsemble checks unique domain", {
 test_that("loadModel handles spatial mismatches between ensembles", {
     path <- "testdata_mismatch/"
     
-    # Data created by
+    # Test data created by
     # d1 <- cmip5data(1850,lonsize=10,latsize=10)
     # d2 <- cmip5data(1851,lonsize=10,latsize=8)
     # d2$ensemble <- "dummyensemble2"
     # saveNetCDF(d1) and then d2
-    
-    expect_warning(loadModel("dummyvar", "dummymodel", "dummyexperiment", domain="dummydomain", path=path, verbose=F))
+    # Rename files to avoid R CMD CHECK warning
+    expect_warning(loadModel("dummyvar", "b", "c", domain="d", path=path, verbose=F))
 })

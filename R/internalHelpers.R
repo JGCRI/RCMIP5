@@ -17,10 +17,6 @@ addProvenance <- function(prov=NULL, msg=NULL) {
     MSG_PREFIX <- "--"
     stopifnot(class(prov) %in% c("character", "NULL"))
     stopifnot(class(msg) %in% c("character", "NULL"))
- 
-    if(is.null(PROV)) { # start a new provenance by giving software version numbers and date
-        prov <- paste("Written by RCMIP5", packageVersion("RCMIP5"), "under", R.version.string, date())
-    }
     
     # Get calling function's call (its name and parameters)
     parentcall <- "<parent unavailable>"
@@ -43,12 +39,17 @@ addProvenance <- function(prov=NULL, msg=NULL) {
         }
     }
     
+    # Start a new provenance by giving software version numbers and date
+    if(is.null(prov)) { 
+        prov <- c(prov, paste("RCMIP5", packageVersion("RCMIP5"), "under", R.version.string, date()))
+    }
+    
     # Append the caller info (except when there's not been a change) and message
     if(is.null(prov) | parentcall != lastparentcall){
         prov <- c(prov, parentcall)
     }
     if(!is.null(msg)){
-        prov <- c(prov, paste(MSG_PREFIX, msg, sep=''))
+        prov <- c(prov, paste(MSG_PREFIX, msg))
     }
     return(prov)
 } # addProvenance
