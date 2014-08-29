@@ -73,7 +73,8 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
             modelTemp <- temp 
         } else {
             # Make sure lat-lon-depth|lev-time match
-            if(identical(temp$lat, modelTemp$lat) &
+            if(all(dim(temp) == dim(modelTemp)) &
+                   identical(temp$lat, modelTemp$lat) &
                    identical(temp$lon, modelTemp$lon) &
                    identical(temp$depth, modelTemp$depth) &
                    identical(temp$lev, modelTemp$lev) &
