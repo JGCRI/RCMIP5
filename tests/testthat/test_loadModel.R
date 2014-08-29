@@ -41,7 +41,7 @@ test_that("loadModel loads monthly data", {
     path <- "../../sampledata/monthly/"
     d <- loadModel('nbp','HadGEM2-ES','rcp85',path=path,verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_equal(length(d$files),4)                                 # should be four files
+    expect_equal(length(d$files), 4)                                 # should be four files
     d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1',path=path,verbose=F)     
     expect_is(d,"cmip5data")
     expect_equal(length(d$files),1)                                 # should be one file
@@ -58,7 +58,14 @@ test_that("loadEnsemble checks unique domain", {
     expect_error(loadModel("co3","fakemodel1-ES","rcp85",path='testdata_twodomains/',verbose=F))
 })
 
-test_that("loadModel handles lat-lon-time mismatches", {
+test_that("loadModel handles spatial mismatches between ensembles", {
     path <- "testdata_mismatch/"
-    expect_warning(loadModel("nbp","HadGEM2-ES","historical",path=path,verbose=F))
+    
+    # Data created by
+    # d1 <- cmip5data(1850,lonsize=10,latsize=10)
+    # d2 <- cmip5data(1851,lonsize=10,latsize=8)
+    # d2$ensemble <- "dummyensemble2"
+    # saveNetCDF(d1) and then d2
+    
+    expect_warning(loadModel("dummyvar", "dummymodel", "dummyexperiment", domain="dummydomain", path=path, verbose=F))
 })
