@@ -62,9 +62,9 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                                      unlist(strsplit(basename(x), '_'))[2]
                                  },
                                  FUN.VALUE=''))
-    # Check that we are only loading one domain, we check this before checking
-    # ...other CMIP5 specifications because 'fx' domains will split on '_' to a
-    # ...different number of strings then temporal domains.
+    # Check that we are only loading one domain. We check this before checking
+    # other CMIP5 specifications because 'fx' domains will split on '_' to a
+    # different number of strings then temporal domains.
     if(length(unique(domainCheck)) > 1){
         stop('Domain is not unique: [', paste(unique(domainCheck), collapse=' '), ']\n')
     }
@@ -112,11 +112,9 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             temp.nc <- nc_open(fileStr, write=FALSE)
             temp <- ncvar_get(temp.nc, varid=variable)  # load data array
             
-            # TODO: figure out where the time dimension is, based on dimensions names
-            timeIndex <- 3  # temporary
-            
             # Bind the main variable along time dimension to previously loaded data
-            val <- abind(val, temp, along=timeIndex)
+            # Note that the time dimensions is guaranteed to be last - see ncdf4 documentation
+            val <- abind(val, temp, along=length(dim(temp)))
             
             valUnit <- ncatt_get(temp.nc, variable, 'units')$value  # load units
             
@@ -131,10 +129,10 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             latArr <- ncvar_get(temp.nc, varid='lat')
             lonArr <- ncvar_get(temp.nc, varid='lon')
             
-            # Get the time frequency, note that this should be related to
+            # Get the time frequency. Note that this should be related to
             # ...the domain but really we are looking for 'fx'/fixed variables
             # ...where we don't have to deal with time.
-            # BBL: what does this comment mean? Clarify if possible
+            # TODO BBL: what does this comment mean? Clarify if possible
             timeFreqStr <- ncatt_get(temp.nc, varid=0)$frequency
             
             # Non-fixed files have a time dimension to deal with:
@@ -162,14 +160,14 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                         as.numeric(substr(dateStr, 15, 16))/(calendarDayLength*24*60) + # mm
                         as.numeric(substr(dateStr, 18, 19))/(calendarDayLength*24*60*60) # ss
                     ##TODO: Should really split this based on '-' instead
-                    
-                } else if(grepl('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr)) { # Alternatively YYYY-MM-DD
+                    # Alternatively YYYY-MM-DD
+                } else if(grepl('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr)) { 
                     dateStr <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{2}-\\d{2}', calendarUnitsStr))
                     startYr <- as.numeric(substr(dateStr, 1, 4))+ # YYYY
                         (as.numeric(substr(dateStr, 6, 7))-1)/12 + # MM
                         (as.numeric(substr(dateStr, 9, 10))-1)/calendarDayLength # DD
-                    
-                } else if(grepl('\\d{4}-\\d{1}-\\d{1}', calendarUnitsStr)) { # Alternativelly YYYY-M-D
+                    # Alternatively YYYY-M-D      
+                } else if(grepl('\\d{4}-\\d{1}-\\d{1}', calendarUnitsStr)) { 
                     dateStr <- regmatches(calendarUnitsStr, regexpr('\\d{4}-\\d{1}-\\d{1}', calendarUnitsStr))
                     startYr <- as.numeric(substr(dateStr, 1, 4))+ # YYYY
                         (as.numeric(substr(dateStr, 6, 6))-1)/12 + # M
@@ -208,8 +206,15 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
         }
     }
     
-    # TODO: if dimensions are out of order, rearrange them using aperm
+    # TODO: if dimensions are out of order, rearrange them
     # Or could do immediately after loading data
+    # BBL: After reading netcdf documentation, I don't think this is necessary;
+    # order is guaranteed to be X-Y-Z-time
+#     correctOrder <- unlist(lapply(dimensionnames, FUN=function(x) { which(x==correctSequence) }))
+#     if(any(correctOrder != 1:length(correctOrder))) {
+#         if(verbose) cat("Dimensions are", correctSequence[correctOrder], " - rearranging\n")
+#         val <- aperm(val, correctOrder)
+#     }
     
     cmip5data(list(files=fileList, val=unname(val), valUnit=valUnit,
                    lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
