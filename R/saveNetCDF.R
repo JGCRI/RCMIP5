@@ -13,13 +13,13 @@
 #' CMIP5 naming convention (but appending 'RCMIP5'). \code{\link{loadEnsemble}} should be
 #' able to read this file.
 saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
-
-    # Sanity checks
+    
+    # Sanity checks - class and length of parameters
     stopifnot(class(x)=="cmip5data")
-    stopifnot(length(file)==1 & (is.null(file) | is.character(file)))
+    stopifnot(is.null(file) | (length(file)==1 & is.character(file)))
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(length(verbose)==1 & is.logical(verbose))
-
+    
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
     # Anything else is not valid.
     stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
@@ -35,40 +35,61 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     }
     fqfn <- normalizePath(paste(path, file, sep="/"))
     
-    # Define dimensions
+    # Define mandatory dimensions
     if(verbose) cat("Defining netCDF dimensions...")
     londim <- ncdim_def("lon", x$debug$lonUnit, x$lon)
     latdim <- ncdim_def("lat", x$debug$latUnit, x$lat)
     timedim <- ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
-    dimlist <- list(londim, latdim, timedim)
+    dimlist <- list(londim, latdim, timedim) # assuming no depth/lev
+    
+    # Define optional dimensions, if present
     if(!is.null(x$depth)) {
         depthdim <- ncdim_def("depth", x$debug$depthUnit, x$depth)
         dimlist <- list(londim, latdim, depthdim, timedim)
+#        depthvar <- ncvar_def("depth", x$debug$depthUnit, depthdim)
     } else if(!is.null(x$lev)) {
         levdim <- ncdim_def("lev", x$debug$levUnit, x$lev)
         dimlist <- list(londim, latdim, levdim, timedim)
+#        levvar <- ncvar_def("lev", x$debug$levUnit, levdim)
     }
-    if(verbose) cat(length(dimlist), "dimensions\n")
+    if(verbose) cat(length(dimlist), "dimensions for", x$variable, "\n")
     
-    # Create variable and write data
-    if(verbose) cat("Defining netCDF variables\n")
+    # Define mandatory variables
+    if(verbose) cat("Defining main netCDF variable\n")
     valvar <- ncvar_def(x$variable, x$valUnit, dimlist)
+    lonvar <- ncvar_def("lon", x$debug$lonUnit, londim)
+    latvar <- ncvar_def("lat", x$debug$latUnit, londim)
+    varlist <- list(valvar, lonvar, latvar)
     
+    # Create the file and write mandatory variables
     if(verbose) cat("Creating and writing", file, "\n")
     nc <- nc_create(fqfn, valvar)
+
     ncvar_put(nc, valvar, x$val)
+    ncvar_put(nc, lonvar, x$lon)
+    ncvar_put(nc, latvar, x$lat)
+
+    # Write optional variables
+    if(!is.null(x$depth)) {
+        if(verbose) cat("Writing depth\n")
+        depthvar <- ncvar_def("depth", x$debug$depthUnit, depthdim)
+        ncvar_put(nc, depthvar, x$depth) 
+    } else if(!is.null(x$lev)) {
+        if(verbose) cat("Writing lev\n")
+        levvar <- ncvar_def("lev", x$debug$levUnit, levdim)
+        ncvar_put(nc, levvar, x$lev)
+    }
     
     # Write attributes
-    if(verbose) cat("Writing attributes\n")
-    for(i in 1:length(x$files)) {
-        ncatt_put(nc, 0, paste0("file", i), x$files[i])
-    }
+    if(verbose) cat("Writing attributes\n")    
+    ncatt_put(nc, 0, "frequency", x$timeFreqStr)
     for(i in 1:length(x$provenance)) {
         ncatt_put(nc, 0, paste0("provenance", i), x$provenance[i])
     }
-    ncatt_put(nc, 0, "software", paste("File written by RCMIP5,", R.version.string))
+    ncatt_put(nc, 0, "software", paste("Written by RCMIP5", packageVersion("RCMIP5"), 
+                                       "under", R.version.string, date()))
     nc_close(nc)
     
-    if(verbose) cat("Wrote", round(file.info(file)$size/1024/1024, 2), "MB\n")
+    if(verbose) cat("Wrote", round(file.info(fqfn)$size/1024/1024, 2), "MB\n")
     invisible(fqfn)
 } # saveNetCDF
