@@ -19,6 +19,10 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     stopifnot(length(file)==1 & (is.null(file) | is.character(file)))
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(length(verbose)==1 & is.logical(verbose))
+
+    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # Anything else is not valid.
+    stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
     
     # Create meaningful filename, if necessary
     if(is.null(file)) {

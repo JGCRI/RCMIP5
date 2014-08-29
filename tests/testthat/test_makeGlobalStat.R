@@ -113,14 +113,7 @@ test_that("makeGlobalStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[1:2], c(1, 1)) #  all spatial dimensions should be 1
     expect_equal(dim(res$val)[3:(ndims-1)], dim(d$val)[3:(ndims-1)]) # time should match    
     expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
-    
-    # Don't know if this ever will occur, but need to handle lev AND depth
-    d <- cmip5data(years, depth=T, lev=T)
-    res <- makeGlobalStat(d, verbose=F)
-    ndims <- length(dim(res$val))
-    expect_equal(res$time, d$time)
-    expect_equal(ndims, length(dim(d$val)))  # same number of dimensions
-    expect_equal(dim(res$val)[1:2], c(1, 1)) #  all spatial dimensions should be 1
-    expect_equal(dim(res$val)[3:(ndims-1)], dim(d$val)[3:(ndims-1)]) # time should match    
-    expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
+
+    # lev and depth cannot both be present
+    expect_error(makeAnnualStat(cmip5data(years, depth=T, lev=T), verbose=F))
 })

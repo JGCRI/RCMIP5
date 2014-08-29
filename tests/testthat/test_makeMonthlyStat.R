@@ -102,10 +102,6 @@ test_that("makeMonthlyStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
     expect_equal(dim(res$val)[4], 12)  # temporal size match
     
-    # Don't know if this ever will occur, but need to handle lev AND depth
-    d <- cmip5data(years, depth=T, lev=T)
-    res <- makeMonthlyStat(d, verbose=F)
-    expect_equal(res$time, 1:12)
-    expect_equal(dim(res$val)[1:4], dim(d$val)[1:4])   # spatial size match
-    expect_equal(dim(res$val)[5], 12)  # temporal size match
+    # lev and depth cannot both be present
+    expect_error(makeAnnualStat(cmip5data(years, depth=T, lev=T), verbose=F))
 })
