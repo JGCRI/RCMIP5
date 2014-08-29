@@ -94,8 +94,10 @@ cmip5data <- function(x=list(),
         if(lev) debuglist$levUnit <- "m"
 
         x <- cmip5data(list(variable="dummyvar",
+                            domain="dummydomain",
                             model="dummymodel",
                             experiment="dummyexperiment",
+                            ensemble="dummyensemble",
                             val=array(valData, dim=valdims),
                             valUnit="dummy unit",
                             calendarStr="360_day",
