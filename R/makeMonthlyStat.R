@@ -26,7 +26,10 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     stopifnot(length(FUN)==1 & is.function(FUN))
     stopifnot(length(dim(x$val)) %in% c(3, 4, 5)) # that's all we know
     
-    timeIndex <- length(dim(x$val))  # time is always the last index
+    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # Anything else is not valid.
+    timeIndex <- length(dim(x$val))
+    stopifnot(timeIndex %in% c(3, 4)) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     
     stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))

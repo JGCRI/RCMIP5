@@ -28,10 +28,8 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
     # Anything else is not valid.
-    stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
-    
-    # Figure out where the time index is (always last dimension)
     timeIndex <- length(dim(x$val))
+    stopifnot(timeIndex %in% c(3, 4)) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     
     # Check that data array dimensions match those of lon, lat, and time

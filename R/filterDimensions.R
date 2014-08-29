@@ -19,7 +19,7 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
 
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
     # Anything else is not valid.
-    stopifnot(length(dim(x$val)) %in% c(2, 3, 4, 5)) # that's all we know
+    stopifnot(length(dim(x$val)) %in% c(2, 3, 4)) # that's all we know
     
     x <- filterDimensionLon(x, lons, verbose)
     x <- filterDimensionLat(x, lats, verbose)

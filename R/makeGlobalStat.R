@@ -33,7 +33,10 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
     
-    timeIndex <- length(dim(x$val))  # time is always the last index
+    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # Anything else is not valid.
+    timeIndex <- length(dim(x$val))
+    stopifnot(timeIndex %in% c(3, 4)) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     
     # Get and check area data, using 1's if nothing supplied
