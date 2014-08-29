@@ -17,6 +17,10 @@ addProvenance <- function(prov=NULL, msg=NULL) {
     MSG_PREFIX <- "--"
     stopifnot(class(prov) %in% c("character", "NULL"))
     stopifnot(class(msg) %in% c("character", "NULL"))
+ 
+    if(is.null(PROV)) { # start a new provenance by giving software version numbers and date
+        prov <- paste("Written by RCMIP5", packageVersion("RCMIP5"), "under", R.version.string, date())
+    }
     
     # Get calling function's call (its name and parameters)
     parentcall <- "<parent unavailable>"
