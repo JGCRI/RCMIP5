@@ -113,6 +113,12 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             if(verbose) cat('Loading', fileStr, "\n")
             temp.nc <- nc_open(fileStr, write=FALSE)
             temp <- ncvar_get(temp.nc, varid=variable)  # load data array
+            if(verbose) cat("- data", dim(temp), "\n")
+            
+            # Test that spatial dimensions are identical across files
+            if(length(val) > 0) {
+                stopifnot(all(dim(val)[1:(length(dim(val))-1)] == dim(temp)[1:(length(dim(temp))-1)]))
+            }
             
             # Bind the main variable along time dimension to previously loaded data
             # Note that the time dimensions is guaranteed to be last - see ncdf4 documentation
@@ -123,7 +129,15 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             # Get all the variables stored in the netcdf file so that we
             # ...can load the lon, lat and time variables if appropriate
             varnames <- names(temp.nc$var)
-            # BBL: don't we want dimension names, not variable names?
+            dimensionnames <- unlist(lapply(test$dim, FUN=function(x) { x$name }))
+            
+            if(verbose) cat("- var names:", varnames, "\n")
+            if(verbose) cat("- dimension names:", dimensionnames, "\n")
+            # TODO: this is a hack. The files written by saveNetCDF look the same in Panoply
+            # to CMIP5 files, but loadEnsemble isn't seeing their dimension names in the
+            # variable name list, the way it does with CMIP5 data. So merge the two here,
+            # so we can use these (small) files in testing code.
+            varnames <- union(varnames, dimensionnames)
             
             # Load these guaranteed data; latitude and longitude
             stopifnot(any(c("lon", "lon_bnds") %in% varnames))
@@ -210,17 +224,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
             
             nc_close(temp.nc)
         }
-    }
-    
-    # TODO: if dimensions are out of order, rearrange them
-    # Or could do immediately after loading data
-    # BBL: After reading netcdf documentation, I don't think this is necessary;
-    # order is guaranteed to be X-Y-Z-time
-#     correctOrder <- unlist(lapply(dimensionnames, FUN=function(x) { which(x==correctSequence) }))
-#     if(any(correctOrder != 1:length(correctOrder))) {
-#         if(verbose) cat("Dimensions are", correctSequence[correctOrder], " - rearranging\n")
-#         val <- aperm(val, correctOrder)
-#     }
+    } # for
     
     cmip5data(list(files=fileList, val=unname(val), valUnit=valUnit,
                    lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
