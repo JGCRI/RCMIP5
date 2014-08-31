@@ -78,7 +78,7 @@ test_that("loadEnsemble assigns ancillary data", {
     path <- "../../sampledata/annual/"
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1',path=path,verbose=F)
     expect_is(d,"cmip5data")
-    expect_is(d$provenance, "character")
+    expect_true(!is.null(d$provenance))
 })
 
 test_that("demo mode works", {

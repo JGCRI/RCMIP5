@@ -41,7 +41,7 @@ test_that("makeGlobalStat handles monthly data", {
     expect_null(res$lon)
     expect_null(res$lat)
     expect_is(res$numCells, "integer")
-    expect_more_than(length(res$provenance), length(d$provenance))
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))
     
     # Does time match what we expect?
     expect_equal(res$time, d$time)

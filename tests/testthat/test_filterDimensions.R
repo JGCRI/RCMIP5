@@ -35,7 +35,7 @@ test_that("filterDimensions filters lon", {
     res <- filterDimensions(d, lons=lf)
     expect_equal(res$lon, lf)
     expect_true(dim(res$val)[1] == dim(d$val)[1]-1)  # stripped off one lon
-    expect_more_than(length(res$provenance), length(d$provenance))     
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))     
 })
 
 test_that("filterDimensions filters lat", {
@@ -48,7 +48,7 @@ test_that("filterDimensions filters lat", {
     res <- filterDimensions(d, lats=lf)
     expect_equal(res$lat, lf)
     expect_true(dim(res$val)[2] == dim(d$val)[2]-1)  # stripped off one lat
-    expect_more_than(length(res$provenance), length(d$provenance))     
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))     
 })
 
 test_that("filterDimensions filters depth", {
@@ -59,7 +59,7 @@ test_that("filterDimensions filters depth", {
     res <- filterDimensions(d, depths=df)
     expect_equal(res$depth, df)
     expect_true(dim(res$val)[3] == dim(d$val)[3]-1)  # stripped off one depth
-    expect_more_than(length(res$provenance), length(d$provenance))     
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))     
 })
 
 test_that("filterDimensions filters lev", {
@@ -70,7 +70,7 @@ test_that("filterDimensions filters lev", {
     res <- filterDimensions(d, levs=lf)
     expect_equal(res$lev, lf)
     expect_true(dim(res$val)[3] == dim(d$val)[3]-1)  # stripped off one lev
-    expect_more_than(length(res$provenance), length(d$provenance))     
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))     
 })
 
 test_that("filterDimensions filters time (years)", {
@@ -85,7 +85,7 @@ test_that("filterDimensions filters time (years)", {
     res <- filterDimensions(d, years=yf)
     expect_equal(res$time, yf)                                      # only years in filter
     expect_true(dim(res$val)[3] == dim(d$val)[3]-1)                 # stripped off one year
-    expect_more_than(length(res$provenance), length(d$provenance))  # provenance bigger
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))  # provenance bigger
     
     # Monthly data
     d <- cmip5data(1:5)
@@ -93,7 +93,7 @@ test_that("filterDimensions filters time (years)", {
     res <- filterDimensions(d, years=yf)
     expect_equal(unique(floor(res$time)), unique(floor(yf)))        # only years in filter
     expect_more_than(dim(d$val)[3], dim(res$val)[3])                # data should be smaller
-    expect_more_than(length(res$provenance), length(d$provenance))  # and provenance bigger
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))  # and provenance bigger
     
 })
 
@@ -109,7 +109,7 @@ test_that("filterDimensions filters time (months)", {
     res <- filterDimensions(d, months=mf)
     expect_equal(length(unique(round(res$time %% 1, 2))), length(mf))  # only months in filter
     expect_more_than(dim(d$val)[3], dim(res$val)[3])                # data should be smaller
-    expect_more_than(length(res$provenance), length(d$provenance))  # and provenance bigger
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))  # and provenance bigger
    
     expect_error(filterDimensions(d, months=13))                    # illegal months value
 })

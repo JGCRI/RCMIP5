@@ -1,12 +1,11 @@
-# Testing code for the RCMIP5 scripts in 'internalHelpers.R' and 'RCMIP5.R'
+# Testing code for the RCMIP5 scripts in 'addProvenance.R' and 'RCMIP5.R'
 
 # Uses the testthat package
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
 library(testthat)
-#source("internalHelpers.R")    # can't do this here
 
 # To run this code: 
-#   source("internalHelpers.R")
+#   source("addProvenance.R")
 #   source("RCMIP5.R")
 #   library(testthat)
 #   test_file("tests/testthat/test_internalHelpers.R")
@@ -14,28 +13,32 @@ library(testthat)
 context("addProvenance")
 
 test_that("addProvenance handles bad input", {
-    expect_error(addProvenance(prov=3))
-    expect_error(addProvenance(msg=3))
+    expect_error(addProvenance())
+    expect_error(addProvenance(x=3))
+    expect_error(addProvenance(cmip5data(), msg=3))
 })
 
 test_that("addProvenance initializes", {
-    expect_is(addProvenance(), "character")
-    expect_is(addProvenance(msg="test"), "character")
+    d <- addProvenance(cmip5data(1), msg="test")
+    expect_is(d, "cmip5data")
+    expect_is(d$provenance, "data.frame")
 })
 
 test_that("addProvenance adds messages", {
-    expect_equal(length(addProvenance()), 2)            # One line for timestamp, one for function
-    expect_equal(length(addProvenance(msg="test")), 3)  # Timestamp, function, msg
-    
-    p1 <- addProvenance(msg="test1")
-    p2 <- addProvenance(prov=p1, msg="test2")
-    expect_true(grepl("test1", p2[3]))   # 'test2' should appear in final line
-    expect_true(grepl("test2", p2[4]))   # 'test2' should appear in final line
-    expect_equal(length(p2), 4)          # One line for function, two for msgs
-    new.env()
-    expect_equal(length(addProvenance(p2, msg="test3")), 6)  # Should add two new lines
+    d <- cmip5data(1)
+    expect_equal(nrow(d$provenance), 2)            # One line for software specs, one for message
+    d <- addProvenance(d, "test23")
+    expect_equal(nrow(d$provenance), 3)           # One line for software specs, one for message
+    expect_true(any(grepl("test23", d$provenance[3,])))   # 'test23' should appear in final line
 })
 
+test_that("addProvenance merges provenances", {
+    d1 <- cmip5data(1)
+    d2 <- cmip5data(2)
+    d3 <- addProvenance(d1, d2)
+    
+    expect_equal(nrow(d1$provenance)+nrow(d2$provenance), nrow(d3$provenance))
+})
 
 # ===============================================
 

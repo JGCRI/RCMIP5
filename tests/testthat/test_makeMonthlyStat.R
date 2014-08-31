@@ -45,7 +45,7 @@ test_that("makeMonthlyStat handles monthly data", {
     
     # numYears set and Provenance updated?
     expect_is(res$numYears, "table")
-    expect_more_than(length(res$provenance), length(d$provenance))
+    expect_more_than(nrow(res$provenance), nrow(d$provenance))
     
     # Does time match what we expect?
     expect_equal(res$time, 1:12)
