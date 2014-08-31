@@ -64,7 +64,7 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     x$numYears <- unname(table(floor(monthIndex)))
     x$timeUnit <- "months (summarized)"
     x$time <- 1:12
-    x$provenance <- addProvenance(x$provenance, paste("Calculated", as.character(substitute(FUN)), 
-                                                      "for months", min(x$time), "-", max(x$time)))
+    x <- addProvenance(x, paste("Calculated", as.character(substitute(FUN)), 
+                                "for months", min(x$time), "-", max(x$time)))
     return(x)
 } # makeMonthlyStat

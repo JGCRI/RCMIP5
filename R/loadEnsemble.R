@@ -103,7 +103,6 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
     # Note that list.files returns a sorted list so these file should already
     # be in temporal order if the ensemble is split over multiple files.
     for(fileStr in fileList) {
-        prov <- addProvenance(prov, paste("Loaded", fileStr))
         if(demo) { # KTB Does demo load any data??
             # BBL: Yes, but see issue on github. It may not be worth it to ship package
             # with any test data, and in that case, can remove this 'demo' mode
@@ -226,19 +225,24 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
         }
     } # for
     
-    cmip5data(list(files=fileList, val=unname(val), valUnit=valUnit,
-                   lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
-                   time=timeArr, timeFreqStr=timeFreqStr,
-                   variable=variable, model=model, domain=domain,
-                   experiment=experiment, ensembles=ensemble,
-                   provenance=prov,
-                   
-                   debug=list(startYr=startYr, 
-                              lonUnit=lonUnit, latUnit=latUnit,
-                              depthUnit=depthUnit, levUnit=levUnit, 
-                              timeUnit=timeUnit,
-                              calendarUnitsStr=calendarUnitsStr,
-                              calendarStr=calendarStr, timeRaw=timeRaw,
-                              calendarDayLength=calendarDayLength)
+    x <- cmip5data(list(files=fileList, val=unname(val), valUnit=valUnit,
+                        lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
+                        time=timeArr, timeFreqStr=timeFreqStr,
+                        variable=variable, model=model, domain=domain,
+                        experiment=experiment, ensembles=ensemble,
+                        
+                        debug=list(startYr=startYr, 
+                                   lonUnit=lonUnit, latUnit=latUnit,
+                                   depthUnit=depthUnit, levUnit=levUnit, 
+                                   timeUnit=timeUnit,
+                                   calendarUnitsStr=calendarUnitsStr,
+                                   calendarStr=calendarStr, timeRaw=timeRaw,
+                                   calendarDayLength=calendarDayLength)
     ))
+
+    for(f in fileList) {
+        x <- addProvenance(x, paste("Loaded", basename(f)))     
+    }
+    
+    x
 } # loadEnsemble

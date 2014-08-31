@@ -57,9 +57,9 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
             ans <- foreach(i=1:length(uniqueYears),                                     # (1)
                            .combine = function(...)  abind(..., along=timeIndex),       # (2)
                            .packages='plyr')  %dopar% {                                 # (3)
-                aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), # (4)
-                      c(1:(timeIndex-1)), FUN, ...)                                                                                                                   
-            } # %dopar%
+                               aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), # (4)
+                                     c(1:(timeIndex-1)), FUN, ...)                                                                                                                   
+                           } # %dopar%
         } else { # not parallel
             if(verbose) cat("Running in serial\n")
             ans <- list()
@@ -86,11 +86,8 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     x$numMonths <- table(floor(x$time)) ##KTB numMonths should be changed to numPerYr
     x$time <- uniqueYears
     x$timeFreqStr <- "years (summarized)"
-    x$provenance <- addProvenance(x$provenance,
-                                  paste("Calculated",
-                                        as.character(substitute(FUN)),
-                                        "for years",
-                                        min(x$time), "-", max(x$time)))
+    x <- addProvenance(x, paste("Calculated",as.character(substitute(FUN)),
+                                "for years", min(x$time), "-", max(x$time)))
     
     if(verbose) cat('done with makeAnnualStat\n')
     return(x)

@@ -18,7 +18,7 @@ source("R/loadEnsemble.R")
 source("R/loadModel.R")
 
 source("R/RCMIP5.R")
-source("R/internalHelpers.R")
+source("R/addProvenance.R")
 source("R/makeAnnualStat.R")
 source("R/makeGlobalStat.R")
 source("R/makeMonthlyStat.R")

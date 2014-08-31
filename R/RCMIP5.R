@@ -109,7 +109,7 @@ cmip5data <- function(x=list(),
                             time=debuglist$timeRaw/360+min(years),
                             debug=debuglist
         ))
-        x$provenance <- addProvenance(NULL, "Dummy data")
+        x <- addProvenance(x, "Dummy data created")
         x
     } else
         stop("Don't know what to do with this class of parameter")

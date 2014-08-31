@@ -63,11 +63,12 @@ mergeExperiments <- function(x, y, verbose=TRUE) {
     
     # Go ahead and merge
     if(verbose) cat("Merging\n")
+    x <- addProvenance(x, "Merging with another experiment:")
     x$time <- c(x$time, y$time)
     x$val <- unname(abind(x$val, y$val))
     x$files <- c(x$files, y$files)
     x$experiment <- paste(x$experiment, y$experiment, sep=".")
-    x$provenance <- addProvenance(x$provenance, "Merged with another experiment:")
-    x$provenance <- addProvenance(x$provenance, y$provenance)
+    x <- addProvenance(x, y)
+    x <- addProvenance(x, "Merge completed")
     x
 } # mergeExperiments

@@ -21,16 +21,13 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
     path <- normalizePath(path)
     options(warn=w)
     
-    # Sanity checks########
-    # Check that the model specifiers are strings
+    # Sanity checks - parameters are correct type and length
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
     stopifnot(length(experiment)==1 & is.character(experiment))
     stopifnot(length(domain)==1 & is.character(domain))
-    # Check that the path is a string and exists
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(file.exists(path))
-    # Check the boolean flags
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(demo)==1 & is.logical(demo))
@@ -53,7 +50,7 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
         return(NULL)
     }
     
-    #strip the .nc out of the file list
+    # Strip the .nc out of the file list
     fileList <- gsub('\\.nc$', '', fileList)
     
     # Parse out the ensemble strings according to CMIP5 specifications
@@ -83,6 +80,8 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
                 modelTemp$val <- modelTemp$val + temp$val
                 modelTemp$files <- c( modelTemp$files, temp$files )
                 modelTemp$ensembles <- c(modelTemp$ensembles, ensemble)
+                modelTemp <- addProvenance(modelTemp, temp)
+                modelTemp <- addProvenance(modelTemp, paste("Added ensemble", ensemble))
             } else { # ...if dimensions don't match, don't load and warn user
                 warning(ensemble,
                         'Not loaded: data dimensions do not match those of previous ensemble(s)\n')
@@ -96,13 +95,9 @@ loadModel <- function(variable, model, experiment, domain='[^_]+',
         return(NULL)
     }
     
-    # compute mean over all ensembles, update provenance, return
+    # Compute mean over all ensembles, update provenance, and return
     modelTemp$val <- unname(modelTemp$val / length(modelTemp$ensembles))
-    modelTemp$provenance <- addProvenance(NULL,
-                                          c(paste("Computed mean of ensembles:",
+    modelTemp <- addProvenance(modelTemp, c(paste("Computed mean of ensembles:",
                                                   paste(ensembleArr, collapse=' '))))
-    modelTemp$provenance <- addProvenance(modelTemp$provenance,
-                                          c(paste("From files:",
-                                                  paste(fileList, collapse=' '))))
     return(modelTemp)
 } # loadModel

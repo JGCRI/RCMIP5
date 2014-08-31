@@ -43,8 +43,11 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     areavals <- array(1, dim=dim(x$val)[1:2])
     if(is.null(area)) {
         if(verbose) warning("No grid areas supplied; global stat will probably not be correct\n")
+        x <- addProvenance(x, "About to compute global stat. No grid areas supplied.")
     } else {
         stopifnot(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
+        x <- addProvenance(x, "About to compute global stat. Grid areas from following data:")
+        x <- addProvenance(x, area)
         areavals <- area$val
         dav <- dim(areavals)
         if(length(dav) > 2) {
@@ -91,12 +94,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     x[c('lat', 'lon')] <- NULL
     x$variable <- paste(as.character(substitute(FUN)), "of", x$variable)
     x$numCells <- length(areavals)
-    x$provenance <-  addProvenance(x$provenance, 
-                                   paste("Computed global", as.character(substitute(FUN))))
-    if(!is.null(area)) {
-        x$provenance <-  addProvenance(x$provenance, "Used area data:")
-        x$provenance <- addProvenance(x$provenance, area$provenance)        
-    }
+    x <-  addProvenance(x, paste("Computed global", x$variable))
     return(x)
 } # makeGlobalStat
 

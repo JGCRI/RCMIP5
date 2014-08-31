@@ -8,11 +8,12 @@
 #' @param file Filename desired. If omitted one will be generated automatically.
 #' @param path File path.
 #' @param verbose logical. Print info as we go?
+#' @param saveProvenance. Save the provenance separately?
 #' @return The fully-qualified filename that was written (invisible).
 #' @details If no filename is provided, a meaningful one will be assigned based on the
 #' CMIP5 naming convention (but appending 'RCMIP5'). \code{\link{loadEnsemble}} should be
 #' able to read this file.
-saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
+saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRUE) {
     
     # Sanity checks - class and length of parameters
     stopifnot(class(x)=="cmip5data")
@@ -46,11 +47,11 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     if(!is.null(x$depth)) {
         depthdim <- ncdim_def("depth", x$debug$depthUnit, x$depth)
         dimlist <- list(londim, latdim, depthdim, timedim)
-#        depthvar <- ncvar_def("depth", x$debug$depthUnit, depthdim)
+        #        depthvar <- ncvar_def("depth", x$debug$depthUnit, depthdim)
     } else if(!is.null(x$lev)) {
         levdim <- ncdim_def("lev", x$debug$levUnit, x$lev)
         dimlist <- list(londim, latdim, levdim, timedim)
-#        levvar <- ncvar_def("lev", x$debug$levUnit, levdim)
+        #        levvar <- ncvar_def("lev", x$debug$levUnit, levdim)
     }
     if(verbose) cat(length(dimlist), "dimensions for", x$variable, "\n")
     
@@ -64,11 +65,11 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     # Create the file and write mandatory variables
     if(verbose) cat("Creating and writing", file, "\n")
     nc <- nc_create(fqfn, valvar)
-
+    
     ncvar_put(nc, valvar, x$val)
     ncvar_put(nc, lonvar, x$lon)
     ncvar_put(nc, latvar, x$lat)
-
+    
     # Write optional variables
     if(!is.null(x$depth)) {
         if(verbose) cat("Writing depth\n")
@@ -82,14 +83,22 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE) {
     
     # Write attributes
     if(verbose) cat("Writing attributes\n")    
-    ncatt_put(nc, 0, "frequency", x$timeFreqStr)
-    for(i in 1:length(x$provenance)) {
-        ncatt_put(nc, 0, paste0("provenance", i), x$provenance[i])
-    }
     ncatt_put(nc, 0, "software", paste("Written by RCMIP5", packageVersion("RCMIP5"), 
                                        "under", R.version.string, date()))
-    nc_close(nc)
+    ncatt_put(nc, 0, "frequency", x$timeFreqStr)
+    for(i in 1:nrow(x$provenance)) {
+        ncatt_put(nc, 0, paste0("provenance", i), x$provenance[i, "message"])
+    }
     
+    # All done with netCDF. Close file, inform user
+    nc_close(nc)
     if(verbose) cat("Wrote", round(file.info(fqfn)$size/1024/1024, 2), "MB\n")
+    
+    if(saveProvenance) {
+        fqfn_prov <- paste0(fqfn, "_prov.csv")
+        write.csv(as.data.frame(x$provenance), fqfn_prov)
+        if(verbose) cat("Wrote provenance to", fqfn_prov, "\n")   
+    }
+    
     invisible(fqfn)
 } # saveNetCDF
