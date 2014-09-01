@@ -40,10 +40,11 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     if(verbose) cat("Time index =", timeIndex, "\n")
     
     # Get and check area data, using 1's if nothing supplied
-    areavals <- array(1, dim=dim(x$val)[1:2])
+    areavals <- NA
     if(is.null(area)) {
-        if(verbose) warning("No grid areas supplied; global stat will probably not be correct\n")
-        x <- addProvenance(x, "About to compute global stat. No grid areas supplied.")
+        if(verbose) cat("No grid areas supplied; using calculating values\n")
+        x <- addProvenance(x, "About to compute global stat. Grid areas calculated.")
+        areavals <- calcGridArea(x$lon, x$lat, verbose=verbose)
     } else {
         stopifnot(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
         x <- addProvenance(x, "About to compute global stat. Grid areas from following data:")
