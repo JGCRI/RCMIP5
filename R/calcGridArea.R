@@ -15,13 +15,13 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     stopifnot(is.numeric(lon))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
-    if(verbose) cat('Calculating area...\n')
+    if(verbose) cat('Calculating grid cell areas...\n')
     numLat <- length(lat)
     numLon <- length(lon)
     
     # Dummy check the given lat/lon
     # TODO: why is this happening?
-    if(abs(lat[1]) != 90) {
+    if(abs(lat[1]) == 90) {
         stop('Error: lat centered at 90\n')
     }
     if(lon[1] == 0) {
@@ -53,7 +53,5 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     latMax <- matrix(latMax, nrow=numLon, ncol=numLat, byrow=TRUE)
     deltaLon <- matrix(deltaLon, nrow=numLon, ncol=numLat)
     
-    N <- N^2 * (sin(latMax/180*pi) - sin(latMin/180*pi)) * deltaLon/180 * pi
-    if(verbose) cat('Done\n')
-    invisible(N)
+    invisible(N^2 * (sin(latMax/180*pi) - sin(latMin/180*pi)) * deltaLon/180 * pi)
 } # calcGridArea
