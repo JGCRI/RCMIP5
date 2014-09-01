@@ -42,7 +42,6 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     # Parallel processing uses the foreach and doParallel packages, if available
     if(parallel) parallel <- require(foreach) & require(doParallel)
     
-    
     timer <- system.time(  # time the main computation, below
         
         if(parallel) {  # go parallel, woo hoo!
