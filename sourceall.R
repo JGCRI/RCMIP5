@@ -31,8 +31,8 @@ source("R/saveNetCDF.R")
 #...these are bloated and have lots of room
 #...for optimization but do provide a starting point.
 source("R/calcGridArea.R")
-source("R/regrid_val.R")
-source("R/regrid_data.R")
+source("R/regridVal.R")
+source("R/regridData.R")
 #source("R/devMain.R")
 
 source('R/world.plot.R')
