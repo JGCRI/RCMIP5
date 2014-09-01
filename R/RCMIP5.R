@@ -102,8 +102,11 @@ cmip5data <- function(x=list(),
                             valUnit="dummy unit",
                             calendarStr="360_day",
                             timeFreqStr=ifelse(monthly, "mon", "yr"),
-                            lat=c(0:(latsize-1)),
-                            lon=c(0:(lonsize-1)),
+                            
+                            # realistic lon (0 to 360) and lat (-90 to 90) numbers
+                            lat=180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2,
+                            lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2,
+                            
                             depth=depthdim,
                             lev=levdim,
                             time=debuglist$timeRaw/360+min(years),
@@ -179,6 +182,10 @@ summary.cmip5data <- function(object, ...) {
         
         if(!is.null(object$filtered)) {
             ans$type <- paste(ans$type, "(filtered)")
+        }
+
+        if(!is.null(object$area)) {
+            ans$type <- paste(ans$type, "(regridded)")
         }
         
         ans$variable <- x$variable
