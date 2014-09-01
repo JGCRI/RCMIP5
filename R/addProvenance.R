@@ -8,7 +8,7 @@
 #' a cmip5data object, in which case the provenance of this latter object is appended
 #' to that of 'x' (i.e., their histories are merged).
 #' @param verbose logical. Print info as we go?
-#' @return An updated provenance string
+#' @return The original object, with an updated provenance.
 #' @details We want to track computational steps applied to a particular
 #' \code{\link{cmip5data}} object, for reproducibility and user debugging.
 #' This function logs information from the caller to a 'provenance' data structure.
@@ -49,7 +49,7 @@ addProvenance <- function(x, msg, verbose=FALSE) {
         if(verbose) cat("Adding message to provenance")
         x$provenance[nr, "caller"] <- parentcall
         x$provenance[nr, "message"] <- msg
-        x$provenance[nr, "dim"] <- paste(dim(d$val), collapse=",")
+        x$provenance[nr, "dim"] <- paste(dim(x$val), collapse=",")
         x$provenance[nr, "digest"] <- digest(x$val)        
     } else {
         if(verbose) cat("Appending provenances")
