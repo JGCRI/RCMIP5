@@ -13,7 +13,8 @@ Depends:
     plyr (>= 1.8.1),
     abind  (>= 1.4-0),
     ncdf4 (>= 1.9),
-    reshape2 (>= 1.4)
+    reshape2 (>= 1.4),
+    digest
 Suggests:
     ggplot2 (>= 0.9.3),
     foreach (>= 1.4.2),
