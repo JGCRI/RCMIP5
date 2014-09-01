@@ -4,16 +4,15 @@
 #'
 #' @param x cmip5data A \code{\link{cmip5data}} object.
 #' @param area cmip5data An area cmip5data data structure
-#' @param forceRegrid logical. TODO
+#' @param regridSize size of new cell, in degrees
 #' @param verbose logical. Print info as we go?
 #' @return The data regridded onto the new spatial grid.
 #' @export
-regridData <- function(x, area=NULL, regridSize, forceRegrid=FALSE, verbose=TRUE) {
+regridData <- function(x, area=NULL, regridSize, verbose=TRUE) {
     
     # Sanity checks - parameter classes and lengths
     stopifnot(class(x)=="cmip5data")
     stopifnot(is.null(area) | class(area)=="cmip5data")
-    stopifnot(length(forceRegrid)==1 & is.logical(forceRegrid))
     stopifnot(length(regridSize)==1 & is.numeric(regridSize))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
@@ -22,42 +21,36 @@ regridData <- function(x, area=NULL, regridSize, forceRegrid=FALSE, verbose=TRUE
     lat <- x$lat
     units <- x$valUnit
     
-    if(is.null(x$area)) {
-        if(verbose) cat("No area supplied; calculating...")
-        area <- calcGridArea(lon=x$lon, lat=x$lat)
-    } else {
-        area <- area$val
-    }
-    
+    x$area <- ifelse(is.null(x$area), calcGridArea(x$lon, x$lat, verbose), area$val)
+
     isDensity <- grepl('m(\\^)?-2', units) | grepl('%', units)
-    if(verbose) cat('Density flag is: [', isDensity, ']\n')
-    
+    if(verbose) cat('Density flag is', isDensity, '\n')
     isTemp <- grepl('K', units)
-    if(verbose) cat('Temp flag is : [', isTemp, ']\n')
+    if(verbose) cat('Temp flag is', isTemp, '\n')
     
+    if(verbose) cat("Creating new projected data object\n")
     projection <- x
-    projection$lat <- seq(-90, 90-regridSize, by=regridSize) + 0.5*regridSize
     projection$lon <- seq(0, 360-regridSize, by=regridSize) + 0.5*regridSize
-    projection$area <- calcGridArea(projection$lat, projection$lon)
+    projection$lat <- seq(-90, 90-regridSize, by=regridSize) + 0.5*regridSize
+    projection$area <- calcGridArea(projection$lon, projection$lat, verbose)
+    projection <- addProvenance(projection, paste("Shifted lon/lat to new grid size", regridSize))
     
     if(verbose) cat('Regridding [', x$lon[2] - x$lon[1], 'x',
-                    mean(x$lat[2:length(lat)] - x$lat[1:(length(lat)-1)]), '] to [',
-                    regridSize, 'x', regridSize, ']\n')
+                    mean(x$lat[2:length(lat)] - x$lat[1:(length(lat)-1)]), '] degrees to [',
+                    regridSize, 'x', regridSize, '] degrees\n')
     
-    if(isTemp|isDensity) {
-        projection$val <- x$val * projection$area
+    if(isTemp | isDensity) {
+        x$val <- x$val * x$area
+        projection <- regridVal(x, projection, verbose=verbose)
+#        x$val <- x$val/x$area
         
-        data <- regrid_val(orginal, projection, verbose=TRUE)
-        orginal$val <- orginal$val/orginal$area
-        data$val <- data$val/data$area  # correct for regridding artifacts
-        data$area <- projection$area    # reset the old area after correction
+        projection$val <- projection$val/projection$area  # correct for regridding artifacts
     } else {
-        data <- regrid_val(orginal, projection)
-        data$val <- data$val/data$area  # correct for regridding artifacts
-        data$area <- projection$area    # reset the old area after correction
-        data$val <- data$val*data$area  # correct for regridding artifacts
-    }
+        data <- regridVal(x, projection, verbose=verbose)
+        
+        projection$val <- projection$val/projection$area  # correct for regridding artifacts
+        projection$val <- projection$val * projection$area  # correct for regridding artifacts
+    } # if
     
-    
-    return(data)
+    return(projection)
 } # regrid_data
