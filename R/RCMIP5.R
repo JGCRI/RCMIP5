@@ -237,37 +237,37 @@ print.summary.cmip5data <- function(x, ...) {
 #' @return The object converted, as well as possible, to a data frame
 #' @export
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
-    years <- x$time
 
     if(verbose) cat("Melting...\n")
     df <- reshape2::melt(x$val)
 
-    if(verbose) cat("Filling in dimensional data...\n")
+    if(verbose) cat("Melting values...\n")
     df[,1] <- x$lon[df[,1]]
     df[,2] <- x$lat[df[,2]]
     names(df)[1:2] <- c("lon","lat")
-    timeindex <- 4   # Assume there's depth or lev
+
+    if(verbose) cat("Dealing with depth/level...\n")
     if(!is.null(x$lev)) {
         if(verbose) cat("Found lev")
         df[,3] <- x$lev[df[,3]]
         names(df)[3] <- "lev"
+        nextindex <- 4
     } else if(!is.null(x$depth)) {
         if(verbose) cat("Found depth")
         df[,3] <- x$depth[df[,3]]
         names(df)[3] <- "depth"
-    } else
-        timeindex <- 3
-    df[,timeindex] <- years[df[,timeindex]]
-    names(df)[timeindex] <- "time"
+        nextindex <- 4
+    } else {
+        nextindex <- 3
+    }
 
-    if(!is.null(x$variable))
-        df$variable <- factor(x$variable)
-    if(!is.null(x$model))
-        df$model <- factor(x$model)
-    if(!is.null(x$experiment))
-        df$experiment <- factor(x$experiment)
-    if(!is.null(x$valUnit))
-        df$valUnit <- factor(x$valUnit)
+    if(verbose) cat("Dealing with time...\n")
+    if(!is.null(x$time)){
+        df[,timeindex] <- x$time[df[,timeindex]]
+        names(df)[timeindex] <- "time"
+        nextindex <- nextindex + 1
+    }
+
     return(df)
 } # as.data.frame.cmip5data
 
