@@ -9,7 +9,7 @@ library(testthat)
 #   source("filterDimensions.R")
 #   source("RCMIP5.R") # for cmip5data
 #   test_file("tests/testthat/test_filterDimensions.R")
-    
+
 context("filterDimensions")
 
 test_that("filterDimensions handles bad input", {
@@ -53,7 +53,7 @@ test_that("filterDimensions filters lat", {
 
 test_that("filterDimensions filters depth", {
     expect_warning(filterDimensions(cmip5data(1), depths=1))
-
+    
     d <- cmip5data(1, depth=T)
     df <- d$depth[1:(length(d$depth)-1)] # the filter
     res <- filterDimensions(d, depths=df)
@@ -110,8 +110,12 @@ test_that("filterDimensions filters time (months)", {
     expect_equal(length(unique(round(res$time %% 1, 2))), length(mf))  # only months in filter
     expect_more_than(dim(d$val)[3], dim(res$val)[3])                # data should be smaller
     expect_more_than(nrow(res$provenance), nrow(d$provenance))  # and provenance bigger
-   
+    
     expect_error(filterDimensions(d, months=13))                    # illegal months value
+})
+
+test_that("filterDimensions warns about dropped dimensions", {
+    expect_warning(filterDimensions(cmip5data(1),lats=1000))
 })
 
 test_that("filterDimensions handles multiple operations", {

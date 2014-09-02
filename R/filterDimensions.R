@@ -19,7 +19,8 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
     
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
     # Anything else is not valid.
-    stopifnot(length(dim(x$val)) %in% c(2, 3, 4)) # that's all we know
+    timeIndex <- length(dim(x$val))
+    stopifnot(timeIndex %in% c(2, 3, 4)) # that's all we know
     
     x <- filterDimensionLon(x, lons, verbose)
     x <- filterDimensionLat(x, lats, verbose)
@@ -27,6 +28,10 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
     x <- filterDimensionLev(x, levs, verbose)
     x <- filterDimensionTimeYears(x, years, verbose)
     x <- filterDimensionTimeMonths(x, months, verbose)
+    
+    if(timeIndex != length(dim(x$val)) | 0 %in% dim(x$val)) {
+        warning("Dropped one or more dimensions (i.e. no data matched criteria). This is probably not what you want.")    
+    }
     
     x
 } # filterDimensions
