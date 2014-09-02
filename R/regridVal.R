@@ -2,8 +2,8 @@
 #' 
 #' This function regrids global data (in x) to a new grid (defined in y).
 #' Both grids must be center defined (each lat x lon marks the center of the grid).
-#' This function does not deal with wrapping boundry conditions! One key assumption
-#' in this regridding is that a degree is propotional to distance for neighboring
+#' This function does not deal with wrapping boundary conditions! One key assumption
+#' in this regridding is that a degree is proportional to distance for neighboring
 #' grid cells.
 #'
 #' @param x cmip5data A \code{\link{cmip5data}} object containing original data.
@@ -19,20 +19,12 @@
 regridVal <- function(x, y, verbose=FALSE, parallel=FALSE,
                       maxLon=360, minLon=0, maxLat=90, minLat=-90,
                       extremeVerbose=FALSE) {
+    cat("**** Entering regridVal\n")
     
     # Sanity checks - parameter classes and lengths
     stopifnot(class(x)=="cmip5data" & class(y)=="cmip5data")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
-    
-    if(verbose) cat('Regridding [', dim(x$val), ']==[', length(x$lon), 
-                    ',', length(x$lat), '] to [', dim(y$val), ']==[',
-                    length(y$lon), ',', length(y$lat),']\n')        
-    
-    if(length(y$lat) == length(x$lat) & length(y$lon) == length(x$lon)) {
-        cat("No change in grid size\n")
-        return(x)
-    }
     
     # Allocate space for the regridded data
     y_nlat <- length(y$lat)
@@ -40,6 +32,15 @@ regridVal <- function(x, y, verbose=FALSE, parallel=FALSE,
     x_nlat <- length(x$lat)
     x_nlon <- length(x$lon)
     y$val <- matrix(NA_real_, nrow=y_nlon, ncol=y_nlat)
+    
+    if(verbose) cat('Regridding [', dim(x$val), ']==[', x_nlon, 
+                    ',', x_nlat, '] to [', dim(y$val), ']==[',
+                    y_nlon, ',', y_nlat,']\n')        
+    
+    if(y_nlat == x_nlat & y_nlon == x_nlon) {
+        cat("No change in grid size\n")
+        return(x)
+    }
     
     ####################################################
     # Fix gridding abnomalities in original grid
