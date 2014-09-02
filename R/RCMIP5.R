@@ -54,16 +54,17 @@ NULL
 #'  \item{experiment}{Experiment of this dataset}
 #'  \item{ensembles}{Ensemble(s) included in this dataset}
 #' @docType class
+#' @export
 cmip5data <- function(x=list(),
                       # parameters for making sample data
                       monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
                       lonsize=10, latsize=10, depthsize=5, levsize=5) {
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
-    
+
     if (is.list(x)) {
         structure(x, class="cmip5data")
     } else if(is.numeric(x)) {
-        
+
         # Create sample data. 'x' is years
         years <- x
         ppy <- ifelse(monthly, 12, 1)  # periods per year
@@ -78,10 +79,10 @@ cmip5data <- function(x=list(),
             valdims <- c(valdims[1:(length(valdims)-1)], levsize, valdims[length(valdims)])
             levdim <- c(0:(levsize-1))
         }
-        
+
         valData <- 1:2
         if(randomize) valData  <- runif(prod(valdims))
-        
+
         debuglist <- list(lonUnit="degrees_east",
                           latUnit="degrees_north",
                           startYr=years[1],
@@ -89,7 +90,7 @@ cmip5data <- function(x=list(),
                           timeUnit=paste0("days since ",years[1],"-01-01"),
                           timeRaw=(360/ppy*c(0:(length(years)*ppy-1) )+15)
         )
-        
+
         if(depth) debuglist$depthUnit <- "m"
         if(lev) debuglist$levUnit <- "m"
 
@@ -102,11 +103,11 @@ cmip5data <- function(x=list(),
                             valUnit="dummy unit",
                             calendarStr="360_day",
                             timeFreqStr=ifelse(monthly, "mon", "yr"),
-                            
+
                             # realistic lon (0 to 360) and lat (-90 to 90) numbers
                             lat=180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2,
                             lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2,
-                            
+
                             depth=depthdim,
                             lev=levdim,
                             time=debuglist$timeRaw/360+min(years),
@@ -124,34 +125,32 @@ cmip5data <- function(x=list(),
 #' @param ... Other parameters passed to cat
 #' @details Prints a one-line summary of the object
 #' @method print cmip5data
+#' @export
 print.cmip5data <- function(x, ...) {
-    
-    if(is.null(x$variable) | is.null(x$time)) {
+
+    if(is.null(x$variable)) {
         cat("(Empty cmip5data object)")
         return()
     }
-    
-    nensembles <- length(x$ensembles)
-    
-    yearString <- "[date parse error]"
-    try({
-        yearRange <- round(range(x$time), 2)
-        yearString <- paste(yearRange[1], yearRange[2], sep="-")
-    }, silent=T)
-    
-    cat("CMIP5 ")
-    if(!is.null(x$numMonths)) {
-        cat("- annual summary: ")
-    } else if(!is.null(x$numYears)) {
-        cat(" - monthly summary ")
-    } else if(!is.null(x$numCells)) {
-        cat(" - spatial summary ")
+
+    ansStr <- sprintf('CMIP5: %s %s %s', x$variable, x$model, x$experiment)
+
+    if(!is.null(x$time)){
+        ansStr <- sprintf('%s over years %d to %d', ansStr,
+                          floor(min(x$time, na.rm=TRUE)),
+                          ceiling(max(x$time, na.rm=TRUE)))
     }
-    
-    cat(paste(x$variable, x$model, x$experiment, yearString,
-              paste0("[", paste(dim(x$val), collapse=" "), "]"),
-              "from", nensembles, ifelse(nensembles==1, "ensemble", "ensembles"),
-              "\n", ...))
+
+    if(!is.null(x$ensembles)){
+        ansStr <- sprintf('%s from %d %s', ansStr,
+                          length(x$ensembles),
+                          ifelse(length(x$ensembles)==1,
+                                 "ensemble", "ensembles"))
+        }
+
+
+
+    print(ansStr)
 } # print.cmip5data
 
 #' Summarize a 'cmip5data' class object.
@@ -163,50 +162,53 @@ print.cmip5data <- function(x, ...) {
 #' @method summary cmip5data
 #' @export
 summary.cmip5data <- function(object, ...) {
-    
-    x <- object
+
     ans <- list()
     class(ans) <- "summary.cmip5data"
-    
-    if(!is.null(x$variable) & !is.null(x$time)) {
-        
-        if(!is.null(object$numMonths)) {
-            ans$type <- paste("annual summary (of", mean(x$numMonths), "months)")
-        } else if(!is.null(object$numYears)) {
-            ans$type <- paste("monthly summary (of", mean(x$numYears), "years)")
-        } else if(!is.null(object$numCells)) {
-            ans$type <- paste("spatial summary (of", x$numCells, "cells)")
-        } else {
-            ans$type <- "primary data"
-        }
-        
-        if(!is.null(object$filtered)) {
-            ans$type <- paste(ans$type, "(filtered)")
-        }
 
-        if(!is.null(object$area)) {
-            ans$type <- paste(ans$type, "(regridded)")
-        }
-        
-        ans$variable <- x$variable
-        ans$valUnit <- x$valUnit
-        ans$domain <- x$domain
-        ans$model <- x$model
-        ans$experiment <- x$experiment
-        ans$ensembles <- x$ensembles
-        ans$spatial <- paste0("lon [", length(x$lon),
-                              "] lat [", length(x$lat),
-                              "] depth [", length(x$depth),
-                              "] lev [", length(x$lev), "]")
-        
-        ans$time <- paste0(x$timeFreqStr, " [", length(x$time), "] ", x$debug$timeUnit)
-        ans$size <- as.numeric(object.size(x))
-        ans$valsummary <- c(min(as.vector(x$val), na.rm=TRUE),
-                            mean(as.vector(x$val), na.rm=TRUE),
-                            max(as.vector(x$val), na.rm=TRUE))
-        ans$provenance <- x$provenance
+    #Always assume that cmip5 objects have the following defined:
+    ans$variable <- object$variable
+    ans$valUnit <- object$valUnit
+
+    ans$domain <- object$domain
+    ans$model <- object$model
+    ans$experiment <- object$experiment
+    ans$ensembles <- object$ensembles
+
+    if(!is.null(object$numMonths)) {
+        ans$type <- paste("annual summary (of", mean(object$numMonths), "months)")
+    } else if(!is.null(object$numYears)) {
+        ans$type <- paste("monthly summary (of", mean(object$numYears), "years)")
+    } else if(!is.null(object$numCells)) {
+        ans$type <- paste("spatial summary (of", object$numCells, "cells)")
+    } else {
+        ans$type <- "primary data"
     }
-    ans
+
+    if(!is.null(object$filtered)) {
+        ans$type <- paste(ans$type, "(filtered)")
+    }
+
+    if(!is.null(object$area)) {
+        ans$type <- paste(ans$type, "(regridded)")
+    }
+
+
+    ans$spatial <- paste0("lon [", length(object$lon),
+                          "] lat [", length(object$lat),
+                          "] depth [", length(object$depth),
+                          "] lev [", length(object$lev), "]")
+
+    if(!is.null(object$time)){
+        ans$time <- paste0(object$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
+    }
+    ans$size <- as.numeric(object.size(object))
+    ans$valsummary <- c(min(as.vector(object$val), na.rm=TRUE),
+                        mean(as.vector(object$val), na.rm=TRUE),
+                        max(as.vector(object$val), na.rm=TRUE))
+    ans$provenance <- object$provenance
+
+    return(ans)
 } # summary.cmip5data
 
 #' Print the summary for a 'cmip5data' class object.
@@ -215,6 +217,7 @@ summary.cmip5data <- function(object, ...) {
 #' @param ... Other parameters passed to cat
 #' @details Prints a one-line summary of the object
 #' @method print summary.cmip5data
+#' @export
 print.summary.cmip5data <- function(x, ...) {
     cat("CMIP5 data -", x$type, "\n")
     cat("Variable: ", x$variable, " (", x$valUnit, ") from model ", x$model, "\n", sep="")
@@ -232,12 +235,13 @@ print.summary.cmip5data <- function(x, ...) {
 #' @param x A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
 #' @return The object converted, as well as possible, to a data frame
+#' @export
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     years <- x$time
-    
+
     if(verbose) cat("Melting...\n")
     df <- reshape2::melt(x$val)
-    
+
     if(verbose) cat("Filling in dimensional data...\n")
     df[,1] <- x$lon[df[,1]]
     df[,2] <- x$lat[df[,2]]
@@ -255,7 +259,7 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
         timeindex <- 3
     df[,timeindex] <- years[df[,timeindex]]
     names(df)[timeindex] <- "time"
-    
+
     if(!is.null(x$variable))
         df$variable <- factor(x$variable)
     if(!is.null(x$model))
@@ -280,7 +284,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-    
+
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],
