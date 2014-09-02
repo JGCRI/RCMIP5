@@ -171,11 +171,11 @@ summary.cmip5data <- function(object, ...) {
     if(!is.null(x$variable) & !is.null(x$time)) {
         
         if(!is.null(object$numMonths)) {
-            ans$type <- paste0("annual summary (of ", mean(x$numMonths), "months)")
+            ans$type <- paste("annual summary (of", mean(x$numMonths), "months)")
         } else if(!is.null(object$numYears)) {
-            ans$type <- paste0("monthly summary (of ", mean(x$numYears), "years)")
+            ans$type <- paste("monthly summary (of", mean(x$numYears), "years)")
         } else if(!is.null(object$numCells)) {
-            ans$type <- paste0("spatial summary (of ", x$numCells, "cells)")
+            ans$type <- paste("spatial summary (of", x$numCells, "cells)")
         } else {
             ans$type <- "primary data"
         }
