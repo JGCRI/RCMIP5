@@ -1,6 +1,6 @@
-#' Regrid data.
+#' Regrid CMIP5 data.
 #' 
-#' Regrid data. TODO
+#' Regrid CMIP5 data. TODO
 #'
 #' @param x cmip5data A \code{\link{cmip5data}} object.
 #' @param area cmip5data An area cmip5data data structure
@@ -8,7 +8,7 @@
 #' @param verbose logical. Print info as we go?
 #' @return The data regridded onto the new spatial grid.
 #' @export
-regridData <- function(x, area=NULL, regridSize, verbose=TRUE) {
+regridCMIP5 <- function(x, area=NULL, regridSize, verbose=TRUE) {
     
     # Sanity checks - parameter classes and lengths
     stopifnot(class(x)=="cmip5data")
@@ -21,8 +21,9 @@ regridData <- function(x, area=NULL, regridSize, verbose=TRUE) {
     lat <- x$lat
     units <- x$valUnit
     
+    # Assign or calculate (if none supplied) the grid cell areas
     x$area <- ifelse(is.null(x$area), calcGridArea(x$lon, x$lat, verbose), area$val)
-
+    
     isDensity <- grepl('m(\\^)?-2', units) | grepl('%', units)
     if(verbose) cat('Density flag is', isDensity, '\n')
     isTemp <- grepl('K', units)
@@ -40,17 +41,12 @@ regridData <- function(x, area=NULL, regridSize, verbose=TRUE) {
                     regridSize, 'x', regridSize, '] degrees\n')
     
     if(isTemp | isDensity) {
-        x$val <- x$val * x$area
+        x$val <- x$val * x$area  # e.g. from X/m2 to X (per grid cell)
         projection <- regridVal(x, projection, verbose=verbose)
-#        x$val <- x$val/x$area
-        
-        projection$val <- projection$val/projection$area  # correct for regridding artifacts
+        projection$val <- projection$val/projection$area  # and back to X/m2
     } else {
-        data <- regridVal(x, projection, verbose=verbose)
-        
-        projection$val <- projection$val/projection$area  # correct for regridding artifacts
-        projection$val <- projection$val * projection$area  # correct for regridding artifacts
+        projection <- regridVal(x, projection, verbose=verbose)   
     } # if
     
-    return(projection)
+    projection
 } # regrid_data
