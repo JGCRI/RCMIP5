@@ -3,7 +3,7 @@
 #' Working with CMIP5 data can be tricky, forcing scientists to
 #' write custom scripts and programs. The `RCMIP5` package aims
 #' to ease this process, providing a standard, robust, and
-#' high-performance set of scripts to (i) explore what data
+#' high-performance set of functions to (i) explore what data
 #' have been downloaded, (ii) identify missing data, (iii)
 #' average (or apply other mathematical operations) across
 #' experimental ensembles, (iv) produce both temporal and spatial
