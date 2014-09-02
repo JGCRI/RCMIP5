@@ -45,13 +45,13 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     # Find the edges of the latitude grid
     # BBL: these calculations need to be better documented TODO
     midLat <- (lat[2:numLat]+lat[1:(numLat-1)])/2
-    if(verbose) cat("midLat =", midLat, "\n")
+#    if(verbose) cat("midLat =", midLat, "\n")
     latMin <- c(-90, midLat)
     latMax <- c(midLat, 90)
     
     latMin <- matrix(latMin, nrow=numLon, ncol=numLat, byrow=TRUE)
     latMax <- matrix(latMax, nrow=numLon, ncol=numLat, byrow=TRUE)
     deltaLon <- matrix(deltaLon, nrow=numLon, ncol=numLat)
-    
+
     invisible(N^2 * (sin(latMax/180*pi) - sin(latMin/180*pi)) * deltaLon/180 * pi)
 } # calcGridArea

@@ -22,7 +22,11 @@ regridCMIP5 <- function(x, area=NULL, regridSize, verbose=TRUE) {
     units <- x$valUnit
     
     # Assign or calculate (if none supplied) the grid cell areas
-    x$area <- ifelse(is.null(x$area), calcGridArea(x$lon, x$lat, verbose), area$val)
+    if(is.null(area) & is.null(x$area)) {
+        x$area <- calcGridArea(x$lon, x$lat, verbose=verbose)
+    } else {
+        x$area <- area$val
+    }
     
     isDensity <- grepl('m(\\^)?-2', units) | grepl('%', units)
     if(verbose) cat('Density flag is', isDensity, '\n')
@@ -42,10 +46,10 @@ regridCMIP5 <- function(x, area=NULL, regridSize, verbose=TRUE) {
     
     if(isTemp | isDensity) {
         x$val <- x$val * x$area  # e.g. from X/m2 to X (per grid cell)
-        projection <- regridVal(x, projection, verbose=verbose)
+        projection$val <- regridVal(x$val, x$lon, x$lat, x$area, projection$lon, projection$lat, projection$area, verbose=verbose)
         projection$val <- projection$val/projection$area  # and back to X/m2
     } else {
-        projection <- regridVal(x, projection, verbose=verbose)   
+        projection$val <- regridVal(x$val, x$lon, x$lat, x$area, projection$lon, projection$lat, projection$area, verbose=verbose)
     } # if
     
     projection
