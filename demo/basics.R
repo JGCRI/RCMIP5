@@ -4,7 +4,7 @@ print("This is a sample script that generates dummy data and demonstrates")
 print("some of the functionality of the RCMIP5 package.")
 print("")
 print("This script does not demonstrate the functionality of getFileInfo(),")
-print("checkTimePeriod(), loadEnsemble(), or loadModel(), all of which require")
+print("checkTimePeriod(), or loadCMIP5(), all of which require")
 print("existing CMIP5 netcdf files.")
 readline("<return>")
 
@@ -24,7 +24,7 @@ print(combined)
 readline("<return>")
 
 print("Limiting to certain latitudes and longitudes")
-combined <- filterDimensions(combined, lons=1:11, lats=6:8, verbose=T)
+combined <- filterDimensions(combined, lons=50:200, lats=-30:30, verbose=T)
 print(combined)
 readline("<return>")
 
@@ -38,7 +38,6 @@ readline("<return>")
 
 print("Computing global area-weighted mean")
 globalmean <- makeGlobalStat(combined, verbose=T)
-print("This gives a warning (printed when script ends) because we didn't supply a grid area file")
 readline("<return>")
 
 print("More detailed look at the resulting dataset:")
@@ -49,7 +48,6 @@ print("Each step is tracked in the data's provenance, which includes a timestamp
 print("operation performed, parameters, message, and data dimensions and MD5 hash.")
 print("For example:" )
 print(globalmean$provenance[c("timestamp","message")])
-print("Note that the missing-area problem is logged here.")
 readline("<return>")
 
 print("Visualization of the first 12 months of data:")
@@ -61,6 +59,5 @@ print(head(as.data.frame(combined)))
 readline("<return>")
 
 print("...or save them as netcdf files. (Not run.)")
-print("saveNetCDF(combined)  # will save both data and provenance information")
 
 print("All done!")

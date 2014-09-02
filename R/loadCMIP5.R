@@ -1,24 +1,138 @@
-#' Load a model-variable-experiment-ensemble.
+#' Load CMIP5 data
 #'
-#' Loads the data for a particular CMIP5 experiment/variable/model/ensemble
+#' Loads CMIP5 data from disk. \code{loadCMIP5} will return a unique model ensemble,
+#' or will average all ensemble members of a specified experiment-variable-model 
+#' combination.
+#'
+#' @param variable CMIP5 variable to load (required)
+#' @param model CMIP5 model to load (required)
+#' @param experiment CMIP5 experiment to load (required)
+#' @param ensemble optional CMIP5 ensemble to load
+#' @param optional domain CMIP5 domain to load
+#' @param path root of directory tree
+#' @param recursive logical. Should we recurse into directories?
+#' @param verbose logical. Print info as we go?
+#' @param demo logical. Demo mode (reading data from global environment, not disk)?
+#' @return A \code{\link{cmip5data}} object
+#' @export
+loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+',
+                      path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
+    
+    # Match the path conventions to the operating system
+    w <- getOption('warn')
+    options(warn=-1)
+    path <- normalizePath(path)
+    options(warn=w)
+    
+    # Sanity checks - parameters are correct type and length
+    stopifnot(length(variable)==1 & is.character(variable))
+    stopifnot(length(model)==1 & is.character(model))
+    stopifnot(length(experiment)==1 & is.character(experiment))
+    stopifnot(length(ensemble)==1 & is.character(ensemble) | is.null(ensemble))
+    stopifnot(length(domain)==1 & is.character(domain))
+    stopifnot(length(path)==1 & is.character(path))
+    stopifnot(file.exists(path))
+    stopifnot(length(recursive)==1 & is.logical(recursive))
+    stopifnot(length(verbose)==1 & is.logical(verbose))
+    stopifnot(length(demo)==1 & is.logical(demo))
+    
+    # If a unique ensemble is specified, jump right to loadEnsemble()
+    if(!is.null(variable) & !is.null(model)
+       &!is.null(experiment) & !is.null(ensemble)) { 
+        return(loadEnsemble(variable, model, experiment, ensemble, domain,
+                            path=path, recursive=recursive, verbose=verbose, demo=demo))
+    }
+    
+    # List all files that match specifications
+    if(demo) {
+        fileList <- ls(envir=.GlobalEnv) # in demo mode pull from environment, not disk
+    } else {
+        fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
+    }
+    
+    # Only pull the files which are specified by the model strings
+    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_',
+                                               variable, domain, model, experiment),
+                               basename(fileList))]
+    
+    if(length(fileList) == 0) {
+        warning("Could not find any matching files")
+        return(NULL)
+    }
+    
+    # Strip the .nc out of the file list
+    fileList <- gsub('\\.nc$', '', fileList)
+    
+    # Parse out the ensemble strings according to CMIP5 specifications
+    ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
+                                        function(x){x[5]})))
+    
+    if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
+    
+    modelTemp <- NULL                   # Initalize the return data structure
+    for(ensemble in ensembleArr) { # for each ensemble...
+        
+        # load the entire ensemble
+        temp <- loadEnsemble(variable, model, experiment, ensemble, domain,
+                             path=path, verbose=verbose, recursive=recursive, demo=demo)
+        
+        if(is.null(modelTemp)) {         # If first model, just copy
+            modelTemp <- temp 
+        } else {
+            # Make sure lat-lon-depth|lev-time match
+            if(all(dim(temp) == dim(modelTemp)) &
+                   identical(temp$lat, modelTemp$lat) &
+                   identical(temp$lon, modelTemp$lon) &
+                   identical(temp$depth, modelTemp$depth) &
+                   identical(temp$lev, modelTemp$lev) &
+                   identical(temp$time, modelTemp$time)) {
+                # Add this ensemble's data and record file and ensemble loaded
+                modelTemp$val <- modelTemp$val + temp$val
+                modelTemp$files <- c( modelTemp$files, temp$files )
+                modelTemp$ensembles <- c(modelTemp$ensembles, ensemble)
+                modelTemp <- addProvenance(modelTemp, temp)
+                modelTemp <- addProvenance(modelTemp, paste("Added ensemble", ensemble))
+            } else { # ...if dimensions don't match, don't load and warn user
+                warning(ensemble,
+                        'Not loaded: data dimensions do not match those of previous ensemble(s)\n')
+            }
+        } # is.null(modelTemp)
+    } # for
+    
+    # Make sure at least one ensemble was actually loaded
+    if(length(modelTemp$ensembles) == 0) {
+        warning("No ensembles were loaded.")
+        return(NULL)
+    }
+    
+    # Compute mean over all ensembles, update provenance, and return
+    modelTemp$val <- unname(modelTemp$val / length(modelTemp$ensembles))
+    modelTemp <- addProvenance(modelTemp, c(paste("Computed mean of ensembles:",
+                                                  paste(ensembleArr, collapse=' '))))
+    return(modelTemp)
+} # loadCMIP5
+
+
+#' Load a unique CMIP5 ensemble
+#'
+#' Loads the data for a particular CMIP5 experiment-variable-model-ensemble
 #' combination (one or more files). Returns NULL and a warning if nothing matches.
 #'
-#' @param variable CMIP5 variable to load
-#' @param model CMIP5 model to load
-#' @param experiment CMIP5 experiment to load
-#' @param ensemble CMIP5 ensemble to load
-#' @param domain CMIP5 domain to load
-#' @param path root of directory tree
+#' @param variable CMIP5 variable to load (required)
+#' @param model CMIP5 model to load (required)
+#' @param experiment CMIP5 experiment to load (required)
+#' @param ensemble CMIP5 ensemble to load (required)
+#' @param domain optinal CMIP5 domain to load (required)
+#' @param path optional root of directory tree
 #' @param recursive logical. Recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param demo logical. Demo mode (reading data from global environment, not disk)?
 #' @return A \code{\link{cmip5data}} object.
 #' @details This function is the core of RCMIP5's data-loading. It loads all files matching
-#' the experiment, variable, model, ensemble, and perhaps domain supplied by the caller.
+#' the experiment, variable, model, ensemble, and domain supplied by the caller.
 #' We can also load from the package datasets by specifying DEMO=TRUE.
-#' @export
-loadEnsemble <- function(variable='[^_]+', model='[^_]+',
-                         experiment='[^_]+', ensemble='[^_]+', domain='[^_]+',
+#' @note This is an internal RCMIP5 function and not exported.
+loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                          path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
     
     # Sanity checks - make sure all parameters are correct class and length
@@ -47,8 +161,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
     # ...Note that the '[_\\.]' match differentiates between
     # ...ensembles like 'r1i1p1' and 'r1i1p11', an unlikely but possible case.
     fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_%s[_\\.]',
-                                               variable, domain, model,
-                                               experiment, ensemble),
+                                               variable, domain, model, experiment, ensemble),
                                basename(fileList))]
     
     if(length(fileList)==0) {
@@ -239,7 +352,7 @@ loadEnsemble <- function(variable='[^_]+', model='[^_]+',
                                    calendarStr=calendarStr, timeRaw=timeRaw,
                                    calendarDayLength=calendarDayLength)
     ))
-
+    
     for(f in fileList) {
         x <- addProvenance(x, paste("Loaded", basename(f)))     
     }

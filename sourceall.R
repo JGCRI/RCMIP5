@@ -15,8 +15,7 @@ library(digest)
 source("R/getFileInfo.R")
 source("R/checkTimePeriod.R")
 
-source("R/loadEnsemble.R")
-source("R/loadModel.R")
+source("R/loadCMIP5.R")
 
 source("R/RCMIP5.R")
 source("R/addProvenance.R")
@@ -36,3 +35,4 @@ source("R/regridData.R")
 #source("R/devMain.R")
 
 source('R/world.plot.R')
+source("R/worldPlot2.R")
