@@ -46,7 +46,7 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
 filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
     
     # Sanity check
-    stopifnot(is.null(lons) | class(lons) %in% c("numeric", "integer"))
+    stopifnot(is.null(lons) | class(lons) %in% c("numeric", "integer", "array"))
     
     # Filter longitude dimension
     if(!is.null(lons)) {
@@ -74,7 +74,7 @@ filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
 filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
     
     # Sanity check
-    stopifnot(is.null(lats) | class(lats) %in% c("numeric", "integer"))
+    stopifnot(is.null(lats) | class(lats) %in% c("numeric", "integer", "array"))
     
     # Filter latitude dimension
     if(!is.null(lats)) {
@@ -102,7 +102,7 @@ filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
 filterDimensionDepth <- function(x, depths=NULL, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(is.null(depths) | class(depths) %in% c("numeric", "integer"))
+    stopifnot(is.null(depths) | class(depths) %in% c("numeric", "integer", "array"))
     
     # Filter depth dimension
     ndim <- length(dim(x$val))
@@ -131,7 +131,7 @@ filterDimensionDepth <- function(x, depths=NULL, verbose=FALSE) {
 filterDimensionLev <- function(x, levs=NULL, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(is.null(levs) | class(levs) %in% c("numeric", "integer"))
+    stopifnot(is.null(levs) | class(levs) %in% c("numeric", "integer", "array"))
     
     # Filter lev dimension
     ndim <- length(dim(x$val))
@@ -160,7 +160,7 @@ filterDimensionLev <- function(x, levs=NULL, verbose=FALSE) {
 filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(is.null(years) | class(years) %in% c("numeric", "integer"))
+    stopifnot(is.null(years) | class(years) %in% c("numeric", "integer", "array"))
     
     # Filter time (years) dimension
     ndim <- length(dim(x$val))
@@ -190,7 +190,7 @@ filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
 filterDimensionTimeMonths <- function(x, months=NULL, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(is.null(months) | class(months) %in% c("numeric", "integer"))
+    stopifnot(is.null(months) | class(months) %in% c("numeric", "integer", "array"))
     stopifnot(months %in% 1:12)
     
     # Filter time (months) dimension
