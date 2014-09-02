@@ -31,7 +31,7 @@ source("R/saveNetCDF.R")
 #...for optimization but do provide a starting point.
 source("R/calcGridArea.R")
 source("R/regridVal.R")
-source("R/regridData.R")
+#source("R/regridData.R")
 #source("R/devMain.R")
 
 source('R/world.plot.R')
