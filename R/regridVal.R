@@ -54,109 +54,21 @@ regridVal <- function(x, x_lon, x_lat, x_area,
         return(x)
     }
     
-    ####################################################
-    # Fix gridding abnomalities in original grid
-    ####################################################
+    ###################################################
+    # Check for grid abnormalities in original data
+    ###################################################
     
-    yMid <- (y_lat[2:y_nlat] + y_lat[1:(y_nlat-1)]) / 2
-    y.lat.min <- c(-90, yMid)
-    y.lat.max <- c(yMid, 90)
-    
-    # Pull the boundries of the grid cells
-    xMid <- (x_lat[2:x_nlat]+x_lat[1:(x_nlat-1)])/2
-    x.lat.min <- c(-90, xMid) #x_lat-x$deltaLat/2
-    x.lat.max <- c(xMid, 90) #x_lat+x$deltaLat/2
-    deltaLon <- unique(x_lon[2:x_nlon] - x_lon[1:(x_nlon-1)])
-    
-    if(max(deltaLon)-min(deltaLon) > 1e-8) {
-        print(max(deltaLon) - min(deltaLon))
-        warning('ERROR: non uniform longitude... returning NA.\n')
-        return(NA)
-    } else {
-        deltaLon <- signif(deltaLon[1], 8) # make the array a scalar... hackish I know
-    }
-    
-    x.lon.min <- x_lon-deltaLon/2
-    x.lon.max <- x_lon+deltaLon/2
-    cat('x lat min: [', head(x.lat.min, n=3),
-        '...] max:[', tail(x.lat.max, n=3),
-        '] lon min: [', head(x.lon.min, n=3),
-        '] max:[', tail(x.lon.max, n=3),']\n')
-    
-    # Check to see if these boundries fall over the min/max
-    cat('check lat boundry\n')
-    
-    if((x.lat.min[1] < minLat) | (x.lat.max[length(x.lat.max)] > maxLat)) {
-        
-        cat('!!!!!!!! \n Error! Wrapping latitude grid not valid. Attempting to salvage by trimming top and bottom of NA or 0 values. \n')
-        cat('old dim of val: [', dim(x), '] lat: [', length(x_lat), ']\n')
-        
-        cat('Trim max lat values\n')
-        x_area <- x_area[,1:(x_nlat-1)]
-        x <- x[,1:(x_nlat-1)]
-        x_lat <- x_lat[1:(x_nlat-1)]
-        x_nlat <- length(x_lat)
-        
-        #if(all(is.na(x[,1])) | sum(x[,1]) == 0){
-        cat('Trim min lat values\n')
-        x_area <- x_area[,2:x_nlat]
-        x <- x[,2:x_nlat]
-        x_lat <- x_lat[2:x_nlat]
-        x_nlat <- length(x_lat)
-        #}
-        cat('new dim of val: [', dim(x), '] lat: [', length(x_lat), ']\n')
-        
-        xMid <- (x_lat[2:x_nlat]+x_lat[1:(x_nlat-1)])/2
-        x.lat.min <- c(-90, xMid)#x_lat-x$deltaLat/2
-        x.lat.max <- c(xMid, 90) #x_lat+x$deltaLat/2
-        
-        #org.lat.min <- x_lat-x$deltaLat/2
-        #org.lat.max <- x_lat+x$deltaLat/2
-        x.lon.min <- x_lon-deltaLon/2
-        x.lon.max <- x_lon+deltaLon/2
-        
-        if((x.lat.min[1] < minLat) || (x.lat.max[length(x.lat.max)] > maxLat)){
-            cat(x.lat.min[1], '> ', minLat)
-            cat('\n minLat:[', minLat, ']: test [', (x.lat.min[1] < minLat)
-                , '] maxLat:[', maxLat, ']: test [', (x.lat.max[length(x.lat.max)] > maxLat), '] Trimming unsucessful. Exiting\n')
-            return(NA)
-        } else {
-            cat('Trimming sucessful. Moving on. \n !!!!!\n')
-        }
-    } # if
-    
-    # Move any lon grids which are below/above the minimum to the other side
-    cat('wrap lon boundries\n')
-    if(x.lon.min[1] < minLon) {
-        x.lon.min <- c(0, x.lon.min[2:length(x.lon.min)], x.lon.min[1]+maxLon)
-        x.lon.max <- c(x.lon.max, maxLon)
-        x_area <- rbind(x_area, x_area[1,])*
-            (x.lon.max-x.lon.min)/deltaLon
-        x <- rbind(x, x[1,])*
-            (x.lon.max-x.lon.min)/deltaLon
-        
-        if(verbose) cat('Expanding lon min points to include: [', min(x.lon.min), 
-                        '] dimentions: , [', length(x.lon.min), ']\n')
-        cat('data values are [', dim(x), ']\n')
-    } # if
-    
-    if(x.lon.max[length(x.lon.max)] > maxLon) {
-        cat('longitude is too high', x.lon.max[length(x.lon.max)],'>', maxLon,'\n')
-        x.lon.max <- c(x.lon.max[length(x.lon.max)]-maxLon,
-                         x.lon.max[1:(length(x.lon.max)-1)], maxLon)
-        x.lon.min <- c(0, x.lon.min)
-        x_area <- rbind(x_area[length(x.lon.max),] , x)*
-            (x.lon.max-x.lon.min)/deltaLon
-        x <- rbind(x[length(x.lon.max),] , x)*
-            (x.lon.max-x.lon.min)/deltaLon
-        
-        if(verbose) cat('Expanding lon max points\n')
-    }
-       
-    cat('x lat min: [', head(x.lat.min, n=3),
-        '...] max:[...', tail(x.lat.max, n=3),
-        '] lon min: [', head(x.lon.min, n=3),
-        '...] max:[...', tail(x.lon.max, n=3),']\n')
+    results <- checkGridAbnormalities(x, x_lon, x_lat, x_area,
+                                      y_lon, y_lat,
+                                      minLat, maxLat, minLon, maxLon)
+    x <- results$x   # ... and copy back (possibly changed) data
+    x_lon <- results$x_lon
+    x_lon_min <- results$x_lon_min
+    x_lon_max <- results$x_lon_max
+    x_lat <- results$x_lat
+    x_lat_min <- results$x_lat_min
+    x_lat_max <- results$x_lat_max
+    x_area <- results$x_area
     
     ###################################################
     # Regrid the values using weighted averaging
@@ -173,32 +85,29 @@ regridVal <- function(x, x_lon, x_lat, x_area,
         dim(x), ']==[',
         dim(y_lon), ', ', dim(y_lat),']\n')
     cat("regridding of ", y_nlon," longitudes [takes a while]: ")
+ 
+    yMid <- (y_lat[2:y_nlat] + y_lat[1:(y_nlat-1)]) / 2
+    y_lat_min <- c(-90, yMid)
+    y_lat_max <- c(yMid, 90)
     
-    # Parallel processing uses the foreach and doParallel packages, if available
-    if(parallel) parallel <- require(foreach) & require(doParallel)
-    # parallel TODO
-    
-    stop('ok')
-    
-    # Consider each grid cell in a for-loop
-    for(jj in 1:y_nlon) {
+    for(jj in 1:y_nlon) { # main loop
         cat( jj, " ")
         for(ii in 1:y_nlat) {
             ##############################################
             # Calculate latitude intersections
             ##############################################
-            y.min <- y.lat.min[ii]#y_lat[ii] - y$deltaLat/2
-            y.max <- y.lat.max[ii]#y_lat[ii] + y$deltaLat/2
+            y_min <- y_lat_min[ii]#y_lat[ii] - y$deltaLat/2
+            y_max <- y_lat_max[ii]#y_lat[ii] + y$deltaLat/2
             
             # Calcuate the length of the intersection between the x grid and
             # projected grid cell. Take the minimum of the max point in the
             # segment and subtract it from the maximum of the min point in the
             # segments.
-            latInter <- pmin(x.lat.max, y.max)-pmax(x.lat.min, y.min)
+            latInter <- pmin(x_lat_max, y_max)-pmax(x_lat_min, y_min)
             
             # Normalize this to the size of the x grid to get a
             # percentage contribution of the x grid to the projected grid cell
-            latInter <- latInter/(x.lat.max-x.lat.min)
+            latInter <- latInter/(x_lat_max-x_lat_min)
             
             # Remove all negitive values which indicate non-intersecting segments
             latInter[latInter<0] <- 0
@@ -207,23 +116,23 @@ regridVal <- function(x, x_lon, x_lat, x_area,
             # Calculate for the longitude
             ##############################################
             if(jj==1) {
-                y.min <- 0
+                y_min <- 0
             } else {
-                y.min <- mean(y_lon[(jj-1):jj])#y_lon[jj] - y$deltaLon/2
+                y_min <- mean(y_lon[(jj-1):jj])#y_lon[jj] - y$deltaLon/2
             }
             if(jj==y_nlon) {
-                y.max <- 360
+                y_max <- 360
             } else {
-                y.max <- mean(y_lon[jj:(jj+1)])#y_lon[jj] + y$deltaLon/2
+                y_max <- mean(y_lon[jj:(jj+1)])#y_lon[jj] + y$deltaLon/2
             }
             # Dealing with longitude wrapping which was not an issue for latitude
-            if(y.min < 0 || y.max > maxLon) {
+            if(y_min < 0 || y_max > maxLon) {
                 cat('y can not wrap around 0!! Ending.\n')
                 return(NA)
             }
             
-            lonInter <- pmin(x.lon.max, y.max)-pmax(x.lon.min, y.min)            
-            lonInter <- lonInter/(x.lon.max-x.lon.min)
+            lonInter <- pmin(x_lon_max, y_max)-pmax(x_lon_min, y_min)            
+            lonInter <- lonInter/(x_lon_max-x_lon_min)
             lonInter[lonInter<0] <- 0
             
             if(extremeVerbose) {
@@ -231,13 +140,13 @@ regridVal <- function(x, x_lon, x_lat, x_area,
                     ' dim of lonInter ', length(lonInter),
                     ' dim(latInter) ', length(latInter),'\n')
                 cat('\n')
-                cat('x lat min: [', head(x.lat.min, n=3),
-                    '...] max:[...', tail(x.lat.max, n=3),
-                    '] lon min: [', head(x.lon.min, n=3),
-                    '...] max:[...', tail(x.lon.max, n=3),']\n')
-                cat('y lon max [',y.max, ']\n')
-                cat('y lon min [',y.min, ']\n')
-                cat('lon maxs: ',pmin(x.lon.max, y.max), 'lon mins: ',pmax(x.lon.min, y.min),'\n')
+                cat('x lat min: [', head(x_lat_min, n=3),
+                    '...] max:[...', tail(x_lat_max, n=3),
+                    '] lon min: [', head(x_lon_min, n=3),
+                    '...] max:[...', tail(x_lon_max, n=3),']\n')
+                cat('y lon max [',y_max, ']\n')
+                cat('y lon min [',y_min, ']\n')
+                cat('lon maxs: ',pmin(x_lon_max, y_max), 'lon mins: ',pmax(x_lon_min, y_min),'\n')
                 cat('lonInter: [', lonInter, ']\n')
             }
             
@@ -289,8 +198,8 @@ regridVal <- function(x, x_lon, x_lat, x_area,
                     "] dim(temp) [", dim(temp),"]\n")
                 cat("projected$val[",jj,",", ii,"]: [", y[jj, ii], "]\n")
             } # if(extremeVerbose)
-        }
-    }
+        } # for ii
+    } # for jj
     
     if(extremeVerbose) {
         cat('x lat[', x_lat, ']\n')
@@ -306,6 +215,120 @@ regridVal <- function(x, x_lon, x_lat, x_area,
 } # regridVal
 
 
-checkGridAbnormalities <- function(x) {
+#' Check for grid abnormalities.
+#' 
+#' Check for grid abnormalities. TODO - describe more.
+#'
+#' @param x an array containing original data; rows=lon and columns=lat
+#' @param x_area a matrix, same dimensions as x, containing area data
+#' @param y_area a matrix of the new (projected) dimensions, containing area data
+#' @param verbose logical. Print info as we go?
+#' @return TODO
+#' @note This is an internal RCMIP5 function and not exported.
+checkGridAbnormalities <- function(x, x_lon, x_lat, x_area,
+                                   y_lon, y_lat, 
+                                   minLat, maxLat, minLon, maxLon) {
+
+    y_nlat <- length(y_lat)
+    y_nlon <- length(y_lon)
+    x_nlat <- length(x_lat)
+    x_nlon <- length(x_lon)
+        
+    # Pull the boundries of the grid cells
+    xMid <- (x_lat[2:x_nlat]+x_lat[1:(x_nlat-1)])/2
+    x_lat_min <- c(-90, xMid) #x_lat-x$deltaLat/2
+    x_lat_max <- c(xMid, 90) #x_lat+x$deltaLat/2
+    deltaLon <- unique(x_lon[2:x_nlon] - x_lon[1:(x_nlon-1)])
     
+    if(max(deltaLon)-min(deltaLon) > 1e-8) {
+        print(max(deltaLon) - min(deltaLon))
+        warning('ERROR: non uniform longitude... returning NA.\n')
+        return(NA)
+    } else {
+        deltaLon <- signif(deltaLon[1], 8) # make the array a scalar... hackish I know
+    }
+    
+    x_lon_min <- x_lon-deltaLon/2
+    x_lon_max <- x_lon+deltaLon/2
+    cat('x lat min: [', head(x_lat_min, n=3),
+        '...] max:[', tail(x_lat_max, n=3),
+        '] lon min: [', head(x_lon_min, n=3),
+        '] max:[', tail(x_lon_max, n=3),']\n')
+    
+    # Check to see if these boundries fall over the min/max
+    cat('check lat boundry\n')
+    
+    if((x_lat_min[1] < minLat) | (x_lat_max[length(x_lat_max)] > maxLat)) {
+        
+        cat('!!!!!!!! \n Error! Wrapping latitude grid not valid. Attempting to salvage by trimming top and bottom of NA or 0 values. \n')
+        cat('old dim of val: [', dim(x), '] lat: [', length(x_lat), ']\n')
+        
+        cat('Trim max lat values\n')
+        x_area <- x_area[,1:(x_nlat-1)]
+        x <- x[,1:(x_nlat-1)]
+        x_lat <- x_lat[1:(x_nlat-1)]
+        x_nlat <- length(x_lat)
+        
+        #if(all(is.na(x[,1])) | sum(x[,1]) == 0){
+        cat('Trim min lat values\n')
+        x_area <- x_area[,2:x_nlat]
+        x <- x[,2:x_nlat]
+        x_lat <- x_lat[2:x_nlat]
+        x_nlat <- length(x_lat)
+        #}
+        cat('new dim of val: [', dim(x), '] lat: [', length(x_lat), ']\n')
+        
+        xMid <- (x_lat[2:x_nlat]+x_lat[1:(x_nlat-1)])/2
+        x_lat_min <- c(-90, xMid)#x_lat-x$deltaLat/2
+        x_lat_max <- c(xMid, 90) #x_lat+x$deltaLat/2
+        
+        #org.lat.min <- x_lat-x$deltaLat/2
+        #org.lat.max <- x_lat+x$deltaLat/2
+        x_lon_min <- x_lon-deltaLon/2
+        x_lon_max <- x_lon+deltaLon/2
+        
+        if((x_lat_min[1] < minLat) || (x_lat_max[length(x_lat_max)] > maxLat)){
+            cat(x_lat_min[1], '> ', minLat)
+            cat('\n minLat:[', minLat, ']: test [', (x_lat_min[1] < minLat)
+                , '] maxLat:[', maxLat, ']: test [', (x_lat_max[length(x_lat_max)] > maxLat), '] Trimming unsucessful. Exiting\n')
+            return(NA)
+        } else {
+            cat('Trimming sucessful. Moving on. \n !!!!!\n')
+        }
+    } # if
+    
+    # Move any lon grids which are below/above the minimum to the other side
+    cat('wrap lon boundries\n')
+    if(x_lon_min[1] < minLon) {
+        x_lon_min <- c(0, x_lon_min[2:length(x_lon_min)], x_lon_min[1]+maxLon)
+        x_lon_max <- c(x_lon_max, maxLon)
+        x_area <- rbind(x_area, x_area[1,])*
+            (x_lon_max-x_lon_min)/deltaLon
+        x <- rbind(x, x[1,])*
+            (x_lon_max-x_lon_min)/deltaLon
+        
+        if(verbose) cat('Expanding lon min points to include: [', min(x_lon_min), 
+                        '] dimensions: , [', length(x_lon_min), ']\n')
+        cat('data values are [', dim(x), ']\n')
+    } # if
+    
+    if(x_lon_max[length(x_lon_max)] > maxLon) {
+        cat('longitude is too high', x_lon_max[length(x_lon_max)],'>', maxLon,'\n')
+        x_lon_max <- c(x_lon_max[length(x_lon_max)]-maxLon,
+                       x_lon_max[1:(length(x_lon_max)-1)], maxLon)
+        x_lon_min <- c(0, x_lon_min)
+        x_area <- rbind(x_area[length(x_lon_max),] , x) * (x_lon_max-x_lon_min)/deltaLon
+        x <- rbind(x[length(x_lon_max),] , x) * (x_lon_max-x_lon_min)/deltaLon
+        
+        if(verbose) cat('Expanding lon max points\n')
+    }
+    
+    cat('x lat min: [', head(x_lat_min, n=3),
+        '...] max:[...', tail(x_lat_max, n=3),
+        '] lon min: [', head(x_lon_min, n=3),
+        '...] max:[...', tail(x_lon_max, n=3),']\n')
+    
+    return(list(x=x, x_lon=x_lon, x_lon_min=x_lon_min, x_lon_max=x_lon_max,
+                x_lat=x_lat, x_lat_min=x_lat_min, x_lat_max=x_lat_max,
+                x_area=x_area))
 }
