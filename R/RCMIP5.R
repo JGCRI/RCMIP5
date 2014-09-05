@@ -238,6 +238,11 @@ print.summary.cmip5data <- function(x, ...) {
 #' @export
 as.data.frame.cmip5data <- function(x, verbose=FALSE) {
 
+    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # Anything else is not valid.
+    timeIndex <- length(dim(x$val))
+    stopifnot(timeIndex %in% c(2, 3, 4)) # that's all we know
+    
     if(verbose) cat("Melting...\n")
     df <- reshape2::melt(x$val)
 
@@ -247,25 +252,20 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     names(df)[1:2] <- c("lon","lat")
 
     if(verbose) cat("Dealing with depth/level...\n")
-    if(!is.null(x$lev)) {
+    if(!is.null(x$lev) & timeIndex==4) {
         if(verbose) cat("Found lev")
         df[,3] <- x$lev[df[,3]]
         names(df)[3] <- "lev"
-        nextindex <- 4
-    } else if(!is.null(x$depth)) {
+    } else if(!is.null(x$depth) & timeIndex==4) {
         if(verbose) cat("Found depth")
         df[,3] <- x$depth[df[,3]]
         names(df)[3] <- "depth"
-        nextindex <- 4
-    } else {
-        nextindex <- 3
     }
-
+    
     if(verbose) cat("Dealing with time...\n")
     if(!is.null(x$time)){
-        df[,timeindex] <- x$time[df[,timeindex]]
+        df[,timeIndex] <- x$time[df[,timeIndex]]
         names(df)[timeindex] <- "time"
-        nextindex <- nextindex + 1
     }
 
     return(df)
