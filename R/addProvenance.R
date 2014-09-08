@@ -13,6 +13,7 @@
 #' \code{\link{cmip5data}} object, for reproducibility and user debugging.
 #' This function logs information from the caller to a 'provenance' data structure.
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 addProvenance <- function(x, msg, verbose=FALSE) {
     
     # Sanity checks

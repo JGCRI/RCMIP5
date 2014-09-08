@@ -42,4 +42,5 @@ We can also load from the package datasets by specifying DEMO=TRUE.
 \note{
 This is an internal RCMIP5 function and not exported.
 }
+\keyword{internal}
 

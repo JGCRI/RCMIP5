@@ -43,6 +43,7 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
     
     # Sanity check
@@ -71,6 +72,7 @@ filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
     
     # Sanity check
@@ -99,6 +101,7 @@ filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 filterDimensionDepth <- function(x, depths=NULL, verbose=FALSE) {
     
     # Sanity checks
@@ -128,6 +131,7 @@ filterDimensionDepth <- function(x, depths=NULL, verbose=FALSE) {
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 filterDimensionLev <- function(x, levs=NULL, verbose=FALSE) {
     
     # Sanity checks
@@ -157,6 +161,7 @@ filterDimensionLev <- function(x, levs=NULL, verbose=FALSE) {
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
     
     # Sanity checks
@@ -187,6 +192,7 @@ filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 filterDimensionTimeMonths <- function(x, months=NULL, verbose=FALSE) {
     
     # Sanity checks
