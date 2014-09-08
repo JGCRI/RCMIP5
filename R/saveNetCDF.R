@@ -106,9 +106,15 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
         _ncvar_put(nc, levvar, x$lev)
     }
     
+    # Get package version number, allowing that there might not be one
+    pkgv <- "???"
+    try({
+        pkgv <- packageVersion("RCMIP5") 
+    }, silent=T)
+    
     # Write attributes
     if(verbose) cat("Writing attributes\n")    
-    _ncatt_put(nc, 0, "software", paste("Written by RCMIP5", packageVersion("RCMIP5"), 
+    _ncatt_put(nc, 0, "software", paste("Written by RCMIP5", pkgv, 
                                        "under", R.version.string, date()))
     _ncatt_put(nc, 0, "frequency", x$timeFreqStr)
     for(i in 1:nrow(x$provenance)) {
