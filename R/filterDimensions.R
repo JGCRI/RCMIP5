@@ -124,7 +124,7 @@ filterDimensionDepth <- function(x, depths=NULL, verbose=FALSE) {
 #' Filter lev dimension.
 #'
 #' @param x cmip5data A \code{\link{cmip5data}} object.
-#' @param depths numeric vector. Depths to filter.
+#' @param levs numeric vector. Levels to filter.
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.

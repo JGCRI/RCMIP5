@@ -228,10 +228,11 @@ print.summary.cmip5data <- function(x, ...) {
 #' Convert a cmip5data object to a data frame
 #'
 #' @param x A \code{\link{cmip5data}} object
+#' @param ... Other parameters
 #' @param verbose logical. Print info as we go?
 #' @return The object converted, as well as possible, to a data frame
 #' @export
-as.data.frame.cmip5data <- function(x, verbose=FALSE) {
+as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
     
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
     # Anything else is not valid.
@@ -260,7 +261,7 @@ as.data.frame.cmip5data <- function(x, verbose=FALSE) {
     if(verbose) cat("Dealing with time...\n")
     if(!is.null(x$time)){
         df[,timeIndex] <- x$time[df[,timeIndex]]
-        names(df)[timeindex] <- "time"
+        names(df)[timeIndex] <- "time"
     }
     
     return(df)

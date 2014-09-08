@@ -4,7 +4,7 @@
 \title{Load a unique CMIP5 ensemble}
 \usage{
 loadEnsemble(variable, model, experiment, ensemble, domain, path = ".",
-  recursive = TRUE, verbose = TRUE, demo = FALSE)
+  recursive = TRUE, verbose = TRUE, demo = FALSE, force.ncdf = FALSE)
 }
 \arguments{
 \item{variable}{CMIP5 variable to load (required)}
@@ -24,6 +24,8 @@ loadEnsemble(variable, model, experiment, ensemble, domain, path = ".",
 \item{verbose}{logical. Print info as we go?}
 
 \item{demo}{logical. Demo mode (reading data from global environment, not disk)?}
+
+\item{force.ncdf}{Force use of the less-desirable ncdf package for testing?}
 }
 \value{
 A \code{\link{cmip5data}} object.

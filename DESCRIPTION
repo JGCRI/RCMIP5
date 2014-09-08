@@ -8,15 +8,16 @@ Description: Working with CMIP5 data can be tricky, forcing scientists to write
     ensembles, (iv) produce both temporal and spatial statistical summaries,
     (v) regrid data, and (vi) produce easy-to-work-with graphical and data
     summaries.
-Depends:
-    R (>= 2.11.0),
-    plyr (>= 1.8.1),
+Imports:
     abind  (>= 1.4-0),
-    reshape2 (>= 1.4),
-    digest
-Suggests:
     ncdf4 (>= 1.9),
     ncdf (>= 1.6),
+    plyr (>= 1.8.1),
+    reshape2 (>= 1.4),
+    digest
+Depends:
+    R (>= 2.11.0),
+Suggests:
     ggplot2 (>= 0.9.3),
     foreach (>= 1.4.2),
     doParallel (>= 1.0.8)

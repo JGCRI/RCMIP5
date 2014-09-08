@@ -8,7 +8,7 @@
 #' @param model CMIP5 model to load (required)
 #' @param experiment CMIP5 experiment to load (required)
 #' @param ensemble optional CMIP5 ensemble to load
-#' @param optional domain CMIP5 domain to load
+#' @param domain optional CMIP5 domain to load
 #' @param path root of directory tree
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
@@ -162,6 +162,11 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         } else {
             stop("No netCDF (either 'ncdf4' or 'ncdf') package is available")            
         }
+    } else {
+        nc_open <- ncdf4::nc_open
+        ncatt_get <- ncdf4::ncatt_get
+        ncvar_get <- ncdf4::ncvar_get
+        nc_close <- ncdf4::nc_close
     }
     
     # List all files that match specifications

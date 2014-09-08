@@ -5,6 +5,8 @@ library(fields)
 #' Plot a quick world map with reasonable coloring.
 #'
 #' @param x x
+#' @param lon lon
+#' @param lat lat
 #' @param time time
 #' @param main main
 #' @param parList parList
