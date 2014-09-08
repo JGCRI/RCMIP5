@@ -23,7 +23,8 @@ Suggests:
     doParallel (>= 1.0.8),
     testthat (>= 0.8)
 Version: 0.1
-Authors@R: c(person("Ben", "Bond-Lamberty", role = "aut"),
-    person("Kathe", "Todd-Brown", role = c("aut", "cre"),
-    email = "ktoddbrown@gmail.com") )
+Authors@R: c(
+    person("Ben", "Bond-Lamberty", role = c("aut", "cre")),
+    person("Kathe", "Todd-Brown", role = c("aut", "cre"), email = "ktoddbrown@gmail.com") 
+    )
 License: MIT + file LICENSE
