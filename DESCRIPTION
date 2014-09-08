@@ -10,17 +10,18 @@ Description: Working with CMIP5 data can be tricky, forcing scientists to write
     summaries.
 Imports:
     abind  (>= 1.4-0),
-    ncdf4 (>= 1.9),
-    ncdf (>= 1.6),
     plyr (>= 1.8.1),
     reshape2 (>= 1.4),
     digest
 Depends:
-    R (>= 2.11.0),
+    R (>= 2.11.0)
 Suggests:
     ggplot2 (>= 0.9.3),
+    ncdf4 (>= 1.9),
+    ncdf (>= 1.6),
     foreach (>= 1.4.2),
-    doParallel (>= 1.0.8)
+    doParallel (>= 1.0.8),
+    testthat (>= 0.8)
 Version: 0.1
 Authors@R: c(person("Ben", "Bond-Lamberty", role = "aut"),
     person("Kathe", "Todd-Brown", role = c("aut", "cre"),

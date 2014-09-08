@@ -50,7 +50,7 @@ addProvenance <- function(x, msg, verbose=FALSE) {
         x$provenance[nr, "caller"] <- parentcall
         x$provenance[nr, "message"] <- msg
         x$provenance[nr, "dim"] <- paste(dim(x$val), collapse=",")
-        x$provenance[nr, "digest"] <- digest(x$val)        
+        x$provenance[nr, "digest"] <- digest::digest(x$val)        
     } else {
         if(verbose) cat("Appending provenances")
         x$provenance[nr, "caller"] <- "addProvenance"
