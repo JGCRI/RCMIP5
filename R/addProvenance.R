@@ -20,12 +20,18 @@ addProvenance <- function(x, msg, verbose=FALSE) {
     stopifnot(class(msg) %in% c("character", "NULL", "cmip5data"))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
+    # Get package version number, allowing that there might not be one
+    pkgv <- "???"
+    try({
+       pkgv <- packageVersion("RCMIP5") 
+    }, silent=T)
+    
     if(is.null(x$provenance)) { # create a new provenance
         if(verbose) cat("Creating new provenance\n")
         x$provenance <- data.frame(
             timestamp=Sys.time(),
             caller="addProvenance",
-            message=paste("RCMIP5", packageVersion("RCMIP5"), "under", R.version.string),
+            message=paste("RCMIP5", pkgv, "under", R.version.string),
             dim="",
             digest="",
             stringsAsFactors=F
