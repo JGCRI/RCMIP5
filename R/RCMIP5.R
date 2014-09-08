@@ -17,7 +17,7 @@
 #'   An overview of CMIP5 and the experiment design, Bulletin of the American
 #'   Meteorological Society, 93, 485-498.
 #'   \url{http://dx.doi.org/10.1175/BAMS-D-11-00094.1}
-#' @import plyr abind ncdf4 reshape2
+#' @import plyr abind reshape2 digest
 #' @docType package
 #' @name RCMIP5
 NULL
@@ -126,6 +126,7 @@ cmip5data <- function(x=list(),
 #' @details Prints a one-line summary of the object
 #' @method print cmip5data
 #' @export
+#' @keywords internal
 print.cmip5data <- function(x, ...) {
     
     if(is.null(x$variable)) {
@@ -156,6 +157,7 @@ print.cmip5data <- function(x, ...) {
 #' @return A summary structure of the object.
 #' @method summary cmip5data
 #' @export
+#' @keywords internal
 summary.cmip5data <- function(object, ...) {
     
     ans <- list()
@@ -213,6 +215,7 @@ summary.cmip5data <- function(object, ...) {
 #' @details Prints a one-line summary of the object
 #' @method print summary.cmip5data
 #' @export
+#' @keywords internal
 print.summary.cmip5data <- function(x, ...) {
     cat("CMIP5 data -", x$type, "\n")
     cat("Variable: ", x$variable, " (", x$valUnit, ") from model ", x$model, "\n", sep="")
@@ -232,6 +235,7 @@ print.summary.cmip5data <- function(x, ...) {
 #' @param verbose logical. Print info as we go?
 #' @return The object converted, as well as possible, to a data frame
 #' @export
+#' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
     
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
@@ -275,6 +279,7 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
 #' @details Writes all available ensembles to disk as Rdata files, subject to
 #' a maximum size parameter (CRAN says keep sample data < 5MB).
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") {
     if(!file.exists(outpath)) dir.create(outpath)
     stopifnot(file.exists(outpath))
