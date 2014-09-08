@@ -28,26 +28,26 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     
     # We prefer to use the 'ncdf4' package, but Windows has problems with this, so
     # if it's not installed can also use 'ncdf'
-    if(force.ncdf | !require("ncdf4")) {
-        if(require("ncdf")) {
+    if(force.ncdf | !require(ncdf4)) {
+        if(require(ncdf)) {
             # The ncdf and ncdf4 functions are mostly parameter-identical. This makes
             # things easy--we redefine the ncdf4 function names to their ncdf equivalents
-            _nc_create <- ncdf::create.ncdf
-            _ncdim_def <- ncdf::dim.def.ncdf
-            _ncvar_def <- ncdf::var.def.ncdf
-            _ncatt_put <- ncdf::att.put.ncdf
-            _ncvar_put <- ncdf::put.var.ncdf
-            _nc_close <- ncdf::close.ncdf
+            .nc_create <- ncdf::create.ncdf
+            .ncdim_def <- ncdf::dim.def.ncdf
+            .ncvar_def <- ncdf::var.def.ncdf
+            .ncatt_put <- ncdf::att.put.ncdf
+            .ncvar_put <- ncdf::put.var.ncdf
+            .nc_close <- ncdf::close.ncdf
         } else {
             stop("No netCDF (either 'ncdf4' or 'ncdf') package is available")            
         }
     } else {
-        _nc_create <- ncdf4::nc_create
-        _ncdim_def <- ncdf4::ncdim_def
-        _ncvar_def <- ncdf4::ncvar_def
-        _ncatt_put <- ncdf4::ncatt_put
-        _ncvar_put <- ncdf4::ncvar_put
-        _nc_close <- ncdf4::nc_close
+        .nc_create <- ncdf4::nc_create
+        .ncdim_def <- ncdf4::ncdim_def
+        .ncvar_def <- ncdf4::ncvar_def
+        .ncatt_put <- ncdf4::ncatt_put
+        .ncvar_put <- ncdf4::ncvar_put
+        .nc_close <- ncdf4::nc_close
     }
     
     # Create meaningful filename, if necessary
@@ -63,18 +63,18 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     
     # Define mandatory dimensions
     if(verbose) cat("Defining netCDF dimensions...")
-    londim <- _ncdim_def("lon", x$debug$lonUnit, x$lon)
-    latdim <- _ncdim_def("lat", x$debug$latUnit, x$lat)
-    timedim <- _ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
+    londim <- .ncdim_def("lon", x$debug$lonUnit, x$lon)
+    latdim <- .ncdim_def("lat", x$debug$latUnit, x$lat)
+    timedim <- .ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
     dimlist <- list(londim, latdim, timedim) # assuming no depth/lev
     
     # Define optional dimensions, if present
     if(!is.null(x$depth)) {
-        depthdim <- _ncdim_def("depth", x$debug$depthUnit, x$depth)
+        depthdim <- .ncdim_def("depth", x$debug$depthUnit, x$depth)
         dimlist <- list(londim, latdim, depthdim, timedim)
         #        depthvar <- ncvar_def("depth", x$debug$depthUnit, depthdim)
     } else if(!is.null(x$lev)) {
-        levdim <- _ncdim_def("lev", x$debug$levUnit, x$lev)
+        levdim <- .ncdim_def("lev", x$debug$levUnit, x$lev)
         dimlist <- list(londim, latdim, levdim, timedim)
         #        levvar <- ncvar_def("lev", x$debug$levUnit, levdim)
     }
@@ -82,28 +82,28 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     
     # Define mandatory variables
     if(verbose) cat("Defining main netCDF variable\n")
-    valvar <- _ncvar_def(x$variable, x$valUnit, dimlist)
-    lonvar <- _ncvar_def("lon", x$debug$lonUnit, londim)
-    latvar <- _ncvar_def("lat", x$debug$latUnit, londim)
+    valvar <- .ncvar_def(x$variable, x$valUnit, dimlist)
+    lonvar <- .ncvar_def("lon", x$debug$lonUnit, londim)
+    latvar <- .ncvar_def("lat", x$debug$latUnit, londim)
     varlist <- list(valvar, lonvar, latvar)
     
     # Create the file and write mandatory variables
     if(verbose) cat("Creating and writing", file, "\n")
-    nc <- _nc_create(fqfn, valvar)
+    nc <- .nc_create(fqfn, valvar)
     
-    _ncvar_put(nc, valvar, x$val)
-    _ncvar_put(nc, lonvar, x$lon)
-    _ncvar_put(nc, latvar, x$lat)
+    .ncvar_put(nc, valvar, x$val)
+    .ncvar_put(nc, lonvar, x$lon)
+    .ncvar_put(nc, latvar, x$lat)
     
     # Write optional variables
     if(!is.null(x$depth)) {
         if(verbose) cat("Writing depth\n")
-        depthvar <- ncvar_def("depth", x$debug$depthUnit, depthdim)
-        _ncvar_put(nc, depthvar, x$depth) 
+        depthvar <- .ncvar_def("depth", x$debug$depthUnit, depthdim)
+        .ncvar_put(nc, depthvar, x$depth) 
     } else if(!is.null(x$lev)) {
         if(verbose) cat("Writing lev\n")
-        levvar <- ncvar_def("lev", x$debug$levUnit, levdim)
-        _ncvar_put(nc, levvar, x$lev)
+        levvar <- .ncvar_def("lev", x$debug$levUnit, levdim)
+        .ncvar_put(nc, levvar, x$lev)
     }
     
     # Get package version number, allowing that there might not be one
@@ -114,15 +114,15 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     
     # Write attributes
     if(verbose) cat("Writing attributes\n")    
-    _ncatt_put(nc, 0, "software", paste("Written by RCMIP5", pkgv, 
+    .ncatt_put(nc, 0, "software", paste("Written by RCMIP5", pkgv, 
                                        "under", R.version.string, date()))
-    _ncatt_put(nc, 0, "frequency", x$timeFreqStr)
+    .ncatt_put(nc, 0, "frequency", x$timeFreqStr)
     for(i in 1:nrow(x$provenance)) {
-        _ncatt_put(nc, 0, paste0("provenance", i), x$provenance[i, "message"])
+        .ncatt_put(nc, 0, paste0("provenance", i), x$provenance[i, "message"])
     }
     
     # All done with netCDF. Close file, inform user
-    _nc_close(nc)
+    .nc_close(nc)
     if(verbose) cat("Wrote", round(file.info(fqfn)$size/1024/1024, 2), "MB\n")
     
     if(saveProvenance) {

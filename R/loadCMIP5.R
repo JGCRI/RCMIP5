@@ -134,6 +134,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
 #' the experiment, variable, model, ensemble, and domain supplied by the caller.
 #' We can also load from the package datasets by specifying DEMO=TRUE.
 #' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                          path='.', recursive=TRUE, verbose=TRUE, demo=FALSE, force.ncdf=FALSE) {
     
@@ -151,22 +152,22 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     
     # We prefer to use the 'ncdf4' package, but Windows has problems with this, so
     # if it's not installed can also use 'ncdf'
-    if(force.ncdf | !require("ncdf4")) {
-        if(require("ncdf")) {
+    if(force.ncdf | !require(ncdf4)) {
+        if(require(ncdf)) {
             # The ncdf and ncdf4 functions are mostly parameter-identical. This makes
             # things easy: we redefine the ncdf4 function names to their ncdf equivalents
-            _nc_open <- ncdf::open.ncdf
-            _ncatt_get <- ncdf::att.get.ncdf
-            _ncvar_get <- ncdf::get.var.ncdf
-            _nc_close <- ncdf::close.ncdf
+            .nc_open <- ncdf::open.ncdf
+            .ncatt_get <- ncdf::att.get.ncdf
+            .ncvar_get <- ncdf::get.var.ncdf
+            .nc_close <- ncdf::close.ncdf
         } else {
             stop("No netCDF (either 'ncdf4' or 'ncdf') package is available")            
         }
     } else {
-        _nc_open <- ncdf4::nc_open
-        _ncatt_get <- ncdf4::ncatt_get
-        _ncvar_get <- ncdf4::ncvar_get
-        _nc_close <- ncdf4::nc_close
+        .nc_open <- ncdf4::nc_open
+        .ncatt_get <- ncdf4::ncatt_get
+        .ncvar_get <- ncdf4::ncvar_get
+        .nc_close <- ncdf4::nc_close
     }
     
     # List all files that match specifications
@@ -245,8 +246,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             return(get(fileStr, envir=.GlobalEnv))
         } else {
             if(verbose) cat('Loading', fileStr, "\n")
-            temp.nc <- _nc_open(fileStr, write=FALSE)
-            temp <- _ncvar_get(temp.nc, varid=variable)  # load data array
+            temp.nc <- .nc_open(fileStr, write=FALSE)
+            temp <- .ncvar_get(temp.nc, varid=variable)  # load data array
             if(verbose) cat("- data", dim(temp), "\n")
             
             # Test that spatial dimensions are identical across files
@@ -258,7 +259,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # Note that the time dimensions is guaranteed to be last - see ncdf4 documentation
             val <- abind(val, temp, along=length(dim(temp)))
             
-            valUnit <- _ncatt_get(temp.nc, variable, 'units')$value  # load units
+            valUnit <- .ncatt_get(temp.nc, variable, 'units')$value  # load units
             
             # Get all the variables stored in the netcdf file so that we
             # ...can load the lon, lat and time variables if appropriate
@@ -276,24 +277,24 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # Load these guaranteed data; latitude and longitude
             stopifnot(any(c("lon", "lon_bnds") %in% varnames))
             stopifnot(any(c("lat", "lat_bnds") %in% varnames))
-            latArr <- _ncvar_get(temp.nc, varid='lat')
-            lonArr <- _ncvar_get(temp.nc, varid='lon')
-            latUnit <- _ncatt_get(temp.nc, 'lat', 'units')$value
-            lonUnit <- _ncatt_get(temp.nc, 'lon', 'units')$value
+            latArr <- .ncvar_get(temp.nc, varid='lat')
+            lonArr <- .ncvar_get(temp.nc, varid='lon')
+            latUnit <- .ncatt_get(temp.nc, 'lat', 'units')$value
+            lonUnit <- .ncatt_get(temp.nc, 'lon', 'units')$value
             
             # Get the time frequency. Note that this should be related to
             # ...the domain but really we are looking for 'fx'/fixed variables
             # ...where we don't have to deal with time.
             # TODO BBL: what does this comment mean? Clarify if possible
-            timeFreqStr <- _ncatt_get(temp.nc, varid=0, "frequency")$value
+            timeFreqStr <- .ncatt_get(temp.nc, varid=0, "frequency")$value
             
             # Non-fixed files have a time dimension to deal with:
             if(! timeFreqStr %in% 'fx') {
                 # Get the time unit (e.g. 'days since 1860')
-                timeUnit <- _ncatt_get(temp.nc, 'time', 'units')$value
+                timeUnit <- .ncatt_get(temp.nc, 'time', 'units')$value
                 # Get the type of calendar used (e.g. 'noleap')
-                calendarStr <- _ncatt_get(temp.nc, 'time', 'calendar')$value
-                calendarUnitsStr <- _ncatt_get(temp.nc, 'time', 'units')$value
+                calendarStr <- .ncatt_get(temp.nc, 'time', 'calendar')$value
+                calendarUnitsStr <- .ncatt_get(temp.nc, 'time', 'units')$value
                 # Pull the number of days in a year
                 if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)) {
                     calendarDayLength <- as.numeric(regmatches(calendarStr, regexpr('\\d{3}', calendarStr)))
@@ -329,7 +330,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                 }
                 
                 # Pull the actual time
-                thisTimeRaw <- _ncvar_get(temp.nc, varid='time')
+                thisTimeRaw <- .ncvar_get(temp.nc, varid='time')
                 timeRaw <- c(timeRaw, thisTimeRaw)
                 timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
             } else { # this is a fx variable. Set most things to NULL
@@ -346,17 +347,17 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # depth (ocean/land depths) and lev (atmospheric levels)
             depthArr <- NULL
             if(any(c("depth", "depth_bnds") %in% varnames)){
-                depthArr <- _ncvar_get(temp.nc, varid='depth')
-                depthUnit <- _ncatt_get(temp.nc, 'depth', 'units')$value
+                depthArr <- .ncvar_get(temp.nc, varid='depth')
+                depthUnit <- .ncatt_get(temp.nc, 'depth', 'units')$value
             }
             
             levArr <- NULL
             if(any(c("lev", "lev_bnds") %in% varnames)){
-                levArr <- _ncvar_get(temp.nc, varid='lev')
-                levUnit <- _ncatt_get(temp.nc, 'lev', 'units')$value
+                levArr <- .ncvar_get(temp.nc, varid='lev')
+                levUnit <- .ncatt_get(temp.nc, 'lev', 'units')$value
             }
             
-            _nc_close(temp.nc)
+            .nc_close(temp.nc)
         }
     } # for
     
