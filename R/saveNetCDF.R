@@ -8,12 +8,13 @@
 #' @param file Filename desired. If omitted one will be generated automatically.
 #' @param path File path.
 #' @param verbose logical. Print info as we go?
-#' @param saveProvenance. Save the provenance separately?
+#' @param saveProvenance Save the provenance separately?
+#' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @return The fully-qualified filename that was written (invisible).
 #' @details If no filename is provided, a meaningful one will be assigned based on the
 #' CMIP5 naming convention (but appending 'RCMIP5'). \code{\link{loadEnsemble}} should be
 #' able to read this file.
-saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRUE) {
+saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRUE, force.ncdf=FALSE) {
     
     # Sanity checks - class and length of parameters
     stopifnot(class(x)=="cmip5data")
@@ -25,9 +26,30 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     # Anything else is not valid.
     stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
     
-    # We require the 'ncdf4' package. Could allow 'ncdf' in future... TODO
-    stopifnot(require(ncdf4))
-     
+    # We prefer to use the 'ncdf4' package, but Windows has problems with this, so
+    # if it's not installed can also use 'ncdf'
+    if(force.ncdf | !require(ncdf4)) {
+        if(require(ncdf)) {
+            # The ncdf and ncdf4 functions are mostly parameter-identical. This makes
+            # things easy--we redefine the ncdf4 function names to their ncdf equivalents
+            nc_create <- ncdf::create.ncdf
+            ncdim_def <- ncdf::dim.def.ncdf
+            ncvar_def <- ncdf::var.def.ncdf
+            ncatt_put <- ncdf::att.put.ncdf
+            ncvar_put <- ncdf::put.var.ncdf
+            nc_close <- ncdf::close.ncdf
+        } else {
+            stop("No netCDF (either 'ncdf4' or 'ncdf') package is available")            
+        }
+    } else {
+        nc_create <- ncdf4::nc_create
+        ncdim_def <- ncdf4::ncdim_def
+        ncvar_def <- ncdf4::ncvar_def
+        ncatt_put <- ncdf4::ncatt_put
+        ncvar_put <- ncdf4::ncvar_put
+        nc_close <- ncdf4::nc_close
+    }
+    
     # Create meaningful filename, if necessary
     if(is.null(file)) {
         ensembles <- paste(x$ensemble, collapse="")
