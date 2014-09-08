@@ -5,7 +5,7 @@ library(plyr)
 library(abind)
 library(ggplot2)
 library(reshape2)
-library(ncdf4)
+#library(ncdf4)
 library(digest)
 
 # Load sample data, as package would

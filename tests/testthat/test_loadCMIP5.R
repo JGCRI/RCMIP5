@@ -66,3 +66,11 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
     # Rename files to avoid R CMD CHECK warning
     expect_warning(loadCMIP5("dummyvar", "b", "c", domain="d", path=path, verbose=F))
 })
+
+test_that("loadCMIP5 can load using both ncdf and ncdf4", {
+    path <- "../../sampledata/monthly/"
+    d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)     # test data set
+    d2 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, force.ncdf=TRUE)     # test data set
+    expect_equal(d1$val, d2$val)
+    expect_equal(names(d1), names(d2))
+})

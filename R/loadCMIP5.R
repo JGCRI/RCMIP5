@@ -13,10 +13,11 @@
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param demo logical. Demo mode (reading data from global environment, not disk)?
+#' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @return A \code{\link{cmip5data}} object
 #' @export
 loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+',
-                      path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
+                      path='.', recursive=TRUE, verbose=TRUE, demo=FALSE, force.ncdf=FALSE) {
     
     # Match the path conventions to the operating system
     w <- getOption('warn')
@@ -40,7 +41,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     if(!is.null(variable) & !is.null(model)
        &!is.null(experiment) & !is.null(ensemble)) { 
         return(loadEnsemble(variable, model, experiment, ensemble, domain,
-                            path=path, recursive=recursive, verbose=verbose, demo=demo))
+                            path=path, recursive=recursive, verbose=verbose, demo=demo, force.ncdf=force.ncdf))
     }
     
     # List all files that match specifications
@@ -74,7 +75,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
         
         # load the entire ensemble
         temp <- loadEnsemble(variable, model, experiment, ensemble, domain,
-                             path=path, verbose=verbose, recursive=recursive, demo=demo)
+                             path=path, verbose=verbose, recursive=recursive, demo=demo, force.ncdf=force.ncdf)
         
         if(is.null(modelTemp)) {         # If first model, just copy
             modelTemp <- temp 
@@ -127,13 +128,14 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
 #' @param recursive logical. Recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param demo logical. Demo mode (reading data from global environment, not disk)?
+#' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @return A \code{\link{cmip5data}} object.
 #' @details This function is the core of RCMIP5's data-loading. It loads all files matching
 #' the experiment, variable, model, ensemble, and domain supplied by the caller.
 #' We can also load from the package datasets by specifying DEMO=TRUE.
 #' @note This is an internal RCMIP5 function and not exported.
 loadEnsemble <- function(variable, model, experiment, ensemble, domain,
-                         path='.', recursive=TRUE, verbose=TRUE, demo=FALSE) {
+                         path='.', recursive=TRUE, verbose=TRUE, demo=FALSE, force.ncdf=FALSE) {
     
     # Sanity checks - make sure all parameters are correct class and length
     stopifnot(length(variable)==1 & is.character(variable))
@@ -146,6 +148,21 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(demo)==1 & is.logical(demo))
+    
+    # We prefer to use the 'ncdf4' package, but Windows has problems with this, so
+    # if it's not installed can also use 'ncdf'
+    if(force.ncdf | !require(ncdf4)) {
+        if(require(ncdf)) {
+            # The ncdf and ncdf4 functions are mostly parameter-identical. This makes
+            # things easy--we redefine the ncdf4 function names to their ncdf equivalents
+            nc_open <- ncdf::open.ncdf
+            ncatt_get <- ncdf::att.get.ncdf
+            ncvar_get <- ncdf::get.var.ncdf
+            nc_close <- ncdf::close.ncdf
+        } else {
+            stop("No netCDF (either 'ncdf4' or 'ncdf') package is available")            
+        }
+    }
     
     # List all files that match specifications
     if(demo) {
@@ -263,7 +280,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # ...the domain but really we are looking for 'fx'/fixed variables
             # ...where we don't have to deal with time.
             # TODO BBL: what does this comment mean? Clarify if possible
-            timeFreqStr <- ncatt_get(temp.nc, varid=0)$frequency
+            timeFreqStr <- ncatt_get(temp.nc, varid=0, "frequency")$value
             
             # Non-fixed files have a time dimension to deal with:
             if(! timeFreqStr %in% 'fx') {
@@ -353,6 +370,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                                    calendarDayLength=calendarDayLength)
     ))
     
+    # Add the provenance information, with a line for each loaded file
     for(f in fileList) {
         x <- addProvenance(x, paste("Loaded", basename(f)))     
     }

@@ -25,6 +25,9 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     # Anything else is not valid.
     stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
     
+    # We require the 'ncdf4' package. Could allow 'ncdf' in future... TODO
+    stopifnot(require(ncdf4))
+     
     # Create meaningful filename, if necessary
     if(is.null(file)) {
         ensembles <- paste(x$ensemble, collapse="")
