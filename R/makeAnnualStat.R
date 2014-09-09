@@ -55,7 +55,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
             # (4) is equivalent to the inside of the serial loop below.
             ans <- foreach(i=1:length(uniqueYears),                                     # (1)
                            .combine = function(...)  abind(..., along=timeIndex),       # (2)
-                           .packages='plyr')  %dopar% {                                 # (3)
+                           .packages=c('plyr', 'abind')) %dopar% {                                 # (3)
                                aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), # (4)
                                      c(1:(timeIndex-1)), FUN, ...)                                                                                                                   
                            } # %dopar%

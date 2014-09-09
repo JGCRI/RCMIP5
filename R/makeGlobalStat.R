@@ -68,7 +68,9 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-            ans <- foreach(i=1:length(x$time), .combine = function(...) abind(..., along=timeIndex-2), .packages='plyr') %dopar% {
+            ans <- foreach(i=1:length(x$time), 
+                           .combine = function(...) abind(..., along=timeIndex-2), 
+                           .packages=c('plyr', 'abind')) %dopar% {
                 aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex), 
                       margins, FUN, w=areavals, ...)                
             }

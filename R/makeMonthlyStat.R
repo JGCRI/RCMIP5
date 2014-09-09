@@ -45,7 +45,9 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
             if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-            ans <- foreach(i=1:12, .combine=function(...) abind(..., along=timeIndex), .packages='plyr') %dopar% {
+            ans <- foreach(i=1:12, 
+                           .combine=function(...) abind(..., along=timeIndex), 
+                           .packages=c('plyr', 'abind')) %dopar% {
                 aaply(asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN, ...)
             }
         } else {
