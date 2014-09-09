@@ -24,6 +24,6 @@ Note that this only works for files that are in domains 'fx', '*mon', or '*yr'.
 checkTimePeriod(getFileInfo())
 }
 \seealso{
-\link{getFileInfo}
+\code{\link{getFileInfo}}
 }
 

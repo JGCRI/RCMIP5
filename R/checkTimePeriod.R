@@ -11,7 +11,7 @@
 #' @export
 #' @examples
 #' checkTimePeriod(getFileInfo())
-#' @seealso \link{getFileInfo}
+#' @seealso \code{\link{getFileInfo}}
 checkTimePeriod <- function(fileInfo_df) {
 
     # Sanity checks

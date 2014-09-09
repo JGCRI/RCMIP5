@@ -7,7 +7,7 @@
 #' function that returns a numeric result (including weighted.mean, if you 
 #' want to apply weights) can be used.
 #'
-#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
+#' @param x A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across depths or levels

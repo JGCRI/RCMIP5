@@ -2,7 +2,7 @@
 #' 
 #' Plot a quick world map with reasonable coloring.
 #'
-#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
+#' @param x A \code{\link{cmip5data}} object
 #' @param time numeric. Which time slice(s) should we plot?
 #' @param splitPacific logical. Try to split image in the Pacific?
 #' @param capMinMax logical. Cap data min and max by quantile? This may produce better coloring.

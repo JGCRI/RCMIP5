@@ -13,7 +13,8 @@
 #' @return The fully-qualified filename that was written (invisible).
 #' @details If no filename is provided, a meaningful one will be assigned based on the
 #' CMIP5 naming convention (but appending 'RCMIP5'). \code{\link{loadEnsemble}} should be
-#' able to read this file.
+#' able to read this file. If \code{saveProvenance} is specified, the provenance is saved
+#' in a comma-separated file of the same name but appending "_prov.csv".
 saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRUE, force.ncdf=FALSE) {
     
     # Sanity checks - class and length of parameters

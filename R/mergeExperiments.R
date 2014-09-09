@@ -4,8 +4,8 @@
 #' merging 'historical' with one of the RCPs. This function does that, checking
 #' that the merge is appropriate and possible.
 #'
-#' @param x cmip5data
-#' @param y cmip5data
+#' @param x cmip5data A \code{\link{cmip5data}} object
+#' @param y cmip5data A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @details The variable, units, spatial grid,

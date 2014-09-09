@@ -1,9 +1,14 @@
 #' Filter dimensions, limiting to arbitrary lon/lat/time/lev/depth
 #'
-#' @param x cmip5data A \code{\link{cmip5data}} object.
-#' @param lons numeric vector. Longitudes to filter (in).
-#' @param lats numeric vector. Latitudes to filter (in).
-#' @param depths numeric vector. Depths to filter.
+#' We frequently want to filter CMIP5 data according to some predetermined
+#' criteria: only high-latitude cells, for example, or certain years, months,
+#' depths, levels, etc. This function provides convenient one-stop service
+#' for such filtering.
+#' 
+#' @param x A \code{\link{cmip5data}} object
+#' @param lons numeric vector. Longitudes to filter (in)
+#' @param lats numeric vector. Latitudes to filter (in)
+#' @param depths numeric vector. Depths to filter
 #' @param levs numeric vector
 #' @param years numeric vector
 #' @param months numeric vector

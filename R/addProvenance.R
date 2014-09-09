@@ -3,7 +3,7 @@
 #' It's important to track data provenance, the steps taken to produce a particular
 #' dataset. Each operation in the RCMIP5 package adds provenance information via this function.
 #'
-#' @param x cmip5data A \code{\link{cmip5data}} object.
+#' @param x A \code{\link{cmip5data}} object
 #' @param msg Either a string (message to be added to the provenance) or
 #' a cmip5data object, in which case the provenance of this latter object is appended
 #' to that of 'x' (i.e., their histories are merged).

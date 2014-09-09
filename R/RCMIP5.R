@@ -22,7 +22,7 @@
 #' @name RCMIP5
 NULL
 
-#' Constructor for 'cmip5data' class.
+#' The 'cmip5data' class
 #'
 #' This constructor has two functions. First, given a list, it makes the list
 #' a cmip5data-class object (no check is made that the list has appropriate
@@ -39,7 +39,7 @@ NULL
 #' @param latsize Size of latitude dimension
 #' @param depthsize Size of depth dimension
 #' @param levsize Size of lev dimension
-#' @return A cmip5data object, which is a list with the following fields:
+#' @return A cmip5data object, which is a list with (at least) the following fields:
 #'  \item{val}{A multidimensional array [lon, lat, time] holding the data}
 #'  \item{valUnit}{A string containing the value units}
 #'  \item{timeUnit}{A string containing the time units}

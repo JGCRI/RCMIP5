@@ -20,6 +20,7 @@
 #' @examples
 #' getFileInfo()
 #' getFileInfo('.',recursive=FALSE)
+#' @seealso \code{\link{checkTimePeriod}}
 getFileInfo <- function(path='.', recursive=TRUE) {
 
     # Sanity checks

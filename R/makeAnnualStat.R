@@ -5,7 +5,7 @@
 #' handled as well). The default statistic is \link{mean}, but any summary
 #' function that returns a numeric result can be used.
 #'
-#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
+#' @param x A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across months of year
@@ -13,6 +13,8 @@
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the annual
 #' mean of the variable. A \code{numMonths} field is also added
 #' recording the number of months averaged for each year.
+#' @details If 'lev' and/or 'depth' dimensions are present, the stat function is calculated
+#' for all combinations of these. 
 #' @seealso \code{\link{makeDepthLevStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
 makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {

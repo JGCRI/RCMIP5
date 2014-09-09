@@ -3,11 +3,10 @@
 #' We frequently want a global summary for CMIP5 data, usually weighted by the 
 #' grid cell areas used by each particular model. This function does that. If no
 #' area weighting is supplied, a warning is given. The default statistic is \link{weighted.mean},
-#' but any summary function that returns a numeric result can be used. If the data
-#' have 'depth' or 'lev' attributes, the statistic will be computed for each of these.
+#' but any summary function that returns a numeric result can be used.
 #'
-#' @param x cmip5data A structure returned from loadEnsemble() or loadModel()
-#' @param area cmip5data An area cmip5data data structure
+#' @param x A \code{\link{cmip5data}} object
+#' @param area An area \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
 #' @param FUN function. Function to apply across grid
@@ -100,12 +99,12 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     return(x)
 } # makeGlobalStat
 
-#' Weighted sum--i.e., sum of weighted means. Convenience function.
+#' Weighted sum--i.e., sum of weighted means. Convenience function
 #'
 #' @param x vector of data
 #' @param w vector of weights
 #' @param ... passed on to weighted.mean
-#' @return weighted mean multipled by sum of weights
+#' @return Weighted mean multipled by sum of weights.
 #' @export
 #' @seealso \code{\link{weighted.mean}}
 weighted.sum <- function(x, w=rep(1, length(x)), ...) { weighted.mean(x, w, ...) * sum(w) }
