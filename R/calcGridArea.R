@@ -5,8 +5,9 @@
 #' @param lat latitude coordinates of the grid centers
 #' @param lon longitude coordinates of the grid centers
 #' @param verbose logical. Print info as we go?
-#' @return The grid cell area in m^2 (meter*meter).
+#' @return The grid cell area in m^2 (meter*meter)
 #' @details Currently the lon must be uniform but the lat does not need to be.
+#' @keywords internal
 #' @export
 calcGridArea<- function(lon, lat, verbose=FALSE) {
 
