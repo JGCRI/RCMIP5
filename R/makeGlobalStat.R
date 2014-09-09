@@ -67,17 +67,30 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
         
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
-            if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-            ans <- foreach(i=1:length(x$time), 
-                           .combine = function(...) abind(..., along=timeIndex-2), 
-                           .packages=c('plyr', 'abind')) %dopar% {
-                aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex), 
-                      margins, FUN, w=areavals, ...)                
+            if(verbose) {
+                cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
+                
+                # Set up tempfile to log progress
+                tf <- tempfile()
+                cat(date(), "Started\n", file=tf)
+                if(verbose) cat("Progress logged to", tf, "\n")
             }
+            # To parallelize this computation, split time across available cores (1).
+            # When finished, combine results using the abind function (2). Make the 'plyr'
+            # package available to the child processes (3). The computation in each process
+            # is equivalent to the inside of the serial loop below.
+            ans <- foreach(i=1:length(x$time),                                     # (1)
+                           .combine = function(...) abind(..., along=timeIndex-2), # (2)
+                           .packages=c('plyr', 'abind')) %dopar% {                 # (3)
+                               if(verbose) cat(date(), i, "\n", file=tf, append=T)
+                               aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex), 
+                                     margins, FUN, w=areavals, ...)                
+                           }
         } else {
             if(verbose) cat("Running in serial\n")
+            pb <- txtProgressBar(min=1, max=length(x$time), style=3)
             for(i in 1:length(x$time)) {
-                if(verbose & floor(i/10)==i/10) cat(i, " ")
+                if(verbose) setTxtProgressBar(pb, i)
                 ans[[i]] <- aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex), 
                                   margins, FUN, w=areavals, ...)
             }

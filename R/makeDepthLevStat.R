@@ -56,23 +56,31 @@ makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
-            if(verbose) cat("Running in parallel [", getDoParWorkers(),
+            if(verbose) {
+                cat("Running in parallel [", getDoParWorkers(),
                             "cores ]\n")
-            
+                
+                # Set up tempfile to log progress
+                tf <- tempfile()
+                cat(date(), "Started\n", file=tf)
+                if(verbose) cat("Progress logged to", tf, "\n")
+            }
             # To parallelize this computation, split time across available cores (1).
             # When finished, combine results using the abind function (2). Make the 'plyr'
             # package available to the child processes (3). The computation in each process
-            # (4) is equivalent to the inside of the serial loop below.
+            # is equivalent to the inside of the serial loop below.
             ans <- foreach(i=1:length(x$time),                                     # (1)
                            .combine = function(...)  abind(..., along=timeIndex),  # (2)
                            .packages='plyr')  %dopar% {                            # (3)
-                               aaply(x$val[,,,i], 1:2, .drop=FALSE, FUN, ...)      # (4)                                                                                               
+                               if(verbose) cat(date(), i, "\n", file=tf, append=T)
+                               aaply(x$val[,,,i], 1:2, .drop=FALSE, FUN, ...)                                                                                               
                            }
         } else { # not parallel
             if(verbose) cat("Running in serial\n")
             ans <- list()
+            pb <- txtProgressBar(min=1, max=length(x$time), style=3)
             for(i in 1:length(x$time)) {  # for each time slice...
-                if(verbose & floor(i/10)==i/10) cat(i, " ")
+                if(verbose) setTxtProgressBar(pb, i)
                 # ...apply the annual stat function to the data subset for which
                 # the time matches the current loop. Uses aaply from 'plyr',
                 # asub and abind from 'abind' packages.

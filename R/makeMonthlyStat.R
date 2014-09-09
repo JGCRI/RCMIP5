@@ -44,17 +44,31 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
-            if(verbose) cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-            ans <- foreach(i=1:12, 
-                           .combine=function(...) abind(..., along=timeIndex), 
-                           .packages=c('plyr', 'abind')) %dopar% {
-                aaply(asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN, ...)
+            if(verbose) {
+                cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
+                
+                # Set up tempfile to log progress
+                tf <- tempfile()
+                cat(date(), "Started\n", file=tf)
+                if(verbose) cat("Progress logged to", tf, "\n")
             }
+            # To parallelize this computation, split years across available cores (1).
+            # When finished, combine results using the abind function (2). Make the 'plyr'
+            # and 'abind' packages available to the child processes (3). The computation 
+            # in each process is equivalent to the inside of the serial loop below.
+            ans <- foreach(i=1:12,                                               # (1)
+                           .combine=function(...) abind(..., along=timeIndex),   # (2)
+                           .packages=c('plyr', 'abind')) %dopar% {               # (3)
+                               if(verbose) cat(date(), i, "\n", file=tf, append=T)
+                               aaply(asub(x$val, idx=(i == monthIndex), dims=timeIndex), 
+                                     c(1:(timeIndex-1)), FUN, ...)
+                           }
         } else {
             if(verbose) cat("Running in serial\n")
             ans <- list()
+            pb <- txtProgressBar(min=1, max=12, style=3)
             for(i in 1:12) {
-                if(verbose) cat(i, " ")
+                if(verbose) setTxtProgressBar(pb, i)
                 ans[[i]] <- aaply(
                     asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN, ...)
             }

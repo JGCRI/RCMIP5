@@ -46,24 +46,32 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         
         if(parallel) {  # go parallel, woo hoo!
             registerDoParallel()
-            if(verbose) cat("Running in parallel [", getDoParWorkers(),
+            if(verbose) {
+                cat("Running in parallel [", getDoParWorkers(),
                             "cores ]\n")
-            
+                
+                # Set up tempfile to log progress
+                tf <- tempfile()
+                cat(date(), "Started\n", file=tf)
+                if(verbose) cat("Progress logged to", tf, "\n")
+            }
             # To parallelize this computation, split years across available cores (1).
             # When finished, combine results using the abind function (2). Make the 'plyr'
             # package available to the child processes (3). The computation in each process
-            # (4) is equivalent to the inside of the serial loop below.
+            # is equivalent to the inside of the serial loop below.
             ans <- foreach(i=1:length(uniqueYears),                                     # (1)
                            .combine = function(...)  abind(..., along=timeIndex),       # (2)
-                           .packages=c('plyr', 'abind')) %dopar% {                                 # (3)
-                               aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex), # (4)
-                                     c(1:(timeIndex-1)), FUN, ...)                                                                                                                   
+                           .packages=c('plyr', 'abind')) %dopar% {                      # (3)
+                               if(verbose) cat(date(), i, "\n", file=tf, append=T)
+                               aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex),
+                                     c(1:(timeIndex-1)), FUN, ...)
                            } # %dopar%
         } else { # not parallel
             if(verbose) cat("Running in serial\n")
             ans <- list()
+            pb <- txtProgressBar(min=1, max=length(uniqueYears), style=3)
             for(i in 1:length(uniqueYears)) {  # For each year...
-                if(verbose) cat(i, " ")
+                if(verbose) setTxtProgressBar(pb, i)
                 # ...apply the annual stat function to the data subset for which
                 # the years match the current year of the loop. Uses aaply from 'plyr',
                 # asub and abind from 'abind' packages.
