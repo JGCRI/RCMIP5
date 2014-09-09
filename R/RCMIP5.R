@@ -146,7 +146,7 @@ print.cmip5data <- function(x, ...) {
                         ifelse(length(x$ensembles)==1, "ensemble", "ensembles"))
     }
     
-    print(ansStr)
+    cat(ansStr, "\n")
 } # print.cmip5data
 
 #' Summarize a 'cmip5data' class object.
