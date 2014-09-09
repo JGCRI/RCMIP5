@@ -13,8 +13,8 @@
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the annual
 #' mean of the variable. A \code{numMonths} field is also added
 #' recording the number of months averaged for each year.
+#' @seealso \code{\link{makeDepthLevStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
-#' @seealso \code{\link{makeMonthlyStat}}
 makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     
     # Sanity checks
@@ -23,8 +23,6 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
-    
-    if(verbose) cat('starting makeAnnualStat\n')
     
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
     # Anything else is not valid.
@@ -88,6 +86,5 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     x <- addProvenance(x, paste("Calculated",as.character(substitute(FUN)),
                                 "for years", min(x$time), "-", max(x$time)))
     
-    if(verbose) cat('done with makeAnnualStat\n')
     return(x)
 } # makeAnnualStat

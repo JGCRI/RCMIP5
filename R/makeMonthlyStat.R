@@ -13,8 +13,8 @@
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the monthly
 #' mean of the variable. A \code{numYears} field is also added
 #' recording the number of years averaged for each month.
+#' @seealso \code{\link{makeAnnualStat}} \code{\link{makeDepthLevStat}} \code{\link{makeGlobalStat}}
 #' @export
-#' @seealso \code{\link{makeAnnualStat}}
 makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     
     # Sanity checks

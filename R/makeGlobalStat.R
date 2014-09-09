@@ -23,6 +23,7 @@
 #' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
 #' follow the weighted.mean syntax, in particular 
 #' accepting parameters 'x' (data) and 'w' (weights) of equal size.
+#' @seealso \code{\link{makeAnnualStat}} \code{\link{makeDepthLevStat}} \code{\link{makeMonthlyStat}} 
 #' @export
 makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weighted.mean, ...) {
     
