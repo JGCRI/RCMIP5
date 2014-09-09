@@ -71,7 +71,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
                                   c(1:(timeIndex-1)), FUN, ...)
             } # for
             ans <- abind(ans, along=timeIndex) # convert list to array
-        }# if(parallel)
+        } # if(parallel)
         
     ) # system.time
     
