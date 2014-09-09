@@ -1,4 +1,4 @@
-#' Merge data for two separate experiments.
+#' Merge data for two separate experiments
 #' 
 #' The most common reason to merge experiments is across time periods--e.g.,
 #' merging 'historical' with one of the RCPs. This function does that, checking

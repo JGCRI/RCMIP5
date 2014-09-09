@@ -1,4 +1,4 @@
-#' Compute global statistic of a variable.
+#' Compute global statistic of a variable
 #' 
 #' We frequently want a global summary for CMIP5 data, usually weighted by the 
 #' grid cell areas used by each particular model. This function does that. If no

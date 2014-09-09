@@ -1,4 +1,4 @@
-#' Check for continuous time periods in CMIP5 files.
+#' Check for continuous time periods in CMIP5 files
 #' 
 #' Check that all time periods match for multi-file ensembles. Before starting to 
 #' process what may be hundreds or thousands of CMIP5 files, it's a good idea to verify

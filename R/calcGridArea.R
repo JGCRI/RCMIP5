@@ -1,4 +1,4 @@
-#' Calculate the grid cella area for a centered lat/lon grid.
+#' Calculate the grid cella area for a centered lat/lon grid
 #'
 #' Calculate the grid cella area for a centered lat/lon grid.
 #'

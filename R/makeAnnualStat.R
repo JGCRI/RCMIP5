@@ -1,4 +1,4 @@
-#' Compute annual statistic of a variable.
+#' Compute annual statistic of a variable
 #'
 #' Most CMIP5 data are monthly, and we frequently want to summarize these to annual
 #' numbers. This function does that (although annual files also occur, and will be

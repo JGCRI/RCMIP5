@@ -1,4 +1,4 @@
-#' Exploration, manipulation, and summarizing of CMIP5 data.
+#' Exploration, manipulation, and summarizing of CMIP5 data
 #'
 #' Working with CMIP5 data can be tricky, forcing scientists to
 #' write custom scripts and programs. The `RCMIP5` package aims

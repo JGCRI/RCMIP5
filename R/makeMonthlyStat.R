@@ -1,4 +1,4 @@
-#' Compute monthly statistic of a variable.
+#' Compute monthly statistic of a variable
 #' 
 #' We frequently want to summarize CMIP5 data by month, e.g. to understand how
 #' air temperature varies over the year for a particular data range. This function 

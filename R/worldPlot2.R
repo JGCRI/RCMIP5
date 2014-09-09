@@ -1,4 +1,4 @@
-#' Plot global data.
+#' Plot global data
 #' 
 #' Plot a quick world map with reasonable coloring.
 #'

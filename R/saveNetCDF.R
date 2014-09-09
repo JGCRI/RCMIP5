@@ -1,4 +1,4 @@
-#' Save a cmip5data object to netCDF format.
+#' Save a cmip5data object to netCDF format
 #' 
 #' There are at least three ways to save a \code{\link{cmip5data}} object.
 #' First, \link{save} it. Second, use \link{as.data.frame}. Third, this function
