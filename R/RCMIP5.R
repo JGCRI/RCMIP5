@@ -247,8 +247,8 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
     df <- reshape2::melt(x$val)
     
     if(verbose) cat("Melting values...\n")
-    df[,1] <- x$lon[df[,1]]
-    df[,2] <- x$lat[df[,2]]
+    if(!is.null(x$lon)) df[,1] <- x$lon[df[,1]]
+    if(!is.null(x$lat)) df[,2] <- x$lat[df[,2]]
     names(df)[1:2] <- c("lon","lat")
     
     if(verbose) cat("Dealing with depth/level...\n")
@@ -263,7 +263,7 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
     }
     
     if(verbose) cat("Dealing with time...\n")
-    if(!is.null(x$time)){
+    if(!is.null(x$time)) {
         df[,timeIndex] <- x$time[df[,timeIndex]]
         names(df)[timeIndex] <- "time"
     }
