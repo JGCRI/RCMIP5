@@ -28,7 +28,6 @@ test_that("loadEnsemble handles bad input", {
     expect_error(loadEnsemble("","","","",domain=c("","")))         # multi-value
     expect_error(loadEnsemble("","","","",verbose=1))               # non-logical verbose
     expect_error(loadEnsemble("","","","",recursive=1))             # non-logical recursive
-    expect_error(loadEnsemble("","","","",demo=1))                  # non-logical demo
 })
 
 test_that("loadEnsemble handles no files found", {            # no netcdf files found
@@ -82,9 +81,4 @@ test_that("loadEnsemble assigns ancillary data", {
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', path=path,verbose=F)
     expect_is(d,"cmip5data")
     expect_true(!is.null(d$provenance))
-})
-
-test_that("demo mode works", {
-    #    d <- loadEnsemble('tas','CMCC-CESM','historical','r1i1p1',demo=T,verbose=F)     # test data set
-    #    expect_is(d,"cmip5data")
 })

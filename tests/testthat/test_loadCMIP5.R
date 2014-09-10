@@ -26,7 +26,6 @@ test_that("loadCMIP5 handles bad input", {
     expect_error(loadCMIP5("","","",domain=c("","")))         # multi-value
     expect_error(loadCMIP5("","","",verbose=1))               # non-logical verbose
     expect_error(loadCMIP5("","","",recursive=1))             # non-logical recursive
-    expect_error(loadCMIP5("","","",demo=1))                  # non-logical demo
 })
 
 test_that("loadCMIP5 handles no files found", {            # no netcdf files found
