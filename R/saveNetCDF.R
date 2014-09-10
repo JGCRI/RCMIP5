@@ -25,7 +25,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
     # Anything else is not valid.
-    stopifnot(length(dim(x$val)) %in% c(3, 4)) # that's all we know
+    stopifnot(length(dim(x$val)) %in% c(2, 3, 4)) # that's all we know
     
     # We prefer to use the 'ncdf4' package, but Windows has problems with this, so
     # if it's not installed can also use 'ncdf'
@@ -66,19 +66,23 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     if(verbose) cat("Defining netCDF dimensions...")
     londim <- .ncdim_def("lon", x$debug$lonUnit, x$lon)
     latdim <- .ncdim_def("lat", x$debug$latUnit, x$lat)
-    timedim <- .ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
-    dimlist <- list(londim, latdim, timedim) # assuming no depth/lev
+    dimlist <- list(londim, latdim) # assuming no depth/lev/time
     
     # Define optional dimensions, if present
     if(!is.null(x$depth)) {
         depthdim <- .ncdim_def("depth", x$debug$depthUnit, x$depth)
-        dimlist <- list(londim, latdim, depthdim, timedim)
+        dimlist <- list(londim, latdim, depthdim)
         #        depthvar <- ncvar_def("depth", x$debug$depthUnit, depthdim)
     } else if(!is.null(x$lev)) {
         levdim <- .ncdim_def("lev", x$debug$levUnit, x$lev)
-        dimlist <- list(londim, latdim, levdim, timedim)
+        dimlist <- list(londim, latdim, levdim)
         #        levvar <- ncvar_def("lev", x$debug$levUnit, levdim)
     }
+    if(!is.null(x$time)) {
+        timedim <- .ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
+        dimlist[[length(dimlist)+1]] <- timedim     
+    }
+    
     if(verbose) cat(length(dimlist), "dimensions for", x$variable, "\n")
     
     # Define mandatory variables
@@ -117,7 +121,9 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     if(verbose) cat("Writing attributes\n")    
     .ncatt_put(nc, 0, "software", paste("Written by RCMIP5", pkgv, 
                                        "under", R.version.string, date()))
-    .ncatt_put(nc, 0, "frequency", x$timeFreqStr)
+    if(!is.null(x$time)) {
+        .ncatt_put(nc, 0, "frequency", x$timeFreqStr)
+    }
     for(i in 1:nrow(x$provenance)) {
         .ncatt_put(nc, 0, paste0("provenance", i), x$provenance[i, "message"])
     }
