@@ -78,7 +78,7 @@ makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         } else { # not parallel
             if(verbose) cat("Running in serial\n")
             ans <- list()
-            pb <- txtProgressBar(min=1, max=length(x$time), style=3)
+            pb <- txtProgressBar(min=0, max=length(x$time), style=3)
             for(i in 1:length(x$time)) {  # for each time slice...
                 if(verbose) setTxtProgressBar(pb, i)
                 # ...apply the annual stat function to the data subset for which

@@ -66,7 +66,7 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         } else {
             if(verbose) cat("Running in serial\n")
             ans <- list()
-            pb <- txtProgressBar(min=1, max=12, style=3)
+            pb <- txtProgressBar(min=0, max=12, style=3)
             for(i in 1:12) {
                 if(verbose) setTxtProgressBar(pb, i)
                 ans[[i]] <- aaply(
