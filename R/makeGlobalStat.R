@@ -87,8 +87,10 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
                                      margins, FUN, w=areavals, ...)                
                            }
         } else {
-            if(verbose) cat("Running in serial\n")
-            pb <- txtProgressBar(min=0, max=length(x$time), style=3)
+            if(verbose) {
+                cat("Running in serial\n")
+                pb <- txtProgressBar(min=0, max=length(x$time), style=3)
+            }
             for(i in 1:length(x$time)) {
                 if(verbose) setTxtProgressBar(pb, i)
                 ans[[i]] <- aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex), 
