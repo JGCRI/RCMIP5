@@ -13,10 +13,15 @@
 #' @param recursive logical. Should we recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
+#' @param yearRange numeric of length 2. If supplied, load only these years of data
 #' @return A \code{\link{cmip5data}} object
+#' @note The \code{yearRange} parameter is intended to help users deal with large 
+#' CMIP5 data files on memory-limited machine, e.g. by sequentially processing smaller 
+#' chunks of such files.
 #' @export
 loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+',
-                      path='.', recursive=TRUE, verbose=TRUE, force.ncdf=FALSE) {
+                      path='.', recursive=TRUE, verbose=TRUE, force.ncdf=FALSE,
+                      yearRange=NULL) {
     
     # Match the path conventions to the operating system
     w <- getOption('warn')
@@ -34,12 +39,15 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     stopifnot(file.exists(path))
     stopifnot(length(recursive)==1 & is.logical(recursive))
     stopifnot(length(verbose)==1 & is.logical(verbose))
+    stopifnot(length(force.ncdf)==1 & is.logical(force.ncdf))
+    stopifnot(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
     
     # If a unique ensemble is specified, jump right to loadEnsemble()
     if(!is.null(variable) & !is.null(model)
        &!is.null(experiment) & !is.null(ensemble)) { 
         return(loadEnsemble(variable, model, experiment, ensemble, domain,
-                            path=path, recursive=recursive, verbose=verbose, force.ncdf=force.ncdf))
+                            path=path, recursive=recursive, verbose=verbose,
+                            force.ncdf=force.ncdf, yearRange=yearRange))
     }
     
     # List all files that match specifications
@@ -68,7 +76,8 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
         
         # load the entire ensemble
         temp <- loadEnsemble(variable, model, experiment, ensemble, domain,
-                             path=path, verbose=verbose, recursive=recursive, force.ncdf=force.ncdf)
+                             path=path, verbose=verbose, recursive=recursive, 
+                             force.ncdf=force.ncdf, yearRange=yearRange)
         
         if(is.null(modelTemp)) {         # If first model, just copy
             modelTemp <- temp 
@@ -121,13 +130,18 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
 #' @param recursive logical. Recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
+#' @param yearRange numeric of length 2. If supplied, load only these years of data
 #' @return A \code{\link{cmip5data}} object.
 #' @details This function is the core of RCMIP5's data-loading. It loads all files matching
 #' the experiment, variable, model, ensemble, and domain supplied by the caller.
+#' @note The \code{yearRange} parameter is intended to help users deal with large 
+#' CMIP5 data files on memory-limited machine, e.g. by sequentially processing smaller 
+#' chunks of such files.
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
 loadEnsemble <- function(variable, model, experiment, ensemble, domain,
-                         path='.', recursive=TRUE, verbose=TRUE, force.ncdf=FALSE) {
+                         path='.', recursive=TRUE, verbose=TRUE, force.ncdf=FALSE,
+                         yearRange=NULL) {
     
     # Sanity checks - make sure all parameters are correct class and length
     stopifnot(length(variable)==1 & is.character(variable))
@@ -226,19 +240,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     for(fileStr in fileList) {
         if(verbose) cat('Loading', fileStr, "\n")
         temp.nc <- .nc_open(fileStr, write=FALSE)
-        temp <- .ncvar_get(temp.nc, varid=variable)  # load data array
-        if(verbose) cat("- data", dim(temp), "\n")
-        
-        # Test that spatial dimensions are identical across files
-        if(length(val) > 0) {
-            stopifnot(all(dim(val)[1:(length(dim(val))-1)] == dim(temp)[1:(length(dim(temp))-1)]))
-        }
-        
-        # Bind the main variable along time dimension to previously loaded data
-        # Note that the time dimensions is guaranteed to be last - see ncdf4 documentation
-        val <- abind(val, temp, along=length(dim(temp)))
-        
-        valUnit <- .ncatt_get(temp.nc, variable, 'units')$value  # load units
         
         # Get all the variables stored in the netcdf file so that we
         # ...can load the lon, lat and time variables if appropriate
@@ -335,6 +336,27 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             levArr <- .ncvar_get(temp.nc, varid='lev')
             levUnit <- .ncatt_get(temp.nc, 'lev', 'units')$value
         }
+
+        # If yearRange supplied, calculate filter for the data load below
+        start <- NA
+        count <- NA
+        if(!is.null(yearRange) & !is.null(timeArr)) {
+            # TODO            
+        }
+        
+        # Finally, load the actual data and its units
+        temp <- .ncvar_get(temp.nc, varid=variable, start=start, count=count)
+        if(verbose) cat("- data", dim(temp), "\n")
+        valUnit <- .ncatt_get(temp.nc, variable, 'units')$value  # load units
+        
+        # Test that spatial dimensions are identical across files
+        if(length(val) > 0) {
+            stopifnot(all(dim(val)[1:(length(dim(val))-1)] == dim(temp)[1:(length(dim(temp))-1)]))
+        }
+        
+        # Bind the main variable along time dimension to previously loaded data
+        # Note that the time dimensions is guaranteed to be last - see ncdf4 documentation
+        val <- abind(val, temp, along=length(dim(temp)))
         
         .nc_close(temp.nc)
     } # for
