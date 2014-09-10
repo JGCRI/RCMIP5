@@ -59,62 +59,75 @@ cmip5data <- function(x=list(),
                       # parameters for making sample data
                       monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
                       lonsize=10, latsize=10, depthsize=5, levsize=5) {
+    
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
     
     if (is.list(x)) {
         structure(x, class="cmip5data")
-    } else if(is.numeric(x)) {
+    } else if(is.numeric(x)) {        # Create sample data
         
-        # Create sample data. 'x' is years
-        years <- x
-        ppy <- ifelse(monthly, 12, 1)  # periods per year
-        valdims <- c(lonsize, latsize, ppy*length(years))
-        depthdim <- NULL
-        if(depth) {
-            valdims <- c(valdims[1:(length(valdims)-1)], depthsize, valdims[length(valdims)])
-            depthdim <- c(0:(depthsize-1))
-        }
-        levdim <- NULL
-        if(lev) {
-            valdims <- c(valdims[1:(length(valdims)-1)], levsize, valdims[length(valdims)])
-            levdim <- c(0:(levsize-1))
-        }
-        
-        valData <- 1:2
-        if(randomize) valData  <- runif(prod(valdims))
-        
+        result <- list(
+            model="model",
+            experiment="experiment",
+            ensemble = "ensemble",
+            # realistic lon (0 to 360) and lat (-90 to 90) numbers
+            lat=180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2,
+            lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
+        )        
         debuglist <- list(lonUnit="degrees_east",
-                          latUnit="degrees_north",
-                          startYr=years[1],
-                          calendarStr="360_day",
-                          timeUnit=paste0("days since ",years[1],"-01-01"),
-                          timeRaw=(360/ppy*c(0:(length(years)*ppy-1) )+15)
+                          latUnit="degrees_north"
         )
         
-        if(depth) debuglist$depthUnit <- "m"
-        if(lev) debuglist$levUnit <- "m"
+        if(all(x > 0)) {  # normal (non-area) data
+            result$variable <- "var"
+            result$domain <- "domain"
+            
+            # Time
+            years <- x
+            ppy <- ifelse(monthly, 12, 1)  # periods per year
+            result$calendarStr <- "360_day"
+            result$timeFreqStr <- ifelse(monthly, "mon", "yr")
+            debuglist$startYr <- years[1]
+            debuglist$calendarStr <- "360_day"
+            debuglist$timeUnit <- paste0("days since ",years[1],"-01-01")
+            debuglist$timeRaw <- (360/ppy*c(0:(length(years)*ppy-1) )+15)
+            result$time <- debuglist$timeRaw/360+min(years)
+            
+            # Space
+            valdims <- c(lonsize, latsize, ppy*length(years))
+            depthdim <- NULL
+            if(depth) {
+                valdims <- c(valdims[1:(length(valdims)-1)], depthsize, valdims[length(valdims)])
+                depthdim <- c(0:(depthsize-1))
+                debuglist$depthUnit <- "m"
+            }
+            levdim <- NULL
+            if(lev) {
+                valdims <- c(valdims[1:(length(valdims)-1)], levsize, valdims[length(valdims)])
+                levdim <- c(0:(levsize-1))
+                debuglist$levUnit <- "m"
+            }
+            
+            result$depth <- depthdim
+            result$lev <- levdim
+            
+        } else {  # <=0 years means create an area data file
+            result$variable <- "area"
+            result$domain <- "fx"
+            valdims <- c(lonsize, latsize)
+        }
         
-        x <- cmip5data(list(variable="dummyvar",
-                            domain="dummydomain",
-                            model="dummymodel",
-                            experiment="dummyexperiment",
-                            ensemble="dummyensemble",
-                            val=array(valData, dim=valdims),
-                            valUnit="dummy unit",
-                            calendarStr="360_day",
-                            timeFreqStr=ifelse(monthly, "mon", "yr"),
-                            
-                            # realistic lon (0 to 360) and lat (-90 to 90) numbers
-                            lat=180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2,
-                            lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2,
-                            
-                            depth=depthdim,
-                            lev=levdim,
-                            time=debuglist$timeRaw/360+min(years),
-                            debug=debuglist
-        ))
-        x <- addProvenance(x, "Dummy data created")
-        x
+        # Generate data
+        valData <- ifelse(randomize, runif(prod(valdims)), 1:2)
+        result$val <- array(valData, dim=valdims)
+        result$valUnit <- "unit"
+        
+        # Add debug info and set class
+        result$debug <- debuglist
+        result <- structure(result, class="cmip5data")
+        
+        # Initialize provenance and return
+        addProvenance(result, "Dummy data created")
     } else
         stop("Don't know what to do with this class of parameter")
 }
