@@ -28,7 +28,7 @@ test_that("loadCMIP5 handles bad input", {
     expect_error(loadCMIP5("","","",recursive=1))             # non-logical recursive
     expect_error(loadCMIP5("","","",force.ncdf=1))             # non-logical force.ncdf
     expect_error(loadCMIP5("","","",yearRange=T))             # non-numeric yearRange
-    expect_error(loadCMIP5("","","",yearRange=1))             # non-numeric yearRange
+    expect_error(loadCMIP5("","","",yearRange=1))             # yearRange wrong length
 })
 
 test_that("loadCMIP5 handles no files found", {            # no netcdf files found
@@ -71,8 +71,39 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
 
 test_that("loadCMIP5 can load using both ncdf and ncdf4", {
     path <- "../../sampledata/monthly/"
-    d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)     # test data set
-    d2 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, force.ncdf=TRUE)     # test data set
+    d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)  # ncdf4
+    d2 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, force.ncdf=TRUE) # ncdf
     expect_equal(d1$val, d2$val)
     expect_equal(names(d1), names(d2))
+})
+
+test_that("loadCMIP5 handles YearRange", {
+    path <- "../../sampledata/monthly/"
+    
+    # These sample data are 200512-203011 and 203012-205511 (with 2 ensembles)
+    # yearRange in first file only
+    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2006, 2007))
+    expect_equal(length(d$time), 24)
+    expect_equal(dim(d$val)[3], 24)
+    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(1, 2007))
+    expect_equal(length(d$time), 25)
+    expect_equal(dim(d$val)[3], 25)
+    
+    # yearRange in second file only
+    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2036, 2037))
+    expect_equal(length(d$time), 24)
+    expect_equal(dim(d$val)[3], 24)
+    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2054, 9999))
+    expect_equal(length(d$time), 23)
+    expect_equal(dim(d$val)[3], 23)
+    
+    # yearRange spans files
+    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2030, 2031))
+    expect_equal(length(d$time), 24)
+    expect_equal(dim(d$val)[3], 24)
+    
+    # yearRange doesn't overlap with files
+    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(1995, 1996))
+    expect_null(d$time)
+    expect_null(dim(d$val))
 })
