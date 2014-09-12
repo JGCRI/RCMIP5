@@ -82,3 +82,11 @@ test_that("loadEnsemble assigns ancillary data", {
     expect_is(d,"cmip5data")
     expect_true(!is.null(d$provenance))
 })
+
+test_that("loadEnsemble handles GFDL quirks", {
+    path <- "../../sampledata/"
+    d <- loadEnsemble('tos','GFDL-ESM2G', 'historical', 'r1i1p1', '[^_]+', path=path, verbose=F)
+    expect_is(d,"cmip5data")
+    expect_null(dim(d$lon))
+    expect_null(dim(d$lat))
+})

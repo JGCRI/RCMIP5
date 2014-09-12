@@ -267,6 +267,11 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         latUnit <- .ncatt_get(nc, 'lat', 'units')$value
         lonUnit <- .ncatt_get(nc, 'lon', 'units')$value
         
+        # Some models (*cough* GFDL *cough*) provide TWO-dimensional arrays of
+        # their lon and lat values. Not helpful. If this occurs, strip down to 1
+        if(length(dim(lonArr)) > 1) lonArr <- lonArr[,1]
+        if(length(dim(latArr)) > 1) latArr <- latArr[1,]
+        
         # Get the time frequency. Note that this should be related to
         # ...the domain but really we are looking for 'fx'/fixed variables
         # ...where we don't have to deal with time.
