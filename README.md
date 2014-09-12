@@ -15,6 +15,6 @@ More information about the CMIP5 experiment can be found on the project home pag
 
 * If you use this package/code in your work, please cite it! See `citation("RCMIP5")`.
 
-* Want to get started? See the package `demo()`.
+* Want to get started? See the package vignettes or demo, `demo(RCMIP5)`.
 
 
