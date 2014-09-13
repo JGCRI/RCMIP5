@@ -8,7 +8,7 @@
 #' @return The grid cell area in m^2 (meter*meter)
 #' @details Currently the lon must be uniform but the lat does not need to be.
 #' @keywords internal
-#' @export
+#' @note This is an internal RCMIP5 function and not exported.
 calcGridArea<- function(lon, lat, verbose=FALSE) {
 
     # Sanity checks - parameter classes and lengths
