@@ -146,12 +146,18 @@ print.cmip5data <- function(x, ...) {
         cat("(Empty cmip5data object)")
         return()
     }
+
+    if(!is.null(x$numMonths) | !is.null(x$numYears) | !is.null(x$numCells)) {
+        ans$type <- "(summary)"
+    } else {
+        type <- ""
+    }
     
-    ansStr <- paste('CMIP5:', x$variable, x$model, x$experiment)
+    ansStr <- paste('CMIP5:', x$variable, x$model, x$experiment, type)
     
     if(!is.null(x$time)) {
-        ansStr <- paste(ansStr, "over years", floor(min(x$time, na.rm=TRUE)),
-                        "to", ceiling(max(x$time, na.rm=TRUE)))
+        ansStr <- paste0(ansStr, "over years ", floor(min(x$time, na.rm=TRUE)),
+                        " to ", floor(max(x$time, na.rm=TRUE)))
     }
     
     if(!is.null(x$ensembles)) {
@@ -176,10 +182,9 @@ summary.cmip5data <- function(object, ...) {
     ans <- list()
     class(ans) <- "summary.cmip5data"
     
-    #Always assume that cmip5 objects have the following defined:
+    # In general cmip5 objects have the following defined:
     ans$variable <- object$variable
     ans$valUnit <- object$valUnit
-    
     ans$domain <- object$domain
     ans$model <- object$model
     ans$experiment <- object$experiment
