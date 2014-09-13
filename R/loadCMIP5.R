@@ -27,12 +27,6 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
                       path='.', recursive=TRUE, verbose=TRUE, force.ncdf=FALSE,
                       yearRange=NULL) {
     
-    # Match the path conventions to the operating system
-    w <- getOption('warn')
-    options(warn=-1)
-    path <- normalizePath(path)
-    options(warn=w)
-    
     # Sanity checks - parameters are correct type and length
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
@@ -267,8 +261,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         latUnit <- .ncatt_get(nc, 'lat', 'units')$value
         lonUnit <- .ncatt_get(nc, 'lon', 'units')$value
         
-        # Some models (*cough* GFDL *cough*) provide TWO-dimensional arrays of
-        # their lon and lat values. Not helpful. If this occurs, strip down to 1
+        # Some models provide two-dimensional arrays of their lon and lat values.
+        # If this occurs, strip down to 1
         if(length(dim(lonArr)) > 1) lonArr <- lonArr[,1]
         if(length(dim(latArr)) > 1) latArr <- latArr[1,]
         
@@ -285,7 +279,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # Get the type of calendar used (e.g. 'noleap')
             calendarStr <- .ncatt_get(nc, 'time', 'calendar')$value
             calendarUnitsStr <- .ncatt_get(nc, 'time', 'units')$value
-            # Pull the number of days in a year
+            # Extract the number of days in a year
             if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)) {
                 calendarDayLength <- as.numeric(regmatches(calendarStr, regexpr('\\d{3}', calendarStr)))
             } else {
@@ -363,10 +357,10 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             if(is.na(tstart)) tstart <- 1
             tend <- match(max(yearRange)+1, floor(thisTimeArr)) - 1 # find last time match
             if(is.na(tend)) tend <- length(thisTimeArr)
-            ndims <- nc$var[[variable]]$ndims
             
             # Construct the 'start' and 'count' arrays the ncvar_get will need below
             # (See ncvar_get documentation for what these mean.)
+            ndims <- nc$var[[variable]]$ndims
             start <- c(rep(1, ndims-1), tstart)
             count <- c(rep(-1, ndims-1), tend-tstart+1)
             if(verbose) cat("- loading only timeslices", tstart, "-", tend, "\n")
