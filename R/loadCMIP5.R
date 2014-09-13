@@ -18,7 +18,7 @@
 #' @note The \code{yearRange} parameter is intended to help users deal with large 
 #' CMIP5 data files on memory-limited machines, e.g. by allowing them to process 
 #' smaller chunks of such files.
-#' @example
+#' @examples
 #' \dontrun{
 #' loadCMIP5(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
 #' }
