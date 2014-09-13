@@ -58,19 +58,22 @@ test_that("makeGlobalStat handles monthly data", {
 
 test_that("makeGlobalStat weights correctly", {
     d <- cmip5data(1850, randomize=T, monthly=F)
-    res <- makeGlobalStat(d, area=d, verbose=F)
+    darea <- cmip5data(0, randomize=T)
+
+    res <- makeGlobalStat(d, area=darea, verbose=F)
     
     # Are the answer values numerically correct?
-    dummyans <- weighted.mean(d$val[,,1], w=d$val[,,1])
+    dummyans <- weighted.mean(d$val[,,1], w=darea$val)
     expect_equal(dummyans, res$val[,,1])
 })
 
 test_that("weighted.sum works correctly", {
     d <- cmip5data(1850, randomize=T, monthly=F)
-    res <- makeGlobalStat(d, area=d, verbose=F, FUN=weighted.sum)
+    darea <- cmip5data(0, randomize=T)
+    res <- makeGlobalStat(d, area=darea, verbose=F, FUN=weighted.sum)
     
     # Are the answer values numerically correct?
-    dummyans <- weighted.sum(d$val[,,1], w=d$val[,,1])
+    dummyans <- weighted.sum(d$val[,,1], w=darea$val)
     expect_equal(dummyans, res$val[,,1])
     
     # Make sure the function itself is OK
