@@ -54,6 +54,14 @@ NULL
 #'  \item{experiment}{Experiment of this dataset}
 #'  \item{ensembles}{Ensemble(s) included in this dataset}
 #' @docType class
+#' @examples
+#' cmip5data(1970)  # produces monthly sample data for year 1970
+#' cmip5data(1970:2014)
+#' cmip5data(1970:2014, monthly=FALSE)  # annual data
+#' cmip5data(1970:2014, randomize=TRUE) # randomized data
+#' cmip5data(1970:2014, depth=TRUE)  # four-dimensional data
+#' cmip5data(0)  # sample 'fx' area data, two-dimensional
+#' cmip5data(list())  # makes this (here empty) list class into 'cmip5data'
 #' @export
 cmip5data <- function(x=list(),
                       # parameters for making sample data
@@ -148,7 +156,7 @@ print.cmip5data <- function(x, ...) {
     }
 
     if(!is.null(x$numMonths) | !is.null(x$numYears) | !is.null(x$numCells)) {
-        ans$type <- "(summary)"
+        type <- "(summary)"
     } else {
         type <- ""
     }
@@ -243,7 +251,7 @@ print.summary.cmip5data <- function(x, ...) {
     cat("Spatial dimensions:", x$spatial, "\n")
     cat("Time dimension:", x$time, "\n")
     cat("Size:", format(round(x$size/1024/1024, 1), nsmall=1), "MB\n")
-    cat("Provenance has", length(x$provenance), "entries\n")
+    cat("Provenance has", nrow(x$provenance), "entries\n")
 } # print.summary.cmip5data
 
 #' Convert a cmip5data object to a data frame
