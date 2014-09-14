@@ -5,13 +5,13 @@
 #' that your file set is complete and not missing any years.
 #' 
 #' @param fileInfo_df data.frame from getFileInfo
-#' @return A \code{\link{cmip5data}} object.
+#' @return A data frame showing which ensembles are continuous, and which are not.
+#' @note this only works for files that are in domains 'fx', '*mon', or '*yr'.
 #' @details Decimal time is (year + (month-1)/12).
-#' Note that this only works for files that are in domains 'fx', '*mon', or '*yr'.
-#' @export
 #' @examples
 #' checkTimePeriod(getFileInfo())
 #' @seealso \code{\link{getFileInfo}}
+#' @export
 checkTimePeriod <- function(fileInfo_df) {
 
     # Sanity checks

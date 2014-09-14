@@ -4,7 +4,8 @@
 \title{Load a unique CMIP5 ensemble}
 \usage{
 loadEnsemble(variable, model, experiment, ensemble, domain, path = ".",
-  recursive = TRUE, verbose = TRUE, demo = FALSE, force.ncdf = FALSE)
+  recursive = TRUE, verbose = TRUE, force.ncdf = FALSE,
+  yearRange = NULL)
 }
 \arguments{
 \item{variable}{CMIP5 variable to load (required)}
@@ -23,9 +24,9 @@ loadEnsemble(variable, model, experiment, ensemble, domain, path = ".",
 
 \item{verbose}{logical. Print info as we go?}
 
-\item{demo}{logical. Demo mode (reading data from global environment, not disk)?}
-
 \item{force.ncdf}{Force use of the less-desirable ncdf package for testing?}
+
+\item{yearRange}{numeric of length 2. If supplied, load only these years of data}
 }
 \value{
 A \code{\link{cmip5data}} object.
@@ -37,9 +38,12 @@ combination (one or more files). Returns NULL and a warning if nothing matches.
 \details{
 This function is the core of RCMIP5's data-loading. It loads all files matching
 the experiment, variable, model, ensemble, and domain supplied by the caller.
-We can also load from the package datasets by specifying DEMO=TRUE.
 }
 \note{
+The \code{yearRange} parameter is intended to help users deal with large
+CMIP5 data files on memory-limited machines, e.g. by allowing them to process
+smaller chunks of such files.
+
 This is an internal RCMIP5 function and not exported.
 }
 \keyword{internal}

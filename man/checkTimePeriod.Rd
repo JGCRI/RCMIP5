@@ -9,7 +9,7 @@ checkTimePeriod(fileInfo_df)
 \item{fileInfo_df}{data.frame from getFileInfo}
 }
 \value{
-A \code{\link{cmip5data}} object.
+A data frame showing which ensembles are continuous, and which are not.
 }
 \description{
 Check that all time periods match for multi-file ensembles. Before starting to
@@ -18,7 +18,9 @@ that your file set is complete and not missing any years.
 }
 \details{
 Decimal time is (year + (month-1)/12).
-Note that this only works for files that are in domains 'fx', '*mon', or '*yr'.
+}
+\note{
+this only works for files that are in domains 'fx', '*mon', or '*yr'.
 }
 \examples{
 checkTimePeriod(getFileInfo())

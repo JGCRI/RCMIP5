@@ -16,7 +16,15 @@
 #' variable across depths. A \code{numDepths} or \code{numLevels} field is also added
 #' recording the number of depths or levels averaged for each year, and x's original
 #' 'depths' or 'levs' field is removed.
+#' @details No status bar is printed when processing in parallel,
+#' but progress is logged to a file (call with verbose=T) that can be monitored.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
+#' @examples
+#' d <- cmip5data(1970:2014)   # sample data
+#' makeDepthLevStat(d)
+#' summary(makeDepthLevStat(d, verbose=FALSE))
+#' summary(makeDepthLevStat(d, verbose=FALSE, parallel=TRUE))
+#' summary(makeDepthLevStat(d, verbose=FALSE, FUN=sd))
 #' @export
 makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     

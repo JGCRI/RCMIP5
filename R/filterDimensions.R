@@ -6,14 +6,21 @@
 #' for such filtering.
 #' 
 #' @param x A \code{\link{cmip5data}} object
-#' @param lons numeric vector. Longitudes to filter (in)
-#' @param lats numeric vector. Latitudes to filter (in)
+#' @param lons numeric vector. Longitudes to filter
+#' @param lats numeric vector. Latitudes to filter
 #' @param depths numeric vector. Depths to filter
-#' @param levs numeric vector
+#' @param levs numeric vector. Levels to filter.
 #' @param years numeric vector
 #' @param months numeric vector
 #' @param verbose logical. Print info as we go?
-#' @return A \code{\link{cmip5data}} object.
+#' @return The filtered \code{\link{cmip5data}} object.
+#' @note If a depth or lev filter is requested but no such data are present,
+#' a \code{\link{warning}} will be produced.
+#' @examples
+#' d <- cmip5data(1970:2014)   # sample data
+#' filterDimensions(d, years=1980:1985)
+#' filterDimensions(d, months=6:8)  # summer
+#' filterDimensions(d, lats=d$lat[abs(d$lat)<20])  # the tropics
 #' @export
 filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
                              years=NULL, months=NULL, verbose=FALSE) {

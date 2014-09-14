@@ -47,7 +47,7 @@ print(makeAnnualStat(combined, verbose=T))
 ## After this operation that data have been reduced 120 months to 
 ## 10 annual means. Note the 'annual summary' note when printing.
 ## The makeAnnualStat function can apply any summary function, 
-## not just mean, and pass any additional parameters (...).
+## not just mean, and pass any additional parameters via (...).
 readline("<return>")
 
 ## Computing global area-weighted mean:
@@ -58,6 +58,9 @@ print(globalmean)
 ## previously filtered the data to just those latitudes) mean.
 ## Note printing the resulting data set confirms
 ## that the data dimensions are 1 x 1 x 120 months.
+##
+## Because we didn't supply area data to makeGlobalStat, it
+## made it own estimation of grid cell areas.
 readline("<return>")
 
 ## More detailed look at the resulting dataset:

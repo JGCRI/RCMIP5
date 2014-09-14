@@ -14,7 +14,14 @@
 #' mean of the variable. A \code{numMonths} field is also added
 #' recording the number of months averaged for each year.
 #' @details If 'lev' and/or 'depth' dimensions are present, the stat function is calculated
-#' for all combinations of these. 
+#' for all combinations of these. No status bar is printed when processing in parallel,
+#' but progress is logged to a file (call with verbose=T) that can be monitored.
+#' @examples
+#' d <- cmip5data(1970:2014)   # sample data
+#' makeAnnualStat(d)
+#' summary(makeAnnualStat(d, verbose=FALSE))
+#' summary(makeAnnualStat(d, verbose=FALSE, parallel=TRUE))
+#' summary(makeAnnualStat(d, verbose=FALSE, FUN=sd))
 #' @seealso \code{\link{makeDepthLevStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
 makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {

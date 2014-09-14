@@ -16,13 +16,19 @@
 #' 1 (i.e. no dimensionality). A \code{numCells} field is also added, recording the number
 #' of cells in the spatial grid.
 #' @details If 'lev' and/or 'depth' dimensions are present, the stat function is calculated
-#' for all combinations of these. 
+#' for all combinations of these. No status bar is printed when processing in parallel,
+#' but progress is logged to a file (call with verbose=T) that can be monitored.
 #' @note We expect that weighted.mean and a weighted sum will be the most frequent
 #' calculations needed. The former is built into R, and the latter can generally
 #' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
 #' follow the weighted.mean syntax, in particular 
 #' accepting parameters 'x' (data) and 'w' (weights) of equal size.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeDepthLevStat}} \code{\link{makeMonthlyStat}} 
+#' @examples
+#' d <- cmip5data(1970:2014)   # sample data
+#' makeGlobalStat(d)
+#' summary(makeGlobalStat(d, verbose=FALSE))
+#' summary(makeGlobalStat(d, verbose=FALSE, parallel=TRUE))
 #' @export
 makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weighted.mean, ...) {
     
