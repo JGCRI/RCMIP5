@@ -77,6 +77,13 @@ test_that("loadCMIP5 can load using both ncdf and ncdf4", {
     expect_equal(names(d1), names(d2))
 })
 
+test_that("loadCMIP5 can load area files", {
+    path <- "../../sampledata/fx/"
+    # areacella_fx_GFDL-CM3_historical_r0i0p0.nc
+    d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F)
+    expect_is(d, "cmip5data")
+})
+
 test_that("loadCMIP5 handles YearRange", {
     path <- "../../sampledata/monthly/"
     

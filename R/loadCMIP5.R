@@ -324,6 +324,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             calendarDayLength <- NULL
             calendarUnitsStr <- NULL
             dim(val) <- dim(val)[1:2]
+            thisTimeRaw <- NULL
+            thisTimeArr <- NULL
         }
         
         # Load the 4th dimension identifiers, if present:
