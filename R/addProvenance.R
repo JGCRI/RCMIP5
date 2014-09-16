@@ -59,7 +59,8 @@ addProvenance <- function(x, msg, verbose=FALSE) {
         x$provenance[nr, "dim"] <- paste(dim(x$val), collapse=",")
         dg <- "<digest unavailable>"
         try({
-            dg <- digest::digest(x$val), silent=TRUE})
+            dg <- digest::digest(x$val)
+            } , silent=TRUE)
         x$provenance[nr, "digest"] <- dg        
     } else {
         if(verbose) cat("Appending provenances")
