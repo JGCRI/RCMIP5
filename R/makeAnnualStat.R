@@ -70,8 +70,8 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
                            .combine = function(...)  abind(..., along=timeIndex),       # (2)
                            .packages=c('plyr', 'abind')) %dopar% {                      # (3)
                                if(verbose) cat(date(), i, "\n", file=tf, append=T)
-                               aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex),
-                                     c(1:(timeIndex-1)), FUN, ...)
+                               aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex, drop=FALSE),
+                                     c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
                            } # %dopar%
         } else { # not parallel
             if(verbose) {
@@ -86,7 +86,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
                 # asub and abind from 'abind' packages.
                 ans[[i]] <- aaply(asub(x$val,
                                        idx=uniqueYears[i] == floor(x$time),
-                                       dims=timeIndex),
+                                       dims=timeIndex, drop=FALSE),
                                   c(1:(timeIndex-1)), FUN, ...)
             } # for
             ans <- abind(ans, along=timeIndex) # convert list to array

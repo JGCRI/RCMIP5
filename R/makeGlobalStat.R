@@ -89,8 +89,8 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
                            .combine = function(...) abind(..., along=timeIndex-2), # (2)
                            .packages=c('plyr', 'abind')) %dopar% {                 # (3)
                                if(verbose) cat(date(), i, "\n", file=tf, append=T)
-                               aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex), 
-                                     margins, FUN, w=areavals, ...)                
+                               aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE), 
+                                     margins, .drop=FALSE, FUN, w=areavals, ...)                
                            }
         } else {
             if(verbose) {
@@ -99,8 +99,8 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
             }
             for(i in 1:length(x$time)) {
                 if(verbose) setTxtProgressBar(pb, i)
-                ans[[i]] <- aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex), 
-                                  margins, FUN, w=areavals, ...)
+                ans[[i]] <- aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE), 
+                                  margins, .drop=FALSE, FUN, w=areavals, ...)
             }
             # All done, now combine answer list with correct 'along' ordering
             # (When both lev and depth are present, timeIndex=5, along=3. When only

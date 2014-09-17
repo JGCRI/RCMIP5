@@ -67,8 +67,8 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
                            .combine=function(...) abind(..., along=timeIndex),   # (2)
                            .packages=c('plyr', 'abind')) %dopar% {               # (3)
                                if(verbose) cat(date(), i, "\n", file=tf, append=T)
-                               aaply(asub(x$val, idx=(i == monthIndex), dims=timeIndex), 
-                                     c(1:(timeIndex-1)), FUN, ...)
+                               aaply(asub(x$val, idx=(i == monthIndex), dims=timeIndex, drop=FALSE), 
+                                     c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
                            }
         } else {
             if(verbose) {
@@ -79,7 +79,7 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
             for(i in 1:12) {
                 if(verbose) setTxtProgressBar(pb, i)
                 ans[[i]] <- aaply(
-                    asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), FUN, ...)
+                    asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), drop=FALSE, FUN, ...)
             }
             ans <- abind(ans, along=timeIndex)
         }
