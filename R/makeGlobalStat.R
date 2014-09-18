@@ -67,8 +67,10 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     # Main computation code
     if(parallel) parallel <- require(foreach) & require(doParallel)
     timer <- system.time({ # time the main computation
-        margins <- NULL
-        if(timeIndex > 3) margins <- c(3:(timeIndex-1))
+        margins <- 3
+        if(timeIndex > 3) margins <- 3:timeIndex
+        
+        if(verbose) cat("Margins are", margins, "\n")
         ans <- list()
         
         if(parallel) {  # go parallel, woo hoo!
@@ -86,11 +88,11 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
             # package available to the child processes (3). The computation in each process
             # is equivalent to the inside of the serial loop below.
             ans <- foreach(i=1:length(x$time),                                     # (1)
-                           .combine = function(...) abind(..., along=timeIndex-2), # (2)
+                           .combine = abind, # (2)
                            .packages=c('plyr', 'abind')) %dopar% {                 # (3)
                                if(verbose) cat(date(), i, "\n", file=tf, append=T)
-                               aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE), 
-                                     margins, .drop=FALSE, FUN, w=areavals, ...)                
+                               aa <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
+                               aaply(aa, margins, .drop=FALSE, FUN, w=areavals, ...)
                            }
         } else {
             if(verbose) {
@@ -99,16 +101,18 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
             }
             for(i in 1:length(x$time)) {
                 if(verbose) setTxtProgressBar(pb, i)
-                ans[[i]] <- aaply(asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE), 
-                                  margins, .drop=FALSE, FUN, w=areavals, ...)
+                aa <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
+                #                cat("asub returns", dim(aa), "\n")
+                ans[[i]] <- aaply(aa, margins, .drop=FALSE, FUN, w=areavals, ...)
+                #                cat("aaply returns", dim(ans[[i]]), "\n")               
             }
-            # All done, now combine answer list with correct 'along' ordering
-            # (When lev or depth is present, timeIndex=4, along=3. When only
-            # one is, TimeIndex=4, along=2; and when no lev/depth info, 3/1.)
-            # The abind'ing is done by foreach in the parallel logic above.
-            ans <- abind(ans, along=timeIndex)  # not -2
+            # All done, now combine answer list into one array
+            ans <- abind(ans)
+            #            cat("ans is", dim(ans),"\n")
+            #            cat("now ans is", dim(ans),"\n")
         }
-#        dim(ans) <- c(1, 1, dim(ans))      # add back in spatial dimensions of 1 (as placeholders)      
+        ans <- array(ans, dim=c(1, 1, dim(x$val)[margins]))
+        
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
