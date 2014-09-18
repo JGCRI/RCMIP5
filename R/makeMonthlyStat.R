@@ -40,9 +40,9 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex %in% c(3, 4)) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
+    stopifnot(identical(dim(x$val)[timeIndex], length(x$time)))
     
-    stopifnot(dim(x$val)[c(1,2,timeIndex)]==c(length(x$lon),length(x$lat),length(x$time)))
-    
+    # uniqueYears holds the different years in x's time vector
     uniqueYears <- unique(floor(x$time))
     monthIndex <- floor((x$time %% 1) * 12 + 1)
     
@@ -79,7 +79,8 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
             for(i in 1:12) {
                 if(verbose) setTxtProgressBar(pb, i)
                 ans[[i]] <- aaply(
-                    asub(x$val, idx=(i == monthIndex), dims=timeIndex), c(1:(timeIndex-1)), drop=FALSE, FUN, ...)
+                    asub(x$val, idx=(i == monthIndex), dims=timeIndex, drop=FALSE), 
+                    c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
             }
             ans <- abind(ans, along=timeIndex)
         }

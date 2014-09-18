@@ -38,10 +38,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex %in% c(3, 4)) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
-    
-    # Check that data array dimensions match those of lon, lat, and time
-    stopifnot(identical(dim(x$val)[c(1, 2, timeIndex)],
-                        c(length(x$lon), length(x$lat), length(x$time))))
+    stopifnot(identical(dim(x$val)[timeIndex], length(x$time)))
     
     # uniqueYears holds the different years in x's time vector
     uniqueYears <- unique(floor(x$time))
@@ -87,7 +84,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
                 ans[[i]] <- aaply(asub(x$val,
                                        idx=uniqueYears[i] == floor(x$time),
                                        dims=timeIndex, drop=FALSE),
-                                  c(1:(timeIndex-1)), FUN, ...)
+                                  c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
             } # for
             ans <- abind(ans, along=timeIndex) # convert list to array
         } # if(parallel)

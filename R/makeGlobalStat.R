@@ -103,18 +103,18 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
                                   margins, .drop=FALSE, FUN, w=areavals, ...)
             }
             # All done, now combine answer list with correct 'along' ordering
-            # (When both lev and depth are present, timeIndex=5, along=3. When only
+            # (When lev or depth is present, timeIndex=4, along=3. When only
             # one is, TimeIndex=4, along=2; and when no lev/depth info, 3/1.)
             # The abind'ing is done by foreach in the parallel logic above.
-            ans <- abind(ans, along=timeIndex-2)
+            ans <- abind(ans, along=timeIndex)  # not -2
         }
-        dim(ans) <- c(1, 1, dim(ans))      # add back in spatial dimensions of 1 (as placeholders)      
+#        dim(ans) <- c(1, 1, dim(ans))      # add back in spatial dimensions of 1 (as placeholders)      
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
     
     # Finish up
-    x$val <- ans
+    x$val <- unname(ans)
     x[c('lat', 'lon')] <- NULL
     x$variable <- paste(as.character(substitute(FUN)), "of", x$variable)
     x$numCells <- length(areavals)
