@@ -234,6 +234,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     levUnit <- NULL
     valUnit <- NULL
     prov <- NULL # provenance
+    loadedFiles <- c()
     # Note that list.files returns a sorted list so these file should already
     # be in temporal order if the ensemble is split over multiple files.
     for(fileStr in fileList) {
@@ -380,6 +381,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         temp <- .ncvar_get(nc, varid=variable, start=start, count=count)
         if(verbose) cat("- data", dim(temp), "\n")
         valUnit <- .ncatt_get(nc, variable, 'units')$value  # load units
+        loadedFiles <- c(loadedFiles, fileStr)
         
         # Test that spatial dimensions are identical across files
         if(length(val) > 0) {
@@ -393,7 +395,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         .nc_close(nc)
     } # for
     
-    x <- cmip5data(list(files=fileList, val=unname(val), valUnit=valUnit,
+    x <- cmip5data(list(files=loadedFiles, val=unname(val), valUnit=valUnit,
                         lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
                         time=timeArr, timeFreqStr=timeFreqStr,
                         variable=variable, model=model, domain=domain,
