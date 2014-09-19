@@ -15,14 +15,19 @@
 #' same as the caller for lev/depth (if present) and time, but lon and lat are reduced to 
 #' 1 (i.e. no dimensionality). A \code{numCells} field is also added, recording the number
 #' of cells in the spatial grid.
-#' @details If 'lev' and/or 'depth' dimensions are present, the stat function is calculated
-#' for all combinations of these. No status bar is printed when processing in parallel,
-#' but progress is logged to a file (call with verbose=T) that can be monitored.
-#' @note We expect that weighted.mean and a weighted sum will be the most frequent
+#' @details This function is more complicated than the other makeXxxStat functions, because
+#' (i) we don't know ahead of time whether there's a depth/lev dimension, and (ii) we
+#' provide explicit support for area-weighted functions. We expect that weighted.mean 
+#' and a weighted sum will be the most frequent
 #' calculations needed. The former is built into R, and the latter can generally
 #' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
 #' follow the weighted.mean syntax, in particular 
 #' accepting parameters 'x' (data) and 'w' (weights) of equal size.
+#' @note If 'lev' and/or 'depth' dimensions are present, the stat function is calculated
+#' for all combinations of these. No status bar is printed when processing in parallel,
+#' but progress is logged to a file (call with verbose=T) that can be monitored.
+#' @note The \code{val} component of the returned object will always be the same structure
+#' as \code{x}, i.e. of dimensions {1, 1, [z,], t}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeDepthLevStat}} \code{\link{makeMonthlyStat}} 
 #' @examples
 #' d <- cmip5data(1970:2014)   # sample data
@@ -30,7 +35,7 @@
 #' summary(makeGlobalStat(d, verbose=FALSE))
 #' summary(makeGlobalStat(d, verbose=FALSE, parallel=TRUE))
 #' @export
-makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weighted.mean, ...) {
+makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weighted.mean, ...) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
@@ -64,54 +69,45 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     }
     if(verbose) cat("Area grid dimensions", dim(areavals), "\n")
     
-    # Main computation code
-    if(parallel) parallel <- require(foreach) & require(doParallel)
-    timer <- system.time({ # time the main computation
-        margins <- 3
-        if(timeIndex > 3) margins <- 3:timeIndex
-        
-        if(verbose) cat("Margins are", margins, "\n")
-        ans <- list()
-        
-        if(parallel) {  # go parallel, woo hoo!
-            registerDoParallel()
-            if(verbose) {
-                cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-                
-                # Set up tempfile to log progress
-                tf <- tempfile()
-                cat(date(), "Started\n", file=tf)
-                if(verbose) cat("Progress logged to", tf, "\n")
-            }
-            # To parallelize this computation, split time across available cores (1).
-            # When finished, combine results using the abind function (2). Make the 'plyr'
-            # package available to the child processes (3). The computation in each process
-            # is equivalent to the inside of the serial loop below.
-            ans <- foreach(i=1:length(x$time),                                     # (1)
-                           .combine = abind, # (2)
-                           .packages=c('plyr', 'abind')) %dopar% {                 # (3)
-                               if(verbose) cat(date(), i, "\n", file=tf, append=T)
-                               aa <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
-                               aaply(aa, margins, .drop=FALSE, FUN, w=areavals, ...)
-                           }
-        } else {
-            if(verbose) {
-                cat("Running in serial\n")
-                pb <- txtProgressBar(min=0, max=length(x$time), style=3)
-            }
-            for(i in 1:length(x$time)) {
-                if(verbose) setTxtProgressBar(pb, i)
-                aa <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
-                #                cat("asub returns", dim(aa), "\n")
-                ans[[i]] <- aaply(aa, margins, .drop=FALSE, FUN, w=areavals, ...)
-                #                cat("aaply returns", dim(ans[[i]]), "\n")               
-            }
-            # All done, now combine answer list into one array
-            ans <- abind(ans)
-            #            cat("ans is", dim(ans),"\n")
-            #            cat("now ans is", dim(ans),"\n")
+    # Prepare for main computation
+    if(parallel) parallel <- require(doParallel)
+    margins <- 3:timeIndex
+    if(verbose) cat("Margins are", margins, "\n")
+    
+    if(parallel) {  # go parallel, woo hoo!
+        registerDoParallel()
+        if(verbose) {
+            cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
+            
+            # Set up tempfile to log progress
+            tf <- tempfile()
+            cat(date(), "Started\n", file=tf)
+            if(verbose) cat("Progress logged to", tf, "\n")
         }
+    } else if(verbose) {
+        cat("Running in serial\n")
+        pb <- txtProgressBar(min=0, max=length(x$time), style=3)
+    }        
+    
+    # Main computation code
+    timer <- system.time({ # time the main computation
+        # The computation below splits time across available cores (1), falling back
+        # to serial operation if no parallel backend is available. For each time slice,
+        # we use asub (2) to extract the correct array slice and use aaply to apply FUN.
+        # When finished, combine results using the abind function (3). For this the 'plyr'
+        # and 'abind' packages are made available to the child processes (4).
+        ans <- foreach(i=1:length(x$time),                                     # (1)
+                       .combine = abind,                                       # (3)
+                       .packages=c('plyr', 'abind')) %dopar% {                 # (4)
+                           if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)
+                           if(verbose & !parallel) setTxtProgressBar(pb, i)
+                           # Get a timeslice (ts) of data and send to aaply (2)
+                           ts <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
+                           aaply(ts, margins, .drop=FALSE, FUN, w=areavals, ...)
+                       }
         ans <- array(ans, dim=c(1, 1, dim(x$val)[margins]))
+        
+        if(parallel) stopImplicitCluster()
         
     }) # system.time
     
@@ -122,8 +118,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=TRUE, parallel=FALSE, FUN=weigh
     x[c('lat', 'lon')] <- NULL
     x$variable <- paste(as.character(substitute(FUN)), "of", x$variable)
     x$numCells <- length(areavals)
-    x <-  addProvenance(x, paste("Computed global", x$variable))
-    return(x)
+    addProvenance(x, paste("Computed global", x$variable))
 } # makeGlobalStat
 
 #' Weighted sum--i.e., sum of weighted means. Convenience function

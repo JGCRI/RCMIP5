@@ -12,6 +12,7 @@ Imports:
     abind  (>= 1.4-0),
     plyr (>= 1.8.1),
     reshape2 (>= 1.4),
+    foreach (>= 1.4.2),
     digest
 Depends:
     R (>= 2.11.0)
@@ -19,7 +20,6 @@ Suggests:
     ggplot2 (>= 0.9.3),
     ncdf4 (>= 1.9),
     ncdf (>= 1.6),
-    foreach (>= 1.4.2),
     doParallel (>= 1.0.8),
     testthat (>= 0.8)
 Version: 0.1

@@ -18,6 +18,8 @@
 #' 'depths' or 'levs' field is removed.
 #' @details No status bar is printed when processing in parallel,
 #' but progress is logged to a file (call with verbose=T) that can be monitored.
+#' @note The \code{val} component of the returned object will always be the same structure
+#' as \code{x}, i.e. of dimensions {x, y, 1, t}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @examples
 #' d <- cmip5data(1970:2014)   # sample data
@@ -57,56 +59,46 @@ makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     # Check that data array dimensions match those of lon, lat, and time
     stopifnot(identical(dim(x$val)[3], length(depthvals)))
     
-    # Parallel processing uses the foreach and doParallel packages, if available
-    if(parallel) parallel <- require(foreach) & require(doParallel)
+    # Prepare for main computation
+    if(parallel) parallel <- require(doParallel)
+    if(parallel) {  # go parallel, woo hoo!
+        registerDoParallel()
+        if(verbose) {
+            cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
+            
+            # Set up tempfile to log progress
+            tf <- tempfile()
+            cat(date(), "Started\n", file=tf)
+            if(verbose) cat("Progress logged to", tf, "\n")
+        }
+    } else if(verbose) {
+        cat("Running in serial\n")
+        pb <- txtProgressBar(min=0, max=length(x$time), style=3)
+    }        
     
-    timer <- system.time(  # time the main computation, below
-        
-        if(parallel) {  # go parallel, woo hoo!
-            registerDoParallel()
-            if(verbose) {
-                cat("Running in parallel [", getDoParWorkers(),
-                            "cores ]\n")
-                
-                # Set up tempfile to log progress
-                tf <- tempfile()
-                cat(date(), "Started\n", file=tf)
-                if(verbose) cat("Progress logged to", tf, "\n")
-            }
-            # To parallelize this computation, split time across available cores (1).
-            # When finished, combine results using the abind function (2). Make the 'plyr'
-            # package available to the child processes (3). The computation in each process
-            # is equivalent to the inside of the serial loop below.
-            ans <- foreach(i=1:length(x$time),                                     # (1)
-                           .combine = function(...)  abind(..., along=timeIndex),  # (2)
-                           .packages='plyr')  %dopar% {                            # (3)
-                               if(verbose) cat(date(), i, "\n", file=tf, append=T)
-                               aaply(x$val[,,,i], 1:2, .drop=FALSE, FUN, ...)                                                                                               
-                           }
-        } else { # not parallel
-            if(verbose) {
-                cat("Running in serial\n")
-                pb <- txtProgressBar(min=0, max=length(x$time), style=3)                
-            }
-            ans <- list()
-            for(i in 1:length(x$time)) {  # for each time slice...
-                if(verbose) setTxtProgressBar(pb, i)
-                # ...apply the annual stat function to the data subset for which
-                # the time matches the current loop. Uses aaply from 'plyr',
-                # asub and abind from 'abind' packages.
-                ans[[i]] <- aaply(x$val[,,,i], 1:2, .drop=FALSE, FUN, ...)
-            } # for
-            ans <- abind(ans, along=timeIndex) # convert list to array
-        } # if(parallel)
-        
-    ) # system.time
+    # Main computation code
+    timer <- system.time({  # time the main computation, below
+        # The computation below splits time across available cores (1), falling back
+        # to serial operation if no parallel backend is available. For each time slice,
+        # we use asub (2) to extract the correct array slice and use aaply to apply FUN.
+        # When finished, combine results using the abind function (3). For this the 'plyr'
+        # and 'abind' packages are made available to the child processes (4).
+        ans <- foreach(i=1:length(x$time),                                     # (1)
+                       .combine = function(...)  abind(..., along=timeIndex),  # (3)
+                       .packages=c('plyr', 'abind')) %dopar% {                 # (4)
+                           print(i)
+                           if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)
+                           if(verbose & !parallel) setTxtProgressBar(pb, i)
+                           # Get a timeslice (ts) of data and send to aaply (2)
+                           ts <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
+                           aaply(ts, 1:2, .drop=FALSE, FUN, ...)                                                                                     
+                       }
+    }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
     
     # We now have new computed data. Overwrite original data and update provenance
     x$val <- unname(ans)
-    x <- addProvenance(x, paste("Calculated", as.character(substitute(FUN)),
-                                "for depth/lev"))
-    
-    return(x)
+    addProvenance(x, paste("Calculated", as.character(substitute(FUN)),
+                           "for depth/lev"))
 } # makeDepthLevStat

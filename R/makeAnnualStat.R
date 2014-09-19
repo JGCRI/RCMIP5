@@ -16,6 +16,8 @@
 #' @details If 'lev' and/or 'depth' dimensions are present, the stat function is calculated
 #' for all combinations of these. No status bar is printed when processing in parallel,
 #' but progress is logged to a file (call with verbose=T) that can be monitored.
+#' @note The \code{val} component of the returned object will always be the same structure
+#' as \code{x}, i.e. of dimensions {x, y, [z,], t}.
 #' @examples
 #' d <- cmip5data(1970:2014)   # sample data
 #' makeAnnualStat(d)
@@ -43,64 +45,49 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     # uniqueYears holds the different years in x's time vector
     uniqueYears <- unique(floor(x$time))
     
-    # Parallel processing uses the foreach and doParallel packages, if available
-    if(parallel) parallel <- require(foreach) & require(doParallel)
+    # Prepare for main computation
+    if(parallel) parallel <- require(doParallel)
+    if(parallel) {  # go parallel, woo hoo!
+        registerDoParallel()
+        if(verbose) {
+            cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
+            
+            # Set up tempfile to log progress
+            tf <- tempfile()
+            cat(date(), "Started\n", file=tf)
+            if(verbose) cat("Progress logged to", tf, "\n")
+        }
+    } else if(verbose) {
+        cat("Running in serial\n")
+        pb <- txtProgressBar(min=0, max=length(x$time), style=3)
+    }        
     
-    timer <- system.time(  # time the main computation, below
-        
-        if(parallel) {  # go parallel, woo hoo!
-            registerDoParallel()
-            if(verbose) {
-                cat("Running in parallel [", getDoParWorkers(),
-                            "cores ]\n")
-                
-                # Set up tempfile to log progress
-                tf <- tempfile()
-                cat(date(), "Started\n", file=tf)
-                if(verbose) cat("Progress logged to", tf, "\n")
-            }
-            # To parallelize this computation, split years across available cores (1).
-            # When finished, combine results using the abind function (2). Make the 'plyr'
-            # package available to the child processes (3). The computation in each process
-            # is equivalent to the inside of the serial loop below.
-            ans <- foreach(i=1:length(uniqueYears),                                     # (1)
-                           .combine = function(...)  abind(..., along=timeIndex),       # (2)
-                           .packages=c('plyr', 'abind')) %dopar% {                      # (3)
-                               if(verbose) cat(date(), i, "\n", file=tf, append=T)
-                               aaply(asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex, drop=FALSE),
-                                     c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
-                           } # %dopar%
-        } else { # not parallel
-            if(verbose) {
-                cat("Running in serial\n")
-                pb <- txtProgressBar(min=0, max=length(uniqueYears), style=3)
-            }
-            ans <- list()
-            for(i in 1:length(uniqueYears)) {  # For each year...
-                if(verbose) setTxtProgressBar(pb, i)
-                # ...apply the annual stat function to the data subset for which
-                # the years match the current year of the loop. Uses aaply from 'plyr',
-                # asub and abind from 'abind' packages.
-                ans[[i]] <- aaply(asub(x$val,
-                                       idx=uniqueYears[i] == floor(x$time),
-                                       dims=timeIndex, drop=FALSE),
-                                  c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
-            } # for
-            ans <- abind(ans, along=timeIndex) # convert list to array
-        } # if(parallel)
-        
-    ) # system.time
+    # Main computation code
+    timer <- system.time({  # time the main computation, below
+        # The computation below splits time across available cores (1), falling back
+        # to serial operation if no parallel backend is available. For each time slice,
+        # we use asub (2) to extract the correct array slice and use aaply to apply FUN.
+        # When finished, combine results using the abind function (3). For this the 'plyr'
+        # and 'abind' packages are made available to the child processes (4).
+        ans <- foreach(i=1:length(uniqueYears),                                     # (1)
+                       .combine = function(...)  abind(..., along=timeIndex),       # (3)
+                       .packages=c('plyr', 'abind')) %dopar% {                      # (4)
+                           if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)
+                           if(verbose & !parallel) setTxtProgressBar(pb, i)
+                           # Get a timeslice (ts) of data and send to aaply (2)
+                           ts <- asub(x$val, idx=uniqueYears[i] == floor(x$time), dims=timeIndex, drop=FALSE)
+                           aaply(ts, c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
+                       } # %dopar%
+    }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
     
     # We now have new computed data. Overwrite original data, record # of months per year,
     # and update the time vector, time frequency string, and provenance
     x$val <- unname(ans)
-    x$numMonths <- table(floor(x$time)) ##KTB numMonths should be changed to numPerYr
+    x$numMonths <- table(floor(x$time)) # TODO KTB numMonths should be changed to numPerYr
     x$time <- uniqueYears
     x$timeFreqStr <- "years (summarized)"
-    x <- addProvenance(x, paste("Calculated",as.character(substitute(FUN)),
-                                "for years", min(x$time), "-", max(x$time)))
-    
-    return(x)
+    addProvenance(x, paste("Calculated",as.character(substitute(FUN)),
+                           "for years", min(x$time), "-", max(x$time)))
 } # makeAnnualStat
