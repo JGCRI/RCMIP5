@@ -111,17 +111,21 @@ test_that("four-D data", {
     expect_equal(dim(d30$val), c(lsize, lsize, dsize-1, (length(years))*12))    
     d31 <- makeMonthlyStat(d30, verbose=F)
     expect_equal(dim(d31$val), c(lsize, lsize, dsize-1, 12))
-    d32 <- makeGlobalStat(d31, verbose=F)
-    expect_equal(dim(d32$val), c(1, 1, dsize-1, 12))
+    d32 <- makeDepthLevStat(d31, verbose=F)
+    expect_equal(dim(d32$val), c(lsize, lsize, 1, 12))
+    d33 <- makeGlobalStat(d32, verbose=F)
+    expect_equal(dim(d33$val), c(1, 1, 1, 12))
     
     # filter, global stat, annual stat
     d40 <- filterDimensions(d, depths=d$depth[1:(length(d$depth)-1)], verbose=F)    
     expect_equal(dim(d40$val), c(lsize, lsize, dsize-1, (length(years))*12))    
     d41 <- makeGlobalStat(d40, verbose=F)
-    expect_equal(dim(d41$val), c(1, 1, dsize-1, (length(years))*12))
-    d42 <- makeMonthlyStat(d41, verbose=F)
-    expect_equal(dim(d42$val), c(1, 1, dsize-1, 12))
+    expect_equal(dim(d41$val), c(1, 1, dsize-1, (length(years))*12))        
+    d42 <- makeDepthLevStat(d41, verbose=F)
+    expect_equal(dim(d42$val), c(1, 1, 1, (length(years))*12))
+    d43 <- makeMonthlyStat(d42, verbose=F)
+    expect_equal(dim(d43$val), c(1, 1, 1, 12))
     
     # order of operations shouldn't matter
-    expect_equal(d32$val, d42$val)
+    expect_equal(d33$val, d43$val)
 })
