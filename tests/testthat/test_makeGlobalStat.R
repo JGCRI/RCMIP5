@@ -58,7 +58,7 @@ test_that("makeGlobalStat handles monthly data", {
 
 test_that("makeGlobalStat weights correctly", {
     d <- cmip5data(1850, randomize=T, monthly=F)
-    darea <- cmip5data(0, randomize=T)
+    darea <- cmip5data(0, randomize=T)  # create an area file
 
     res <- makeGlobalStat(d, area=darea, verbose=F)
     
