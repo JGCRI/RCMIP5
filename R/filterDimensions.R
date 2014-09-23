@@ -125,6 +125,8 @@ filterDimensionDepth <- function(x, depths=NULL, verbose=FALSE) {
         if(is.null(x[["depth"]])) {
             warning("No depth data found")
         } else {
+            stopifnot(length(x$depth) == dim(x$val)[3])
+            
             x$val <- asub(x$val, x$depth %in% depths, ndim-1, drop=F)
             x$depth <- x$depth[x$depth %in% depths]
             x <- addProvenance(x, paste("Filtered for depths in range [",
@@ -155,6 +157,8 @@ filterDimensionLev <- function(x, levs=NULL, verbose=FALSE) {
         if(is.null(x[["lev"]])) {
             warning("No lev data found")
         } else {
+            stopifnot(length(x$lev) == dim(x$val)[3])
+            
             x$val <- asub(x$val, x$lev %in% levs, ndim-1, drop=F)
             x$lev <- x$lev[x$lev %in% levs]
             x <- addProvenance(x, paste("Filtered for levs in range [",
