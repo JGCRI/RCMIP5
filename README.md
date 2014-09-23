@@ -9,7 +9,7 @@ More information about the CMIP5 experiment can be found on the project home pag
 
 **A few important notes:**
 
-* This package does *not* handle downloading (i.e. from the Earth System Grid Federation, http://pcmdi9.llnl.gov/esgf-web-fe/) the data themselves. You have to do this yourself, although a few small sample ESGF files are included here.
+* This package does *not* handle downloading (i.e. from the Earth System Grid Federation, http://pcmdi9.llnl.gov/esgf-web-fe/) the data themselves.
 
 * See http://cmip.llnl.gov/cmip5/publications/allpublications about registering CMIP5 manuscripts.
 
