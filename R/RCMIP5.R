@@ -155,21 +155,15 @@ print.cmip5data <- function(x, ...) {
         return()
     }
 
-    if(!is.null(x$numMonths) | !is.null(x$numYears) | !is.null(x$numCells)) {
-        type <- "(summary)"
-    } else {
-        type <- ""
-    }
-    
-    ansStr <- paste('CMIP5:', x$variable, x$model, x$experiment, type)
+    ansStr <- paste0('CMIP5: ', x$variable, ", ", x$model, " ", x$experiment)
     
     if(!is.null(x$time)) {
-        ansStr <- paste0(ansStr, "over years ", floor(min(x$time, na.rm=TRUE)),
+        ansStr <- paste0(ansStr, ", ", floor(min(x$time, na.rm=TRUE)),
                         " to ", floor(max(x$time, na.rm=TRUE)))
     }
     
     if(!is.null(x$ensembles)) {
-        ansStr <- paste(ansStr, "from", length(x$ensembles),
+        ansStr <- paste0(ansStr, ", from ", length(x$ensembles), " ",
                         ifelse(length(x$ensembles)==1, "ensemble", "ensembles"))
     }
     
@@ -215,7 +209,6 @@ summary.cmip5data <- function(object, ...) {
     if(!is.null(object$area)) {
         ans$type <- paste(ans$type, "(regridded)")
     }
-    
     
     ans$spatial <- paste0("lon [", length(object$lon),
                           "] lat [", length(object$lat),
