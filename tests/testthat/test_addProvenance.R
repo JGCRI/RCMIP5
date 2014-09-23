@@ -7,7 +7,7 @@ library(testthat)
 # To run this code: 
 #   source("addProvenance.R")
 #   library(testthat)
-#   test_file("tests/testthat/test_internalHelpers.R")
+#   test_file("tests/testthat/test_addProvenance.R")
 
 context("addProvenance")
 
