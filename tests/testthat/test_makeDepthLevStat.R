@@ -41,7 +41,7 @@ test_that("makeDepthLevStat computes depth means", {
     expect_null(res$depths)
     expect_is(res$numDepths, "integer")
     expect_more_than(nrow(res$provenance), nrow(d$provenance))
-        
+    
     # Is the answer value array correctly sized?
     ndims <- length(dim(res$val))
     expect_equal(ndims, length(dim(d$val)))  # same number of dimensions
@@ -92,4 +92,18 @@ test_that("makeDepthLevStat handles 3-dimensional data", {
     years <- 1850:1851
     d <- cmip5data(years, depth=F, lev=F)
     expect_warning(makeDepthLevStat(d))
+})
+
+test_that("makeDepthLevStat handles unusually structured data", {
+    years <- 1850:1851
+    
+    # This occurs in CMIP5: a file with lev, but also a 2D depth
+    d <- cmip5data(years, depth=F, lev=T)
+    d$depth <- array(1, dim=dim(d$val)[1:2])
+    expect_is(makeDepthLevStat(d, verbose=F), "cmip5data")
+    
+    # For completeness, test the converse as well
+    d <- cmip5data(years, depth=T, lev=F)
+    d$lev <- array(1, dim=dim(d$val)[1:2])
+    expect_is(makeDepthLevStat(d, verbose=F), "cmip5data")
 })

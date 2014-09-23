@@ -47,14 +47,22 @@ makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         return(x)
     }
     
-    if(!is.null(x$depth)) {
+    # Some CMIP5 files have four dimensional data but both $depth and $lev data
+    # supplied, with one 2D (e.g. ocean floor depths over the grid) and the
+    # other 1D (e.g. levels of depth). This is confusing. We look for which
+    # is 1D and assume that's what the user wants to compute on.
+    if(length(x$depth) == dim(x$val)[3]) {
         depthvals <- x$depth
         x$numDepths <- length(depthvals)
-    } else if(!is.null(x$lev)) {
+        computingOn <- "depth"
+    } else if(length(x$lev) == dim(x$val)[3]) {
         depthvals <- x$lev
         x$numLevs <- length(depthvals)
-    } else
-        stop("Data structure is missing depth/lev data")
+        computingOn <- "lev"        
+    } else {
+        stop("Data structure is missing appropriate 1D depth/lev data")
+    }
+    if(verbose) cat("Computing on", computingOn, "\n")
     
     # Check that data array dimensions match those of lon, lat, and time
     stopifnot(identical(dim(x$val)[3], length(depthvals)))
@@ -86,7 +94,6 @@ makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         ans <- foreach(i=1:length(x$time),                                     # (1)
                        .combine = function(...)  abind(..., along=timeIndex),  # (3)
                        .packages=c('plyr', 'abind')) %dopar% {                 # (4)
-                           print(i)
                            if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)
                            if(verbose & !parallel) setTxtProgressBar(pb, i)
                            # Get a timeslice (ts) of data and send to aaply (2)
@@ -100,5 +107,5 @@ makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     # We now have new computed data. Overwrite original data and update provenance
     x$val <- unname(ans)
     addProvenance(x, paste("Calculated", as.character(substitute(FUN)),
-                           "for depth/lev"))
+                           "for", computingOn))
 } # makeDepthLevStat
