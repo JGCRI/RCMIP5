@@ -60,7 +60,7 @@ NULL
 #' cmip5data(1970:2014, monthly=FALSE)  # annual data
 #' cmip5data(1970:2014, randomize=TRUE) # randomized data
 #' cmip5data(1970:2014, depth=TRUE)  # four-dimensional data
-#' cmip5data(0)  # sample 'fx' area data, two-dimensional
+#' cmip5data(0)  # sample 'fx' data, two-dimensional
 #' cmip5data(list())  # makes this (here empty) list class into 'cmip5data'
 #' @export
 cmip5data <- function(x=list(),
@@ -169,7 +169,7 @@ cmip5data <- function(x=list(),
 #' @details Prints a one-line summary of the object
 #' @method print cmip5data
 #' @export
-#' @keywords internal
+#' @keywords internal ##KTB: What do you mean by internal?
 print.cmip5data <- function(x, ...) {
 
     if(is.null(x$variable)) {
@@ -190,6 +190,7 @@ print.cmip5data <- function(x, ...) {
     }
 
     cat(ansStr, "\n")
+    cat(...)
 } # print.cmip5data
 
 #' Summarize a 'cmip5data' class object.
