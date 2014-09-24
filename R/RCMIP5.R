@@ -30,16 +30,16 @@ NULL
 #' example data in the newly constructed object. This is used extensively by
 #' the testing code.
 #'
-#' @param x list, or numeric (in which case is years of sample data to return)
-#' @param monthly Monthly or annual data?
-#' @param depth Create depth dimension?
-#' @param lev Create lev dimension?
-#' @param randomize Randomize initial data?
-#' @param lonsize Size of longitude dimension
-#' @param latsize Size of latitude dimension
-#' @param depthsize Size of depth dimension
-#' @param levsize Size of lev dimension
-#' @return A cmip5data object, which is a list with (at least) the following fields:
+#' @param x A list or numeric. If x is a list then the fields are expected to match those of the returned cmip5data object. If x is a numeric sample data is created where the numeric indicates the years of sample data to return.
+#' @param monthly Boolean indicating monthly or annual data.
+#' @param depth Boolean indicating depth dimension.
+#' @param lev Boolean indicating lev dimension. Note that both depth and lev can not be true.
+#' @param randomize Boolean indicating random sample data.
+#' @param lonsize Integer size of longitude dimension
+#' @param latsize Integer size of latitude dimension
+#' @param depthsize Integer size of depth dimension
+#' @param levsize Integer size of lev dimension
+#' @return A cmip5data object, which is a list with the following fields:
 #'  \item{val}{A multidimensional array [lon, lat, time] holding the data}
 #'  \item{valUnit}{A string containing the value units}
 #'  \item{timeUnit}{A string containing the time units}
@@ -48,11 +48,11 @@ NULL
 #'  \item{lon}{A numeric vector containing longitude values}
 #'  \item{depth}{A numeric vector depth values; optional}
 #'  \item{lev}{A numeric vector level values; optional}
-#'  \item{time}{A numeric vector containing time values}
-#'  \item{variable}{Variable described by this dataset}
-#'  \item{model}{Model of this dataset}
-#'  \item{experiment}{Experiment of this dataset}
-#'  \item{ensembles}{Ensemble(s) included in this dataset}
+#'  \item{time}{A numeric vector containing time values; optional}
+#'  \item{variable}{A string containg the variable name described by this dataset}
+#'  \item{model}{A string containing the model name of this dataset}
+#'  \item{experiment}{A string containing the experiment name of this dataset}
+#'  \item{ensembles}{An array of strings containg the ensemble(s) included in this dataset}
 #' @docType class
 #' @examples
 #' cmip5data(1970)  # produces monthly sample data for year 1970
@@ -68,12 +68,18 @@ cmip5data <- function(x=list(),
                       monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
                       lonsize=10, latsize=10, depthsize=5, levsize=5) {
 
+    # Force the boolean flags for sample data construction
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
 
-    if (is.list(x)) {
+    if (is.list(x)) {          # If x is a list then we are done.
+                               # Just cast it directly to a cmip5data object.
         structure(x, class="cmip5data")
-    } else if(is.numeric(x)) {        # Create sample data
 
+    } else if(is.numeric(x)) {  # Create sample data
+        # Construct two lists which will be used to create the sample data:
+        # ... result and debug.
+
+        # result holds the primary data of interest
         result <- list(
             model="model",
             experiment="experiment",
@@ -82,15 +88,18 @@ cmip5data <- function(x=list(),
             lat=180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2,
             lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
         )
+
+        # debuglist holds information which is useful for testing
         debuglist <- list(lonUnit="degrees_east",
                           latUnit="degrees_north"
         )
 
-        if(all(x > 0)) {  # normal (non-area) data
+        # Make standard space-time variable
+        if(all(x > 0)) {
             result$variable <- "var"
             result$domain <- "domain"
 
-            # Time
+            # Construct time
             years <- x
             ppy <- ifelse(monthly, 12, 1)  # periods per year
             result$calendarStr <- "360_day"
@@ -98,10 +107,12 @@ cmip5data <- function(x=list(),
             debuglist$startYr <- years[1]
             debuglist$calendarStr <- "360_day"
             debuglist$timeUnit <- paste0("days since ",years[1],"-01-01")
+            # '+15' initalizes all time stamps to be middle of the month
             debuglist$timeRaw <- (360/ppy*c(0:(length(years)*ppy-1) )+15)
+            # convert day based calandar to year based
             result$time <- debuglist$timeRaw/360+min(years)
 
-            # Space
+            # Construct space
             valdims <- c(lonsize, latsize, ppy*length(years))
             depthdim <- NULL
             if(depth) {
@@ -136,8 +147,9 @@ cmip5data <- function(x=list(),
 
         # Initialize provenance and return
         addProvenance(result, "Dummy data created")
-    } else
+    } else {
         stop("Don't know what to do with this class of parameter")
+    }
 }
 
 #' Print a 'cmip5data' class object.
