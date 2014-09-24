@@ -46,8 +46,8 @@ NULL
 #'  \item{calendarStr}{A string defining the calendar type}
 #'  \item{lat}{A numeric vector containing latitude values}
 #'  \item{lon}{A numeric vector containing longitude values}
-#'  \item{depth}{A numeric vector depth values; optional}
-#'  \item{lev}{A numeric vector level values; optional}
+#'  \item{depth}{A numeric vector depth values; optional but lev must be false}
+#'  \item{lev}{A numeric vector level values; optional but depth must be false}
 #'  \item{time}{A numeric vector containing time values; optional}
 #'  \item{variable}{A string containg the variable name described by this dataset}
 #'  \item{model}{A string containing the model name of this dataset}
@@ -70,6 +70,8 @@ cmip5data <- function(x=list(),
 
     # Force the boolean flags for sample data construction
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
+    # Only depth or lev may be true not both
+    stopifnot(!(depth & lev))
 
     if (is.list(x)) {          # If x is a list then we are done.
                                # Just cast it directly to a cmip5data object.
@@ -113,31 +115,39 @@ cmip5data <- function(x=list(),
             result$time <- debuglist$timeRaw/360+min(years)
 
             # Construct space
+            # set defaults
             valdims <- c(lonsize, latsize, ppy*length(years))
             depthdim <- NULL
+            levdim <- NULL
+
+            # insert the depth/lev in the next to last dimention and record
             if(depth) {
-                valdims <- c(valdims[1:(length(valdims)-1)], depthsize, valdims[length(valdims)])
+                valdims <- c(valdims[1:(length(valdims)-1)], depthsize,
+                             valdims[length(valdims)])
                 depthdim <- c(0:(depthsize-1))
                 debuglist$depthUnit <- "m"
-            }
-            levdim <- NULL
-            if(lev) {
-                valdims <- c(valdims[1:(length(valdims)-1)], levsize, valdims[length(valdims)])
+            }else if(lev){
+                valdims <- c(valdims[1:(length(valdims)-1)], levsize,
+                             valdims[length(valdims)])
                 levdim <- c(0:(levsize-1))
                 debuglist$levUnit <- "m"
             }
-
             result$depth <- depthdim
             result$lev <- levdim
 
-        } else {  # <=0 years means create an area data file
-            result$variable <- "area"
+        } else {  # <=0 years means create an temporally fixed data file
+            result$variable <- "var"
             result$domain <- "fx"
             valdims <- c(lonsize, latsize)
         }
 
-        # Generate data
-        valData <- ifelse(randomize, runif(prod(valdims)), 1:2)
+        # Generate fake data
+        if(randomize){
+            valData <- runif(n=prod(valdims))
+        }else{
+            valData <- 1
+        }
+
         result$val <- array(valData, dim=valdims)
         result$valUnit <- "unit"
 
