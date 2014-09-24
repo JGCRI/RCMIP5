@@ -169,7 +169,7 @@ cmip5data <- function(x=list(),
 #' @details Prints a one-line summary of the object
 #' @method print cmip5data
 #' @export
-#' @keywords internal ##KTB: What do you mean by internal?
+#' @keywords internal
 print.cmip5data <- function(x, ...) {
 
     if(is.null(x$variable)) {
@@ -207,7 +207,7 @@ summary.cmip5data <- function(object, ...) {
     ans <- list()
     class(ans) <- "summary.cmip5data"
 
-    # In general cmip5 objects have the following defined:
+    # In general, cmip5 objects have the following defined:
     ans$variable <- object$variable
     ans$valUnit <- object$valUnit
     ans$domain <- object$domain
@@ -280,36 +280,22 @@ print.summary.cmip5data <- function(x, ...) {
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
 
-    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
-    # Anything else is not valid.
-    timeIndex <- length(dim(x$val))
-    stopifnot(timeIndex %in% c(2, 3, 4)) # that's all we know
+    # cmip5data can not have both lev and depth defined
+    stopifnot((is.null(x$lev) | is.null(x$depth)))
+
+    # The ordering of x$val dimensions is lon-lat-lev-depth-time
+    dimNames <- c('lon', 'lat', 'lev', 'depth', 'time')[!c(is.null(x$lon), is.null(x$lat), is.null(x$lev), is.null(x$depth), is.null(x$time))]
 
     if(verbose) cat("Melting...\n")
     df <- reshape2::melt(x$val)
 
-    if(verbose) cat("Melting values...\n")
-    if(!is.null(x$lon)) df[,1] <- x$lon[df[,1]]
-    if(!is.null(x$lat)) df[,2] <- x$lat[df[,2]]
-    names(df)[1:2] <- c("lon","lat")
-
-    if(verbose) cat("Dealing with depth/level...\n")
-    if(!is.null(x$lev) & timeIndex==4) {
-        if(verbose) cat("Found lev")
-        df[,3] <- x$lev[df[,3]]
-        names(df)[3] <- "lev"
-    } else if(!is.null(x$depth) & timeIndex==4) {
-        if(verbose) cat("Found depth")
-        df[,3] <- x$depth[df[,3]]
-        names(df)[3] <- "depth"
+    if(verbose) cat("Melting values in order...")
+    for(ii in 1:length(dimNames)){
+        df[,ii] <- x[[dimNames[ii]]][df[,ii]]
+        names(df)[ii] <- dimNames[ii]
+        if(verbose) cat(dimNames[ii], ' ')
     }
-
-    if(verbose) cat("Dealing with time...\n")
-    if(!is.null(x$time)) {
-        df[,timeIndex] <- x$time[df[,timeIndex]]
-        names(df)[timeIndex] <- "time"
-    }
-
+    if(verbose) cat('\n')
     return(df)
 } # as.data.frame.cmip5data
 
