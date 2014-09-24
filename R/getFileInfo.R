@@ -1,5 +1,5 @@
 #' List all CMIP5 files in a directory tree
-#' 
+#'
 #' List all CMIP5 files in a directory tree, parsing their filenames for
 #' information like experiment, model, and variable names.
 #'
@@ -14,7 +14,7 @@
 #' \item{ensemble}{File ensemble}
 #' \item{time}{year (and often month) range of file}
 #' \item{size}{File size, in kilobytes}
-#' @details For more information on CMIP5 filename structure and data description, 
+#' @details For more information on CMIP5 filename structure and data description,
 #' see \url{http://cmip-pcmdi.llnl.gov/cmip5/data_description.html}
 #' @export
 #' @examples
@@ -33,7 +33,7 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     options(warn=-1)
     path <- normalizePath(path)
     options(warn=w)
-    
+
     # Pull all nc files from the directory
     fullFile <- list.files(path=path, pattern='nc$',
                            full.names=TRUE, recursive=recursive)
@@ -47,12 +47,18 @@ getFileInfo <- function(path='.', recursive=TRUE) {
     # Pull the file name w/o directory and take off the '.nc',
     shortFile <- gsub(".nc$", "", basename(fullFile))
 
-    # Split out the various components of the file name based on CMIP5 convention
+    # Split out the various components of the file name based on CMIP5
+    # ...file naming convention: variable_domain_model_experiment_ensemble_time
+    # ...or variable_domain_model_experiment_ensemble. The first example
+    # ...contains 6 string identifiers while the second contains 5.
     fileInfo <- strsplit(shortFile, split='_')
 
-    # Check how many components (pieces of info) we have
+    # Get the number of string identifiers in the file names
     infoSize <- unlist(lapply(fileInfo, length))
+    # Flag the ones that match the expected number (5 or 6)
     valid <- infoSize %in% c(5,6)
+
+    # Remove the files which do not have expected number of string identifiers
     if(!all(valid)) {
         warning('Unexpected (not correctly formatted) files. Cutting the following files from the list: ', fullFile[!valid])
         fullFile <- fullFile[valid]
@@ -67,6 +73,9 @@ getFileInfo <- function(path='.', recursive=TRUE) {
 
     # Pull the file size
     sizeInfo <- unlist(lapply(fullFile, function(x){paste0(round(file.info(x)$size/1024),"K")}))
+
+    # Since some of the files only have 5 pieces of information and other's have
+    # ...6 we need to deal with them seperately and then merge the data frames.
 
     # Deal with the 'fixed' variables  (example: areacella)
     if(any(infoSize == 5)) {
