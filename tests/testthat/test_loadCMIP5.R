@@ -4,7 +4,7 @@
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
 library(testthat)
 
-# To run this code: 
+# To run this code:
 #   source("loadCMIP5.R")
 #   library(testthat)
 #   test_file("tests/testthat/test_loadCMIP5.R")
@@ -59,7 +59,7 @@ test_that("loadEnsemble checks unique domain", {
 
 test_that("loadCMIP5 handles spatial mismatches between ensembles", {
     path <- "testdata_mismatch/"
-    
+
     # Test data created by
     # d1 <- cmip5data(1850,lonsize=10,latsize=10)
     # d2 <- cmip5data(1851,lonsize=10,latsize=8)
@@ -84,9 +84,15 @@ test_that("loadCMIP5 can load area files", {
     expect_is(d, "cmip5data")
 })
 
+test_that("loadCMIP5 correctly extracts start year", {
+    path <- "../../sampledata/monthly/"
+    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)
+    expect_equal(d$debug$startYr,  1859+11/12)
+})
+
 test_that("loadCMIP5 handles YearRange", {
     path <- "../../sampledata/monthly/"
-    
+
     # These sample data are 200512-203011 and 203012-205511 (with 2 ensembles)
     # yearRange in first file only
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2006, 2007))
@@ -95,7 +101,7 @@ test_that("loadCMIP5 handles YearRange", {
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(1, 2007))
     expect_equal(length(d$time), 25)
     expect_equal(dim(d$val)[3], 25)
-    
+
     # yearRange in second file only
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2036, 2037))
     expect_equal(length(d$time), 24)
@@ -103,14 +109,15 @@ test_that("loadCMIP5 handles YearRange", {
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2054, 9999))
     expect_equal(length(d$time), 23)
     expect_equal(dim(d$val)[3], 23)
-    
+
     # yearRange spans files
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2030, 2031))
     expect_equal(length(d$time), 24)
     expect_equal(dim(d$val)[3], 24)
-    
+
     # yearRange doesn't overlap with files
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(1995, 1996))
     expect_null(d$time)
     expect_null(dim(d$val))
 })
+
