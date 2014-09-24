@@ -128,7 +128,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
 #' @param recursive logical. Recurse into directories?
 #' @param verbose logical. Print info as we go?
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
-#' @param yearRange numeric of length 2. If supplied, load only these years of data
+#' @param yearRange numeric of length 2. If supplied, load only these years of data inclusively between these years.
 #' @return A \code{\link{cmip5data}} object.
 #' @details This function is the core of RCMIP5's data-loading. It loads all files matching
 #' the experiment, variable, model, ensemble, and domain supplied by the caller.
@@ -153,6 +153,11 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(force.ncdf)==1 & is.logical(force.ncdf))
     stopifnot(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
+
+    # Force yearRange to be made of two whole numbers
+    if(!is.null(yearRange)){
+        yearRange <- c(floor(min(yearRange)), ceiling(max(yearRange)))
+    }
 
     # We prefer to use the 'ncdf4' package, but Windows has problems with this,
     # ...so if it's not installed can also use 'ncdf'
@@ -365,7 +370,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             levUnit <- .ncatt_get(nc, 'lev', 'units')$value
         }
 
-        # Don't let there be both a depth and level
+        # Don't let there be both a depth and level, this shouldn't happen
+        # ...but let's make sure
         stopifnot(is.null(depthArr) & is.null(levArr))
 
         # If yearRange supplied, calculate filter for the data load below
@@ -380,23 +386,25 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                 next
             }
 
-            # Calculate what positions in current time array fall within yearRange
-            tstart <- match(min(yearRange), floor(thisTimeArr))   # find first time match
+            # Calculate what positions in time array fall within yearRange
+                                        # find first time match
+            tstart <- match(min(yearRange), floor(thisTimeArr))
             if(is.na(tstart)) tstart <- 1
-            tend <- match(max(yearRange)+1, floor(thisTimeArr)) - 1 # find last time match
+                                        # find last time match
+            tend <- match(max(yearRange)+1, floor(thisTimeArr)) - 1
             if(is.na(tend)) tend <- length(thisTimeArr)
 
-            # Construct the 'start' and 'count' arrays the ncvar_get will need below
+            # Construct the 'start' and 'count' arrays for ncvar_get below
             # (See ncvar_get documentation for what these mean.)
             ndims <- nc$var[[variable]]$ndims
             start <- c(rep(1, ndims-1), tstart)
             count <- c(rep(-1, ndims-1), tend-tstart+1)
-            if(verbose) cat("- loading only timeslices", tstart, "-", tend, "\n")
+            if(verbose) cat("- loading only timeslices", tstart, "-",tend, "\n")
 
             # Trim the already-loaded time arrays to match
             thisTimeArr <- thisTimeArr[tstart:tend]
             thisTimeRaw <- thisTimeRaw[tstart:tend]
-        } # if
+        } # if year range
 
         # Update running time data
         timeRaw <- c(timeRaw, thisTimeRaw)
@@ -410,15 +418,17 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 
         # Test that spatial dimensions are identical across files
         if(length(val) > 0) {
-            stopifnot(all(dim(val)[1:(length(dim(val))-1)] == dim(temp)[1:(length(dim(temp))-1)]))
+            stopifnot(all(dim(val)[1:(length(dim(val))-1)] ==
+                          dim(temp)[1:(length(dim(temp))-1)]))
         }
 
         # Bind the main variable along time dimension to previously loaded data
-        # Note that the time dimensions is guaranteed to be last - see ncdf4 documentation
+        # Note that the time dimensions is guaranteed to be last
+        # ...see ncdf4 documentation
         val <- abind(val, temp, along=length(dim(temp)))
 
         .nc_close(nc)
-    } # for
+    } # for filenames
 
     x <- cmip5data(list(files=loadedFiles, val=unname(val), valUnit=valUnit,
                         lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
