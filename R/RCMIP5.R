@@ -7,7 +7,7 @@
 #' have been downloaded, (ii) identify missing data, (iii)
 #' average (or apply other mathematical operations) across
 #' experimental ensembles, (iv) produce both temporal and spatial
-#' statistical summaries, (v) regrid data, and (vi) produce
+#' statistical summaries, and (v) produce
 #' easy-to-work-with graphical and data summaries.
 #'
 #' ...
@@ -67,13 +67,13 @@ cmip5data <- function(x=list(),
                       # parameters for making sample data
                       monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
                       lonsize=10, latsize=10, depthsize=5, levsize=5) {
-    
+
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
-    
+
     if (is.list(x)) {
         structure(x, class="cmip5data")
     } else if(is.numeric(x)) {        # Create sample data
-        
+
         result <- list(
             model="model",
             experiment="experiment",
@@ -81,15 +81,15 @@ cmip5data <- function(x=list(),
             # realistic lon (0 to 360) and lat (-90 to 90) numbers
             lat=180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2,
             lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
-        )        
+        )
         debuglist <- list(lonUnit="degrees_east",
                           latUnit="degrees_north"
         )
-        
+
         if(all(x > 0)) {  # normal (non-area) data
             result$variable <- "var"
             result$domain <- "domain"
-            
+
             # Time
             years <- x
             ppy <- ifelse(monthly, 12, 1)  # periods per year
@@ -100,7 +100,7 @@ cmip5data <- function(x=list(),
             debuglist$timeUnit <- paste0("days since ",years[1],"-01-01")
             debuglist$timeRaw <- (360/ppy*c(0:(length(years)*ppy-1) )+15)
             result$time <- debuglist$timeRaw/360+min(years)
-            
+
             # Space
             valdims <- c(lonsize, latsize, ppy*length(years))
             depthdim <- NULL
@@ -115,25 +115,25 @@ cmip5data <- function(x=list(),
                 levdim <- c(0:(levsize-1))
                 debuglist$levUnit <- "m"
             }
-            
+
             result$depth <- depthdim
             result$lev <- levdim
-            
+
         } else {  # <=0 years means create an area data file
             result$variable <- "area"
             result$domain <- "fx"
             valdims <- c(lonsize, latsize)
         }
-        
+
         # Generate data
         valData <- ifelse(randomize, runif(prod(valdims)), 1:2)
         result$val <- array(valData, dim=valdims)
         result$valUnit <- "unit"
-        
+
         # Add debug info and set class
         result$debug <- debuglist
         result <- structure(result, class="cmip5data")
-        
+
         # Initialize provenance and return
         addProvenance(result, "Dummy data created")
     } else
@@ -149,24 +149,24 @@ cmip5data <- function(x=list(),
 #' @export
 #' @keywords internal
 print.cmip5data <- function(x, ...) {
-    
+
     if(is.null(x$variable)) {
         cat("(Empty cmip5data object)")
         return()
     }
 
     ansStr <- paste0('CMIP5: ', x$variable, ", ", x$model, " ", x$experiment)
-    
+
     if(!is.null(x$time)) {
         ansStr <- paste0(ansStr, ", ", floor(min(x$time, na.rm=TRUE)),
                         " to ", floor(max(x$time, na.rm=TRUE)))
     }
-    
+
     if(!is.null(x$ensembles)) {
         ansStr <- paste0(ansStr, ", from ", length(x$ensembles), " ",
                         ifelse(length(x$ensembles)==1, "ensemble", "ensembles"))
     }
-    
+
     cat(ansStr, "\n")
 } # print.cmip5data
 
@@ -180,10 +180,10 @@ print.cmip5data <- function(x, ...) {
 #' @export
 #' @keywords internal
 summary.cmip5data <- function(object, ...) {
-    
+
     ans <- list()
     class(ans) <- "summary.cmip5data"
-    
+
     # In general cmip5 objects have the following defined:
     ans$variable <- object$variable
     ans$valUnit <- object$valUnit
@@ -191,7 +191,7 @@ summary.cmip5data <- function(object, ...) {
     ans$model <- object$model
     ans$experiment <- object$experiment
     ans$ensembles <- object$ensembles
-    
+
     if(!is.null(object$numMonths)) {
         ans$type <- paste("annual summary (of", mean(object$numMonths), "months)")
     } else if(!is.null(object$numYears)) {
@@ -201,20 +201,20 @@ summary.cmip5data <- function(object, ...) {
     } else {
         ans$type <- "primary data"
     }
-    
+
     if(!is.null(object$filtered)) {
         ans$type <- paste(ans$type, "(filtered)")
     }
-    
+
     if(!is.null(object$area)) {
         ans$type <- paste(ans$type, "(regridded)")
     }
-    
+
     ans$spatial <- paste0("lon [", length(object$lon),
                           "] lat [", length(object$lat),
                           "] depth [", length(object$depth),
                           "] lev [", length(object$lev), "]")
-    
+
     if(!is.null(object$time)){
         ans$time <- paste0(object$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
     }
@@ -223,7 +223,7 @@ summary.cmip5data <- function(object, ...) {
                         mean(as.vector(object$val), na.rm=TRUE),
                         max(as.vector(object$val), na.rm=TRUE))
     ans$provenance <- object$provenance
-    
+
     return(ans)
 } # summary.cmip5data
 
@@ -256,20 +256,20 @@ print.summary.cmip5data <- function(x, ...) {
 #' @export
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
-    
+
     # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex %in% c(2, 3, 4)) # that's all we know
-    
+
     if(verbose) cat("Melting...\n")
     df <- reshape2::melt(x$val)
-    
+
     if(verbose) cat("Melting values...\n")
     if(!is.null(x$lon)) df[,1] <- x$lon[df[,1]]
     if(!is.null(x$lat)) df[,2] <- x$lat[df[,2]]
     names(df)[1:2] <- c("lon","lat")
-    
+
     if(verbose) cat("Dealing with depth/level...\n")
     if(!is.null(x$lev) & timeIndex==4) {
         if(verbose) cat("Found lev")
@@ -280,13 +280,13 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
         df[,3] <- x$depth[df[,3]]
         names(df)[3] <- "depth"
     }
-    
+
     if(verbose) cat("Dealing with time...\n")
     if(!is.null(x$time)) {
         df[,timeIndex] <- x$time[df[,timeIndex]]
         names(df)[timeIndex] <- "time"
     }
-    
+
     return(df)
 } # as.data.frame.cmip5data
 
@@ -304,7 +304,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-    
+
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],
