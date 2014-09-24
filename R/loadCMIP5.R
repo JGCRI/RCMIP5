@@ -374,7 +374,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 
         # Don't let there be both a depth and level, this shouldn't happen
         # ...but let's make sure
-        stopifnot(is.null(depthArr) & is.null(levArr))
+        stopifnot(is.null(depthArr) | is.null(levArr))
 
         # If yearRange supplied, calculate filter for the data load below
         start <- NA
