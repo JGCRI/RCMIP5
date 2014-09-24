@@ -51,8 +51,9 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     # List all files that match specifications
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
 
-    # Only pull the files which are specified by the model strings
-    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_', variable, domain, model, experiment),
+    # Only pull the files which are specified by the id strings
+    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_',
+                                          variable, domain, model, experiment),
                                basename(fileList))]
 
     if(length(fileList) == 0) {
@@ -63,13 +64,14 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     # Strip the .nc out of the file list
     fileList <- gsub('\\.nc$', '', fileList)
 
-    # Parse out the ensemble strings according to CMIP5 specifications
+    # Parse out the ensemble strings according to CMIP5 specifications for
+    # ...file naming conventions
     ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
                                         function(x){x[5]})))
 
     if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
 
-    modelTemp <- NULL                   # Initalize the return data structure
+    modelTemp <- NULL              # Initalize the return data structure
     for(ensemble in ensembleArr) { # for each ensemble...
 
         # load the entire ensemble
