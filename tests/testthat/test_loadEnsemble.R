@@ -90,3 +90,15 @@ test_that("loadEnsemble handles GFDL quirks", {
     expect_null(dim(d$lon))
     expect_null(dim(d$lat))
 })
+
+test_that("loadEnsemble handles data with time length=1", {
+    path <- "../../sampledata/"
+    
+    # This is a real CMIP5 file with one single month
+    # loadEnsemble should add an extra dimension (of length 1) to the data
+    d <- loadEnsemble("spco2", "HadGEM2-ES", "rcp85", domain="Omon",
+                      ensemble="r1i1p1", path=path, verbose=F)    
+    expect_is(d,"cmip5data")
+    expect_equal(length(dim(d$val)), 3)
+    expect_equal(dim(d$val)[3], 1)
+})
