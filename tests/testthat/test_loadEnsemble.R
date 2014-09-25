@@ -44,7 +44,7 @@ test_that("loadEnsemble loads monthly data", {
     expect_is(d, "cmip5data")
     d <- loadEnsemble('prc','GFDL-CM3', 'rcp85', 'r1i1p1', '[^_]+', path=path, verbose=F)
     expect_is(d, "cmip5data")
-    d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1','[^_]+', path=path,verbose=F)     
+    d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1','[^_]+', path=path, verbose=F)     
     expect_is(d,"cmip5data")
     expect_equal(length(d$files),1)                                 # should be one file
 })
@@ -57,23 +57,26 @@ test_that("loadEnsemble loads annual data", {
 
 test_that("loadEnsemble loads 4D data", {
     path <- "../../sampledata/annual/"
-    d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path,verbose=F)     # test data set
+    d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
     expect_is(d$lev, "array")
     expect_is(d$val, "array")
     
-    d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', path=path,verbose=F)     # test data set
+    d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', 
+                      path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
     expect_is(d$lev, "array")
     
     path <- "../../sampledata/monthly/"
-    d <- loadEnsemble('tsl','GFDL-CM3','historicalGHG','r1i1p1', '[^_]+', path=path,verbose=F)     # test data set
+    d <- loadEnsemble('tsl','GFDL-CM3','historicalGHG','r1i1p1', '[^_]+', 
+                      path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
     expect_is(d$depth, "array")
 })
 
 test_that("loadEnsemble checks unique domain", {
-    expect_error(loadEnsemble("co3","fakemodel1-ES","rcp85","r1i1p1", '[^_]+', path='testdata_twodomains/',verbose=F))
+    expect_error(loadEnsemble("co3","fakemodel1-ES","rcp85","r1i1p1", '[^_]+',
+                              path='testdata_twodomains/', verbose=F))
 })
 
 test_that("loadEnsemble assigns ancillary data", {
@@ -83,12 +86,12 @@ test_that("loadEnsemble assigns ancillary data", {
     expect_true(!is.null(d$provenance))
 })
 
-test_that("loadEnsemble handles GFDL quirks", {
+test_that("loadEnsemble handles 2D lon and lat", {
     path <- "../../sampledata/"
     d <- loadEnsemble('tos','GFDL-ESM2G', 'historical', 'r1i1p1', '[^_]+', path=path, verbose=F)
-    expect_is(d,"cmip5data")
-    expect_null(dim(d$lon))
-    expect_null(dim(d$lat))
+    expect_is(d, "cmip5data")
+    expect_equal(length(dim(d$lon)), 1)
+    expect_equal(length(dim(d$lat)), 1)
 })
 
 test_that("loadEnsemble handles data with time length=1", {
