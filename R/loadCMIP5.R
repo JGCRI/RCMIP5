@@ -418,11 +418,12 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         # then .ncvar_get is going to return data with dimensions [x, y, [z,]]
         # (i.e. no time!). This will break our assumptions, so need to add
         # the extra dimension back in. (Same logic applies to depth/lev.)
-        if(length(depthArr) == 1 | length(levArr == 1)){
+        if(length(depthArr) == 1 | length(levArr) == 1) {
+            if(verbose) cat("- adding extra dimension for depth/lev\n")
             temp <- array(temp, dim=c(dim(temp), 1))
         }
-
-        if(length(thisTimeRaw) == 1){
+        if(length(thisTimeRaw) == 1) {
+            if(verbose) cat("- adding extra dimension for time/lev\n")            
             temp <- array(temp, dim=c(dim(temp), 1))
         }
 
