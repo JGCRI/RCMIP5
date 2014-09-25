@@ -31,3 +31,5 @@ ToddBrown/anuGrid
 #image files
 *.pdf
 *.png
+
+*.R#
