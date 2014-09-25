@@ -46,8 +46,8 @@ NULL
 #'  \item{calendarStr}{A string defining the calendar type}
 #'  \item{lat}{A numeric vector containing latitude values}
 #'  \item{lon}{A numeric vector containing longitude values}
-#'  \item{depth}{A numeric vector depth values; optional but lev must be false}
-#'  \item{lev}{A numeric vector level values; optional but depth must be false}
+#'  \item{depth}{A numeric vector depth values; optional}
+#'  \item{lev}{A numeric vector level values; optional}
 #'  \item{time}{A numeric vector containing time values; optional}
 #'  \item{variable}{A string containg the variable name described by this dataset}
 #'  \item{model}{A string containing the model name of this dataset}
@@ -70,8 +70,7 @@ cmip5data <- function(x=list(),
 
     # Force the boolean flags for sample data construction
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
-    # Only depth or lev may be true not both
-    stopifnot(!(depth & lev))
+
 
     if (is.list(x)) {          # If x is a list then we are done.
                                # Just cast it directly to a cmip5data object.
@@ -126,7 +125,9 @@ cmip5data <- function(x=list(),
                              valdims[length(valdims)])
                 depthdim <- c(0:(depthsize-1))
                 debuglist$depthUnit <- "m"
-            }else if(lev){
+            }
+
+            if(lev){
                 valdims <- c(valdims[1:(length(valdims)-1)], levsize,
                              valdims[length(valdims)])
                 levdim <- c(0:(levsize-1))
@@ -280,10 +281,8 @@ print.summary.cmip5data <- function(x, ...) {
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
 
-    # cmip5data can not have both lev and depth defined
-    stopifnot((is.null(x$lev) | is.null(x$depth)))
-
     # The ordering of x$val dimensions is lon-lat-lev-depth-time
+    # TODO check ordering here!
     dimNames <- c('lon', 'lat', 'lev', 'depth', 'time')[!c(is.null(x$lon), is.null(x$lat), is.null(x$lev), is.null(x$depth), is.null(x$time))]
 
     if(verbose) cat("Melting...\n")

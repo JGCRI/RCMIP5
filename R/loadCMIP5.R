@@ -372,10 +372,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             levUnit <- .ncatt_get(nc, 'lev', 'units')$value
         }
 
-        # Don't let there be both a depth and level, this shouldn't happen
-        # ...but let's make sure
-        stopifnot(is.null(depthArr) | is.null(levArr))
-
         # If yearRange supplied, calculate filter for the data load below
         start <- NA
         count <- NA
@@ -417,16 +413,19 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         if(verbose) cat("- data", dim(temp), "\n")
         valUnit <- .ncatt_get(nc, variable, 'units')$value  # load units
         loadedFiles <- c(loadedFiles, fileStr)
-        
+
         # If there's only a single time value (looking at you, HadGEM2-ES)
-        # then .ncvar_get is going to return data with dimensions [x, y, [z,]] 
+        # then .ncvar_get is going to return data with dimensions [x, y, [z,]]
         # (i.e. no time!). This will break our assumptions, so need to add
         # the extra dimension back in. (Same logic applies to depth/lev.)
-        if(length(depthArr) == 1 | length(levArr == 1)) 
+        if(length(depthArr) == 1 | length(levArr == 1)){
             temp <- array(temp, dim=c(dim(temp), 1))
-        if(length(thisTimeRaw) == 1) 
+        }
+
+        if(length(thisTimeRaw) == 1){
             temp <- array(temp, dim=c(dim(temp), 1))
-        
+        }
+
         # Test that spatial dimensions are identical across files
         if(length(val) > 0) {
             stopifnot(all(dim(val)[1:(length(dim(val))-1)] ==
