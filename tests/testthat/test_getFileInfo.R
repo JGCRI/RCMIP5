@@ -4,7 +4,7 @@
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
 library(testthat)
 
-# To run this code: 
+# To run this code:
 #   source("getFileInfo.R")
 #   library(testthat)
 #   test_file("tests/testthat/test_getFileInfo.R")
@@ -24,7 +24,7 @@ test_that("getFileInfo handles no input", {                 # no netcdf files fo
     w <- getOption('warn')
     options(warn=-1)
     path <- normalizePath("testdata_none/")
-    expect_warning(getFileInfo(path),"No netcdf files found")   
+    expect_warning(getFileInfo(path),"No netcdf files found")
     expect_is(getFileInfo(path),"NULL")
     options(warn=w)
 })
@@ -33,12 +33,12 @@ test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf fi
     w <- getOption('warn')
     options(warn=-1)
     path <- normalizePath("testdata_badfilename/")
-    expect_warning(getFileInfo(path),"Unexpected")   
+    expect_warning(getFileInfo(path),"Unexpected")
     expect_is(getFileInfo(path),"NULL")
     options(warn=w)
 })
 
-test_that("getFileInfo handles annual netcdfs", { 
+test_that("getFileInfo handles annual netcdfs", {
     path <- normalizePath("../../sampledata/annual")
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
@@ -49,7 +49,7 @@ test_that("getFileInfo handles annual netcdfs", {
     expect_equal(d[1,"time"],"2171-2172")
 })
 
-test_that("getFileInfo handles monthly netcdfs", { 
+test_that("getFileInfo handles monthly netcdfs", {
     path <- normalizePath("../../sampledata/monthly")
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
@@ -58,3 +58,19 @@ test_that("getFileInfo handles monthly netcdfs", {
     expect_equal(ncol(d),9)
     expect_equal(d[1,"path"],path)
 })
+
+test_that("getFileInfo handles fixed netcdfs", {
+    path <- normalizePath("../../sampledata/fx")
+    d <- getFileInfo(path)
+    expect_is(d,"data.frame")
+    expect_equal(ncol(d),9)
+    expect_equal(d[1,"path"],path)
+})
+
+test_that("getFileInfo handles fixed and temporal netcdfs together", {
+    path <- normalizePath("../../sampledata")
+    d <- getFileInfo(path)
+    expect_is(d,"data.frame")
+    expect_equal(ncol(d),9)
+})
+

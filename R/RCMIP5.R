@@ -7,7 +7,7 @@
 #' have been downloaded, (ii) identify missing data, (iii)
 #' average (or apply other mathematical operations) across
 #' experimental ensembles, (iv) produce both temporal and spatial
-#' statistical summaries, (v) regrid data, and (vi) produce
+#' statistical summaries, and (v) produce
 #' easy-to-work-with graphical and data summaries.
 #'
 #' ...
@@ -30,29 +30,29 @@ NULL
 #' example data in the newly constructed object. This is used extensively by
 #' the testing code.
 #'
-#' @param x list, or numeric (in which case is years of sample data to return)
-#' @param monthly Monthly or annual data?
-#' @param depth Create depth dimension?
-#' @param lev Create lev dimension?
-#' @param randomize Randomize initial data?
-#' @param lonsize Size of longitude dimension
-#' @param latsize Size of latitude dimension
-#' @param depthsize Size of depth dimension
-#' @param levsize Size of lev dimension
-#' @return A cmip5data object, which is a list with (at least) the following fields:
+#' @param x A list or numeric. If x is a list then the fields are expected to match those of the returned cmip5data object. If x is a numeric sample data is created where the numeric indicates the years of sample data to return.
+#' @param monthly Boolean indicating monthly or annual data.
+#' @param depth Boolean indicating depth dimension.
+#' @param lev Boolean indicating lev dimension. Note that both depth and lev can not be true.
+#' @param randomize Boolean indicating random sample data.
+#' @param lonsize Integer size of longitude dimension
+#' @param latsize Integer size of latitude dimension
+#' @param depthsize Integer size of depth dimension
+#' @param levsize Integer size of lev dimension
+#' @return A cmip5data object, which is a list with the following fields:
 #'  \item{val}{A multidimensional array [lon, lat, time] holding the data}
 #'  \item{valUnit}{A string containing the value units}
 #'  \item{timeUnit}{A string containing the time units}
 #'  \item{calendarStr}{A string defining the calendar type}
 #'  \item{lat}{A numeric vector containing latitude values}
 #'  \item{lon}{A numeric vector containing longitude values}
-#'  \item{depth}{A numeric vector depth values; optional}
-#'  \item{lev}{A numeric vector level values; optional}
-#'  \item{time}{A numeric vector containing time values}
-#'  \item{variable}{Variable described by this dataset}
-#'  \item{model}{Model of this dataset}
-#'  \item{experiment}{Experiment of this dataset}
-#'  \item{ensembles}{Ensemble(s) included in this dataset}
+#'  \item{depth}{A numeric vector depth values; optional but lev must be false}
+#'  \item{lev}{A numeric vector level values; optional but depth must be false}
+#'  \item{time}{A numeric vector containing time values; optional}
+#'  \item{variable}{A string containg the variable name described by this dataset}
+#'  \item{model}{A string containing the model name of this dataset}
+#'  \item{experiment}{A string containing the experiment name of this dataset}
+#'  \item{ensembles}{An array of strings containg the ensemble(s) included in this dataset}
 #' @docType class
 #' @examples
 #' cmip5data(1970)  # produces monthly sample data for year 1970
@@ -60,20 +60,28 @@ NULL
 #' cmip5data(1970:2014, monthly=FALSE)  # annual data
 #' cmip5data(1970:2014, randomize=TRUE) # randomized data
 #' cmip5data(1970:2014, depth=TRUE)  # four-dimensional data
-#' cmip5data(0)  # sample 'fx' area data, two-dimensional
+#' cmip5data(0)  # sample 'fx' data, two-dimensional
 #' cmip5data(list())  # makes this (here empty) list class into 'cmip5data'
 #' @export
 cmip5data <- function(x=list(),
                       # parameters for making sample data
                       monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
                       lonsize=10, latsize=10, depthsize=5, levsize=5) {
-    
+
+    # Force the boolean flags for sample data construction
     stopifnot(is.logical(c(monthly, depth, lev, randomize)))
-    
-    if (is.list(x)) {
+    # Only depth or lev may be true not both
+    stopifnot(!(depth & lev))
+
+    if (is.list(x)) {          # If x is a list then we are done.
+                               # Just cast it directly to a cmip5data object.
         structure(x, class="cmip5data")
-    } else if(is.numeric(x)) {        # Create sample data
-        
+
+    } else if(is.numeric(x)) {  # Create sample data
+        # Construct two lists which will be used to create the sample data:
+        # ... result and debug.
+
+        # result holds the primary data of interest
         result <- list(
             model="model",
             experiment="experiment",
@@ -81,16 +89,19 @@ cmip5data <- function(x=list(),
             # realistic lon (0 to 360) and lat (-90 to 90) numbers
             lat=180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2,
             lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
-        )        
+        )
+
+        # debuglist holds information which is useful for testing
         debuglist <- list(lonUnit="degrees_east",
                           latUnit="degrees_north"
         )
-        
-        if(all(x > 0)) {  # normal (non-area) data
+
+        # Make standard space-time variable
+        if(all(x > 0)) {
             result$variable <- "var"
             result$domain <- "domain"
-            
-            # Time
+
+            # Construct time
             years <- x
             ppy <- ifelse(monthly, 12, 1)  # periods per year
             result$calendarStr <- "360_day"
@@ -98,46 +109,57 @@ cmip5data <- function(x=list(),
             debuglist$startYr <- years[1]
             debuglist$calendarStr <- "360_day"
             debuglist$timeUnit <- paste0("days since ",years[1],"-01-01")
+            # '+15' initalizes all time stamps to be middle of the month
             debuglist$timeRaw <- (360/ppy*c(0:(length(years)*ppy-1) )+15)
+            # convert day based calandar to year based
             result$time <- debuglist$timeRaw/360+min(years)
-            
-            # Space
+
+            # Construct space
+            # set defaults
             valdims <- c(lonsize, latsize, ppy*length(years))
             depthdim <- NULL
+            levdim <- NULL
+
+            # insert the depth/lev in the next to last dimention and record
             if(depth) {
-                valdims <- c(valdims[1:(length(valdims)-1)], depthsize, valdims[length(valdims)])
+                valdims <- c(valdims[1:(length(valdims)-1)], depthsize,
+                             valdims[length(valdims)])
                 depthdim <- c(0:(depthsize-1))
                 debuglist$depthUnit <- "m"
-            }
-            levdim <- NULL
-            if(lev) {
-                valdims <- c(valdims[1:(length(valdims)-1)], levsize, valdims[length(valdims)])
+            }else if(lev){
+                valdims <- c(valdims[1:(length(valdims)-1)], levsize,
+                             valdims[length(valdims)])
                 levdim <- c(0:(levsize-1))
                 debuglist$levUnit <- "m"
             }
-            
             result$depth <- depthdim
             result$lev <- levdim
-            
-        } else {  # <=0 years means create an area data file
-            result$variable <- "area"
+
+        } else {  # <=0 years means create an temporally fixed data file
+            result$variable <- "var"
             result$domain <- "fx"
             valdims <- c(lonsize, latsize)
         }
-        
-        # Generate data
-        valData <- ifelse(randomize, runif(prod(valdims)), 1:2)
+
+        # Generate fake data
+        if(randomize){
+            valData <- runif(n=prod(valdims))
+        }else{
+            valData <- 1
+        }
+
         result$val <- array(valData, dim=valdims)
         result$valUnit <- "unit"
-        
+
         # Add debug info and set class
         result$debug <- debuglist
         result <- structure(result, class="cmip5data")
-        
+
         # Initialize provenance and return
         addProvenance(result, "Dummy data created")
-    } else
+    } else {
         stop("Don't know what to do with this class of parameter")
+    }
 }
 
 #' Print a 'cmip5data' class object.
@@ -149,25 +171,26 @@ cmip5data <- function(x=list(),
 #' @export
 #' @keywords internal
 print.cmip5data <- function(x, ...) {
-    
+
     if(is.null(x$variable)) {
         cat("(Empty cmip5data object)")
         return()
     }
 
     ansStr <- paste0('CMIP5: ', x$variable, ", ", x$model, " ", x$experiment)
-    
+
     if(!is.null(x$time)) {
         ansStr <- paste0(ansStr, ", ", floor(min(x$time, na.rm=TRUE)),
                         " to ", floor(max(x$time, na.rm=TRUE)))
     }
-    
+
     if(!is.null(x$ensembles)) {
         ansStr <- paste0(ansStr, ", from ", length(x$ensembles), " ",
                         ifelse(length(x$ensembles)==1, "ensemble", "ensembles"))
     }
-    
+
     cat(ansStr, "\n")
+    cat(...)
 } # print.cmip5data
 
 #' Summarize a 'cmip5data' class object.
@@ -180,18 +203,18 @@ print.cmip5data <- function(x, ...) {
 #' @export
 #' @keywords internal
 summary.cmip5data <- function(object, ...) {
-    
+
     ans <- list()
     class(ans) <- "summary.cmip5data"
-    
-    # In general cmip5 objects have the following defined:
+
+    # In general, cmip5 objects have the following defined:
     ans$variable <- object$variable
     ans$valUnit <- object$valUnit
     ans$domain <- object$domain
     ans$model <- object$model
     ans$experiment <- object$experiment
     ans$ensembles <- object$ensembles
-    
+
     if(!is.null(object$numMonths)) {
         ans$type <- paste("annual summary (of", mean(object$numMonths), "months)")
     } else if(!is.null(object$numYears)) {
@@ -201,20 +224,20 @@ summary.cmip5data <- function(object, ...) {
     } else {
         ans$type <- "primary data"
     }
-    
+
     if(!is.null(object$filtered)) {
         ans$type <- paste(ans$type, "(filtered)")
     }
-    
+
     if(!is.null(object$area)) {
         ans$type <- paste(ans$type, "(regridded)")
     }
-    
+
     ans$spatial <- paste0("lon [", length(object$lon),
                           "] lat [", length(object$lat),
                           "] depth [", length(object$depth),
                           "] lev [", length(object$lev), "]")
-    
+
     if(!is.null(object$time)){
         ans$time <- paste0(object$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
     }
@@ -223,7 +246,7 @@ summary.cmip5data <- function(object, ...) {
                         mean(as.vector(object$val), na.rm=TRUE),
                         max(as.vector(object$val), na.rm=TRUE))
     ans$provenance <- object$provenance
-    
+
     return(ans)
 } # summary.cmip5data
 
@@ -256,37 +279,23 @@ print.summary.cmip5data <- function(x, ...) {
 #' @export
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
-    
-    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
-    # Anything else is not valid.
-    timeIndex <- length(dim(x$val))
-    stopifnot(timeIndex %in% c(2, 3, 4)) # that's all we know
-    
+
+    # cmip5data can not have both lev and depth defined
+    stopifnot((is.null(x$lev) | is.null(x$depth)))
+
+    # The ordering of x$val dimensions is lon-lat-lev-depth-time
+    dimNames <- c('lon', 'lat', 'lev', 'depth', 'time')[!c(is.null(x$lon), is.null(x$lat), is.null(x$lev), is.null(x$depth), is.null(x$time))]
+
     if(verbose) cat("Melting...\n")
     df <- reshape2::melt(x$val)
-    
-    if(verbose) cat("Melting values...\n")
-    if(!is.null(x$lon)) df[,1] <- x$lon[df[,1]]
-    if(!is.null(x$lat)) df[,2] <- x$lat[df[,2]]
-    names(df)[1:2] <- c("lon","lat")
-    
-    if(verbose) cat("Dealing with depth/level...\n")
-    if(!is.null(x$lev) & timeIndex==4) {
-        if(verbose) cat("Found lev")
-        df[,3] <- x$lev[df[,3]]
-        names(df)[3] <- "lev"
-    } else if(!is.null(x$depth) & timeIndex==4) {
-        if(verbose) cat("Found depth")
-        df[,3] <- x$depth[df[,3]]
-        names(df)[3] <- "depth"
+
+    if(verbose) cat("Melting values in order...")
+    for(ii in 1:length(dimNames)){
+        df[,ii] <- x[[dimNames[ii]]][df[,ii]]
+        names(df)[ii] <- dimNames[ii]
+        if(verbose) cat(dimNames[ii], ' ')
     }
-    
-    if(verbose) cat("Dealing with time...\n")
-    if(!is.null(x$time)) {
-        df[,timeIndex] <- x$time[df[,timeIndex]]
-        names(df)[timeIndex] <- "time"
-    }
-    
+    if(verbose) cat('\n')
     return(df)
 } # as.data.frame.cmip5data
 
@@ -304,7 +313,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-    
+
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],
