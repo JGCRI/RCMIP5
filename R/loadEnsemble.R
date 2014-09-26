@@ -295,7 +295,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                                          depthArr, levArr, thisTimeRaw, verbose)
         
         # Test that spatial dimensions are identical across files
-        if(length(val) > 0 & length(dimNames) > 1) {
+        if(length(val) > 0 & length(dimNames) > 2) {
             stopifnot(all(dim(val)[1:(length(dim(val))-1)] ==
                               dim(vardata)[1:(length(dim(vardata))-1)]))
         }
@@ -366,13 +366,13 @@ restoreMissingDimensions <- function(vardata, lonArr, latArr,
     }
     if(length(depthArr) == 1 | length(levArr) == 1) {
         if(verbose) cat("- adding extra dimension for depth/lev\n")
-        if(length(dim(vardata)) == 3)
+        if(length(dim(vardata)) >= 3)
             vardata <- array(vardata, dim=c(dim(vardata)[1:2], 1, dim(vardata)[3:length(dim(vardata))]))
         else
             vardata <- array(vardata, dim=c(dim(vardata), 1))
     }
     if(length(thisTimeRaw) == 1) {
-        if(verbose) cat("- adding extra dimension for time/lev\n")            
+        if(verbose) cat("- adding extra dimension for time\n")            
         vardata <- array(vardata, dim=c(dim(vardata), 1))
     } 
     vardata
