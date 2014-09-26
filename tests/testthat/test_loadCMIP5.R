@@ -40,6 +40,8 @@ test_that("loadCMIP5 handles no files found", {            # no netcdf files fou
 })
 
 test_that("loadCMIP5 loads monthly data", {
+    skip_on_cran()
+    
     path <- "../../sampledata/monthly/"
     d <- loadCMIP5('nbp','HadGEM2-ES','rcp85',path=path,verbose=F)     # test data set
     expect_is(d,"cmip5data")
@@ -47,6 +49,8 @@ test_that("loadCMIP5 loads monthly data", {
 })
 
 test_that("loadCMIP5 loads annual data", {
+    skip_on_cran()  
+    
     path <- "../../sampledata/annual/"
     d <- loadCMIP5('co3','HadGEM2-ES','rcp85',path=path,verbose=F)
     expect_is(d,"cmip5data")
@@ -70,6 +74,8 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
 })
 
 test_that("loadCMIP5 can load using both ncdf and ncdf4", {
+    skip_on_cran()
+    
     path <- "../../sampledata/monthly/"
     d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)  # ncdf4
     d2 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, force.ncdf=TRUE) # ncdf
@@ -78,6 +84,8 @@ test_that("loadCMIP5 can load using both ncdf and ncdf4", {
 })
 
 test_that("loadCMIP5 can load area files", {
+    skip_on_cran()
+    
     path <- "../../sampledata/fx/"
     # areacella_fx_GFDL-CM3_historical_r0i0p0.nc
     d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F)
@@ -85,12 +93,16 @@ test_that("loadCMIP5 can load area files", {
 })
 
 test_that("loadCMIP5 correctly extracts start year", {
+    skip_on_cran()
+    
     path <- "../../sampledata/monthly/"
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)
     expect_equal(d$debug$startYr,  1859+11/12)
 })
 
 test_that("loadCMIP5 handles YearRange", {
+    skip_on_cran()
+    
     path <- "../../sampledata/monthly/"
 
     # These sample data are 200512-203011 and 203012-205511 (with 2 ensembles)
