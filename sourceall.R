@@ -17,6 +17,7 @@ source("R/getFileInfo.R")
 source("R/checkTimePeriod.R")
 
 source("R/loadCMIP5.R")
+source("R/loadEnsemble.R")
 
 source("R/RCMIP5.R")
 source("R/addProvenance.R")
