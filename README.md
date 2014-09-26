@@ -11,15 +11,16 @@ More information about the CMIP5 experiment can be found on the project home pag
 
 * The RCMIP5 package can be installed from CRAN or directly from this repository, using the devtools \code{install_github} command.
 
-**A few important notes:**
+**Bugs reports**
+
+* CMIP5 data are highly variable in their structure and assumptions. If you find a bug (something unexpected happens or the code crashes) we want to know about it!
+* Please either [open an issue](https://github.com/ktoddbrown/RCMIP5/issues), or email one of the maintainers.
+* In either case, tell us (i) what file(s) you were trying to process, (ii) what sequence of operations led to the problem, and (iii) any other pertinent information.
+
+**Other important notes**
 
 * This package does *not* handle downloading (i.e. from the Earth System Grid Federation, http://pcmdi9.llnl.gov/esgf-web-fe/) the data themselves.
 * See http://cmip.llnl.gov/cmip5/publications/allpublications about registering CMIP5 manuscripts.
 * If you use this package/code in your work, please cite it! See `citation("RCMIP5")`.
 * Want to get started? See the package vignettes or demo, `demo(RCMIP5)`.
 
-**Bugs reports**
-
-* CMIP5 data are highly variable in their structure and assumptions. If you find a bug (something unexpected happens or the code crashes) we want to know about it!
-* Please either open an issue, or email one of the maintainers.
-* In either case, tell us (i) what file(s) you were trying to process, (ii) what sequence of operations led to the problem, and (iii) any other pertinent information.
