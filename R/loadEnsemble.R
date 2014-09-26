@@ -38,11 +38,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     stopifnot(length(force.ncdf)==1 & is.logical(force.ncdf))
     stopifnot(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
     
-    # Force yearRange to be made of two whole numbers
-    if(!is.null(yearRange)){
-        yearRange <- c(floor(min(yearRange)), ceiling(max(yearRange)))
-    }
-    
     # We prefer to use the 'ncdf4' package, but Windows has problems with this,
     # ...so if it's not installed can also use 'ncdf'
     if(force.ncdf | !require(ncdf4)) {
