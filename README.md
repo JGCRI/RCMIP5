@@ -17,4 +17,8 @@ More information about the CMIP5 experiment can be found on the project home pag
 
 * Want to get started? See the package vignettes or demo, `demo(RCMIP5)`.
 
+**Bugs reports**
 
+* CMIP5 data are highly variable in their structure and assumptions. If you find a bug (something unexpected happens or the code crashes) we want to know about it!
+* Please either open an issue, or email one of the maintainers.
+* In either case, tell us (i) what file(s) you were trying to process, (ii) what sequence of operations led to the problem, and (iii) any other pertinent information.
