@@ -26,7 +26,7 @@ loadEnsemble(variable, model, experiment, ensemble, domain, path = ".",
 
 \item{force.ncdf}{Force use of the less-desirable ncdf package for testing?}
 
-\item{yearRange}{numeric of length 2. If supplied, load only these years of data}
+\item{yearRange}{numeric of length 2. If supplied, load only these years of data inclusively between these years.}
 }
 \value{
 A \code{\link{cmip5data}} object.

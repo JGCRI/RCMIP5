@@ -12,7 +12,7 @@ high-performance set of functions to (i) explore what data
 have been downloaded, (ii) identify missing data, (iii)
 average (or apply other mathematical operations) across
 experimental ensembles, (iv) produce both temporal and spatial
-statistical summaries, (v) regrid data, and (vi) produce
+statistical summaries, and (v) produce
 easy-to-work-with graphical and data summaries.
 }
 \details{
