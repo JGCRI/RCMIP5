@@ -13,7 +13,9 @@
 #' identical, and time values non-overlapping. If the time gap between the two experiments
 #' is different than their internal timesteps (e.g., if two monthly data objects are
 #' separated by more than a month) a warning will be printed.
-#' @export
+#' @note This function is 'in the freezer' (not available to users) for now.
+#' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 mergeExperiments <- function(x, y, verbose=TRUE) {
     
     # Sanity checks
