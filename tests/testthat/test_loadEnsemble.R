@@ -39,6 +39,8 @@ test_that("loadEnsemble handles no files found", {            # no netcdf files 
 })
 
 test_that("loadEnsemble loads monthly data", {
+    skip_on_cran()
+    
     path <- "../../sampledata/monthly/"
     d <- loadEnsemble('nbp','HadGEM2-ES', 'rcp85', 'r3i1p1', '[^_]+', path=path, verbose=F)     # test data set
     expect_is(d, "cmip5data")
@@ -50,12 +52,16 @@ test_that("loadEnsemble loads monthly data", {
 })
 
 test_that("loadEnsemble loads annual data", {
+    skip_on_cran()
+    
     path <- "../../sampledata/annual/"
     d <- loadEnsemble('co3', 'HadGEM2-ES', 'rcp85', 'r1i1p1', '[^_]+', path=path, verbose=F)
     expect_is(d,"cmip5data")
 })
 
 test_that("loadEnsemble loads 4D data", {
+    skip_on_cran()
+    
     path <- "../../sampledata/annual/"
     d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
@@ -80,6 +86,8 @@ test_that("loadEnsemble checks unique domain", {
 })
 
 test_that("loadEnsemble assigns ancillary data", {
+    skip_on_cran()
+    
     path <- "../../sampledata/annual/"
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', path=path,verbose=F)
     expect_is(d,"cmip5data")
@@ -87,6 +95,8 @@ test_that("loadEnsemble assigns ancillary data", {
 })
 
 test_that("loadEnsemble handles 2D lon and lat", {
+    skip_on_cran()
+    
     path <- "../../sampledata/"
     d <- loadEnsemble('tos','GFDL-ESM2G', 'historical', 'r1i1p1', '[^_]+', path=path, verbose=F)
     expect_is(d, "cmip5data")
@@ -95,6 +105,8 @@ test_that("loadEnsemble handles 2D lon and lat", {
 })
 
 test_that("loadEnsemble handles data with time length=1", {
+    skip_on_cran()
+    
     path <- "../../sampledata/"
     
     # This is a real CMIP5 file with one single month
@@ -108,6 +120,8 @@ test_that("loadEnsemble handles data with time length=1", {
 
 
 test_that("loadEnsemble handles time-only data", {
+    skip_on_cran()
+    
     path <- "../../sampledata/"
     
     # This is a real CMIP5 file with no lon or lat, just time
