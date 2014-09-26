@@ -151,18 +151,24 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         # Get dimension names for 'variable'
         dimNames <- unlist(lapply(nc$var[[variable]]$dim, FUN=function(x) { x$name }))
         if(verbose) cat("-", variable, "dimension names:", dimNames, "\n")
-        stopifnot(length(dimNames) %in% c(2, 3, 4)) # that's all we know
+        stopifnot(length(dimNames) %in% c(1, 2, 3, 4)) # that's all we know
         
-        # Load guaranteed data: longitude and latitude 
-        lonArr <- .ncvar_get(nc, varid=dimNames[1])
-        lonUnit <- .ncatt_get(nc, dimNames[1], 'units')$value
-        latArr <- .ncvar_get(nc, varid=dimNames[2])
-        latUnit <- .ncatt_get(nc, dimNames[2], 'units')$value
-        
-        # Some models provide two-dimensional arrays of their lon and lat values.
-        # (Looking at you, GFDL.) If this occurs, strip down to 1
-        if(length(dim(lonArr)) > 1) lonArr <- as.vector(lonArr[,1])
-        if(length(dim(latArr)) > 1) latArr <- as.vector(latArr[1,])
+        # Most, but not all, files have longitude and latitude. Load if available.
+        lonArr <- NULL
+        lonUnit <- NULL
+        latArr <- NULL
+        latUnit <- NULL
+        if(length(dimNames) > 1) {
+            lonArr <- .ncvar_get(nc, varid=dimNames[1])
+            lonUnit <- .ncatt_get(nc, dimNames[1], 'units')$value
+            latArr <- .ncvar_get(nc, varid=dimNames[2])
+            latUnit <- .ncatt_get(nc, dimNames[2], 'units')$value
+            
+            # Some models provide two-dimensional arrays of their lon and lat values.
+            # (Looking at you, GFDL.) If this occurs, strip down to 1
+            if(length(dim(lonArr)) > 1) lonArr <- as.vector(lonArr[,1])
+            if(length(dim(latArr)) > 1) latArr <- as.vector(latArr[1,])            
+        }
         
         # Get the time frequency. Note that this should be related to
         # ...the domain (ie 'mon' should be the frequency of the domain 'Amon').
@@ -287,21 +293,11 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         temp <- .ncvar_get(nc, varid=variable, start=start, count=count)
         if(verbose) cat("- data", dim(temp), "\n")
         valUnit <- .ncatt_get(nc, variable, 'units')$value  # load units
-        loadedFiles <- c(loadedFiles, fileStr)
+        loadedFiles <- c(loadedFiles, basename(fileStr))
         
-        # If there's only a single time value (looking at you, HadGEM2-ES)
-        # then .ncvar_get is going to return data with dimensions [x, y, [z,]]
-        # (i.e. no time!). This will break our assumptions, so need to add
-        # the extra dimension back in. (Same logic applies to depth/lev.)
-        # (Note the 'collapse_degen' option is available ncdf4 but not ncdf.)
-        if(length(depthArr) == 1 | length(levArr) == 1) {
-            if(verbose) cat("- adding extra dimension for depth/lev\n")
-            temp <- array(temp, dim=c(dim(temp), 1))
-        }
-        if(length(thisTimeRaw) == 1) {
-            if(verbose) cat("- adding extra dimension for time/lev\n")            
-            temp <- array(temp, dim=c(dim(temp), 1))
-        }
+        # Restore any 'missing' dimensions (because not present, or length=1)
+        temp <- restoreMissingDimensions(temp, lonArr, latArr, 
+                                         depthArr, levArr, thisTimeRaw, verbose)
         
         # Test that spatial dimensions are identical across files
         if(length(val) > 0) {
@@ -310,7 +306,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         }
         
         # Bind the main variable along time dimension to previously loaded data
-        # Note that the time dimensions is guaranteed to be last
+        # Note that the time dimension, if present, is guaranteed to be last
         # ...see ncdf4 documentation
         val <- abind(val, temp, along=length(dim(temp)))
         
@@ -341,3 +337,48 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     x
 } # loadEnsemble
 
+
+#' Restore missing and/or degenerate dimensions in the data
+#'
+#' Loads the data for a particular CMIP5 experiment-variable-model-ensemble
+#' combination (one or more files). Returns NULL and a warning if nothing matches.
+#'
+#' @param temp the data array just loaded from the netcdf
+#' @param lonArr numeric vector of longitude values
+#' @param latArr numeric vector of latitude values
+#' @param depthArr numeric vector of depth values
+#' @param levArr numeric vector of lev values
+#' @param thisTimeRaw numeric vector of time values
+#' @param verbose logical. Print info as we go?
+#' @return The data array with restored dimensions.
+#' @note There are two cases to consider here. (1) If we load a dimension with only
+#' one value (one month, one depth, etc) then that dimension will be dropped by
+#' the .ncvar_get function (there's a 'collapse_degen' option available in ncdf4,
+#' but not in ncdf). (2) A dimension is missing entirely, e.g. in a time-only file,
+#' or a space-only grid area file. In either case, we want those dimensions (of
+#' length 1) back in the data array.
+#' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
+restoreMissingDimensions <- function(temp, lonArr, latArr, 
+                                     depthArr, levArr, thisTimeRaw, verbose) {
+     if(is.null(lonArr) | length(lonArr) == 1 ) {
+        if(verbose) cat("- adding extra dimension for lon\n")
+        temp <- array(temp, dim=c(1, dim(temp)))            
+    }
+    if(is.null(latArr) | length(latArr) == 1 ) {
+        if(verbose) cat("- adding extra dimension for lat\n")
+        temp <- array(temp, dim=c(dim(temp)[1], 1, dim(temp)[2:length(dim(temp))]))            
+    }
+    if(length(depthArr) == 1 | length(levArr) == 1) {
+        if(verbose) cat("- adding extra dimension for depth/lev\n")
+        if(length(dim(temp)) == 3)
+            temp <- array(temp, dim=c(dim(temp)[1:2], 1, dim(temp)[3:length(dim(temp))]))
+        else
+            temp <- array(temp, dim=c(dim(temp), 1))
+    }
+    if(length(thisTimeRaw) == 1) {
+        if(verbose) cat("- adding extra dimension for time/lev\n")            
+        temp <- array(temp, dim=c(dim(temp), 1))
+    } 
+    temp
+} # restoreMissingDimensions
