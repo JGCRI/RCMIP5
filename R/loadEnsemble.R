@@ -118,7 +118,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     # ...to load. We want to avoid trying to load a file from ModelA and ModelB
     # ...as one cmip5data structure here. Also set the appropreate variables
     # ...so we can identify the cmip5data object correctly.
-    for(checkStr in names(checkField)){
+    for(checkStr in names(checkField)) {
         # Pull all unique strings
         tempStr <- unique(cmipName[checkField[[checkStr]],])
         if(length(tempStr) > 1) { # there should only be one!
@@ -290,25 +290,25 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
         
         # Finally, load the actual data and its units
-        temp <- .ncvar_get(nc, varid=variable, start=start, count=count)
-        if(verbose) cat("- data", dim(temp), "\n")
+        vardata <- .ncvar_get(nc, varid=variable, start=start, count=count)
+        if(verbose) cat("- data", dim(vardata), "\n")
         valUnit <- .ncatt_get(nc, variable, 'units')$value  # load units
         loadedFiles <- c(loadedFiles, basename(fileStr))
         
         # Restore any 'missing' dimensions (because not present, or length=1)
-        temp <- restoreMissingDimensions(temp, lonArr, latArr, 
+        vardata <- restoreMissingDimensions(vardata, lonArr, latArr, 
                                          depthArr, levArr, thisTimeRaw, verbose)
         
         # Test that spatial dimensions are identical across files
-        if(length(val) > 0) {
+        if(length(val) > 0 & length(dimNames) > 1) {
             stopifnot(all(dim(val)[1:(length(dim(val))-1)] ==
-                              dim(temp)[1:(length(dim(temp))-1)]))
+                              dim(vardata)[1:(length(dim(vardata))-1)]))
         }
         
         # Bind the main variable along time dimension to previously loaded data
         # Note that the time dimension, if present, is guaranteed to be last
         # ...see ncdf4 documentation
-        val <- abind(val, temp, along=length(dim(temp)))
+        val <- abind(val, vardata, along=length(dim(vardata)))
         
         .nc_close(nc)
     } # for filenames
@@ -343,7 +343,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 #' Loads the data for a particular CMIP5 experiment-variable-model-ensemble
 #' combination (one or more files). Returns NULL and a warning if nothing matches.
 #'
-#' @param temp the data array just loaded from the netcdf
+#' @param vardata the data array just loaded from the netcdf
 #' @param lonArr numeric vector of longitude values
 #' @param latArr numeric vector of latitude values
 #' @param depthArr numeric vector of depth values
@@ -359,26 +359,26 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 #' length 1) back in the data array.
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
-restoreMissingDimensions <- function(temp, lonArr, latArr, 
+restoreMissingDimensions <- function(vardata, lonArr, latArr, 
                                      depthArr, levArr, thisTimeRaw, verbose) {
      if(is.null(lonArr) | length(lonArr) == 1 ) {
         if(verbose) cat("- adding extra dimension for lon\n")
-        temp <- array(temp, dim=c(1, dim(temp)))            
+        vardata <- array(vardata, dim=c(1, dim(vardata)))            
     }
     if(is.null(latArr) | length(latArr) == 1 ) {
         if(verbose) cat("- adding extra dimension for lat\n")
-        temp <- array(temp, dim=c(dim(temp)[1], 1, dim(temp)[2:length(dim(temp))]))            
+        vardata <- array(vardata, dim=c(dim(vardata)[1], 1, dim(vardata)[2:length(dim(vardata))]))            
     }
     if(length(depthArr) == 1 | length(levArr) == 1) {
         if(verbose) cat("- adding extra dimension for depth/lev\n")
-        if(length(dim(temp)) == 3)
-            temp <- array(temp, dim=c(dim(temp)[1:2], 1, dim(temp)[3:length(dim(temp))]))
+        if(length(dim(vardata)) == 3)
+            vardata <- array(vardata, dim=c(dim(vardata)[1:2], 1, dim(vardata)[3:length(dim(vardata))]))
         else
-            temp <- array(temp, dim=c(dim(temp), 1))
+            vardata <- array(vardata, dim=c(dim(vardata), 1))
     }
     if(length(thisTimeRaw) == 1) {
         if(verbose) cat("- adding extra dimension for time/lev\n")            
-        temp <- array(temp, dim=c(dim(temp), 1))
+        vardata <- array(vardata, dim=c(dim(vardata), 1))
     } 
-    temp
+    vardata
 } # restoreMissingDimensions
