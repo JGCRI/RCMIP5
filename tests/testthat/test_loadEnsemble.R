@@ -101,7 +101,22 @@ test_that("loadEnsemble handles data with time length=1", {
     # loadEnsemble should add an extra dimension (of length 1) to the data
     d <- loadEnsemble("spco2", "HadGEM2-ES", "rcp85", domain="Omon",
                       ensemble="r1i1p1", path=path, verbose=F)    
-    expect_is(d,"cmip5data")
+    expect_is(d, "cmip5data")
     expect_equal(length(dim(d$val)), 3)
     expect_equal(dim(d$val)[3], 1)
+})
+
+
+test_that("loadEnsemble handles time-only data", {
+    path <- "../../sampledata/"
+    
+    # This is a real CMIP5 file with no lon or lat, just time
+    # loadEnsemble should read OK, and add extra lon/lat dimensions of length 1
+    d <- loadEnsemble("co2mass", "GFDL-ESM2M", "historical", domain="Amon", ensemble="r1i1p1",
+                      path=path, verbose=F)
+    
+    expect_is(d, "cmip5data")
+    expect_equal(length(dim(d$val)), 3)
+    expect_equal(dim(d$val)[1], 1)
+    expect_equal(dim(d$val)[2], 1)
 })
