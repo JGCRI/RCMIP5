@@ -7,14 +7,15 @@ Working with CMIP5 data can be tricky, forcing scientists to write custom script
 
 More information about the CMIP5 experiment can be found on the project home page http://cmip-pcmdi.llnl.gov/cmip5/, as well as in Taylor et al. 2012, "An overview of CMIP5 and the experiment design" in *Bulletin of the American Meteorological Society* 93:485-498, http://dx.doi.org/10.1175/BAMS-D-11-00094.1.
 
+**Installing this package**
+
+* The RCMIP5 package can be installed from CRAN or directly from this repository, using the devtools \code{install_github} command.
+
 **A few important notes:**
 
 * This package does *not* handle downloading (i.e. from the Earth System Grid Federation, http://pcmdi9.llnl.gov/esgf-web-fe/) the data themselves.
-
 * See http://cmip.llnl.gov/cmip5/publications/allpublications about registering CMIP5 manuscripts.
-
 * If you use this package/code in your work, please cite it! See `citation("RCMIP5")`.
-
 * Want to get started? See the package vignettes or demo, `demo(RCMIP5)`.
 
 **Bugs reports**
