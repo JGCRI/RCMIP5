@@ -4,7 +4,7 @@
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
 library(testthat)
 
-# To run this code: 
+# To run this code:
 #   source("checkTimePeriod.R")
 #   library(testthat)
 #   test_file("tests/testthat/test_checkTimePeriod.R")
@@ -20,7 +20,7 @@ test_that("checkTimePeriod handles bad input", {
     expect_error(checkTimePeriod(data.frame()))         # incorrect data.frame input
 })
 
-test_that("checkTimePeriod correctly finds missing files", { 
+test_that("checkTimePeriod correctly finds missing files", {
     path <- normalizePath("testdata_missingfile/")
     d <- checkTimePeriod(getFileInfo(path))
     expect_is(d,"data.frame")
@@ -31,7 +31,7 @@ test_that("checkTimePeriod correctly finds missing files", {
     expect_true(all(d$files > 1))
 })
 
-test_that("checkTimePeriod correctly sees continuous files", { 
+test_that("checkTimePeriod correctly sees continuous files", {
     path <- normalizePath("../../sampledata")
     d <- checkTimePeriod(getFileInfo(path))
     expect_is(d, "data.frame")
@@ -40,7 +40,7 @@ test_that("checkTimePeriod correctly sees continuous files", {
     expect_true(all(d$allHere))
 })
 
-test_that("checkTimePeriod correctly parses dates", { 
+test_that("checkTimePeriod correctly parses dates", {
     path <- normalizePath("../../sampledata/")
     d <- checkTimePeriod(getFileInfo(path))
     expect_is(d, "data.frame")
@@ -49,4 +49,10 @@ test_that("checkTimePeriod correctly parses dates", {
     expect_true(all(d$endDate >= d$startDate))
     expect_true(all(d$startDate >= 1850))
     expect_true(all(d$endDate <= 2300))
+})
+
+test_that('checkTimePeriod correctly flags sub-monthly ensembles', {
+    path <- normalizePath('testdata_shortFreq/')
+    d <- checkTimePeriod(getFileInfo(path))
+    expect_true(is.na(d$allHere))
 })
