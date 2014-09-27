@@ -9,7 +9,7 @@
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @details The variable, units, spatial grid,
-#' depths/levels, domain, and model (TODO: ???) must all match. The timesteps must be
+#' depths/levels, domain, and model must all match. The timesteps must be
 #' identical, and time values non-overlapping. If the time gap between the two experiments
 #' is different than their internal timesteps (e.g., if two monthly data objects are
 #' separated by more than a month) a warning will be printed.

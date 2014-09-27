@@ -20,8 +20,7 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     numLat <- length(lat)
     numLon <- length(lon)
 
-    # Dummy check the given lat/lon
-    # TODO: why is this happening?
+    # Dummy check the given lat/lon - BBL: why? Clarify
     if(abs(lat[1]) == 90) {
         stop('Error: lat centered at 90\n')
     }
@@ -44,7 +43,7 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     N <- matrix(radius, nrow=numLon, ncol=numLat, byrow=TRUE)
 
     # Find the edges of the latitude grid
-    # BBL: these calculations need to be better documented TODO
+    # BBL: these calculations need to be better documented
     midLat <- (lat[2:numLat]+lat[1:(numLat-1)])/2
 #    if(verbose) cat("midLat =", midLat, "\n")
     latMin <- c(-90, midLat)

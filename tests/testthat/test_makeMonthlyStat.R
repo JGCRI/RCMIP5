@@ -25,8 +25,6 @@ test_that("makeMonthlyStat handles bad input", {
     d <- cmip5data(1850)
     d$val <- array(1:2, dim=dim(d$val)-1)
     expect_error(makeMonthlyStat(d, verbose=F))        # corrupt value array
-    
-    # TODO: annual data should error
 })
 
 test_that("makeMonthlyStat handles monthly data", {
@@ -77,7 +75,7 @@ test_that("makeMonthlyStat parallel results == serial result", {
     expect_equal(res_s$numMonths, res_p$numMonths)
 })
 
-test_that("makeAnnualStat handles annual data", {
+test_that("makeMonthlyStat handles annual data", {
     years <- 1850:1851
     d <- cmip5data(years, monthly=F)
     expect_error(makeMonthlyStat(d, verbose=F))

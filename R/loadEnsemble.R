@@ -370,7 +370,5 @@ restoreMissingDims <- function(vardata, lonArr, latArr, ZArr, thisTimeRaw, verbo
            array(vardata, dim=c(dvd, 1, 1)),            # 2: assume lon, lat
            array(vardata, dim=c(dvd[1:2], 1, dvd[3])),  # 3: assume lon, lat, time*
            vardata                                      # 4 (no change needed)
-    )
-    # TODO: there is ambiguity with the this case--could also be lon, lat, depth?
-    
+    )    
 } # restoreMissingDimensions
