@@ -31,7 +31,7 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, Zs=NULL,
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
-    stopifnot(timeIndex %in% c(2, 3, 4)) # that's all we know
+    stopifnot(timeIndex %in% c(1, 2, 3, 4)) # that's all we know
     
     x <- filterDimensionLon(x, lons, verbose)
     x <- filterDimensionLat(x, lats, verbose)
@@ -123,7 +123,7 @@ filterDimensionZ <- function(x, Zs=NULL, verbose=FALSE) {
         if(is.null(x[["Z"]])) {
             warning("No Z data found")
         } else {
-            stopifnot(length(x$Z) == dim(x$val)[3])
+            stopifnot(length(x$Z) == dim(x$val)[3]) # Sanity check
             
             x$val <- asub(x$val, x$Z %in% Zs, ndim-1, drop=F)
             x$Z <- x$Z[x$Z %in% Zs]
@@ -132,7 +132,7 @@ filterDimensionZ <- function(x, Zs=NULL, verbose=FALSE) {
             x$filtered <- TRUE
             if(verbose) cat("Filtered by Z, dim =", dim(x$val), "\n")
         }
-    }    
+    }
     x
 } # filterDimensionZ
 
@@ -195,7 +195,7 @@ filterDimensionTimeMonths <- function(x, months=NULL, verbose=FALSE) {
             x$val <- asub(x$val, monthfilter, ndim, drop=F)
             x$time <- x$time[monthfilter]
             x <- addProvenance(x, paste("Filtered for months in range [",
-                                   paste(range(months), collapse=', '), "]"))
+                                        paste(range(months), collapse=', '), "]"))
             x$filtered <- TRUE
             if(verbose) cat("Filtered by month, dim =", dim(x$val), "\n")
         }
