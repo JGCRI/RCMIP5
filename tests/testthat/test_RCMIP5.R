@@ -24,15 +24,27 @@ test_that("cmip5data summary method works", {
 })
 
 test_that("as.data.frame works", {
-    expect_is(as.data.frame(cmip5data(2000:2005)), "data.frame")
-    expect_is(as.data.frame(cmip5data(2000:2005), Z=T), "data.frame")
+    df <- as.data.frame(cmip5data(2000:2002, Z=T))
+    expect_is(df, "data.frame")
+    expect_equal(names(df), c("lon", "lat", "Z", "time", "value"))
     
-     d <- makeAnnualStat(cmip5data(2000:2005), verbose=F)
-     expect_is(as.data.frame(d), "data.frame")
-     d <- makeGlobalStat(cmip5data(2000:2005), verbose=F)
-     expect_is(as.data.frame(d), "data.frame")
-     d <- makeMonthlyStat(cmip5data(2000:2005), verbose=F)
-     expect_is(as.data.frame(d), "data.frame")
-     d <- makeZStat(cmip5data(2000:2005, Z=T), verbose=F)
-     expect_is(as.data.frame(d), "data.frame")
+    df <- as.data.frame(makeAnnualStat(cmip5data(2000:2002), verbose=F))
+     expect_is(df, "data.frame")
+    expect_equal(names(df), c("lon", "lat", "time", "value"))
+    
+    df <- as.data.frame(makeMonthlyStat(cmip5data(2000:2002), verbose=F))
+    expect_is(df, "data.frame")
+    expect_equal(names(df), c("lon", "lat", "time", "value"))
+    
+    df <- as.data.frame(makeGlobalStat(cmip5data(2000:2002), verbose=F))
+    expect_is(df, "data.frame")
+    expect_equal(names(df), c("time", "value"))
+    
+    df <- as.data.frame(makeGlobalStat(cmip5data(2000:2002, Z=T), verbose=F))
+    expect_is(df, "data.frame")
+    expect_equal(names(df), c("Z", "time", "value"))
+    
+    df <- as.data.frame(makeZStat(cmip5data(2000:2002, Z=T), verbose=F))
+    expect_is(df, "data.frame")
+    expect_equal(names(df), c("lon", "lat", "time", "value")) 
 })

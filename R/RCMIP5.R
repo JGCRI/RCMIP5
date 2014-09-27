@@ -291,7 +291,16 @@ print.summary.cmip5data <- function(x, ...) {
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
     if(verbose) cat("Melting...\n")
-    reshape2::melt(x$val, varnames=x$dimNames)
+    df <- reshape2::melt(x$val, varnames=c("lon", "lat", "Z", "time"))
+    
+    # Fill in dimensional data. Note that if one of these vectors (x$lon, x$lat,
+    # x$Z, x$time) doesn't exist, it will be removed from the data frame.
+    df$lon <- x$lon[df$lon]
+    df$lat <- x$lat[df$lat]
+    df$Z <- x$Z[df$Z]
+    df$time <- x$time[df$time]
+   
+    df
 } # as.data.frame.cmip5data
 
 #' Make package datasets and write them to disk.
