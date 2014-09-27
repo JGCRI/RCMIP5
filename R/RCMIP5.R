@@ -60,7 +60,7 @@ NULL
 #' cmip5data(1970:2014, monthly=FALSE)  # annual data
 #' cmip5data(1970:2014, randomize=TRUE) # randomized data
 #' cmip5data(1970:2014, Z=TRUE)  # four-dimensional data
-#' cmip5data(0, time=F)  # sample 'fx' data, two-dimensional
+#' cmip5data(0, time=FALSE)  # sample 'fx' data, two-dimensional
 #' cmip5data(list())  # makes this (here empty) list class into 'cmip5data'
 #' @export
 cmip5data <- function(x=list(),
