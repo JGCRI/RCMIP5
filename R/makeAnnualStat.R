@@ -19,7 +19,7 @@
 #' @note The \code{val} component of the returned object will always be the same structure
 #' as \code{x}, i.e. of dimensions {x, y, [z,], t}.
 #' @examples
-#' d <- cmip5data(1970:2014)   # sample data
+#' d <- cmip5data(1970:1975)   # sample data
 #' makeAnnualStat(d)
 #' summary(makeAnnualStat(d, verbose=FALSE))
 #' summary(makeAnnualStat(d, verbose=FALSE, parallel=TRUE))

@@ -22,9 +22,8 @@
 #' as \code{x}, i.e. of dimensions {x, y, 1, t}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @examples
-#' d <- cmip5data(1970:2014, Z=TRUE)   # sample data
+#' d <- cmip5data(1970:1975, Z=TRUE)   # sample data
 #' makeZStat(d)
-#' summary(makeZStat(d, verbose=FALSE))
 #' summary(makeZStat(d, verbose=FALSE, parallel=TRUE))
 #' summary(makeZStat(d, verbose=FALSE, FUN=sd))
 #' @export

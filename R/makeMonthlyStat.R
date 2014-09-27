@@ -20,7 +20,7 @@
 #' as \code{x}, i.e. of dimensions {x, y, [z,], 12}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeGlobalStat}}
 #' @examples
-#' d <- cmip5data(1970:2014)   # sample data
+#' d <- cmip5data(1970:1975)   # sample data
 #' makeMonthlyStat(d)
 #' summary(makeMonthlyStat(d, verbose=FALSE))
 #' summary(makeMonthlyStat(d, verbose=FALSE, parallel=TRUE))
