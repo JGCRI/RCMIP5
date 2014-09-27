@@ -62,8 +62,10 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
         x <- addProvenance(x, area)
         areavals <- area$val
         dav <- dim(areavals)
+        
+        # Because we're now saying all cmip5data are four dimensional, all the time,
+        # we probably have to strip off extra dimensions
         if(length(dav) > 2) {
-            warning("Ignoring extra area dimensions")
             areavals <- asub(areavals, as.list(rep(1, length(dav)-2)), dims=3:length(dav))       
         }
     }

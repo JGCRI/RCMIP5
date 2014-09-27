@@ -72,7 +72,7 @@ test_that("filterDimensions filters time (years)", {
     yf <- d$time[-length(d$time)] # the filter
     res <- filterDimensions(d, years=yf)
     expect_equal(res$time, yf)                                      # only years in filter
-    expect_true(dim(res$val)[3] == dim(d$val)[3]-1)                 # stripped off one year
+    expect_true(dim(res$val)[4] == dim(d$val)[4]-1)                 # stripped off one year
     expect_more_than(nrow(res$provenance), nrow(d$provenance))  # provenance bigger
     
     # Monthly data
@@ -80,7 +80,7 @@ test_that("filterDimensions filters time (years)", {
     yf <- d$time[1:(length(d$time)/2)] # the filter
     res <- filterDimensions(d, years=yf)
     expect_equal(unique(floor(res$time)), unique(floor(yf)))        # only years in filter
-    expect_more_than(dim(d$val)[3], dim(res$val)[3])                # data should be smaller
+    expect_more_than(dim(d$val)[4], dim(res$val)[4])                # data should be smaller
     expect_more_than(nrow(res$provenance), nrow(d$provenance))  # and provenance bigger
     
 })
@@ -96,7 +96,7 @@ test_that("filterDimensions filters time (months)", {
     mf <- 1:2
     res <- filterDimensions(d, months=mf)
     expect_equal(length(unique(round(res$time %% 1, 2))), length(mf))  # only months in filter
-    expect_more_than(dim(d$val)[3], dim(res$val)[3])                # data should be smaller
+    expect_more_than(dim(d$val)[4], dim(res$val)[4])                # data should be smaller
     expect_more_than(nrow(res$provenance), nrow(d$provenance))  # and provenance bigger
     
     expect_error(filterDimensions(d, months=13))                    # illegal months value
@@ -111,3 +111,18 @@ test_that("filterDimensions handles multiple operations", {
     res <- filterDimensions(d, lons=d$lon[1], lats=d$lat[1], Zs=d$Z[1], years=d$time[1])
     expect_equal(dim(res$val)[1:3], c(1, 1, 1))
 })
+
+test_that("filterDimensions handles nonstandard structures", {
+    d <- cmip5data(0, time=F)  # area-only data
+    res <- filterDimensions(d, lons=d$lon[1], lats=d$lat[1])
+    expect_is(res, "cmip5data")
+    
+    d <- cmip5data(0, Z=T, time=F)  # area and Z-only data
+    res <- filterDimensions(d, lons=d$lon[1], lats=d$lat[1], Zs=d$Z[1])
+    expect_is(res, "cmip5data")
+    
+    d <- cmip5data(1:5, lonlat=F)  # time-only data
+    res <- filterDimensions(d, years=d$time[1])
+    expect_is(res, "cmip5data")    
+})
+

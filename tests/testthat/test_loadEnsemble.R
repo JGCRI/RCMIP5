@@ -114,7 +114,7 @@ test_that("loadEnsemble handles data with time length=1", {
     d <- loadEnsemble("spco2", "HadGEM2-ES", "rcp85", domain="Omon",
                       ensemble="r1i1p1", path=path, verbose=F)    
     expect_is(d, "cmip5data")
-    expect_equal(length(dim(d$val)), 3)
+    expect_equal(length(dim(d$val)), 4)
     expect_equal(dim(d$val)[3], 1)
 })
 
@@ -130,7 +130,7 @@ test_that("loadEnsemble handles time-only data", {
                       path=path, verbose=F)
     
     expect_is(d, "cmip5data")
-    expect_equal(length(dim(d$val)), 3)
+    expect_equal(length(dim(d$val)), 4)
     expect_equal(dim(d$val)[1], 1)
     expect_equal(dim(d$val)[2], 1)
 })
