@@ -72,6 +72,7 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
         # we use asub (2) to extract the correct array slice and use aaply to apply FUN.
         # When finished, combine results using the abind function (3). For this the 'plyr'
         # and 'abind' packages are made available to the child processes (4).
+        i <- 1  # this is here only to avoid a CRAN warning (no visible binding inside foreach)
         ans <- foreach(i=1:12,                                               # (1)
                        .combine=function(...) abind(..., along=timeIndex),   # (3)
                        .packages=c('plyr', 'abind')) %dopar% {               # (4)

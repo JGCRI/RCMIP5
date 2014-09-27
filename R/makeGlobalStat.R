@@ -98,6 +98,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
         # we use asub (2) to extract the correct array slice and use aaply to apply FUN.
         # When finished, combine results using the abind function (3). For this the 'plyr'
         # and 'abind' packages are made available to the child processes (4).
+        i <- 1  # this is here only to avoid a CRAN warning (no visible binding inside foreach)
         ans <- foreach(i=1:length(x$time),                                     # (1)
                        .combine = abind,                                       # (3)
                        .packages=c('plyr', 'abind')) %dopar% {                 # (4)

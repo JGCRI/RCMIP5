@@ -74,6 +74,7 @@ worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=TRU
     }
     
     # Plot
+    value <- 1  # this is here only to avoid a CRAN warning (no visible binding inside geom_raster)
     p <- ggplot(val_df, aes(lon, lat))
     p <- p + geom_raster(aes(fill=value))
     p <- p + scale_x_continuous(expand=c(0,0))
