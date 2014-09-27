@@ -361,5 +361,16 @@ restoreMissingDims <- function(vardata, lonArr, latArr, ZArr, thisTimeRaw, verbo
         if(verbose) cat("- adding extra dimension for time\n")            
         vardata <- array(vardata, dim=c(dim(vardata), 1))
     } 
-    vardata
+    
+    # At this point, we've restored all dimensions dropped due to length 1 issues
+    # But we want all data moving through RCMIP5 to have four dimensions
+    dvd <- dim(vardata)
+    switch(length(dvd),
+           array(vardata, dim=c(1, 1, 1, dvd)),         # 1: assume time only
+           array(vardata, dim=c(dvd, 1, 1)),            # 2: assume lon, lat
+           array(vardata, dim=c(dvd[1:2], 1, dvd[3])),  # 3: assume lon, lat, time*
+           vardata                                      # 4 (no change needed)
+    )
+    # TODO: there is ambiguity with the this case--could also be lon, lat, depth?
+    
 } # restoreMissingDimensions
