@@ -72,7 +72,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
     if(verbose) cat("Area grid dimensions", dim(areavals), "\n")
     
     # Prepare for main computation
-    if(parallel) parallel <- require(doParallel)
+    if(parallel) parallel <- require(doParallel, quietly=T)
     margins <- 3:timeIndex
     if(verbose) cat("Margins are", margins, "\n")
     

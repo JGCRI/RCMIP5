@@ -30,7 +30,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
-    #stopifnot(x$timeFreqStr %in% 'mon')    # val array in months?
+    #stopifnot(x$debug$timeFreqStr %in% 'mon')    # val array in months?
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
@@ -46,7 +46,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     uniqueYears <- unique(floor(x$time))
     
     # Prepare for main computation
-    if(parallel) parallel <- require(doParallel)
+    if(parallel) parallel <- require(doParallel, quietly=T)
     if(parallel) {  # go parallel, woo hoo!
         registerDoParallel()
         if(verbose) {
@@ -88,7 +88,7 @@ makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     x$val <- unname(ans)
     x$numMonths <- table(floor(x$time)) # TODO KTB numMonths should be changed to numPerYr
     x$time <- uniqueYears
-    x$timeFreqStr <- "years (summarized)"
+    x$debug$timeFreqStr <- "years (summarized)"
     addProvenance(x, paste("Calculated",as.character(substitute(FUN)),
                            "for years", min(x$time), "-", max(x$time)))
 } # makeAnnualStat
