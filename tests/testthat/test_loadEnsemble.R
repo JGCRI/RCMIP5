@@ -65,19 +65,19 @@ test_that("loadEnsemble loads 4D data", {
     path <- "../../sampledata/annual/"
     d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_is(d$lev, "array")
+    expect_is(d$Z, "array")
     expect_is(d$val, "array")
     
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', 
                       path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_is(d$lev, "array")
+    expect_is(d$Z, "array")
     
     path <- "../../sampledata/monthly/"
     d <- loadEnsemble('tsl','GFDL-CM3','historicalGHG','r1i1p1', '[^_]+', 
                       path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_is(d$depth, "array")
+    expect_is(d$Z, "array")
 })
 
 test_that("loadEnsemble checks unique domain", {

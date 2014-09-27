@@ -32,13 +32,11 @@ NULL
 #'
 #' @param x A list or numeric. If x is a list then the fields are expected to match those of the returned cmip5data object. If x is a numeric sample data is created where the numeric indicates the years of sample data to return.
 #' @param monthly Boolean indicating monthly or annual data.
-#' @param depth Boolean indicating depth dimension.
-#' @param lev Boolean indicating lev dimension. Note that both depth and lev can not be true.
+#' @param Z Boolean indicating Z dimension.
 #' @param randomize Boolean indicating random sample data.
 #' @param lonsize Integer size of longitude dimension
 #' @param latsize Integer size of latitude dimension
-#' @param depthsize Integer size of depth dimension
-#' @param levsize Integer size of lev dimension
+#' @param Zsize Integer size of Z dimension
 #' @return A cmip5data object, which is a list with the following fields:
 #'  \item{val}{A multidimensional array [lon, lat, time] holding the data}
 #'  \item{valUnit}{A string containing the value units}
@@ -46,8 +44,7 @@ NULL
 #'  \item{calendarStr}{A string defining the calendar type}
 #'  \item{lat}{A numeric vector containing latitude values}
 #'  \item{lon}{A numeric vector containing longitude values}
-#'  \item{depth}{A numeric vector depth values; optional}
-#'  \item{lev}{A numeric vector level values; optional}
+#'  \item{Z}{A numeric vector Z values; optional}
 #'  \item{time}{A numeric vector containing time values; optional}
 #'  \item{variable}{A string containg the variable name described by this dataset}
 #'  \item{model}{A string containing the model name of this dataset}
@@ -59,18 +56,17 @@ NULL
 #' cmip5data(1970:2014)
 #' cmip5data(1970:2014, monthly=FALSE)  # annual data
 #' cmip5data(1970:2014, randomize=TRUE) # randomized data
-#' cmip5data(1970:2014, depth=TRUE)  # four-dimensional data
+#' cmip5data(1970:2014, Z=TRUE)  # four-dimensional data
 #' cmip5data(0)  # sample 'fx' data, two-dimensional
 #' cmip5data(list())  # makes this (here empty) list class into 'cmip5data'
 #' @export
 cmip5data <- function(x=list(),
                       # parameters for making sample data
-                      monthly=TRUE, depth=FALSE, lev=FALSE, randomize=FALSE,
-                      lonsize=10, latsize=10, depthsize=5, levsize=5) {
+                      monthly=TRUE, Z=FALSE, randomize=FALSE,
+                      lonsize=10, latsize=10, Zsize=5) {
 
-    # Force the boolean flags for sample data construction
-    stopifnot(is.logical(c(monthly, depth, lev, randomize)))
-
+    # Sanity checks: flags must be logical
+    stopifnot(is.logical(c(monthly, Z, randomize)))
 
     if (is.list(x)) {          # If x is a list then we are done.
                                # Just cast it directly to a cmip5data object.
@@ -87,14 +83,15 @@ cmip5data <- function(x=list(),
             ensemble = "ensemble",
             # realistic lon (0 to 360) and lat (-90 to 90) numbers
             lat=180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2,
-            lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
+            lon=360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2,
+            dimNames=c("lon", "lat")
         )
 
         # debuglist holds information which is useful for testing
         debuglist <- list(lonUnit="degrees_east",
                           latUnit="degrees_north"
         )
-
+        
         # Make standard space-time variable
         if(all(x > 0)) {
             result$variable <- "var"
@@ -116,26 +113,18 @@ cmip5data <- function(x=list(),
             # Construct space
             # set defaults
             valdims <- c(lonsize, latsize, ppy*length(years))
-            depthdim <- NULL
-            levdim <- NULL
+            Zdim <- NULL
 
-            # insert the depth/lev in the next to last dimention and record
-            if(depth) {
-                valdims <- c(valdims[1:(length(valdims)-1)], depthsize,
+            # insert the Z in the next to last dimention and record
+            if(Z) {
+                valdims <- c(valdims[1:(length(valdims)-1)], Zsize,
                              valdims[length(valdims)])
-                depthdim <- c(0:(depthsize-1))
-                debuglist$depthUnit <- "m"
+                Zdim <- c(0:(Zsize-1))
+                debuglist$ZUnit <- "m"
+                result$dimNames <- c(result$dimNames, "Z")
             }
-
-            if(lev){
-                valdims <- c(valdims[1:(length(valdims)-1)], levsize,
-                             valdims[length(valdims)])
-                levdim <- c(0:(levsize-1))
-                debuglist$levUnit <- "m"
-            }
-            result$depth <- depthdim
-            result$lev <- levdim
-
+           result$Z <- Zdim
+           result$dimNames <- c(result$dimNames, "time")
         } else {  # <=0 years means create an temporally fixed data file
             result$variable <- "var"
             result$domain <- "fx"
@@ -143,9 +132,9 @@ cmip5data <- function(x=list(),
         }
 
         # Generate fake data
-        if(randomize){
+        if(randomize) {
             valData <- runif(n=prod(valdims))
-        }else{
+        } else {
             valData <- 1
         }
 
@@ -236,7 +225,7 @@ summary.cmip5data <- function(object, ...) {
 
     ans$spatial <- paste0("lon [", length(object$lon),
                           "] lat [", length(object$lat),
-                          "] depth [", length(object$depth),
+                          "] Z [", length(object$Z),
                           "] lev [", length(object$lev), "]")
 
     if(!is.null(object$time)){
@@ -280,22 +269,8 @@ print.summary.cmip5data <- function(x, ...) {
 #' @export
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
-
-    # The ordering of x$val dimensions is lon-lat-lev-depth-time
-    # TODO check ordering here!
-    dimNames <- c('lon', 'lat', 'lev', 'depth', 'time')[!c(is.null(x$lon), is.null(x$lat), is.null(x$lev), is.null(x$depth), is.null(x$time))]
-
     if(verbose) cat("Melting...\n")
-    df <- reshape2::melt(x$val)
-
-    if(verbose) cat("Melting values in order...")
-    for(ii in 1:length(dimNames)){
-        df[,ii] <- x[[dimNames[ii]]][df[,ii]]
-        names(df)[ii] <- dimNames[ii]
-        if(verbose) cat(dimNames[ii], ' ')
-    }
-    if(verbose) cat('\n')
-    return(df)
+    reshape2::melt(x$val, varnames=x$dimNames)
 } # as.data.frame.cmip5data
 
 #' Make package datasets and write them to disk.

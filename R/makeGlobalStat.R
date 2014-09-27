@@ -12,23 +12,23 @@
 #' @param FUN function. Function to apply across grid
 #' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object, in which the \code{val} dimensions are the
-#' same as the caller for lev/depth (if present) and time, but lon and lat are reduced to 
+#' same as the caller for Z (if present) and time, but lon and lat are reduced to 
 #' 1 (i.e. no dimensionality). A \code{numCells} field is also added, recording the number
 #' of cells in the spatial grid.
 #' @details This function is more complicated than the other makeXxxStat functions, because
-#' (i) we don't know ahead of time whether there's a depth/lev dimension, and (ii) we
+#' (i) we don't know ahead of time whether there's a Z dimension, and (ii) we
 #' provide explicit support for area-weighted functions. We expect that weighted.mean 
 #' and a weighted sum will be the most frequent
 #' calculations needed. The former is built into R, and the latter can generally
 #' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
 #' follow the weighted.mean syntax, in particular 
 #' accepting parameters 'x' (data) and 'w' (weights) of equal size.
-#' @note If 'lev' and/or 'depth' dimensions are present, the stat function is calculated
+#' @note If a Z dimension is present, the stat function is calculated
 #' for all combinations of these. No status bar is printed when processing in parallel,
 #' but progress is logged to a file (call with verbose=T) that can be monitored.
 #' @note The \code{val} component of the returned object will always be the same structure
 #' as \code{x}, i.e. of dimensions {1, 1, [z,], t}.
-#' @seealso \code{\link{makeAnnualStat}} \code{\link{makeDepthLevStat}} \code{\link{makeMonthlyStat}} 
+#' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeMonthlyStat}} 
 #' @examples
 #' d <- cmip5data(1970:2014)   # sample data
 #' makeGlobalStat(d)
@@ -44,7 +44,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
     
-    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex %in% c(3, 4)) # that's all we know

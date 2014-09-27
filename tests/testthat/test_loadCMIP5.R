@@ -105,7 +105,7 @@ test_that("loadCMIP5 handles YearRange", {
     
     path <- "../../sampledata/monthly/"
 
-    # These sample data are 200512-203011 and 203012-205511 (with 2 ensembles)
+    # These ../../sample data are 200512-203011 and 203012-205511 (with 2 ensembles)
     # yearRange in first file only
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2006, 2007))
     expect_equal(length(d$time), 24)

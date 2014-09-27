@@ -29,7 +29,7 @@ mergeExperiments <- function(x, y, verbose=TRUE) {
     stopifnot(identical(x$valUnit, y$valUnit))
     stopifnot(identical(x$lon, y$lon))
     stopifnot(identical(x$lat, y$lat))
-    stopifnot(identical(x$depth, y$depth))
+    stopifnot(identical(x$Z, y$Z))
     stopifnot(identical(x$lev, y$lev))
     
     # Ensemble check

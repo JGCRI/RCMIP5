@@ -13,12 +13,12 @@
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the monthly
 #' mean of the variable. A \code{numYears} field is also added
 #' recording the number of years averaged for each month.
-#' @details If 'lev' and/or 'depth' dimensions are present, the stat function is calculated
+#' @details If a Z dimension is present, the stat function is calculated
 #' for all combinations of these. No status bar is printed when processing in parallel,
 #' but progress is logged to a file (call with verbose=T) that can be monitored.
 #' @note The \code{val} component of the returned object will always be the same structure
 #' as \code{x}, i.e. of dimensions {x, y, [z,], 12}.
-#' @seealso \code{\link{makeAnnualStat}} \code{\link{makeDepthLevStat}} \code{\link{makeGlobalStat}}
+#' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeGlobalStat}}
 #' @examples
 #' d <- cmip5data(1970:2014)   # sample data
 #' makeMonthlyStat(d)
@@ -37,7 +37,7 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     stopifnot(length(FUN)==1 & is.function(FUN))
     stopifnot(length(dim(x$val)) %in% c(3, 4, 5)) # that's all we know
     
-    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex %in% c(3, 4)) # that's all we know
