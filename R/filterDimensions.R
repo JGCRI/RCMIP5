@@ -1,20 +1,19 @@
-#' Filter dimensions, limiting to arbitrary lon/lat/time/lev/depth
+#' Filter dimensions, limiting to arbitrary lon/lat/Z/time
 #'
 #' We frequently want to filter CMIP5 data according to some predetermined
 #' criteria: only high-latitude cells, for example, or certain years, months,
-#' depths, levels, etc. This function provides convenient one-stop service
+#' Zs, etc. This function provides convenient one-stop service
 #' for such filtering.
 #' 
 #' @param x A \code{\link{cmip5data}} object
 #' @param lons numeric vector. Longitudes to filter
 #' @param lats numeric vector. Latitudes to filter
-#' @param depths numeric vector. Depths to filter
-#' @param levs numeric vector. Levels to filter.
+#' @param Zs numeric vector. Z values to filter
 #' @param years numeric vector
 #' @param months numeric vector
 #' @param verbose logical. Print info as we go?
 #' @return The filtered \code{\link{cmip5data}} object.
-#' @note If a depth or lev filter is requested but no such data are present,
+#' @note If a filter is requested but no relevant data are present,
 #' a \code{\link{warning}} will be produced.
 #' @examples
 #' d <- cmip5data(1970:2014)   # sample data
@@ -22,22 +21,21 @@
 #' filterDimensions(d, months=6:8)  # summer
 #' filterDimensions(d, lats=d$lat[abs(d$lat)<20])  # the tropics
 #' @export
-filterDimensions <- function(x, lons=NULL, lats=NULL, depths=NULL, levs=NULL,
+filterDimensions <- function(x, lons=NULL, lats=NULL, Zs=NULL,
                              years=NULL, months=NULL, verbose=FALSE) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
-    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex %in% c(2, 3, 4)) # that's all we know
     
     x <- filterDimensionLon(x, lons, verbose)
     x <- filterDimensionLat(x, lats, verbose)
-    x <- filterDimensionDepth(x, depths, verbose)
-    x <- filterDimensionLev(x, levs, verbose)
+    x <- filterDimensionZ(x, Zs, verbose)
     x <- filterDimensionTimeYears(x, years, verbose)
     x <- filterDimensionTimeMonths(x, months, verbose)
     
@@ -106,69 +104,37 @@ filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
     x
 } # filterDimensionLat
 
-#' Filter depth dimension.
+#' Filter Z dimension.
 #'
 #' @param x cmip5data A \code{\link{cmip5data}} object.
-#' @param depths numeric vector. Depths to filter.
+#' @param Zs numeric vector. Z values to filter.
 #' @param verbose logical. Print info as we go?
 #' @return A \code{\link{cmip5data}} object.
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
-filterDimensionDepth <- function(x, depths=NULL, verbose=FALSE) {
+filterDimensionZ <- function(x, Zs=NULL, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(is.null(depths) | class(depths) %in% c("numeric", "integer", "array"))
+    stopifnot(is.null(Zs) | class(Zs) %in% c("numeric", "integer", "array"))
     
-    # Filter depth dimension
+    # Filter Z dimension
     ndim <- length(dim(x$val))
-    if(!is.null(depths)) {
-        if(is.null(x[["depth"]])) {
-            warning("No depth data found")
+    if(!is.null(Zs)) {
+        if(is.null(x[["Z"]])) {
+            warning("No Z data found")
         } else {
-            stopifnot(length(x$depth) == dim(x$val)[3])
+            stopifnot(length(x$Z) == dim(x$val)[3])
             
-            x$val <- asub(x$val, x$depth %in% depths, ndim-1, drop=F)
-            x$depth <- x$depth[x$depth %in% depths]
-            x <- addProvenance(x, paste("Filtered for depths in range [",
-                                        paste(range(depths), collapse=', '), "]"))
+            x$val <- asub(x$val, x$Z %in% Zs, ndim-1, drop=F)
+            x$Z <- x$Z[x$Z %in% Zs]
+            x <- addProvenance(x, paste("Filtered for Zs in range [",
+                                        paste(range(Zs), collapse=', '), "]"))
             x$filtered <- TRUE
-            if(verbose) cat("Filtered by depth, dim =", dim(x$val), "\n")
+            if(verbose) cat("Filtered by Z, dim =", dim(x$val), "\n")
         }
     }    
     x
-} # filterDimensionDepth
-
-#' Filter lev dimension.
-#'
-#' @param x cmip5data A \code{\link{cmip5data}} object.
-#' @param levs numeric vector. Levels to filter.
-#' @param verbose logical. Print info as we go?
-#' @return A \code{\link{cmip5data}} object.
-#' @note This is an internal RCMIP5 function and not exported.
-#' @keywords internal
-filterDimensionLev <- function(x, levs=NULL, verbose=FALSE) {
-    
-    # Sanity checks
-    stopifnot(is.null(levs) | class(levs) %in% c("numeric", "integer", "array"))
-    
-    # Filter lev dimension
-    ndim <- length(dim(x$val))
-    if(!is.null(levs)) {
-        if(is.null(x[["lev"]])) {
-            warning("No lev data found")
-        } else {
-            stopifnot(length(x$lev) == dim(x$val)[3])
-            
-            x$val <- asub(x$val, x$lev %in% levs, ndim-1, drop=F)
-            x$lev <- x$lev[x$lev %in% levs]
-            x <- addProvenance(x, paste("Filtered for levs in range [",
-                                        paste(range(levs), collapse=', '), "]"))
-            x$filtered <- TRUE
-            if(verbose) cat("Filtered by lev, dim =", dim(x$val), "\n")
-        }
-    }
-    x
-} # filterDimensionLev
+} # filterDimensionZ
 
 #' Filter time (years) dimension.
 #'

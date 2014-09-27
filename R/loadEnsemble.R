@@ -131,10 +131,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     val <- c() # variable to temporarily holds main data
     timeRaw <- c()
     timeArr <- c()
-    depthUnit <- NULL
-    levUnit <- NULL
+    ZUnit <- NULL
     valUnit <- NULL
-    prov <- NULL # provenance
     loadedFiles <- c()
     
     # Note that list.files returns a sorted list so these file should already
@@ -232,20 +230,11 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             thisTimeArr <- NULL
         }
         
-        # Load the 4th dimension identifiers, if present:
-        # depth (ocean/land depths) and lev (atmospheric levels)
-        # TODO: hackish, as it still depends on exact names
-        # TODO: should we just collapse depth and lev together, if they can't occur simulataneously?
-        # TODO: that is load the Z dimension if present?
-        depthArr <- NULL
-        if(length(dimNames) == 4 & any(c("depth", "depth_bnds") %in% dimNames)) {
-            depthArr <- .ncvar_get(nc, varid=dimNames[3])
-            depthUnit <- .ncatt_get(nc, dimNames[3], 'units')$value
-        }
-        levArr <- NULL
-        if(any(c("lev", "lev_bnds", "plev") %in% dimNames)) {
-            levArr <- .ncvar_get(nc, varid=dimNames[3])
-            levUnit <- .ncatt_get(nc, dimNames[3], 'units')$value
+        # Load the 4th dimension, if present:
+        ZArr <- NULL
+        if(length(dimNames) == 4) {
+            ZArr <- .ncvar_get(nc, varid=dimNames[3])
+            ZUnit <- .ncatt_get(nc, dimNames[3], 'units')$value
         }
         
         # If yearRange supplied, calculate filter for the data load below
@@ -291,8 +280,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         loadedFiles <- c(loadedFiles, basename(fileStr))
         
         # Restore any 'missing' dimensions (because not present, or length=1)
-        vardata <- restoreMissingDimensions(vardata, lonArr, latArr, 
-                                         depthArr, levArr, thisTimeRaw, verbose)
+        vardata <- restoreMissingDims(vardata, lonArr, latArr, ZArr, thisTimeRaw, verbose)
         
         # Test that spatial dimensions are identical across files
         if(length(val) > 0 & length(dimNames) > 2) {
@@ -309,15 +297,15 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     } # for filenames
     
     x <- cmip5data(list(files=loadedFiles, val=unname(val), valUnit=valUnit,
-                        lat=latArr, lon=lonArr, lev=levArr, depth=depthArr,
-                        time=timeArr, timeFreqStr=timeFreqStr,
+                        lat=latArr, lon=lonArr, Z=ZArr, time=timeArr,
+                        timeFreqStr=timeFreqStr,
                         variable=variable, model=model, domain=domain,
                         experiment=experiment, ensembles=ensemble,
                         dimNames=dimNames,
                         
                         debug=list(startYr=startYr,
                                    lonUnit=lonUnit, latUnit=latUnit,
-                                   depthUnit=depthUnit, levUnit=levUnit,
+                                   ZUnit=ZUnit,
                                    timeUnit=timeUnit,
                                    calendarUnitsStr=calendarUnitsStr,
                                    calendarStr=calendarStr, timeRaw=timeRaw,
@@ -341,8 +329,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 #' @param vardata the data array just loaded from the netcdf
 #' @param lonArr numeric vector of longitude values
 #' @param latArr numeric vector of latitude values
-#' @param depthArr numeric vector of depth values
-#' @param levArr numeric vector of lev values
+#' @param ZArr numeric vector of Z values
 #' @param thisTimeRaw numeric vector of time values
 #' @param verbose logical. Print info as we go?
 #' @return The data array with restored dimensions.
@@ -354,8 +341,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 #' length 1) back in the data array.
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
-restoreMissingDimensions <- function(vardata, lonArr, latArr, 
-                                     depthArr, levArr, thisTimeRaw, verbose) {
+restoreMissingDims <- function(vardata, lonArr, latArr, ZArr, thisTimeRaw, verbose) {
      if(is.null(lonArr) | length(lonArr) == 1 ) {
         if(verbose) cat("- adding extra dimension for lon\n")
         vardata <- array(vardata, dim=c(1, dim(vardata)))            
@@ -364,8 +350,8 @@ restoreMissingDimensions <- function(vardata, lonArr, latArr,
         if(verbose) cat("- adding extra dimension for lat\n")
         vardata <- array(vardata, dim=c(dim(vardata)[1], 1, dim(vardata)[2:length(dim(vardata))]))            
     }
-    if(length(depthArr) == 1 | length(levArr) == 1) {
-        if(verbose) cat("- adding extra dimension for depth/lev\n")
+    if(length(ZArr) == 1) {
+        if(verbose) cat("- adding extra dimension for Z\n")
         if(length(dim(vardata)) >= 3)
             vardata <- array(vardata, dim=c(dim(vardata)[1:2], 1, dim(vardata)[3:length(dim(vardata))]))
         else

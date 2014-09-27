@@ -14,7 +14,7 @@ context("cmip5data")
 test_that("cmip5data handles bad input", {
     expect_error(cmip5data("hi"))   
     expect_error(cmip5data(1, monthly=123))   
-    expect_error(cmip5data(1, depth=123))
+    expect_error(cmip5data(1, Z=123))
     expect_error(cmip5data(1, lev=123))
     expect_error(cmip5data(1, randomize="hi"))   
 })
@@ -50,19 +50,10 @@ test_that("cmip5data fills in ancillary data", {
     expect_is(d$debug$timeUnit, "character")
 })
 
-test_that("cmip5data obeys depth and lev", {
-    d <- cmip5data(1, depth=T)
+test_that("cmip5data obeys Z", {
+    d <- cmip5data(1, Z=T)
     expect_equal(length(dim(d$val)), 4)
-    expect_false(is.null(d$depth))
-    
-    d <- cmip5data(1, lev=T)
-    expect_equal(length(dim(d$val)), 4)
-    expect_false(is.null(d$lev))
-    
-    d <- cmip5data(1, depth=T, lev=T)
-    expect_equal(length(dim(d$val)), 5)
-    expect_false(is.null(d$depth))
-    expect_false(is.null(d$lev))
+    expect_false(is.null(d$Z))
 })
 
 test_that("cmip5data obeys randomize", {

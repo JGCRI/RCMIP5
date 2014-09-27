@@ -82,12 +82,11 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
         if(is.null(modelTemp)) {         # If first model, just copy
             modelTemp <- temp
         } else {
-            # Make sure lat-lon-depth|lev-time match
+            # Make sure lat-lon-Z-time match
             if(all(dim(temp) == dim(modelTemp)) &
                    identical(temp$lat, modelTemp$lat) &
                    identical(temp$lon, modelTemp$lon) &
-                   identical(temp$depth, modelTemp$depth) &
-                   identical(temp$lev, modelTemp$lev) &
+                   identical(temp$Z, modelTemp$Z) &
                    identical(temp$time, modelTemp$time)) {
                 # Add this ensemble's data and record file and ensemble loaded
                 modelTemp$val <- modelTemp$val + temp$val

@@ -94,7 +94,7 @@ test_that("makeGlobalStat parallel results == serial result", {
 
 test_that("makeGlobalStat handles 4-dimensional data", {
     years <- 1850:1851
-    d <- cmip5data(years, depth=T)
+    d <- cmip5data(years, Z=T)
     res <- makeGlobalStat(d, verbose=F)
     
     # Do years match what we expect?
@@ -106,17 +106,4 @@ test_that("makeGlobalStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[1:2], c(1, 1)) #  all spatial dimensions should be 1
     expect_equal(dim(res$val)[3:(ndims-1)], dim(d$val)[3:(ndims-1)]) # time should match    
     expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
-    
-    # Same tests, but with lev
-    d <- cmip5data(years, lev=T)
-    res <- makeGlobalStat(d, verbose=F)
-    ndims <- length(dim(res$val))
-    expect_equal(res$time, d$time)
-    expect_equal(ndims, length(dim(d$val)))  # same number of dimensions
-    expect_equal(dim(res$val)[1:2], c(1, 1)) #  all spatial dimensions should be 1
-    expect_equal(dim(res$val)[3:(ndims-1)], dim(d$val)[3:(ndims-1)]) # time should match    
-    expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
-
-    # lev and depth cannot both be present
-    expect_error(makeAnnualStat(cmip5data(years, depth=T, lev=T), verbose=F))
 })

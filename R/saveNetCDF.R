@@ -24,7 +24,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
-    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     stopifnot(length(dim(x$val)) %in% c(2, 3, 4)) # that's all we know
     
@@ -67,20 +67,15 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     if(verbose) cat("Defining netCDF dimensions...")
     londim <- .ncdim_def("lon", x$debug$lonUnit, x$lon)
     latdim <- .ncdim_def("lat", x$debug$latUnit, x$lat)
-    dimlist <- list(londim, latdim) # assuming no depth/lev/time
+    dimlist <- list(londim, latdim) # assuming no Z/time
     
     # Define optional dimensions, if present
-    if(!is.null(x$depth)) {
-        depthdim <- .ncdim_def("depth", x$debug$depthUnit, x$depth)
-        dimlist <- list(londim, latdim, depthdim)
-        #        depthvar <- ncvar_def("depth", x$debug$depthUnit, depthdim)
-    } else if(!is.null(x$lev)) {
-        levdim <- .ncdim_def("lev", x$debug$levUnit, x$lev)
-        dimlist <- list(londim, latdim, levdim)
-        #        levvar <- ncvar_def("lev", x$debug$levUnit, levdim)
+    if(!is.null(x$Z)) {
+        Zdim <- .ncdim_def(x$dimNames[3], x$debug$ZUnit, x$Z)
+        dimlist <- list(londim, latdim, Zdim)
     }
     if(!is.null(x$time)) {
-        timedim <- .ncdim_def("time", x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
+        timedim <- .ncdim_def(x$dimNames[length(x$dimNames)], x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
         dimlist[[length(dimlist)+1]] <- timedim     
     }
     
@@ -102,14 +97,10 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     .ncvar_put(nc, latvar, x$lat)
     
     # Write optional variables
-    if(!is.null(x$depth)) {
-        if(verbose) cat("Writing depth\n")
-        depthvar <- .ncvar_def("depth", x$debug$depthUnit, depthdim)
-        .ncvar_put(nc, depthvar, x$depth) 
-    } else if(!is.null(x$lev)) {
-        if(verbose) cat("Writing lev\n")
-        levvar <- .ncvar_def("lev", x$debug$levUnit, levdim)
-        .ncvar_put(nc, levvar, x$lev)
+    if(!is.null(x$Z)) {
+        if(verbose) cat("Writing Z\n")
+        Zvar <- .ncvar_def(x$dimNames[3], x$debug$ZUnit, Zdim)
+        .ncvar_put(nc, Zvar, x$Z) 
     }
     
     # Get package version number, allowing that there might not be one
@@ -121,7 +112,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     # Write attributes
     if(verbose) cat("Writing attributes\n")    
     .ncatt_put(nc, 0, "software", paste("Written by RCMIP5", pkgv, 
-                                       "under", R.version.string, date()))
+                                        "under", R.version.string, date()))
     if(!is.null(x$time)) {
         .ncatt_put(nc, 0, "frequency", x$timeFreqStr)
     }

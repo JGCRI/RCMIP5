@@ -85,7 +85,7 @@ test_that("makeAnnualStat handles annual data", {
 
 test_that("makeMonthlyStat handles 4-dimensional data", {
     years <- 1850:1851
-    d <- cmip5data(years, depth=T)
+    d <- cmip5data(years, Z=T)
     res <- makeMonthlyStat(d, verbose=F)
     
     # Do years match what we expect?
@@ -94,14 +94,4 @@ test_that("makeMonthlyStat handles 4-dimensional data", {
     # Is the answer value array correctly sized?
     expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
     expect_equal(dim(res$val)[4], 12)  # temporal size match
-    
-    # Same tests, but with lev
-    d <- cmip5data(years, lev=T)
-    res <- makeMonthlyStat(d, verbose=F)
-    expect_equal(res$time, 1:12)
-    expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
-    expect_equal(dim(res$val)[4], 12)  # temporal size match
-    
-    # lev and depth cannot both be present
-    expect_error(makeAnnualStat(cmip5data(years, depth=T, lev=T), verbose=F))
 })

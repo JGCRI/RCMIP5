@@ -17,8 +17,7 @@ test_that("filterDimensions handles bad input", {
     d <- cmip5data(1)
     expect_error(filterDimensions(d, lons='1'))              # non-numeric lons
     expect_error(filterDimensions(d, lats='1'))              # non-numeric lats
-    expect_error(filterDimensions(d, depths='1'))              # non-numeric depths
-    expect_error(filterDimensions(d, levs='1'))              # non-numeric levs
+    expect_error(filterDimensions(d, Zs='1'))              # non-numeric Zs
     expect_error(filterDimensions(d, years='1'))              # non-numeric years
     expect_error(filterDimensions(d, months='1'))              # non-numeric months
     expect_error(filterDimensions(d, verbose=1))            # non-logical verbose
@@ -44,32 +43,21 @@ test_that("filterDimensions filters lat", {
     expect_warning(filterDimensions(d, lats=1))
     
     d <- cmip5data(1)
-    lf <- d$lat[1:(length(d$lat)-1)] # the filter
+    lf <- d$lat[-length(d$lat)] # the filter
     res <- filterDimensions(d, lats=lf)
     expect_equal(res$lat, lf)
     expect_true(dim(res$val)[2] == dim(d$val)[2]-1)  # stripped off one lat
     expect_more_than(nrow(res$provenance), nrow(d$provenance))     
 })
 
-test_that("filterDimensions filters depth", {
-    expect_warning(filterDimensions(cmip5data(1), depths=1))
+test_that("filterDimensions filters Z", {
+    expect_warning(filterDimensions(cmip5data(1), Zs=1))
     
-    d <- cmip5data(1, depth=T)
-    df <- d$depth[1:(length(d$depth)-1)] # the filter
-    res <- filterDimensions(d, depths=df)
-    expect_equal(res$depth, df)
-    expect_true(dim(res$val)[3] == dim(d$val)[3]-1)  # stripped off one depth
-    expect_more_than(nrow(res$provenance), nrow(d$provenance))     
-})
-
-test_that("filterDimensions filters lev", {
-    expect_warning(filterDimensions(cmip5data(1), levs=1))
-    
-    d <- cmip5data(1, lev=T)
-    lf <- d$lev[1:(length(d$lev)-1)] # the filter
-    res <- filterDimensions(d, levs=lf)
-    expect_equal(res$lev, lf)
-    expect_true(dim(res$val)[3] == dim(d$val)[3]-1)  # stripped off one lev
+    d <- cmip5data(1, Z=T)
+    zf <- d$Z[-length(d$Z)] # the filter
+    res <- filterDimensions(d, Zs=zf)
+    expect_equal(res$Z, zf)
+    expect_true(dim(res$val)[3] == dim(d$val)[3]-1)  # stripped off one Z
     expect_more_than(nrow(res$provenance), nrow(d$provenance))     
 })
 
@@ -81,7 +69,7 @@ test_that("filterDimensions filters time (years)", {
     expect_warning(filterDimensions(d, years=1))
     
     d <- cmip5data(1:5, monthly=F)
-    yf <- d$time[1:(length(d$time)-1)] # the filter
+    yf <- d$time[-length(d$time)] # the filter
     res <- filterDimensions(d, years=yf)
     expect_equal(res$time, yf)                                      # only years in filter
     expect_true(dim(res$val)[3] == dim(d$val)[3]-1)                 # stripped off one year
@@ -119,8 +107,7 @@ test_that("filterDimensions warns about dropped dimensions", {
 })
 
 test_that("filterDimensions handles multiple operations", {
-    d <- cmip5data(1:5, depth=T)
-    res <- filterDimensions(d, lons=d$lon[1], lats=d$lat[1], 
-                            depths=d$depth[1], years=d$time[1])
+    d <- cmip5data(1:5, Z=T)
+    res <- filterDimensions(d, lons=d$lon[1], lats=d$lat[1], Zs=d$Z[1], years=d$time[1])
     expect_equal(dim(res$val)[1:3], c(1, 1, 1))
 })

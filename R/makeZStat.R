@@ -1,8 +1,8 @@
-#' Compute depth or level statistic of a variable
+#' Compute Z statistic of a variable
 #'
 #' Some CMIP5 data are four-dimensional: in addition to longitude, latitude,
-#' and time, they include a 'depth' or 'lev' (level) dimension. This function
-#' computes a summary statistic for all depths or levels.
+#' and time, they include a Z dimensions (typically 'depth' or 'lev'). This function
+#' computes a summary statistic for all Z values.
 #' The default statistic is \link{mean}, but any summary
 #' function that returns a numeric result (including weighted.mean, if you 
 #' want to apply weights) can be used.
@@ -10,62 +10,47 @@
 #' @param x A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
 #' @param parallel logical. Parallelize if possible?
-#' @param FUN function. Function to apply across depths or levels
+#' @param FUN function. Function to apply across Zs
 #' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the mean of the
-#' variable across depths. A \code{numDepths} or \code{numLevels} field is also added
-#' recording the number of depths or levels averaged for each year, and x's original
-#' 'depths' or 'levs' field is removed.
+#' variable across Zs A \code{numZs} field is also added
+#' recording the number of Z values averaged for each year, and x's original
+#' Z field is removed.
 #' @details No status bar is printed when processing in parallel,
 #' but progress is logged to a file (call with verbose=T) that can be monitored.
 #' @note The \code{val} component of the returned object will always be the same structure
 #' as \code{x}, i.e. of dimensions {x, y, 1, t}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @examples
-#' d <- cmip5data(1970:2014)   # sample data
-#' makeDepthLevStat(d)
-#' summary(makeDepthLevStat(d, verbose=FALSE))
-#' summary(makeDepthLevStat(d, verbose=FALSE, parallel=TRUE))
-#' summary(makeDepthLevStat(d, verbose=FALSE, FUN=sd))
+#' d <- cmip5data(1970:2014, Z=TRUE)   # sample data
+#' makeZStat(d)
+#' summary(makeZStat(d, verbose=FALSE))
+#' summary(makeZStat(d, verbose=FALSE, parallel=TRUE))
+#' summary(makeZStat(d, verbose=FALSE, FUN=sd))
 #' @export
-makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
-    
+makeZStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
+
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
     
-    # The ordering of x$val dimensions is lon-lat-(depth|lev)?-time?
+    # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex %in% c(3, 4)) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     
-    if(timeIndex == 3) {
-        warning("makeDepthLevStat called for data with no depth or lev")
+    if(timeIndex < 4 | is.null(x$Z)) {
+        warning("makeZStat called for data with no Z")
         return(x)
     }
     
-    # Some CMIP5 files have four dimensional data but both $depth and $lev data
-    # supplied, with one 2D (e.g. ocean floor depths over the grid) and the
-    # other 1D (e.g. levels of depth). This is confusing. We look for which
-    # is 1D and assume that's what the user wants to compute on.
-    if(length(x$depth) == dim(x$val)[3]) {
-        depthvals <- x$depth
-        x$numDepths <- length(depthvals)
-        computingOn <- "depth"
-    } else if(length(x$lev) == dim(x$val)[3]) {
-        depthvals <- x$lev
-        x$numLevs <- length(depthvals)
-        computingOn <- "lev"        
-    } else {
-        stop("Data structure is missing appropriate 1D depth/lev data")
-    }
-    if(verbose) cat("Computing on", computingOn, "\n")
+    if(verbose) cat("Computing on", x$dimNames[3], "\n")
     
-    # Check that data array dimensions match those of lon, lat, and time
-    stopifnot(identical(dim(x$val)[3], length(depthvals)))
+    # Check that data array dimensions match those of Z
+    stopifnot(identical(dim(x$val)[3], length(x$Z)))
     
     # Prepare for main computation
     if(parallel) parallel <- require(doParallel)
@@ -106,6 +91,8 @@ makeDepthLevStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     
     # We now have new computed data. Overwrite original data and update provenance
     x$val <- unname(ans)
+    x$numZs <- length(x$Z)
+    x$Z <- NULL
     addProvenance(x, paste("Calculated", as.character(substitute(FUN)),
-                           "for", computingOn))
+                           "for Z (", x$dimNames[3], ")") )
 } # makeDepthLevStat

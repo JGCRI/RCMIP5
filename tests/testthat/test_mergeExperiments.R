@@ -49,12 +49,7 @@ test_that("mergeExperiments identifies ancillary problems", {
     x$lon <- c(y$lon, 0)
     expect_error(mergeExperiments(x, y, verbose=F))
     
-    x <- cmip5data(1)
-    x$depth <- c(y$depth, 1)
-    expect_error(mergeExperiments(x, y, verbose=F))
-    
-    x <- cmip5data(1)
-    x$lev <- c(y$lev, 1) 
+    x <- cmip5data(1, Z=T)
     expect_error(mergeExperiments(x, y, verbose=F))
     
     x <- cmip5data(1)
@@ -105,22 +100,8 @@ test_that("mergeExperiments merges annual data", {
 })
 
 test_that("mergeExperiments merges 4-dimensional data", {
-    x <- cmip5data(1:5, depth=T)
-    y <- cmip5data(6:10, depth=T)    
-    res <- mergeExperiments(x, y, verbose=F)
-    
-    expect_equal(length(x$val) + length(y$val), length(res$val))
-    expect_equal(length(x$time) + length(y$time), length(res$time))
-
-    x <- cmip5data(1:5, lev=T)
-    y <- cmip5data(6:10, lev=T)    
-    res <- mergeExperiments(x, y, verbose=F)
-    
-    expect_equal(length(x$val) + length(y$val), length(res$val))
-    expect_equal(length(x$time) + length(y$time), length(res$time))
-
-    x <- cmip5data(1:5, depth=T, lev=T)
-    y <- cmip5data(6:10, depth=T, lev=T)    
+    x <- cmip5data(1:5, Z=T)
+    y <- cmip5data(6:10, Z=T)    
     res <- mergeExperiments(x, y, verbose=F)
     
     expect_equal(length(x$val) + length(y$val), length(res$val))
