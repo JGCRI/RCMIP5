@@ -73,7 +73,7 @@ test_that("saveNetCDF saves X-Y-Z-T data correctly", {
 })
 
 test_that("saveNetCDF saves X-Y (area) data correctly", {
-    d <- cmip5data(0)
+    d <- cmip5data(0, time=F)  # area data
     dfile <- tempfile()
     if(file.exists(dfile)) expect_true(file.remove(dfile))
     expect_warning(saveNetCDF(d, file=basename(dfile), path=dirname(dfile), 

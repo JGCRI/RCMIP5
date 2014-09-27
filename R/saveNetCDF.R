@@ -26,7 +26,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
-    stopifnot(length(dim(x$val)) %in% c(2, 3, 4)) # that's all we know
+    stopifnot(length(dim(x$val)) %in% c(1, 2, 3, 4)) # that's all we know
     
     # We prefer to use the 'ncdf4' package, but Windows has problems with this, so
     # if it's not installed can also use 'ncdf'

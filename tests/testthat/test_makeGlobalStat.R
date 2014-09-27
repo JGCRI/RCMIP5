@@ -58,7 +58,7 @@ test_that("makeGlobalStat handles monthly data", {
 
 test_that("makeGlobalStat weights correctly", {
     d <- cmip5data(1850, randomize=T, monthly=F)
-    darea <- cmip5data(0, randomize=T)  # create an area file
+    darea <- cmip5data(0, time=F, randomize=T)  # create an area file
 
     res <- makeGlobalStat(d, area=darea, verbose=F)
     
@@ -69,7 +69,7 @@ test_that("makeGlobalStat weights correctly", {
 
 test_that("weighted.sum works correctly", {
     d <- cmip5data(1850, randomize=T, monthly=F)
-    darea <- cmip5data(0, randomize=T)
+    darea <- cmip5data(0, time=F, randomize=T)
     res <- makeGlobalStat(d, area=darea, verbose=F, FUN=weighted.sum)
     
     # Are the answer values numerically correct?
