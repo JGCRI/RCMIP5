@@ -54,7 +54,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     
     # Create meaningful filename, if necessary
     if(is.null(file)) {
-        ensembles <- paste(x$ensemble, collapse="")
+        ensembles <- paste(x$ensembles, collapse="")
         pretty <- function(x) {formatC(round(x, 0), width=2, flag="0")}
         mintime <- paste0( floor(min(x$time)), pretty(min(x$time) %% 1 * 12 + 0.5))
         maxtime <- paste0( floor(max(x$time)), pretty(max(x$time) %% 1 * 12 + 0.5))
