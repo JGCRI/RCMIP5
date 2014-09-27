@@ -16,7 +16,7 @@
 #' @note This function is 'in the freezer' (not available to users) for now.
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
-mergeExperiments <- function(x, y, verbose=TRUE) {
+mergeExperiments <- function(x, y, verbose=FALSE) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data" & class(y)=="cmip5data")

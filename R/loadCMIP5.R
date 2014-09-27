@@ -24,7 +24,7 @@
 #' }
 #' @export
 loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+',
-                      path='.', recursive=TRUE, verbose=TRUE, force.ncdf=FALSE,
+                      path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
                       yearRange=NULL) {
 
     # Sanity checks - parameters are correct type and length

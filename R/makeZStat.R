@@ -1,8 +1,8 @@
-#' Compute Z statistic of a variable
+#' Compute Z-dimension statistic of a variable
 #'
 #' Some CMIP5 data are four-dimensional: in addition to longitude, latitude,
-#' and time, they include a Z dimensions (typically 'depth' or 'lev'). This function
-#' computes a summary statistic for all Z values.
+#' and time, they include a Z dimension (typically encoded in the netcdf file as
+#' 'depth' or 'lev'). This function computes a summary statistic for all Z values.
 #' The default statistic is \link{mean}, but any summary
 #' function that returns a numeric result (including weighted.mean, if you 
 #' want to apply weights) can be used.
@@ -27,7 +27,7 @@
 #' summary(makeZStat(d, verbose=FALSE, parallel=TRUE))
 #' summary(makeZStat(d, verbose=FALSE, FUN=sd))
 #' @export
-makeZStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
+makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")

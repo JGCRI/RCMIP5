@@ -9,7 +9,7 @@
 #' @param verbose logical. Print info as we go?
 #' @details Uses \code{ggplot2::geom_raster}.
 #' @export
-worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=TRUE) {
+worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=FALSE) {
  
     # Sanity checks
     stopifnot(class(x)=="cmip5data")

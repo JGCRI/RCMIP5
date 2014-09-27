@@ -26,7 +26,7 @@
 #' summary(makeMonthlyStat(d, verbose=FALSE, parallel=TRUE))
 #' summary(makeMonthlyStat(d, verbose=FALSE, FUN=sd))
 #' @export
-makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
+makeMonthlyStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")

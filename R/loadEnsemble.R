@@ -22,7 +22,7 @@
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
 loadEnsemble <- function(variable, model, experiment, ensemble, domain,
-                         path='.', recursive=TRUE, verbose=TRUE, force.ncdf=FALSE,
+                         path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
                          yearRange=NULL) {
     
     # Sanity checks - make sure all parameters are correct class and length

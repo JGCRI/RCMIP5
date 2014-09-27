@@ -26,7 +26,7 @@
 #' summary(makeAnnualStat(d, verbose=FALSE, FUN=sd))
 #' @seealso \code{\link{makeZStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
-makeAnnualStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
+makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     
     # Sanity checks
     stopifnot(class(x)=="cmip5data")

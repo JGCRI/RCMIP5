@@ -16,7 +16,7 @@
 #' able to read this file. If \code{saveProvenance} is specified, the provenance is saved
 #' separately in a comma-separated file of the same name but appending "_prov.csv".
 #' (Provenance messages are always saved as netcdf file attributes.)
-saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRUE, force.ncdf=FALSE) {
+saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TRUE, force.ncdf=FALSE) {
     
     # Sanity checks - class and length of parameters
     stopifnot(class(x)=="cmip5data")
