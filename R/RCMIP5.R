@@ -41,10 +41,11 @@ NULL
 #' @param randomize logical. Random sample data?
 #' @param verbose logical. Print info as we go?
 #' @return A cmip5data object, which is a list with the following fields:
+#'  \item{files}{Array of strings containg the file(s) included in this dataset}
 #'  \item{variable}{String containg the variable name described by this dataset}
 #'  \item{model}{String containing the model name of this dataset}
 #'  \item{experiment}{String containing the experiment name of this dataset}
-#'  \item{ensemble}{Array of strings containg the ensemble(s) included in this dataset}
+#'  \item{ensembles}{Array of strings containg the ensemble(s) included in this dataset}
 #'  \item{domain}{String containing the domain name of this dataset}
 #'  \item{val}{Multidimensional array [x, y, z, t] holding the data}
 #'  \item{valUnit}{String containing the value units}
@@ -90,6 +91,7 @@ cmip5data <- function(x=list(),
         
         # result holds the primary data of interest
         result <- list(
+            files=NULL,
             variable="var",
             model="model",
             experiment="experiment",
@@ -216,7 +218,7 @@ summary.cmip5data <- function(object, ...) {
     ans <- list()
     class(ans) <- "summary.cmip5data"
     
-    # In general, cmip5 objects have the following defined:
+    # cmip5 objects should always have the following defined:
     ans$variable <- object$variable
     ans$valUnit <- object$valUnit
     ans$domain <- object$domain
