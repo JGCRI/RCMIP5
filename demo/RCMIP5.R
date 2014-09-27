@@ -8,17 +8,9 @@
 ## existing CMIP5 netcdf files.
 readline("<return>")
 
-## Create random data
-## First we create two sample data sets to work with. One is 
-## 'historical', 2001-2005, and the other 'future', 2006-2010.
-
-## Creating historical data
+## Create random (dummy) data
 historical <- cmip5data(2001:2005, randomize=T)
 print(historical)
-
-## Creating future data
-future <- cmip5data(2006:2010, randomize=T)
-print(future)
 
 ## Printing a data set displays a one-line summary, showing the 
 ## variable, model, experiment, years, data matrix dimensions 
@@ -26,32 +18,24 @@ print(future)
 ## and number of ensembles.
 readline("<return>")
 
-## Merging datasets
-combined <- mergeExperiments(historical, future, verbose=T)
-combined$experiment <- "combined"
-print(combined)
-
-## Now we have a single data set 'combined', 120 months long.
-readline("<return>")
-
 ## Limiting to the tropics
-combined <- filterDimensions(combined, lats=-30:30, verbose=T)
-print(combined)
+historical <- filterDimensions(historical, lats=-30:30, verbose=T)
+print(historical)
 
 ## We've filtered these data to just the tropics, -30 to 30 latitude.
 readline("<return>")
 
 ## Computing annual mean. For faster processing, run with 'parallel=TRUE'
-print(makeAnnualStat(combined, verbose=T))
+print(makeAnnualStat(historical, verbose=T))
 
-## After this operation that data have been reduced 120 months to 
+## After this operation that data have been reduced from 60 months to 
 ## 10 annual means. Note the 'annual summary' note when printing.
 ## The makeAnnualStat function can apply any summary function, 
 ## not just mean, and pass any additional parameters via (...).
 readline("<return>")
 
 ## Computing global area-weighted mean:
-globalmean <- makeGlobalStat(combined, verbose=T)
+globalmean <- makeGlobalStat(historical, verbose=T)
 print(globalmean)
 
 ## This computed a 'global' (but here tropical, since we 
@@ -74,11 +58,11 @@ print(globalmean$provenance[c("timestamp","message")])
 readline("<return>")
 
 ## Visualization of the first 12 months of data:
-print(worldPlot2(combined, time=1:12))
+print(worldPlot2(historical, time=1:12))
 readline("<return>")
 
 ## It's easy to convert 'cmip5data' structures to data frames:
-print(head(as.data.frame(combined)))
+print(head(as.data.frame(historical)))
 readline("<return>")
 
 ## ...or save them as netcdf files. (Not run.)
