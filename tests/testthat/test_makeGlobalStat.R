@@ -63,8 +63,8 @@ test_that("makeGlobalStat weights correctly", {
     res <- makeGlobalStat(d, area=darea, verbose=F)
     
     # Are the answer values numerically correct?
-    dummyans <- weighted.mean(d$val[,,1], w=darea$val)
-    expect_equal(dummyans, res$val[,,1])
+    dummyans <- weighted.mean(d$val[,,,1], w=darea$val)
+    expect_equal(dummyans, res$val[,,,1])
 })
 
 test_that("weighted.sum works correctly", {
@@ -73,8 +73,8 @@ test_that("weighted.sum works correctly", {
     res <- makeGlobalStat(d, area=darea, verbose=F, FUN=weighted.sum)
     
     # Are the answer values numerically correct?
-    dummyans <- weighted.sum(d$val[,,1], w=darea$val)
-    expect_equal(dummyans, res$val[,,1])
+    dummyans <- weighted.sum(d$val[,,,1], w=darea$val)
+    expect_equal(dummyans, res$val[,,,1])
     
     # Make sure the function itself is OK
     expect_equal(weighted.sum(1:4), 10)

@@ -60,9 +60,9 @@ test_that("makeMonthlyStat handles monthly data", {
     ans <- list()
     monthIndex <- floor((d$time %% 1) * 12 + 1)
     for(i in 1:12) {
-        ans[[i]] <- aaply(asub(d$val, idx=(i == monthIndex), dims=3), c(1:2), mean)
+        ans[[i]] <- aaply(asub(d$val, idx=(i == monthIndex), dims=4, drop=F), c(1:3), mean, .drop=F)
     }
-    dummyans <- unname(abind(ans, along=3))
+    dummyans <- unname(abind(ans, along=4))
     expect_equal(res$val, dummyans)
 })
 
