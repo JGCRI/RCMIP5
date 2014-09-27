@@ -186,7 +186,7 @@ filterDimensionTimeMonths <- function(x, months=NULL, verbose=FALSE) {
     if(!is.null(months)) {
         if(is.null(x[["time"]])) {
             warning("No time data found")
-        } else if(x$timeFreqStr != "mon") {
+        } else if(x$debug$timeFreqStr != "mon") {
             warning("A monthly filter can only be applied to monthly data")            
         }
         else {

@@ -60,7 +60,7 @@ test_that("mergeExperiments identifies ancillary problems", {
 test_that("mergeExperiments identifies time problems", {
     x <- cmip5data(1)
     y <- cmip5data(2)    
-    x$timeFreqStr <- paste0(y$timeFreqStr, "x")
+    x$debug$timeFreqStr <- paste0(y$debug$timeFreqStr, "x")
     expect_error(mergeExperiments(x, y, verbose=F))
  
     x <- cmip5data(1)

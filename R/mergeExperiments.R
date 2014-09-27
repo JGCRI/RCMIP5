@@ -42,7 +42,7 @@ mergeExperiments <- function(x, y, verbose=TRUE) {
     
     # Time checks. This is important, and we try to identify obvious problems
     if(verbose) cat("Checking that time data match up\n")
-    stopifnot(identical(x$timeFreqStr, y$timeFreqStr))
+    stopifnot(identical(x$debug$timeFreqStr, y$debug$timeFreqStr))
     
     if(mean(x$time) > mean(y$time)) { # switch them
         temp <- x

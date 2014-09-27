@@ -114,7 +114,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     .ncatt_put(nc, 0, "software", paste("Written by RCMIP5", pkgv, 
                                         "under", R.version.string, date()))
     if(!is.null(x$time)) {
-        .ncatt_put(nc, 0, "frequency", x$timeFreqStr)
+        .ncatt_put(nc, 0, "frequency", x$debug$timeFreqStr)
     }
     for(i in 1:nrow(x$provenance)) {
         .ncatt_put(nc, 0, paste0("provenance", i), x$provenance[i, "message"])

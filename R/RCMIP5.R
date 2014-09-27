@@ -134,7 +134,7 @@ cmip5data <- function(x=list(),
             years <- x
             ppy <- ifelse(monthly, 12, 1)  # periods per year
             result$calendarStr <- "360_day"
-            result$timeFreqStr <- ifelse(monthly, "mon", "yr")
+            debug$timeFreqStr <- ifelse(monthly, "mon", "yr")
             debug$startYr <- years[1]
             debug$calendarStr <- "360_day"
             debug$timeUnit <- paste0("days since ",years[1],"-01-01")
@@ -245,7 +245,7 @@ summary.cmip5data <- function(object, ...) {
                           "] lev [", length(object$lev), "]")
     
     if(!is.null(object$time)){
-        ans$time <- paste0(object$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
+        ans$time <- paste0(object$debug$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
     }
     ans$size <- as.numeric(object.size(object))
     ans$valsummary <- c(min(as.vector(object$val), na.rm=TRUE),
