@@ -12,8 +12,8 @@
 #'
 #' ...
 #'
-#' @references Todd-Brown, K. and Bond-Lamberty, B, 2014: XXXX.
-#' @references Taylor, K. E., Stouffer, R. J., and Meehl, G. A., 2012:
+#' @references Todd-Brown and Bond-Lamberty, 2014: (in prep).
+#' @references Taylor et al., 2012:
 #'   An overview of CMIP5 and the experiment design, Bulletin of the American
 #'   Meteorological Society, 93, 485-498.
 #'   \url{http://dx.doi.org/10.1175/BAMS-D-11-00094.1}
@@ -41,18 +41,21 @@ NULL
 #' @param randomize logical. Random sample data?
 #' @param verbose logical. Print info as we go?
 #' @return A cmip5data object, which is a list with the following fields:
-#'  \item{val}{A multidimensional array [lon, lat, time] holding the data}
-#'  \item{valUnit}{A string containing the value units}
-#'  \item{timeUnit}{A string containing the time units}
-#'  \item{calendarStr}{A string defining the calendar type}
-#'  \item{lat}{A numeric vector containing latitude values}
-#'  \item{lon}{A numeric vector containing longitude values}
-#'  \item{Z}{A numeric vector Z values; optional}
-#'  \item{time}{A numeric vector containing time values; optional}
-#'  \item{variable}{A string containg the variable name described by this dataset}
-#'  \item{model}{A string containing the model name of this dataset}
-#'  \item{experiment}{A string containing the experiment name of this dataset}
-#'  \item{ensembles}{An array of strings containg the ensemble(s) included in this dataset}
+#'  \item{variable}{String containg the variable name described by this dataset}
+#'  \item{model}{String containing the model name of this dataset}
+#'  \item{experiment}{String containing the experiment name of this dataset}
+#'  \item{ensemble}{Array of strings containg the ensemble(s) included in this dataset}
+#'  \item{domain}{String containing the domain name of this dataset}
+#'  \item{val}{Multidimensional array [x, y, z, t] holding the data}
+#'  \item{valUnit}{String containing the value units}
+#'  \item{lon}{Numeric vector containing longitude values; may be \code{NULL}}
+#'  \item{lat}{Numeric vector containing latitude values; may be \code{NULL}}
+#'  \item{Z}{Numeric vector Z values; may be \code{NULL}}
+#'  \item{time}{Numeric vector containing time values; may be \code{NULL}}
+#'  \item{dimNames}{Array of strings containing the original (netcdf) dimension names}
+#'  \item{calendarStr}{String defining the calendar type; may be \code{NULL}}
+#'  \item{debug}{List with additional data (subject to change)}
+#'  \item{provenance}{Data frame with the object's provenance. See \code{\link{addProvenance}}}
 #' @docType class
 #' @examples
 #' cmip5data(1970)  # produces monthly sample data for year 1970

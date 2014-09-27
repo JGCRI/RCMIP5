@@ -6,9 +6,14 @@
 #' @param x A \code{\link{cmip5data}} object
 #' @param msg Either a string (message to be added to the provenance) or
 #' a cmip5data object, in which case the provenance of this latter object is appended
-#' to that of 'x' (i.e., their histories are merged).
+#' to that of 'x' (i.e., their histories are merged)
 #' @param verbose logical. Print info as we go?
-#' @return The original object, with an updated provenance.
+#' @return The original object, with an updated provenance containing:
+#'  \item{timestamp}{Date and time entry was added}
+#'  \item{caller}{The function that added this entry, including its parameter values}
+#'  \item{message}{Description of action(s) taken}
+#'  \item{dim}{Data dimensions when this entry was added}
+#'  \item{digest}{Hash of the data when this entry was added; see \code{\link{digest}}}
 #' @details We want to track computational steps applied to a particular
 #' \code{\link{cmip5data}} object, for reproducibility and user debugging.
 #' This function logs information from the caller to a 'provenance' data structure.

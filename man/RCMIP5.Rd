@@ -19,9 +19,9 @@ easy-to-work-with graphical and data summaries.
 ...
 }
 \references{
-Todd-Brown, K. and Bond-Lamberty, B, 2014: XXXX.
+Todd-Brown and Bond-Lamberty, 2014: (in prep).
 
-Taylor, K. E., Stouffer, R. J., and Meehl, G. A., 2012:
+Taylor et al., 2012:
   An overview of CMIP5 and the experiment design, Bulletin of the American
   Meteorological Society, 93, 485-498.
   \url{http://dx.doi.org/10.1175/BAMS-D-11-00094.1}
