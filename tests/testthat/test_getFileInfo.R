@@ -39,7 +39,9 @@ test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf fi
 })
 
 test_that("getFileInfo handles annual netcdfs", {
-    path <- normalizePath("../../sampledata/annual")
+    path <- "../../sampledata/annual"
+    if(!file.exists(path)) skip("Path doesn't exist")
+    
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
     expect_is(d,"data.frame")
@@ -50,7 +52,9 @@ test_that("getFileInfo handles annual netcdfs", {
 })
 
 test_that("getFileInfo handles monthly netcdfs", {
-    path <- normalizePath("../../sampledata/monthly")
+    path <- "../../sampledata/monthly"
+    if(!file.exists(path)) skip("Path doesn't exist")
+    
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
     expect_is(d,"data.frame")
@@ -60,7 +64,9 @@ test_that("getFileInfo handles monthly netcdfs", {
 })
 
 test_that("getFileInfo handles fixed netcdfs", {
-    path <- normalizePath("../../sampledata/fx")
+    path <- "../../sampledata/fx"
+    if(!file.exists(path)) skip("Path doesn't exist")
+    
     d <- getFileInfo(path)
     expect_is(d,"data.frame")
     expect_equal(ncol(d),9)
@@ -68,7 +74,9 @@ test_that("getFileInfo handles fixed netcdfs", {
 })
 
 test_that("getFileInfo handles fixed and temporal netcdfs together", {
-    path <- normalizePath("../../sampledata")
+    path <- "../../sampledata"
+    if(!file.exists(path)) skip("Path doesn't exist")
+    
     d <- getFileInfo(path)
     expect_is(d,"data.frame")
     expect_equal(ncol(d),9)
