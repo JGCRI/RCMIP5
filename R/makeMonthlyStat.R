@@ -49,7 +49,7 @@ makeMonthlyStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     monthIndex <- floor((x$time %% 1) * 12 + 1)
     
     # Prepare for main computation
-    if(parallel) parallel <- require(doParallel, quietly=T)
+    if(parallel) parallel <- require(doParallel, quietly=!verbose)
     if(parallel) {  # go parallel, woo hoo!
         registerDoParallel()
         if(verbose) {

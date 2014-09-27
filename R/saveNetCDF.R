@@ -30,8 +30,8 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=TRUE, saveProvenance=TRU
     
     # We prefer to use the 'ncdf4' package, but Windows has problems with this, so
     # if it's not installed can also use 'ncdf'
-    if(force.ncdf | !require(ncdf4)) {
-        if(require(ncdf)) {
+    if(force.ncdf | !require(ncdf4, quietly=!verbose)) {
+        if(require(ncdf, quietly=!verbose)) {
             # The ncdf and ncdf4 functions are mostly parameter-identical. This makes
             # things easy--we redefine the ncdf4 function names to their ncdf equivalents
             .nc_create <- ncdf::create.ncdf

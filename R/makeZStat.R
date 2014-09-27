@@ -52,7 +52,7 @@ makeZStat <- function(x, verbose=TRUE, parallel=FALSE, FUN=mean, ...) {
     stopifnot(identical(dim(x$val)[3], length(x$Z)))
     
     # Prepare for main computation
-    if(parallel) parallel <- require(doParallel, quietly=T)
+    if(parallel) parallel <- require(doParallel, quietly=!verbose)
     if(parallel) {  # go parallel, woo hoo!
         registerDoParallel()
         if(verbose) {
