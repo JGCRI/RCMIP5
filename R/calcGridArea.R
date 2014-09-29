@@ -50,11 +50,11 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
 
     # Calculate the east/west edges by assuming the earth is spherical and
     # ...east/west edges are defined by latitude arc lengths
-    # ... => R*(latMax-latMin)
+    # ... => R*(maxLat-minLat)
     # Calculate the north/south edges by assuming the arc length of longitude
     # ...is the lattitude corrected radius (R*cos(lat)) times the change in lon
     # ... => (R*cos(lat))*deltaLon
-    return( R*(latMax-latMin) * (R*cos(lat))*deltaLon)
+    return( R*(maxLat-minLat) * (R*cos(lat))*deltaLon)
 
     #old formulation for reference (updated 29 September 2014)
     # ...no significant difference but harder to explain
