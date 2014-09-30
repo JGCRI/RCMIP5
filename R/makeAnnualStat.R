@@ -46,9 +46,12 @@ makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     uniqueYears <- unique(floor(x$time))
     
     # Prepare for main computation
+    doParallelAlreadyLoaded <- "package:doParallel" %in% search()
     if(parallel) parallel <- require(doParallel, quietly=!verbose)
     if(parallel) {  # go parallel, woo hoo!
-        registerDoParallel()
+        if(!doParallelAlreadyLoaded) # if the user has already set up a parallel
+            registerDoParallel()     # environment, don't mess with it
+        
         if(verbose) {
             cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             

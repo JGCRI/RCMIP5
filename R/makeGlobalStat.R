@@ -72,12 +72,15 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
     if(verbose) cat("Area grid dimensions", dim(areavals), "\n")
     
     # Prepare for main computation
+    doParallelAlreadyLoaded <- "package:doParallel" %in% search()
     if(parallel) parallel <- require(doParallel, quietly=!verbose)
     margins <- 3:timeIndex
     if(verbose) cat("Margins are", margins, "\n")
     
     if(parallel) {  # go parallel, woo hoo!
-        registerDoParallel()
+        if(!doParallelAlreadyLoaded) # if the user has already set up a parallel
+            registerDoParallel()     # environment, don't mess with it
+        
         if(verbose) {
             cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             
