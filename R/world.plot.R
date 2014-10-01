@@ -19,7 +19,8 @@ library(fields)
 #' @param col col
 #' @param latAxis latAxis
 #' @param lonAxis lonAxis
-#' @export
+#' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
 world.plot <- function(x, lon=NULL, lat=NULL, time=1, main=NULL, parList=NULL,
                        centerZero=FALSE,  absNum=NULL, axisFlag=TRUE,
                        showRange=TRUE, verbose=FALSE, simple=FALSE,
