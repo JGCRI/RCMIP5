@@ -73,7 +73,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                                basename(fileList))]
     
     if(length(fileList)==0) {
-        warning("Could not find any matching files")
+        warning(paste("Could not find any matching files for", 
+                      variable, domain, model, experiment, ensemble))
         return(NULL)
     }
     
@@ -322,9 +323,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 
 
 #' Restore missing and/or degenerate dimensions in the data
-#'
-#' Loads the data for a particular CMIP5 experiment-variable-model-ensemble
-#' combination (one or more files). Returns NULL and a warning if nothing matches.
 #'
 #' @param vardata the data array just loaded from the netcdf
 #' @param lonArr numeric vector of longitude values
