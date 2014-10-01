@@ -18,7 +18,8 @@
 #' Z field is removed.
 #' @details No status bar is printed when processing in parallel,
 #' but progress is logged to a file (call with verbose=T) that can be monitored.
-#' @details If the user requests parallel processing (via parallel=T) makeZStat
+#' 
+#' If the user requests parallel processing (via parallel=T) makeZStat
 #' (i) attempts to load the \code{doParallel} package, and (ii) registers it as a 
 #' parallel backend \emph{unless} the user has already done this (e.g. set up a 
 #' virtual cluster with particular, desired characteristics). In that case, 

@@ -15,22 +15,23 @@
 #' same as the caller for Z (if present) and time, but lon and lat are reduced to 
 #' 1 (i.e. no dimensionality). A \code{numCells} field is also added, recording the number
 #' of cells in the spatial grid.
-#' @details This function is more complicated than the other makeXxxStat functions, because
-#' (i) we don't know ahead of time whether there's a Z dimension, and (ii) we
-#' provide explicit support for area-weighted functions. We expect that weighted.mean 
-#' and a weighted sum will be the most frequent
+#' @details If a Z dimension is present, the stat function is calculated
+#' for all combinations of these. No status bar is printed when processing in parallel,
+#' but progress is logged to a file (call with verbose=T) that can be monitored.
+#' 
+#' This function is more complicated than the other makeXxxStat functions, because
+#' it provides explicit support for area-weighted functions. We expect that 
+#' weighted.mean and a weighted sum will be the most frequent
 #' calculations needed. The former is built into R, and the latter can generally
 #' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
 #' follow the weighted.mean syntax, in particular 
 #' accepting parameters 'x' (data) and 'w' (weights) of equal size.
-#' @details If the user requests parallel processing (via parallel=T) makeGlobalStat
+#' 
+#' If the user requests parallel processing (via parallel=T) makeGlobalStat
 #' (i) attempts to load the \code{doParallel} package, and (ii) registers it as a 
 #' parallel backend \emph{unless} the user has already done this (e.g. set up a 
 #' virtual cluster with particular, desired characteristics). In that case, 
 #' makeGlobalStat respects the existing cluster.
-#' @note If a Z dimension is present, the stat function is calculated
-#' for all combinations of these. No status bar is printed when processing in parallel,
-#' but progress is logged to a file (call with verbose=T) that can be monitored.
 #' @note The \code{val} component of the returned object will always be the same structure
 #' as \code{x}, i.e. of dimensions {1, 1, z, t}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeMonthlyStat}} 
