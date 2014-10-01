@@ -1,25 +1,28 @@
 #' Check for continuous time periods in CMIP5 files
 #'
-#' Check that all time periods match for multi-file ensembles. Before starting to
-#' process what may be hundreds or thousands of CMIP5 files, it's a good idea to verify
-#' that your file set is complete and not missing any years.
-#' Unfortunately it's impossible to automatically check the time signature for
-#' sub-monthly frequencies quickly without opening the netcdf file. These time
-#' signatures will be concatonated and the 'allHere' flag will be returned as
-#' NA for these runs. Note that fixed variables are removed.
+#' Check that all time periods are continuous and present for multi-file ensembles.
+#' Before starting to process what may be hundreds or thousands of CMIP5 files, 
+#' it's a good idea to verify that your file set is complete and not missing any 
+#' years.
 #'
 #' @param fileInfo_df data.frame from getFileInfo
 #' @return A data frame showing which ensembles are continuous, and which are not.
 #' In addition to standard identifying fields in the data frame (domain, model,
-#' experiment, variable, and ensemble),
-#' the yrStr field will concatonate the time strings for all ensembles,
-#' allHere is a quick check for yr and mon frequency, start and end dates are
-#' the decimal earliest and latest dates for the ensemble, and files indicates
-#' the number of files in the run.
-#' @note this only works for files that are in domains 'fx', 'mon', or 'yr'.
-#' @details Decimal time is (year + (month-1)/12).
+#' experiment, variable, and ensemble), this includes:
+#'  \item{yrStr}{A concatenation of time strings for all ensembles}
+#'  \item{allHere}{a quick check for yr and mon frequency}
+#'  \item{startDate}{Earliest (decimal) date for the ensemble}
+#'  \item{endDate}{Latest (decimal) date for the ensemble}
+#'  \item{file}{The number of files in the ensemble}
+#' @details  This function calls \code{\link{getFileInfo}} to scan a directory tree,
+#' and then examines the time data in these filenames. These time signatures 
+#' will be concatenated and an 'allHere' flag returned.
+#' @note This only works for files that are in domains 'fx', 'mon', or 'yr'.
+#' Decimal time is (year + (month-1)/12).
+#' @note Unfortunately it's impossible to automatically check the time signature for
+#' sub-monthly frequencies quickly without opening the netcdf file.
 #' @examples
-#' checkdf <- checkTimePeriod(getFileInfo())
+#' checkTimePeriod(getFileInfo())
 #' @seealso \code{\link{getFileInfo}}
 #' @export
 checkTimePeriod <- function(fileInfo_df) {
