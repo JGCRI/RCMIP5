@@ -16,8 +16,13 @@
 #' @details If a Z dimension is present, the stat function is calculated
 #' for all combinations of these. No status bar is printed when processing in parallel,
 #' but progress is logged to a file (call with verbose=T) that can be monitored.
+#' @details If the user requests parallel processing (via parallel=T) makeMonthlyStat
+#' (i) attempts to load the \code{doParallel} package, and (ii) registers it as a 
+#' parallel backend \emph{unless} the user has already done this (e.g. set up a 
+#' virtual cluster with particular, desired characteristics). In that case, 
+#' makeMonthlyStat respects the existing cluster.
 #' @note The \code{val} component of the returned object will always be the same structure
-#' as \code{x}, i.e. of dimensions {x, y, [z,], 12}.
+#' as \code{x}, i.e. of dimensions {x, y, z, 12}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeGlobalStat}}
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
