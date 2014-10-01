@@ -7,33 +7,27 @@
 #' @param splitPacific logical. Try to split image in the Pacific?
 #' @param capMinMax logical. Cap data min and max by quantile? This may produce better coloring.
 #' @param verbose logical. Print info as we go?
+#' @return A ggplot object.
 #' @details Uses \code{ggplot2::geom_raster}.
+#' @examples
+#' d <- cmip5data(1970:1975)   # sample data
+#' worldPlot(d, time=1:12)
 #' @export
-worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=FALSE) {
+worldPlot <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=FALSE) {
  
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
+    stopifnot(length(dim(x$val)) == 4)
     stopifnot(is.numeric(time)) 
     stopifnot(is.logical(capMinMax) & length(capMinMax)==1)
     stopifnot(is.logical(verbose) & length(verbose)==1)
-    if(length(time) > 16) time <- time[1:16]  # can't see anything smaller...
+    length(time) <- min(length(time), 16)   # can't see anything smaller...
     stopifnot(require(ggplot2))
     
     # Preliminaries
     lon <- x$lon
     lat <- x$lat
-    val <- x$val
-    ndims <- length(dim(val))
-    if(ndims > 2) {
-        stopifnot(time > 0 & time <= length(x$time))
-        if(verbose) cat("Stripping extra dimensions and isolating time\n")
-        idxlist <- ifelse(ndims > 3, 
-                          list(rep(1, ndims-3), time=c(time)), # only 1st lev/depth if present
-                          list(time=c(time))) # time values as specified by caller
-        val <- asub(val, idx=idxlist, dims=3:ndims)
-        if(verbose) print(dim(val))
-    }
-    val[!is.finite(val)] <- NA           # clean up
+    val <- x$val[,,1,time]  # only use the first lev/depth
     
     # Split at the Pacific ocean
     if(splitPacific) {
@@ -63,7 +57,7 @@ worldPlot2 <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=FAL
     }
     
     # Transform data, as ggplot2 uses data frames
-    if(verbose) "Melting to data frame...\n"
+    if(verbose) cat("Melting to data frame...\n")
     val_df <- melt(val)
     val_df$lon <- x$lon[val_df$Var1]
     val_df$lat <- x$lat[val_df$Var2]
