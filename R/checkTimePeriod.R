@@ -1,8 +1,8 @@
 #' Check for continuous time periods in CMIP5 files
 #'
 #' Check that all time periods are continuous and present for multi-file ensembles.
-#' Before starting to process what may be hundreds or thousands of CMIP5 files, 
-#' it's a good idea to verify that your file set is complete and not missing any 
+#' Before starting to process what may be hundreds or thousands of CMIP5 files,
+#' it's a good idea to verify that your file set is complete and not missing any
 #' years.
 #'
 #' @param fileInfo_df data.frame from getFileInfo
@@ -15,7 +15,7 @@
 #'  \item{endDate}{Latest (decimal) date for the ensemble}
 #'  \item{file}{The number of files in the ensemble}
 #' @details  This function calls \code{\link{getFileInfo}} to scan a directory tree,
-#' and then examines the time data in these filenames. These time signatures 
+#' and then examines the time data in these filenames. These time signatures
 #' will be concatenated and an 'allHere' flag returned.
 #' @note This only works for files that are in domains 'fx', 'mon', or 'yr'.
 #' Decimal time is (year + (month-1)/12).
@@ -48,12 +48,12 @@ checkTimePeriod <- function(fileInfo_df) {
         if(all(x$domain %in% 'fx')) { # fixed
             #don't even process fixed files
             return(NULL)
-        } else if(all(grepl('mon$', x$domain))) { # monthly
+        } else if(all(grepl('mon', x$domain))) { # monthly
             timeStep <- 1/12
             #convert to decimal years
             startYear <- startYear+(as.numeric(substr(curCombo[,1], 5, 6))-1)/12
             endYear <- endYear + (as.numeric(substr(curCombo[,2], 5, 6))-1)/12
-        } else if(all(grepl('yr$', x$domain))) { # annual
+        } else if(all(grepl('yr', x$domain))) { # annual
             timeStep <- 1
         } else {
             # we can not process sub-monthly time scales because of not standard
