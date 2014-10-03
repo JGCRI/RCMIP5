@@ -30,7 +30,9 @@
 #' @examples
 #' d <- cmip5data(1970:1975, Z=TRUE)   # sample data
 #' makeZStat(d)
+#' \dontrun{
 #' summary(makeZStat(d, verbose=FALSE, parallel=TRUE))
+#' }
 #' summary(makeZStat(d, verbose=FALSE, FUN=sd))
 #' @export
 makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {

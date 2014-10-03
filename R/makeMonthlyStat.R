@@ -29,7 +29,9 @@
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeMonthlyStat(d)
 #' summary(makeMonthlyStat(d, verbose=FALSE))
+#' \dontrun{
 #' summary(makeMonthlyStat(d, verbose=FALSE, parallel=TRUE))
+#' }
 #' summary(makeMonthlyStat(d, verbose=FALSE, FUN=sd))
 #' @export
 makeMonthlyStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {

@@ -65,6 +65,10 @@ test_that("makeAnnualStat handles monthly data", {
 })
 
 test_that("makeAnnualStat parallel results == serial result", {
+    skip_on_cran()
+    
+    library(doParallel)
+    registerDoParallel(cores=2)  # CRAN policy is 2 cores max
     years <- 1850:1851
     d <- cmip5data(years)
     res_s <- makeAnnualStat(d, verbose=F, parallel=F)

@@ -39,7 +39,9 @@
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeGlobalStat(d)
 #' summary(makeGlobalStat(d, verbose=FALSE))
+#' \dontrun{
 #' summary(makeGlobalStat(d, verbose=FALSE, parallel=TRUE))
+#' }
 #' @export
 makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weighted.mean, ...) {
     

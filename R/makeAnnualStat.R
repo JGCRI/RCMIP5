@@ -28,7 +28,9 @@
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeAnnualStat(d)
 #' summary(makeAnnualStat(d, verbose=FALSE))
+#' \dontrun{
 #' summary(makeAnnualStat(d, verbose=FALSE, parallel=TRUE))
+#' }
 #' summary(makeAnnualStat(d, verbose=FALSE, FUN=sd))
 #' @seealso \code{\link{makeZStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
