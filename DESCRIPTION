@@ -21,6 +21,7 @@ Suggests:
     ncdf4 (>= 1.9),
     ncdf (>= 1.6),
     doParallel (>= 1.0.8),
+    fields(>= 7.1),
     testthat (>= 0.9)
 Version: 0.1
 Authors@R: c( person("Ben", "Bond-Lamberty", role = c("aut", "cre")),

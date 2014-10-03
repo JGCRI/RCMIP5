@@ -1,5 +1,3 @@
-library(fields)
-
 #' Plot global data
 #'
 #' Plot a quick world map with reasonable coloring.
@@ -33,6 +31,9 @@ world.plot <- function(x, lon=NULL, lat=NULL, time=1, main=NULL, parList=NULL,
     ##        verbose - true, then this code is broken and you are trying to fix it.
     ##        simple - don't show the color key and just print the maps
 
+    if(!require(fields))
+        stop("fields package is not available")
+    
     if(verbose) cat('******world.plot starting************\n')
 
     # Sanity checks
