@@ -143,3 +143,22 @@ test_that("loadCMIP5 handles YearRange", {
     expect_null(dim(d$val))
 })
 
+test_that("loadCMIP5 handles FUN correctly", {
+    
+    path <- "testdata_twoensembles/"
+    # These two files (saved by saveNetCDF) have all 1's and 2's, 
+    # respectively, in their data
+    
+    if(!file.exists(path)) skip("Path doesn't exist")
+    
+    d_mean <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F)
+    d_min <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=min)
+    d_max <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=max)
+    d_sum <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sum)
+    expect_error(loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sd))
+    
+    expect_equal(mean(d_mean$val), 1.5)
+    expect_equal(mean(d_min$val), 1)
+    expect_equal(mean(d_max$val), 2)
+    expect_equal(mean(d_sum$val), 3)    
+})
