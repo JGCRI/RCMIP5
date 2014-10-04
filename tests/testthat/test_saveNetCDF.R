@@ -89,12 +89,31 @@ test_that("saveNetCDF saves X-Y (area) data correctly", {
         expect_null(nc$dim$depth$units)
         expect_null(nc$dim$lev$units)
         expect_null(nc$dim$time$units)
-        expect_null(nc$dim$time$units)
         expect_null(nc$dim$time$calendar)
     }
 })
 
 test_that("saveNetCDF saves t (time) data correctly", {
-    # TODO
+    d <- cmip5data(1:10, lonlat=F)  # time data
+    dfile <- tempfile()
+    if(file.exists(dfile)) expect_true(file.remove(dfile))
+    saveNetCDF(d, file=basename(dfile), path=dirname(dfile), verbose=F)
+    expect_true(file.exists(dfile))
+    
+    if(file.exists(dfile)) {
+        nc <- nc_open(dfile)
+        test <- ncvar_get(nc)
+        
+        expect_equal(length(nc$var), 1) # variable count should match
+        expect_equal(length(nc$dim), 1) # dimension count should match
+        expect_equivalent(d$val, ncvar_get(nc))  # data should match
+        expect_null(nc$dim$lon)
+        expect_null(nc$dim$lat)
+        expect_null(nc$dim$Z)
+        expect_null(nc$dim$depth$units)
+        expect_null(nc$dim$lev$units)
+        expect_is(nc$dim$time$units, "character")
+        expect_is(nc$dim$time$calendar, "character")
+    }
 })
 
