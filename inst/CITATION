@@ -6,7 +6,7 @@ citEntry(
   title = "RCMIP5: easy exploration, manipulation, and summarizing of CMIP5 data", 
   journal = "EOS", 
   year = 2015, 
-  volume = submitted, 
+  volume = "submitted", 
   pages = "XXX--XXX", 
   url = "http://onlinelibrary.wiley.com/journal/10.1002/(ISSN)2324-9250", 
   textVersion = paste(
