@@ -68,7 +68,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
         file <- paste(x$variable, x$domain, x$model, x$experiment, ensembles, 
                       paste(mintime, maxtime, sep="-"), "RCMIP5.nc", sep="_")
     }
-    fqfn <- normalizePath(paste(path, file, sep="/"))
+    fqfn <- paste(path, file, sep="/")
     
     # Define spatial dimensions, if present
     if(verbose) cat("Defining netCDF dimensions...")

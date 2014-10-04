@@ -28,8 +28,7 @@ test_that("saveNetCDF saves X-Y-T data correctly", {
     d <- cmip5data(1)
     dfile <- tempfile()
     if(file.exists(dfile)) expect_true(file.remove(dfile))
-    expect_warning(saveNetCDF(d, file=basename(dfile), path=dirname(dfile), 
-                              verbose=F)) # warning that no file exists
+    saveNetCDF(d, file=basename(dfile), path=dirname(dfile), verbose=F)
     expect_true(file.exists(dfile))
     
     if(file.exists(dfile)) {
@@ -52,8 +51,7 @@ test_that("saveNetCDF saves X-Y-Z-T data correctly", {
     d <- cmip5data(1, Z=T)
     dfile <- tempfile()
     if(file.exists(dfile)) expect_true(file.remove(dfile))
-    expect_warning(saveNetCDF(d, file=basename(dfile), path=dirname(dfile), 
-                              verbose=F)) # warning that no file exists
+    saveNetCDF(d, file=basename(dfile), path=dirname(dfile), verbose=F)
     expect_true(file.exists(dfile))
     
     if(file.exists(dfile)) {
@@ -76,8 +74,7 @@ test_that("saveNetCDF saves X-Y (area) data correctly", {
     d <- cmip5data(0, time=F)  # area data
     dfile <- tempfile()
     if(file.exists(dfile)) expect_true(file.remove(dfile))
-    expect_warning(saveNetCDF(d, file=basename(dfile), path=dirname(dfile), 
-                              verbose=F)) # warning that no file exists
+    saveNetCDF(d, file=basename(dfile), path=dirname(dfile), verbose=F)
     expect_true(file.exists(dfile))
     
     if(file.exists(dfile)) {
