@@ -118,7 +118,7 @@ test_that("loadEnsemble handles data with time length=1", {
     
     path <- "../../sampledata/"
     if(!file.exists(path)) skip("Path doesn't exist")
-        
+    
     # This is a real CMIP5 file with one single month
     # loadEnsemble should add an extra dimension (of length 1) to the data
     d <- loadEnsemble("spco2", "HadGEM2-ES", "rcp85", domain="Omon",

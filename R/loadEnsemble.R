@@ -280,8 +280,12 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         valUnit <- .ncatt_get(nc, variable, 'units')$value  # load units
         loadedFiles <- c(loadedFiles, basename(fileStr))
         
-        # Restore any 'missing' dimensions (because not present, or length=1)
-        vardata <- restoreMissingDims(vardata, lonArr, latArr, ZArr, thisTimeRaw, verbose)
+        # Restore any 'missing' dimensions (because not present, or length=1),
+        # inserting NAs into dimNames to mark what wasn't present in file
+        temp <- restoreMissingDims(dim(vardata), dimNames, lonArr, latArr, ZArr, 
+                                   thisTimeRaw, verbose)
+        vardata <- array(vardata, dim=temp[["dims"]])
+        dimNames <- temp[["dimNames"]]
         
         # Test that spatial dimensions are identical across files
         if(length(val) > 0 & length(dimNames) > 2) {
@@ -324,7 +328,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 
 #' Restore missing and/or degenerate dimensions in the data
 #'
-#' @param vardata the data array just loaded from the netcdf
+#' @param dims the data array just loaded from the netcdf
+#' @param dimNames vector of dimensions names present in file
 #' @param lonArr numeric vector of longitude values
 #' @param latArr numeric vector of latitude values
 #' @param ZArr numeric vector of Z values
@@ -339,34 +344,45 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 #' length 1) back in the data array.
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
-restoreMissingDims <- function(vardata, lonArr, latArr, ZArr, thisTimeRaw, verbose) {
-     if(is.null(lonArr) | length(lonArr) == 1 ) {
-        if(verbose) cat("- adding extra dimension for lon\n")
-        vardata <- array(vardata, dim=c(1, dim(vardata)))            
+restoreMissingDims <- function(dims, dimNames, lonArr, latArr, ZArr, thisTimeRaw, verbose) {
+    if(is.null(lonArr) | length(lonArr) == 1 ) {
+        if(verbose) cat("- restoring dimension for lon\n")
+        dims <- c(1, dims)            
     }
     if(is.null(latArr) | length(latArr) == 1 ) {
-        if(verbose) cat("- adding extra dimension for lat\n")
-        vardata <- array(vardata, dim=c(dim(vardata)[1], 1, dim(vardata)[2:length(dim(vardata))]))            
+        if(verbose) cat("- restoring dimension for lat\n")
+        dims <- c(dims[1], 1, dims[2:length(dims)])         
     }
     if(length(ZArr) == 1) {
-        if(verbose) cat("- adding extra dimension for Z\n")
-        if(length(dim(vardata)) >= 3)
-            vardata <- array(vardata, dim=c(dim(vardata)[1:2], 1, dim(vardata)[3:length(dim(vardata))]))
+        if(verbose) cat("- restoring dimension for Z\n")
+        if(length(dims) >= 3)
+            dims <- c(dims[1:2], 1, dims[3:length(dims)])
         else
-            vardata <- array(vardata, dim=c(dim(vardata), 1))
+            dims <- c(dims, 1)
     }
     if(length(thisTimeRaw) == 1) {
         if(verbose) cat("- adding extra dimension for time\n")            
-        vardata <- array(vardata, dim=c(dim(vardata), 1))
+        dims <- c(dims, 1)
     } 
     
     # At this point, we've restored all dimensions dropped due to length 1 issues
     # But we want all data moving through RCMIP5 to have four dimensions
-    dvd <- dim(vardata)
-    switch(length(dvd),
-           array(vardata, dim=c(1, 1, 1, dvd)),         # 1: assume time only
-           array(vardata, dim=c(dvd, 1, 1)),            # 2: assume lon, lat
-           array(vardata, dim=c(dvd[1:2], 1, dvd[3])),  # 3: assume lon, lat, time*
-           vardata                                      # 4 (no change needed)
-    )    
+    if(length(dims) == 1) {  # assume time only
+        if(verbose) cat("- adding extra dimensions for lon, lat, Z\n")
+        dims <- c(1, 1, 1, dims)
+        dimNames <- c(NA, NA, NA, dimNames)
+    } else if(length(dims) == 2) { # assume lon, lat
+        if(verbose) cat("- adding extra dimensions for Z, time\n")
+        dims <- c(dims, 1, 1)
+        dimNames <- c(dimNames, NA, NA)
+    } else if(length(dims) == 3) { # assume lon, lat, time
+        if(verbose) cat("- adding extra dimension for Z\n")
+        dims <- c(dims[1:2], 1, dims[3])
+        dimNames <- c(dimNames[1:2], NA, dimNames[3])
+    } else if(length(dims) == 4) { # assume lon, lat, Z, time
+        # no change needed
+    } else
+        stop("Variable dimensions out of bounds!")
+    
+    list(dims=dims, dimNames=dimNames)
 } # restoreMissingDimensions

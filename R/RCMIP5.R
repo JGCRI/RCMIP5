@@ -120,6 +120,8 @@ cmip5data <- function(x=list(),
             valdims[1:2]=c(lonsize, latsize)
             debug$lonUnit <- "degrees_east"
             debug$latUnit <- "degrees_north"
+        } else {
+            result$dimNames <- c(NA, NA)
         }
         
         # If this data will have Z dimension, construct        
@@ -130,6 +132,8 @@ cmip5data <- function(x=list(),
             result$dimNames <- c(result$dimNames, "Z")
             valdims[3] <- Zsize
             debug$ZUnit <- "m"
+        } else {
+            result$dimNames <- c(result$dimNames, NA)
         }
         
         # If this data will have time dimension, construct        
@@ -150,6 +154,7 @@ cmip5data <- function(x=list(),
             result$dimNames <- c(result$dimNames, "time")            
             valdims[4] <- ppy*length(years)
         } else {
+            result$dimNames <- c(result$dimNames, NA)            
             result$domain <- "fx"
         }
         
@@ -286,20 +291,27 @@ print.summary.cmip5data <- function(x, ...) {
 #' @param x A \code{\link{cmip5data}} object
 #' @param ... Other parameters
 #' @param verbose logical. Print info as we go?
+#' @param originalNames logical. Use original dimension names from file?
 #' @return The object converted, as well as possible, to a data frame
 #' @export
 #' @keywords internal
-as.data.frame.cmip5data <- function(x, ..., verbose=FALSE) {
+as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) {
     if(verbose) cat("Melting...\n")
-    df <- reshape2::melt(x$val, varnames=c("lon", "lat", "Z", "time"))
+    if(originalNames)
+        dimNames <- x$dimNames
+    else
+        dimNames <- c("lon", "lat", "Z", "time")
+    df <- reshape2::melt(x$val, varnames=dimNames)
     
     # Fill in dimensional data. Note that if one of these vectors (x$lon, x$lat,
     # x$Z, x$time) doesn't exist, it will be removed from the data frame.
-    df$lon <- x$lon[df$lon]
-    df$lat <- x$lat[df$lat]
-    df$Z <- x$Z[df$Z]
-    df$time <- x$time[df$time]
-   
+    # Note the order here (column 4...1) matters, because we're potentially
+    # removing columns as we go!
+    df[4] <- x$time[df[,4]]
+    df[3] <- x$Z[df[,3]]
+    df[2] <- x$lat[df[,2]]
+    df[1] <- x$lon[df[,1]]
+
     df
 } # as.data.frame.cmip5data
 

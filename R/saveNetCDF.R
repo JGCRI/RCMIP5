@@ -9,6 +9,7 @@
 #' @param path File path.
 #' @param verbose logical. Print info as we go?
 #' @param saveProvenance Save the provenance separately?
+#' @param originalNames logical. Use original dimension names from file?
 #' @param force.ncdf Force use of the older ncdf package for testing?
 #' @return The fully-qualified filename that was written (invisible).
 #' @details If no filename is provided, a meaningful one will be assigned based on the
@@ -16,7 +17,8 @@
 #' able to read this file. If \code{saveProvenance} is specified, the provenance is saved
 #' separately in a comma-separated file of the same name but appending "_prov.csv".
 #' (Provenance messages are always saved as netcdf file attributes.)
-saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TRUE, force.ncdf=FALSE) {
+saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, 
+                       saveProvenance=TRUE, originalNames=FALSE, force.ncdf=FALSE) {
     
     # Sanity checks - class and length of parameters
     stopifnot(class(x)=="cmip5data")
@@ -27,6 +29,11 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     stopifnot(length(dim(x$val)) %in% c(1, 2, 3, 4)) # that's all we know
+    if(originalNames) 
+        dimNames <- x$dimNames
+    else
+        dimNames <- c("lon", "lat", "Z", "time")
+    if(verbose) cat("Writing with names", dimNames, "\n")
     
     # We prefer to use the 'ncdf4' package, but Windows has problems with this, so
     # if it's not installed can also use 'ncdf'
@@ -63,43 +70,49 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     }
     fqfn <- normalizePath(paste(path, file, sep="/"))
     
-    # Define mandatory dimensions
+    # Define spatial dimensions, if present
     if(verbose) cat("Defining netCDF dimensions...")
-    londim <- .ncdim_def("lon", x$debug$lonUnit, x$lon)
-    latdim <- .ncdim_def("lat", x$debug$latUnit, x$lat)
-    dimlist <- list(londim, latdim) # assuming no Z/time
+    dimlist <- c()
+    if(!is.null(x$lon) & !is.null(x$lat)) {
+        londim <- .ncdim_def("lon", x$debug$lonUnit, x$lon)
+        latdim <- .ncdim_def("lat", x$debug$latUnit, x$lat)
+        dimlist <- list(londim, latdim) # for now assume no Z/time        
+    }
     
-    # Define optional dimensions, if present
+    # Define Z and time dimensions, if present
     if(!is.null(x$Z)) {
-        Zdim <- .ncdim_def(x$dimNames[3], x$debug$ZUnit, x$Z)
+        Zdim <- .ncdim_def(dimNames[3], x$debug$ZUnit, x$Z)
         dimlist <- list(londim, latdim, Zdim)
     }
     if(!is.null(x$time)) {
-        timedim <- .ncdim_def(x$dimNames[length(x$dimNames)], x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
+        timedim <- .ncdim_def(dimNames[length(dimNames)], x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
         dimlist[[length(dimlist)+1]] <- timedim     
     }
     
     if(verbose) cat(length(dimlist), "dimensions for", x$variable, "\n")
     
-    # Define mandatory variables
+    # Define mandatory variable
     if(verbose) cat("Defining main netCDF variable\n")
     valvar <- .ncvar_def(x$variable, x$valUnit, dimlist)
-    lonvar <- .ncvar_def("lon", x$debug$lonUnit, londim)
-    latvar <- .ncvar_def("lat", x$debug$latUnit, londim)
-    varlist <- list(valvar, lonvar, latvar)
     
-    # Create the file and write mandatory variables
+    # Create the file and write mandatory variable
     if(verbose) cat("Creating and writing", file, "\n")
     nc <- .nc_create(fqfn, valvar)
-    
     .ncvar_put(nc, valvar, x$val)
-    .ncvar_put(nc, lonvar, x$lon)
-    .ncvar_put(nc, latvar, x$lat)
     
-    # Write optional variables
+    # Write spatial dimensions, if present
+    if(!is.null(x$lon) & !is.null(x$lat)) {
+        if(verbose) cat("Writing lon and lat\n")
+        lonvar <- .ncvar_def("lon", x$debug$lonUnit, londim)
+        latvar <- .ncvar_def("lat", x$debug$latUnit, londim)
+        .ncvar_put(nc, lonvar, x$lon)
+        .ncvar_put(nc, latvar, x$lat)        
+    }
+    
+    # Write Z and time variables, if present
     if(!is.null(x$Z)) {
         if(verbose) cat("Writing Z\n")
-        Zvar <- .ncvar_def(x$dimNames[3], x$debug$ZUnit, Zdim)
+        Zvar <- .ncvar_def(dimNames[3], x$debug$ZUnit, Zdim)
         .ncvar_put(nc, Zvar, x$Z) 
     }
     

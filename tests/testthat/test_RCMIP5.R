@@ -47,4 +47,11 @@ test_that("as.data.frame works", {
     df <- as.data.frame(makeZStat(cmip5data(2000:2002, Z=T), verbose=F))
     expect_is(df, "data.frame")
     expect_equal(names(df), c("lon", "lat", "time", "value")) 
+    
+    d <- cmip5data(2000:2002, Z=T)
+    d$dimNames <- c("a", "b", "c", "d")
+    expect_equal(names(as.data.frame(d, verbose=F)), 
+                 c("lon", "lat", "Z", "time", "value")) 
+    expect_equal(names(as.data.frame(d, verbose=F, originalNames=T)),
+                 c("a", "b", "c", "d", "value"))
 })
