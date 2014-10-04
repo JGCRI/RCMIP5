@@ -58,7 +58,7 @@ print(globalmean$provenance[c("timestamp","message")])
 readline("<return>")
 
 ## Visualization of the first 12 months of data:
-print(worldPlot2(historical, time=1:12))
+print(worldPlot(historical, time=1:12))
 readline("<return>")
 
 ## It's easy to convert 'cmip5data' structures to data frames:
