@@ -100,6 +100,6 @@ makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     x$numMonths <- table(floor(x$time))
     x$time <- uniqueYears
     x$debug$timeFreqStr <- "years (summarized)"
-    addProvenance(x, paste("Calculated",as.character(substitute(FUN)),
+    addProvenance(x, paste("Calculated", as.character(substitute(FUN)),
                            "for years", min(x$time), "-", max(x$time)))
 } # makeAnnualStat
