@@ -4,32 +4,23 @@
 
 # Mac OS
 *.DS_Store
-
 # Example code in package build process
 *-Ex.R
-
 # R data files from past sessions
 .Rdata
-
 # Specific to this project
 ToddBrown/anuGrid
-
 # R backup files
 *.R~
-
 #backup files
 *~
 .Rproj.user
-
 *.html
-
 *.Rd
-
 #R data files
 *.RData
-
 #image files
 *.pdf
 *.png
-
 *.R#
+inst/doc
