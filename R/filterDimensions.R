@@ -31,7 +31,7 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, Zs=NULL,
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
-    stopifnot(timeIndex %in% c(1, 2, 3, 4)) # that's all we know
+    stopifnot(timeIndex == 4) # that's all we know
     
     x <- filterDimensionLon(x, lons, verbose)
     x <- filterDimensionLat(x, lats, verbose)

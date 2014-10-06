@@ -28,7 +28,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
     
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
-    stopifnot(length(dim(x$val)) %in% c(1, 2, 3, 4)) # that's all we know
+    stopifnot(length(dim(x$val)) == 4) # that's all we know
     if(originalNames) 
         dimNames <- x$dimNames
     else

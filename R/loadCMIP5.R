@@ -112,15 +112,15 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
                 modelTemp <- addProvenance(modelTemp, temp)
                 modelTemp <- addProvenance(modelTemp, paste("Added ensemble", ensemble))
             } else { # ...if dimensions don't match, don't load
-                warning(ensemble,
-                        'Not loaded: data dimensions do not match those of previous ensemble(s)\n')
+                warning(ensemble, paste(
+                    "Did not load", ensemble, "- data dimensions do not match those of previous ensemble(s)"))
             }
         } # is.null(modelTemp)
     } # for
     
     # Make sure at least one ensemble was actually loaded
     if(length(modelTemp$ensembles) == 0) {
-        warning("No ensembles were loaded.")
+        warning(paste("No ensembles were loaded:", variable, model, experiment))
         return(NULL)
     }
     
@@ -130,6 +130,6 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     
     # Update provenance and return
     addProvenance(modelTemp, c(paste("Computed", FUNstr, "of ensembles:",
-                                                  paste(ensembleArr, collapse=' '))))
+                                     paste(ensembleArr, collapse=' '))))
 } # loadCMIP5
 

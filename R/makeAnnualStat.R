@@ -27,8 +27,13 @@
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeAnnualStat(d)
-#' summary(makeAnnualStat(d, verbose=FALSE))
-#' summary(makeAnnualStat(d, verbose=FALSE, FUN=sd))
+#' summary(makeAnnualStat(d))
+#' \dontrun{
+#' library(doParallel)
+#' registerDoParallel()
+#' summary(makeMonthlyStat(d, verbose=TRUE, parallel=TRUE))
+#' }
+#' summary(makeAnnualStat(d, FUN=sd))
 #' @seealso \code{\link{makeZStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
 makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
@@ -43,7 +48,7 @@ makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
-    stopifnot(timeIndex %in% c(3, 4)) # that's all we know
+    stopifnot(timeIndex == 4) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     stopifnot(identical(dim(x$val)[timeIndex], length(x$time)))
     

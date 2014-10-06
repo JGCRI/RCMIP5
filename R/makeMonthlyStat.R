@@ -28,11 +28,13 @@
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeMonthlyStat(d)
-#' summary(makeMonthlyStat(d, verbose=FALSE))
+#' summary(makeMonthlyStat(d))
 #' \dontrun{
-#' summary(makeMonthlyStat(d, verbose=FALSE, parallel=TRUE))
+#' library(doParallel)
+#' registerDoParallel()
+#' summary(makeMonthlyStat(d, verbose=TRUE, parallel=TRUE))
 #' }
-#' summary(makeMonthlyStat(d, verbose=FALSE, FUN=sd))
+#' summary(makeMonthlyStat(d, FUN=sd))
 #' @export
 makeMonthlyStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     
@@ -43,12 +45,11 @@ makeMonthlyStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
-    stopifnot(length(dim(x$val)) %in% c(3, 4, 5)) # that's all we know
     
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
-    stopifnot(timeIndex %in% c(3, 4)) # that's all we know
+    stopifnot(timeIndex == 4) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     stopifnot(identical(dim(x$val)[timeIndex], length(x$time)))
     

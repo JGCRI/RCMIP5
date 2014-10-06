@@ -82,9 +82,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     # ...conventions:variable_domain_model_experiment_ensemble_time.nc
     # ...
     domainCheck <- unname(vapply(unlist(fileList),
-                                 function(x){
-                                     unlist(strsplit(basename(x), '_'))[2]
-                                 },
+                                 function(x){ unlist(strsplit(basename(x), '_'))[2] },
                                  FUN.VALUE=''))
     
     # Check that we are only loading one domain. We check this before checking
@@ -99,9 +97,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     
     # Split all file names based on '_' or '.'
     cmipName <- unname(vapply(unlist(fileList),
-                              function(x){
-                                  unlist(strsplit(basename(x), '[_\\.]'))
-                              },
+                              function(x){ unlist(strsplit(basename(x), '[_\\.]')) },
                               FUN.VALUE=rep('', length=numSplits+1)))
     
     # List what order the files appear in the name, for CMIP5 this will be:
@@ -209,11 +205,9 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             calendarArr <- temp
             
             # calculate the decimal starting year
-            startYr <- sum((calendarArr - c(0, 1, 1, 0, 0, 0)) / c(1, 12,
-                                                                   calendarDayLength,
-                                                                   calendarDayLength*24,
-                                                                   calendarDayLength*24*60,
-                                                                   calendarDayLength*24*60*60))
+            startYr <- sum((calendarArr - c(0, 1, 1, 0, 0, 0)) 
+                           / c(1, 12, calendarDayLength, calendarDayLength*24,
+                               calendarDayLength*24*60, calendarDayLength*24*60*60))
             
             # Load the actual time
             thisTimeRaw <- .ncvar_get(nc, varid=timeName)

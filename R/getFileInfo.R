@@ -19,7 +19,7 @@
 #' @export
 #' @examples
 #' getFileInfo()
-#' getFileInfo('.',recursive=FALSE)
+#' getFileInfo('.', recursive=FALSE)
 #' @seealso \code{\link{checkTimePeriod}}
 getFileInfo <- function(path='.', recursive=TRUE) {
 

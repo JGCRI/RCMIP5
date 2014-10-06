@@ -31,7 +31,7 @@ see \url{http://cmip-pcmdi.llnl.gov/cmip5/data_description.html}
 }
 \examples{
 getFileInfo()
-getFileInfo('.',recursive=FALSE)
+getFileInfo('.', recursive=FALSE)
 }
 \seealso{
 \code{\link{checkTimePeriod}}

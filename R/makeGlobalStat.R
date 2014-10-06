@@ -38,9 +38,11 @@
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeGlobalStat(d)
-#' summary(makeGlobalStat(d, verbose=FALSE))
+#' summary(makeGlobalStat(d))
 #' \dontrun{
-#' summary(makeGlobalStat(d, verbose=FALSE, parallel=TRUE))
+#' library(doParallel)
+#' registerDoParallel()
+#' summary(makeGlobalStat(d, verbose=TRUE, parallel=TRUE))
 #' }
 #' @export
 makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weighted.mean, ...) {
@@ -55,7 +57,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
-    stopifnot(timeIndex %in% c(3, 4)) # that's all we know
+    stopifnot(timeIndex == 4) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     
     # Get and check area data, using 1's if nothing supplied

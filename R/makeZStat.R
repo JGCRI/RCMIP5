@@ -31,9 +31,11 @@
 #' d <- cmip5data(1970:1975, Z=TRUE)   # sample data
 #' makeZStat(d)
 #' \dontrun{
-#' summary(makeZStat(d, verbose=FALSE, parallel=TRUE))
+#' library(doParallel)
+#' registerDoParallel()
+#' summary(makeZStat(d, verbose=TRUE, parallel=TRUE))
 #' }
-#' summary(makeZStat(d, verbose=FALSE, FUN=sd))
+#' summary(makeZStat(d, FUN=sd))
 #' @export
 makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     
@@ -46,7 +48,7 @@ makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
-    stopifnot(timeIndex %in% c(3, 4)) # that's all we know
+    stopifnot(timeIndex == 4) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     
     if(timeIndex < 4 | is.null(x$Z)) {
