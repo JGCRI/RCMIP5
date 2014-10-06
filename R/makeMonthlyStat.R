@@ -79,7 +79,7 @@ makeMonthlyStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
         # When finished, combine results using the abind function (3). For this the 'plyr'
         # and 'abind' packages are made available to the child processes (4).
         i <- 1  # this is here only to avoid a CRAN warning (no visible binding inside foreach)
-        ans <- foreach(i=1:12,                                               # (1)
+        ans <- suppressWarnings(foreach(i=1:12,                              # (1)
                        .combine=function(...) abind(..., along=timeIndex),   # (3)
                        .packages=c('plyr', 'abind')) %dopar% {               # (4)
                            if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)
@@ -87,7 +87,7 @@ makeMonthlyStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
                            # Get a timeslice (ts) of data and send to aaply (2)
                            ts <- asub(x$val, idx=(i == monthIndex), dims=timeIndex, drop=FALSE)
                            aaply(ts, c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
-                       }
+                       })
     }) # system.time
     
     if(verbose) cat('\nTook',timer[3], 's\n')

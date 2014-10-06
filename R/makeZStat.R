@@ -82,7 +82,7 @@ makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
         # When finished, combine results using the abind function (3). For this the 'plyr'
         # and 'abind' packages are made available to the child processes (4).
         i <- 1  # this is here only to avoid a CRAN warning (no visible binding inside foreach)
-        ans <- foreach(i=seq_along(x$time),                                    # (1)
+        ans <- suppressWarnings(foreach(i=seq_along(x$time),                   # (1)
                        .combine = function(...)  abind(..., along=timeIndex),  # (3)
                        .packages=c('plyr', 'abind')) %dopar% {                 # (4)
                            if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)
@@ -90,7 +90,7 @@ makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
                            # Get a timeslice (ts) of data and send to aaply (2)
                            ts <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
                            aaply(ts, 1:2, .drop=FALSE, FUN, ...)                                                                                     
-                       }
+                       })
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')

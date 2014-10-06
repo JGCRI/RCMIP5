@@ -105,7 +105,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
         # When finished, combine results using the abind function (3). For this the 'plyr'
         # and 'abind' packages are made available to the child processes (4).
         i <- 1  # this is here only to avoid a CRAN warning (no visible binding inside foreach)
-        ans <- foreach(i=seq_along(x$time),                                    # (1)
+        ans <- suppressWarnings(foreach(i=seq_along(x$time),                   # (1)
                        .combine = abind,                                       # (3)
                        .packages=c('plyr', 'abind')) %dopar% {                 # (4)
                            if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)
@@ -113,7 +113,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
                            # Get a timeslice (ts) of data and send to aaply (2)
                            ts <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
                            aaply(ts, margins, .drop=FALSE, FUN, w=areavals, ...)
-                       }
+                       })
         ans <- array(ans, dim=c(1, 1, dim(x$val)[margins]))
         
         if(parallel) stopImplicitCluster()
