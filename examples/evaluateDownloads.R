@@ -6,6 +6,7 @@ myPath <- '/Volumes/DATAFILES/downloads/'
 allDownloads <- getFileInfo(myPath)
 
 #check empty downloads
+cat("Empty downloads:\n")
 print(allDownloads[allDownloads$fileSize == 0,])
 
 ##example remove the empty files that failed to download, could be extended to
@@ -20,6 +21,8 @@ handCheck <- yrCheck[is.na(yrCheck$allHere),]
 
 ##pull the years that are clearly bad
 badCheck <- yrCheck[!yrCheck$allHere & is.finite(yrCheck$allHere),]
+
+print("Files to hand check are in variable: 'handCheck'\nFiles flaged as incomplete years are in 'badCheck'\n")
 
 ##Generate download table for variables of interest
 varArr <- c('cSoil', 'rh', 'tsl', 'cLitter', 'cCwd', 'pr', 'evspsbl', #soils
@@ -36,6 +39,10 @@ downloadSummary <- dcast(downloadSummary, model ~ variable,
 
 #Check that the correct models are downloaded based on what's on the ESFG
 modelsWithSoil <- downloadSummary$cSoil > 0
+modelsWithVeg <- downloadSummary$cVeg > 0
 
-downloadSummary$model[modelsWithSoil & downloadSummary$cCwd > 0]
+cat('Summary of model-variables for 1pctCO2\n')
+print(downloadSummary[modelsWithSoil & modelsWithVeg,])
+
+
 
