@@ -82,8 +82,6 @@ test_that("weighted.sum works correctly", {
 })
 
 test_that("makeGlobalStat parallel results == serial result", {
-    skip_on_cran()
-    
     library(doParallel)
     registerDoParallel(cores=2)  # CRAN policy is 2 cores max    
     years <- 1850:1851

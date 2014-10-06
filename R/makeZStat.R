@@ -60,12 +60,7 @@ makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     stopifnot(identical(dim(x$val)[3], length(x$Z)))
     
     # Prepare for main computation
-    doParallelAlreadyLoaded <- "package:doParallel" %in% search()
-    if(parallel) parallel <- require(doParallel, quietly=!verbose)
     if(parallel) {  # go parallel, woo hoo!
-        if(!doParallelAlreadyLoaded) # if the user has already set up a parallel
-            registerDoParallel()     # environment, don't mess with it
-        
         if(verbose) {
             cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             
@@ -87,7 +82,7 @@ makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
         # When finished, combine results using the abind function (3). For this the 'plyr'
         # and 'abind' packages are made available to the child processes (4).
         i <- 1  # this is here only to avoid a CRAN warning (no visible binding inside foreach)
-        ans <- foreach(i=1:length(x$time),                                     # (1)
+        ans <- foreach(i=seq_along(x$time),                                    # (1)
                        .combine = function(...)  abind(..., along=timeIndex),  # (3)
                        .packages=c('plyr', 'abind')) %dopar% {                 # (4)
                            if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)

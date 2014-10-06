@@ -53,8 +53,6 @@ test_that("makeZStat computes Z means", {
 })
 
 test_that("makeZStat parallel results == serial result", {
-    skip_on_cran()
-    
     library(doParallel)
     registerDoParallel(cores=2)  # CRAN policy is 2 cores max
     years <- 1850:1851

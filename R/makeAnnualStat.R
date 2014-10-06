@@ -28,9 +28,6 @@
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeAnnualStat(d)
 #' summary(makeAnnualStat(d, verbose=FALSE))
-#' \dontrun{
-#' summary(makeAnnualStat(d, verbose=FALSE, parallel=TRUE))
-#' }
 #' summary(makeAnnualStat(d, verbose=FALSE, FUN=sd))
 #' @seealso \code{\link{makeZStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
@@ -54,12 +51,7 @@ makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     uniqueYears <- unique(floor(x$time))
     
     # Prepare for main computation
-    doParallelAlreadyLoaded <- "package:doParallel" %in% search()
-    if(parallel) parallel <- require(doParallel, quietly=!verbose)
     if(parallel) {  # go parallel, woo hoo!
-        if(!doParallelAlreadyLoaded) # if the user has already set up a parallel
-            registerDoParallel()     # environment, don't mess with it
-        
         if(verbose) {
             cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
             
@@ -81,7 +73,7 @@ makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
         # When finished, combine results using the abind function (3). For this the 'plyr'
         # and 'abind' packages are made available to the child processes (4).
         i <- 1  # this is here only to avoid a CRAN warning (no visible binding inside foreach)
-        ans <- foreach(i=1:length(uniqueYears),                                     # (1)
+        ans <- foreach(i=seq_along(uniqueYears),                                    # (1)
                        .combine = function(...)  abind(..., along=timeIndex),       # (3)
                        .packages=c('plyr', 'abind')) %dopar% {                      # (4)
                            if(verbose & parallel) cat(date(), i, "\n", file=tf, append=T)
