@@ -1,31 +1,50 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "Atmospheric CO2"
+author: "Ben Bond-Lamberty and Corinne Hartin"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Atmospheric CO2}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+One common use for CMIP5 data, and the `RCMIP5` package, is to extract the global mean of some variable of interest for particular models, experiments, and/or ensembles. Here we give an example of this, computing the global mean CO2 value by year.
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+## Make sure the required data are present
 
-## Vignette Info
+As the package documentation notes (see e.g. http://gitcom.com/JGCRI/RCMIP) you first have to download the necessary from an Earth System Grid Federation node; RCMIP5 won't do this for you. Assuming this step is complete, then, we check to make sure all the data we'll need are present. First load information about all the CMIP5 files available:
+```
+library(RCMIP5)
+c5files <- getFileInfo("~/location/of/cmip5/files/"")
+```
 
-Note the various macros within the `vignette` setion of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+By default, `getFileInfo` will recursively scan the entire directory tree and return a data frame containing the following information:
 
-## Styles
+- File path
+- File name
+- Variable name
+- Domain
+- Model
+- Experiment (typically historical, rcp45, rcp85, etc.)
+- Ensemble
+- Time^[Unless it's an 'fx' (fixed) domain file, with no time dimension.]
+- Size (kb)
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+We're interested in the CO2 files; more specifically, we want to know whether all the necessary files have been downloaded.
 
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
+```
+co2files <- subset(c5files, variable=="co2")
+co2filechk <- checkTimePeriod(co2files)
+co2filechk
+```
+
+## Load the data
+
+
+```
+co2 <- loadCMIP5("co2", "CMCC-CESM", "co2", path="~/location/of/cmip5/files/")
+```
 
 ## Figures
 
