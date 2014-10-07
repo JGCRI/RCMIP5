@@ -36,8 +36,13 @@ We're interested in the CO2 files; more specifically, we want to know whether al
 ```
 co2files <- subset(c5files, variable=="co2")
 co2filechk <- checkTimePeriod(co2files)
-co2filechk
+co2filechk[-1]  # don't display the file path
 ```
+
+For the CMIP5 data we have^[Again, this depends on what you've downloaded from the ESGF! Naively running the commands in this vignette, without the appropriate CMIP5 data, will produce nothing but errors.], this produces the following output:
+
+TODO - get a data frame from CH; dput it; use a chunk to print output.
+
 
 ## Load the data
 
@@ -46,32 +51,26 @@ co2filechk
 co2 <- loadCMIP5("co2", "CMCC-CESM", "co2", path="~/location/of/cmip5/files/")
 ```
 
-## Figures
+Note about yearRange
 
-The figure sizes have been customised so that you can easily put two images side-by-side. 
+## Look at data - summary, etc.
 
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```
+summary(co2)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+## Compute global means
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+Load the correct area file.
+makeGlobalStat
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+## Export the data for further processing
 
-## More Examples
+We can simply use `as.data.frame` to convert our `cmip5data` object to a standard data frame:
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
 ```
+co2g_df <- as.data.frame(co2g)
 
-Also a quote using `>`:
+## Processing many different models, experiments, etc.
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
