@@ -16,11 +16,11 @@
 #' @details If Z dimension is present, the stat function is calculated
 #' for all values of these. No status bar is printed when processing in parallel,
 #' but progress is logged to a file (call with verbose=T) that can be monitored.
-#' 
+#'
 #' If the user requests parallel processing (via parallel=T) makeAnnualStat
-#' (i) attempts to load the \code{doParallel} package, and (ii) registers it as a 
-#' parallel backend \emph{unless} the user has already done this (e.g. set up a 
-#' virtual cluster with particular, desired characteristics). In that case, 
+#' (i) attempts to load the \code{doParallel} package, and (ii) registers it as a
+#' parallel backend \emph{unless} the user has already done this (e.g. set up a
+#' virtual cluster with particular, desired characteristics). In that case,
 #' makeAnnualStat respects the existing cluster.
 #' @note The \code{val} component of the returned object will always be the same structure
 #' as \code{x}, i.e. of dimensions {x, y, z, t}.
@@ -37,29 +37,29 @@
 #' @seealso \code{\link{makeZStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
 makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
-    
+
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
-    #stopifnot(x$debug$timeFreqStr %in% 'mon')    # val array in months?
+
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(parallel)==1 & is.logical(parallel))
     stopifnot(length(FUN)==1 & is.function(FUN))
-    
+
     # The ordering of x$val dimensions is lon-lat-Z?-time?
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex == 4) # that's all we know
     if(verbose) cat("Time index =", timeIndex, "\n")
     stopifnot(identical(dim(x$val)[timeIndex], length(x$time)))
-    
+
     # uniqueYears holds the different years in x's time vector
     uniqueYears <- unique(floor(x$time))
-    
+
     # Prepare for main computation
     if(parallel) {  # go parallel, woo hoo!
         if(verbose) {
             cat("Running in parallel [", getDoParWorkers(), "cores ]\n")
-            
+
             # Set up tempfile to log progress
             tf <- tempfile()
             cat(date(), "Started\n", file=tf)
@@ -68,8 +68,8 @@ makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     } else if(verbose) {
         cat("Running in serial\n")
         pb <- txtProgressBar(min=0, max=length(x$time), style=3)
-    }        
-    
+    }
+
     # Main computation code
     timer <- system.time({  # time the main computation, below
         # The computation below splits time across available cores (1), falling back
@@ -88,13 +88,14 @@ makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
                            aaply(ts, c(1:(timeIndex-1)), .drop=FALSE, FUN, ...)
                        }) # %dopar%
     }) # system.time
-    
+
     if(verbose) cat('\nTook', timer[3], 's\n')
-    
+
     # We now have new computed data. Overwrite original data, record # of months per year,
     # and update the time vector, time frequency string, and provenance
     x$val <- unname(ans)
-    x$numMonths <- table(floor(x$time))
+    x$numMonths <- table(floor(x$time)) #decrepit, we've moved beyond months
+    x$numPerYear <- table(floor(x$time))
     x$time <- uniqueYears
     x$debug$timeFreqStr <- "years (summarized)"
     addProvenance(x, paste("Calculated", as.character(substitute(FUN)),
