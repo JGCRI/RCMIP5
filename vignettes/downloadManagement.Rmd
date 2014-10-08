@@ -50,6 +50,7 @@ badCheck <- yrCheck[!yrCheck$allHere & is.finite(yrCheck$allHere),]
 ```
 
 There are several known shortcomings due to the fact that these checks are based entirely on the filename. Specifically, this function
+
 1. misses missing files from the beginning or end of the time period.
 2. misses mismatched time periods between ensembles.
 3. flages as unknown any sub-monthly time period because different models have different calendars. `yrCheck[is.na(yrCheck$allHere),]`
