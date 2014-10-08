@@ -9,14 +9,15 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
-One common use for CMIP5 data, and the `RCMIP5` package, is to extract the global mean of some variable of interest for particular models, experiments, and/or ensembles. Here we give an example of this, computing the global mean CO2 value by year.
+One common use for CMIP5 data, and the `RCMIP5` package, is to extract the global mean of some variable of interest for particular models, experiments, and/or ensembles. Here we give an example of this, computing the global mean atmospheric CO2 value by year.
 
 ## Make sure the required data are present
 
 As the package documentation notes (see e.g. http://gitcom.com/JGCRI/RCMIP) you first have to download the necessary from an Earth System Grid Federation node; RCMIP5 won't do this for you. Assuming this step is complete, then, we check to make sure all the data we'll need are present. First load information about all the CMIP5 files available:
 ```
-library(RCMIP5)
-c5files <- getFileInfo("~/location/of/cmip5/files/"")
+> library(RCMIP5)
+> mypath <- "~/my/cmip5/files/"
+> c5files <- getFileInfo(mypath)
 ```
 
 By default, `getFileInfo` will recursively scan the entire directory tree and return a data frame containing the following information:
@@ -34,43 +35,172 @@ By default, `getFileInfo` will recursively scan the entire directory tree and re
 We're interested in the CO2 files; more specifically, we want to know whether all the necessary files have been downloaded.
 
 ```
-co2files <- subset(c5files, variable=="co2")
-co2filechk <- checkTimePeriod(co2files)
-co2filechk[-1]  # don't display the file path
+> co2files <- subset(c5files, variable=="co2")
+> co2filechk <- checkTimePeriod(co2files)
+> co2filechk[-1]  # don't display the file path
 ```
 
 For the CMIP5 data we have^[Again, this depends on what you've downloaded from the ESGF! Naively running the commands in this vignette, without the appropriate CMIP5 data, will produce nothing but errors.], this produces the following output:
 
-TODO - get a data frame from CH; dput it; use a chunk to print output.
+```
+  experiment   model variable ensemble         yrStr allHere startDate  endDate files
+1      rcp85 CanESM2      co2   r1i1p1 200601-210012    TRUE      2006 2100.917     1
+2      rcp85 CanESM2      co2   r2i1p1 200601-210012    TRUE      2006 2100.917     1
+```
 
+Here we see that two ensembles are available, both from the 'rcp85' experiment run by the 'CanESM2' model.
+Crucially, both are complete: the `allHere` flag is TRUE (it would be FALSE if, for example, we'd downloaded
+2006-2049 and 2051-2100 but forgotten year 2050).
 
 ## Load the data
 
+Time to load these data into memory. To do so we use the `loadCMIP5` function, telling to it
+to load the 'co2' variable from the 'CanESM2' model running the 'rcp85' experiment. Note that here 
+we're using the `yearRange` parameter to limit the data to five years:
 
 ```
-co2 <- loadCMIP5("co2", "CMCC-CESM", "co2", path="~/location/of/cmip5/files/")
+> co2 <- loadCMIP5("co2", "CanESM2", "rcp85", path=mypath, verbose=T, yearRange=c(2006, 2010))
+Averaging ensembles: r1i1p1 r2i1p1 
+Loading ~/my/cmip5/files/co2_Amon_CanESM2_rcp85_r1i1p1_200601-210012.nc 
+- co2 dimension names: lon lat plev time 
+- loading only timeslices 1 - 60 
+- data 128 64 22 60 
+Loading ~/my/cmip5/files/co2_Amon_CanESM2_rcp85_r2i1p1_200601-210012.nc 
+- co2 dimension names: lon lat plev time 
+- loading only timeslices 1 - 60 
+- data 128 64 22 60 
 ```
 
-Note about yearRange
+`loadCMIP5` reports that there are two ensembles to average (r1i1p1 and r2i1p1), the name of each file it loads, the 
+dimension names, the fact that it's only reading the first five years, and the resulting data array size: 128 (lon) x 64 (lat) 
+x 22 (plev, which will be renamed 'Z' when read in) x 60 (time).
 
-## Look at data - summary, etc.
+## Examining the data
+
+Summarize these data:
 
 ```
-summary(co2)
+> summary(co2)
+CMIP5 data - primary data 
+Variable: co2 (1e-6) from model CanESM2
+Data range: 379.81-390.28  Mean: 384.85
+Experiment: rcp85 - 2 ensemble(s)
+Spatial dimensions: lon [128] lat [64] Z [22]
+Time dimension: mon [60] days since 1850-1-1 
+Size: 82.5 MB
+Provenance has 6 entries
 ```
+
+Here we see the name of the variable, model, experiment, the fact that this came from two ensembles, the data range
+and spatial dimensions, time dimensions and frequency ('mon' - monthly), size in memory, and a note about the 
+provenance (see below). Everything looks good. Assuming the `ggplot2` package is installed, we might want to make a quick plot of the data to check:
+
+```
+> worldPlot(co2, time=1:12)
+```
+**TODO - get structure from Corinne**
+
 
 ## Compute global means
 
-Load the correct area file.
-makeGlobalStat
-
-## Export the data for further processing
-
-We can simply use `as.data.frame` to convert our `cmip5data` object to a standard data frame:
+There are three steps in our processing chain. First, we want to filter the data: this model reports atmospheric CO2 for 22 different levels (the 'Z' dimension), and we're only interested in the level closest to the surface.
+Second, these are monthly data, and we're interested in an annual average. Third, we want to reduce the gridded
+data to a global mean value. This can be done as follows:
 
 ```
-co2g_df <- as.data.frame(co2g)
+> co2surf <- filterDimensions(co2, Zs=co2$Z[1])
+> co2annual <- makeAnnualStat(co2surf, verbose=T)
+Running in serial
+Took 6.41 s
+> co2summary <- makeGlobalStat(co2annual, verbose=T)
+No grid areas supplied; using calculating values
+Calculating grid cell areas...
+Running in serial
+Took 0.03 s
+```
 
-## Processing many different models, experiments, etc.
+The first step, `makeAnnualStat`, was relatively slow (and can be quite slow for large datasets).^[All the `make...Stat` functions have a optional `parallel` parameter that will use the `foreach` package and any available parallelized backend.] Also note that because we didn't supply any grid cell area data to the `makeAnnualStat` function, it computed its own.
+In any event, now we look at the resulting data:
 
+```
+> print(summary(co2summary))
+CMIP5 data - annual summary (of 12 months) (filtered) 
+Variable: weighted.mean of co2 (1e-6) from model CanESM2
+Data range: 380.72-389.22  Mean: 384.85
+Experiment: rcp85 - 2 ensemble(s)
+Spatial dimensions: lon [0] lat [0] Z [1] 
+Time dimension: years (summarized) [5] days since 1850-1-1 
+Size: 0.0 MB
+Provenance has 10 entries
+```
+
+The summary reports that `co2annual` is an annual summary of filtered data, and a weighted mean (from the `makeGlobalStat` operation). Note the dimensions of the data: no longitude or latitude (since we summarized these to a global mean); a single level (Z) that's the one filtered to; and 5 time points. The summary also explicitly tells us that these data have been filtered and summarized. At this point, we may want to convert this object to a regular data frame for easy plotting:
+
+```
+> co2_df <- as.data.frame(co2summary)
+> co2_df
+      Z time    value
+1 1e+05 2006 380.7173
+2 1e+05 2007 382.6840
+3 1e+05 2008 384.7202
+4 1e+05 2009 386.9201
+5 1e+05 2010 389.2190
+> plot(df$time, df$value, type='b')
+```
+```{r, echo=FALSE}
+df <- structure(list(Z = c(1e+05, 1e+05, 1e+05, 1e+05, 1e+05), time = c(2006, 
+2007, 2008, 2009, 2010), value = c(380.717267354329, 382.683990478516, 
+384.720212300618, 386.920120239258, 389.219032287598)), .Names = c("Z", 
+"time", "value"), row.names = c(NA, -5L), class = "data.frame")
+plot(df$time, df$value, type='b')
+```
+
+## Provenance
+
+With each operation we perform, `RCMIP5` adds entries to the object's *provenance*, a
+data frame that records various information about the data's history. If we look at
+the provenance of the `co2summary` object, we see a record of the steps performed that produced it:
+
+```
+> co2summary$provenance[c(1,3)]
+             timestamp                                                 message
+1  2014-10-07 15:46:37           RCMIP5 0.1 under R version 3.1.0 (2014-04-10)
+2  2014-10-07 15:46:37   Loaded co2_Amon_CanESM2_rcp85_r1i1p1_200601-210012.nc
+3  2014-10-07 15:46:39                          Merged (*) provenance follows:
+21 2014-10-07 15:46:39 * Loaded co2_Amon_CanESM2_rcp85_r2i1p1_200601-210012.nc
+5  2014-10-07 15:46:39                                   Added ensemble r2i1p1
+6  2014-10-07 15:46:40               Computed mean of ensembles: r1i1p1 r2i1p1
+7  2014-10-07 15:46:41               Filtered for Zs in range [ 1e+05, 1e+05 ]
+8  2014-10-07 15:46:47                   Calculated mean for years 2006 - 2010
+9  2014-10-07 15:46:47    About to compute global stat. Grid areas calculated.
+10 2014-10-07 15:46:48                    Computed global weighted.mean of co2
+```
+
+The provenance also records what function (with parameter values) wrote each message, the data dimensions
+at each step, and a checksum (MD5 hash) of the data. The provenance can be exported, saved alongside the data, etc.
+
+## Next steps and final notes
+
+As noted above, we can simply use `as.data.frame` to convert our `cmip5data` object to a standard data frame. We could also `saveNetCDF(co2summary)` to save it as a netcdf file, for example to send to a colleague; the provenance is saved as netcdf global attributes, and optionally as an accompanying text file.
+
+Given the above example, it's straightforward to process a whole collection of CMIP5 data-for example, all the co2 data across experiments and models. For example:
+
+```
+for(mo in co2filechk$model) {
+    for(ex in co2filechk$experiment) {
+        co2 <- loadCMIP5(variable="co2", model=mo, experiment=ex, path=mypath)
+        #
+        # ... process ...
+        # 
+        co2_df <- as.data.frame(co2)
+        co2_df$model <- mo
+        co2_df$experiment <- ex
+        #
+        # ... save, or combine with running results
+        #
+    }
+}
+```
+
+This concludes the **Atmospheric CO2** vignette.
 
