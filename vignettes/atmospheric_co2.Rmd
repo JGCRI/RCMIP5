@@ -96,10 +96,11 @@ and spatial dimensions, time dimensions and frequency ('mon' - monthly), size in
 provenance (see below). Everything looks good. Assuming the `ggplot2` package is installed, we might want to make a quick plot of the data to check:
 
 ```
-> worldPlot(co2, time=1:12)
+> worldPlot(co2, time=1:12)  # first 12 months, i.e. all of 2006
 ```
-**TODO - get structure from Corinne**
 
+The resulting plot isn't very interesting, as CO2 is a well-mixed gas, but would be useful if we were working with
+a spatially variable output.
 
 ## Compute global means
 
@@ -108,7 +109,8 @@ Second, these are monthly data, and we're interested in an annual average. Third
 data to a global mean value. This can be done as follows:
 
 ```
-> co2surf <- filterDimensions(co2, Zs=co2$Z[1])
+> co2surf <- filterDimensions(co2, Zs=co2$Z[1], verbose=T)
+Filtered by Z, dim = 128 64 1 60 
 > co2annual <- makeAnnualStat(co2surf, verbose=T)
 Running in serial
 Took 6.41 s
@@ -119,8 +121,8 @@ Running in serial
 Took 0.03 s
 ```
 
-The first step, `makeAnnualStat`, was relatively slow (and can be quite slow for large datasets).^[All the `make...Stat` functions have a optional `parallel` parameter that will use the `foreach` package and any available parallelized backend.] Also note that because we didn't supply any grid cell area data to the `makeAnnualStat` function, it computed its own.
-In any event, now we look at the resulting data:
+The second step, `makeAnnualStat`, was relatively slow (and can be *very* slow for large datasets).^[All the `make...Stat` functions have a optional `parallel` parameter that will use the `foreach` package and any available parallelized backend.] Also note that because we didn't supply any grid cell area data to the `makeAnnualStat` function, it computed its own.
+Now we look at the resulting data:
 
 ```
 > print(summary(co2summary))
@@ -204,3 +206,38 @@ for(mo in co2filechk$model) {
 
 This concludes the **Atmospheric CO2** vignette.
 
+```{r, eval=FALSE, echo=FALSE}
+# Here's the short script that produced the outputs in this vignette.
+# (Because it uses very large CMIP5 data files, we can't run it as 
+# part of the vignette itself.)
+sink("sink.txt")
+
+library(RCMIP5)
+
+c5files<-getFileInfo()
+
+co2files <- subset(c5files, variable =="co2")
+co2filechk <- checkTimePeriod(co2files)
+print(co2filechk[-1])
+
+co2 <- loadCMIP5("co2", "CanESM2", "rcp85", verbose=T, yearRange = c(2006,2010))
+print(summary(co2))
+save(co2, file="co2")
+
+print(str(co2))
+print(co2$Z)
+
+co2surf <- filterDimensions(co2, Zs=co2$Z[1], verbose=T)
+print(co2surf)
+
+co2annual <- makeAnnualStat(co2surf, verbose=T)
+co2summary <- makeGlobalStat(co2annual, verbose=T)
+print(summary(co2summary))
+print(as.data.frame(co2summary))
+
+write.csv(as.data.frame(co2summary), "co2_canesm2.csv")
+
+save(co2summary, file="co2summary")
+
+sink()
+```
