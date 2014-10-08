@@ -58,8 +58,8 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex == 4) # that's all we know
-    if(verbose) cat("Time index =", timeIndex, "\n")
-    
+    stopifnot(identical(dim(x$val)[timeIndex], length(x$time)))
+        
     # Get and check area data, using 1's if nothing supplied
     areavals <- NA
     if(is.null(area)) {

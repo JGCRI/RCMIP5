@@ -49,7 +49,7 @@ makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     # Anything else is not valid.
     timeIndex <- length(dim(x$val))
     stopifnot(timeIndex == 4) # that's all we know
-    if(verbose) cat("Time index =", timeIndex, "\n")
+    stopifnot(identical(dim(x$val)[timeIndex], length(x$time)))
     
     if(timeIndex < 4 | is.null(x$Z)) {
         warning("makeZStat called for data with no Z")
