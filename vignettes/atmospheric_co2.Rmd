@@ -13,7 +13,7 @@ One common use for CMIP5 data, and the `RCMIP5` package, is to extract the globa
 
 ## Make sure the required data are present
 
-As the package documentation notes (see e.g. http://gitcom.com/JGCRI/RCMIP) you first have to download the necessary from an Earth System Grid Federation node; RCMIP5 won't do this for you. Assuming this step is complete, then, we check to make sure all the data we'll need are present. First load information about all the CMIP5 files available:
+As the package documentation notes (see e.g. http://gitcom.com/JGCRI/RCMIP) you first have to download the necessary data from an Earth System Grid Federation node; RCMIP5 won't do this for you. Assuming this step is complete, then, we check to make sure all the data we'll need are present. First load information about all the CMIP5 files available:
 ```
 > library(RCMIP5)
 > mypath <- "~/my/cmip5/files/"
