@@ -22,5 +22,5 @@ More information about the CMIP5 experiment can be found on the project home pag
 * This package does *not* handle downloading (i.e. from nodes in the Earth System Grid Federation, http://esgf.org) the data themselves.
 * See http://cmip.llnl.gov/cmip5/publications/allpublications about registering CMIP5 manuscripts.
 * If you use this package/code in your work, please cite it! See `citation("RCMIP5")`.
-* Want to get started? See the package vignettes or demo, `demo(RCMIP5)`.
+* Want to get started? Extensive vignettes and a demo are included with the package.
 
