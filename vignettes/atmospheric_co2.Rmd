@@ -115,13 +115,13 @@ Filtered by Z, dim = 128 64 1 60
 Running in serial
 Took 6.41 s
 > co2summary <- makeGlobalStat(co2annual, verbose=T)
-No grid areas supplied; using calculating values
+No grid areas supplied; using calculated values
 Calculating grid cell areas...
 Running in serial
 Took 0.03 s
 ```
 
-The second step, `makeAnnualStat`, was relatively slow (and can be *very* slow for large datasets).^[All the `make...Stat` functions have a optional `parallel` parameter that will use the `foreach` package and any available parallelized backend.] Also note that because we didn't supply any grid cell area data to the `makeAnnualStat` function, it computed its own.
+The second step, `makeAnnualStat`, was relatively slow (and can be *very* slow for large datasets).^[All the `make...Stat` functions have a optional `parallel` parameter that will use the `foreach` package and any available parallelized backend.] Also note that because we didn't supply any grid cell area data to `makeAnnualStat`, it computed its own.
 Now we look at the resulting data:
 
 ```
