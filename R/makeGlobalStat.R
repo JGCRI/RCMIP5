@@ -63,7 +63,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
     # Get and check area data, using 1's if nothing supplied
     areavals <- NA
     if(is.null(area)) {
-        if(verbose) cat("No grid areas supplied; using calculating values\n")
+        if(verbose) cat("No grid areas supplied; using calculated values\n")
         x <- addProvenance(x, "About to compute global stat. Grid areas calculated.")
         areavals <- calcGridArea(x$lon, x$lat, verbose=verbose)
     } else {
