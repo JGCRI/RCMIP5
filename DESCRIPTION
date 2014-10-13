@@ -25,7 +25,7 @@ Suggests:
     testthat (>= 0.9),
     knitr
 Version: 0.1
-Authors@R: c( person("Ben", "Bond-Lamberty", role = c("aut", "cre")),
+Authors@R: c( person("Ben", "Bond-Lamberty", role = c("aut")),
     person("Kathe", "Todd-Brown", role = c("aut", "cre"), email =
     "ktoddbrown@gmail.com") )
 License: MIT + file LICENSE
