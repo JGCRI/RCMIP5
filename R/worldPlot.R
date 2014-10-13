@@ -69,11 +69,11 @@ worldPlot <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=FALS
     
     # Plot
     value <- 1  # this is here only to avoid a CRAN warning (no visible binding inside geom_raster)
-    p <- ggplot(val_df, aes(lon, lat))
-    p <- p + geom_raster(aes(fill=value))
-    p <- p + scale_x_continuous(expand=c(0,0))
-    p <- p + scale_y_continuous(expand=c(0,0))
-    p <- p + scale_fill_gradientn(colours=rainbow(4))
-    p <- p + facet_wrap(~time, nrow=floor(sqrt(length(time))), ncol=ceiling(sqrt(length(time))))
-    p + ggtitle(paste0(x$model, " ", x$experiment, " ", x$variable, " (", x$valUnit, ")"))
+    p <- ggplot2::ggplot(val_df, ggplot2::aes(lon, lat))
+    p <- p + ggplot2::geom_raster(aes(fill=value))
+    p <- p + ggplot2::scale_x_continuous(expand=c(0,0))
+    p <- p + ggplot2::scale_y_continuous(expand=c(0,0))
+    p <- p + ggplot2::scale_fill_gradientn(colours=rainbow(4))
+    p <- p + ggplot2::facet_wrap(~time, nrow=floor(sqrt(length(time))), ncol=ceiling(sqrt(length(time))))
+    p + ggplot2::ggtitle(paste0(x$model, " ", x$experiment, " ", x$variable, " (", x$valUnit, ")"))
 } # worldPlot2

@@ -116,10 +116,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
                            ts <- asub(x$val, idx=x$time[i] == x$time, dims=timeIndex, drop=FALSE)
                            aaply(ts, margins, .drop=FALSE, FUN, w=areavals, ...)
                        })
-        ans <- array(ans, dim=c(1, 1, dim(x$val)[margins]))
-        
-        if(parallel) stopImplicitCluster()
-        
+        ans <- array(ans, dim=c(1, 1, dim(x$val)[margins]))        
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')

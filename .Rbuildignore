@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 sampledata/
 ToddBrown/
+cran-comments.md
+unused/
+
