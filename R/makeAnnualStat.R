@@ -93,7 +93,7 @@ makeAnnualStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     # We now have new computed data. Overwrite original data, record # of months per year,
     # and update the time vector, time frequency string, and provenance
     x$val <- unname(ans)
-    x$numMonths <- table(floor(x$time)) #decrepit, we've moved beyond months
+    #x$numMonths <- table(floor(x$time)) #decrepit, we've moved beyond months
     x$numPerYear <- table(floor(x$time))
     x$time <- uniqueYears
     x$debug$timeFreqStr <- "years (summarized)"
