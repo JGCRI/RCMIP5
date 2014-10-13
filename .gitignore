@@ -24,3 +24,6 @@ ToddBrown/anuGrid
 *.png
 *.R#
 inst/doc
+
+cran-comments.md
+
