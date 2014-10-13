@@ -125,7 +125,7 @@ The second step, `makeAnnualStat`, was relatively slow (and can be *very* slow f
 Now we look at the resulting data:
 
 ```
-> print(summary(co2summary))
+> summary(co2summary)
 CMIP5 data - annual summary (of 12 months) (filtered) 
 Variable: weighted.mean of co2 (1e-6) from model CanESM2
 Data range: 380.72-389.22  Mean: 384.85
