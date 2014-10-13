@@ -43,21 +43,22 @@ test_that("loadCMIP5 loads monthly data", {
 
     path <- "../../sampledata/monthly/"
     if(!file.exists(path)) skip("Path doesn't exist")
-    
+
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)     # test data set
     expect_is(d, "cmip5data")
     expect_equal(length(d$files), 4)                                 # should be four files
 })
 
 test_that("loadCMIP5 loads annual data", {
-    skip_on_cran()  
-    
+    skip_on_cran()
+
     path <- "../../sampledata/annual/"
     if(!file.exists(path)) skip("Path doesn't exist")
-    
+
     d <- loadCMIP5('co3','HadGEM2-ES','rcp85',path=path,verbose=F)
     expect_is(d,"cmip5data")
-    expect_equal(length(d$files), 1)                                 # should be one file
+    #There is a csv file with the same base name that load should ignore
+    expect_equal(length(d$files), 1)                # should be one file
 })
 
 test_that("loadEnsemble checks unique domain", {
@@ -78,10 +79,10 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
 
 test_that("loadCMIP5 can load using both ncdf and ncdf4", {
     skip_on_cran()
-    
+
     path <- "../../sampledata/monthly/"
     if(!file.exists(path)) skip("Path doesn't exist")
-    
+
     d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)  # ncdf4
     d2 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, force.ncdf=TRUE) # ncdf
     expect_equal(d1$val, d2$val)
@@ -90,10 +91,10 @@ test_that("loadCMIP5 can load using both ncdf and ncdf4", {
 
 test_that("loadCMIP5 can load area files", {
     skip_on_cran()
-    
+
     path <- "../../sampledata/fx/"
     if(!file.exists(path)) skip("Path doesn't exist")
-    
+
     # areacella_fx_GFDL-CM3_historical_r0i0p0.nc
     d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F)
     expect_is(d, "cmip5data")
@@ -101,20 +102,20 @@ test_that("loadCMIP5 can load area files", {
 
 test_that("loadCMIP5 correctly extracts start year", {
     skip_on_cran()
-    
+
     path <- "../../sampledata/monthly/"
     if(!file.exists(path)) skip("Path doesn't exist")
-    
+
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)
     expect_equal(d$debug$startYr,  1859+11/12)
 })
 
 test_that("loadCMIP5 handles YearRange", {
     skip_on_cran()
-    
+
     path <- "../../sampledata/monthly/"
     if(!file.exists(path)) skip("Path doesn't exist")
-    
+
     # These ../../sample data are 200512-203011 and 203012-205511 (with 2 ensembles)
     # yearRange in first file only
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2006, 2007))
@@ -144,21 +145,21 @@ test_that("loadCMIP5 handles YearRange", {
 })
 
 test_that("loadCMIP5 handles FUN correctly", {
-    
+
     path <- "testdata_twoensembles/"
-    # These two files (saved by saveNetCDF) have all 1's and 2's, 
+    # These two files (saved by saveNetCDF) have all 1's and 2's,
     # respectively, in their data
-    
+
     if(!file.exists(path)) skip("Path doesn't exist")
-    
+
     d_mean <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F)
     d_min <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=min)
     d_max <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=max)
     d_sum <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sum)
     expect_error(loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sd))
-    
+
     expect_equal(mean(d_mean$val), 1.5)
     expect_equal(mean(d_min$val), 1)
     expect_equal(mean(d_max$val), 2)
-    expect_equal(mean(d_sum$val), 3)    
+    expect_equal(mean(d_sum$val), 3)
 })
