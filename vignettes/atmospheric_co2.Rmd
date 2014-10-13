@@ -81,7 +81,7 @@ Summarize these data:
 
 ```
 > summary(co2)
-CMIP5 data - primary data 
+CMIP5 data 
 Variable: co2 (1e-6) from model CanESM2
 Data range: 379.81-390.28  Mean: 384.85
 Experiment: rcp85 - 2 ensemble(s)
@@ -126,7 +126,7 @@ Now we look at the resulting data:
 
 ```
 > summary(co2summary)
-CMIP5 data - annual summary (of 12 months) (filtered) 
+CMIP5 data (annual summary of 12 months) (filtered) 
 Variable: weighted.mean of co2 (1e-6) from model CanESM2
 Data range: 380.72-389.22  Mean: 384.85
 Experiment: rcp85 - 2 ensemble(s)
