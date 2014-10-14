@@ -6,7 +6,7 @@ library(testthat)
 library(plyr)
 library(abind)
 
-# To run this code: 
+# To run this code:
 #   source("makeZStat.R")
 #   source("RCMIP5.R") # for cmip5data
 #   library(testthat)
@@ -29,27 +29,36 @@ test_that("makeZStat computes Z means", {
     years <- 1850:1851
     d <- cmip5data(years, Z=T)
     res <- makeZStat(d, verbose=F)
-    
+
     # Is 'res' correct type and size?
     expect_is(res, "cmip5data")
-    
+
     # Did unchanging info get copied correctly?
     expect_equal(res$valUnit, d$valUnit)
     expect_equal(res$files, d$files)
-    
+
     # Depth removed, and other info updated?
     expect_null(res$Z)
     expect_is(res$numZs, "integer")
     expect_more_than(nrow(res$provenance), nrow(d$provenance))
-    
+
     # Is the answer value array correctly sized?
     ndims <- length(dim(res$val))
     expect_equal(ndims, length(dim(d$val)))  # same number of dimensions
     expect_equal(dim(res$val)[3], 1) #  all spatial dimensions should be 1
-    expect_equal(dim(res$val)[c(1,2,4)], dim(d$val)[c(1,2,4)]) # time should match    
-    
+    expect_equal(dim(res$val)[c(1,2,4)], dim(d$val)[c(1,2,4)]) # time should match
+
     # Are the answer values numerically correct?
     expect_equal(mean(res$val), mean(d$val))  # no weighting
+})
+
+test_that("does makeZStat correctly report multi-line functions",{
+    years <- 1850:1851
+    d <- cmip5data(years, Z=T)
+    res <- makeZStat(d, FUN=function(x){
+        mean(x)
+        }, verbose=F)
+
 })
 
 test_that("makeZStat parallel results == serial result", {
