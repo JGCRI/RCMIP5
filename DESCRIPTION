@@ -1,5 +1,5 @@
 Package: RCMIP5
-Title: Tools for manipulating and summarizing CMIP5 data
+Title: Tools for Manipulating and Summarizing CMIP5 Data
 Description: Working with CMIP5 data can be tricky, forcing scientists to write
     custom scripts and programs. The `RCMIP5` package aims to ease this
     process, providing a standard, robust, and high-performance set of scripts

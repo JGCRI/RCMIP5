@@ -70,7 +70,7 @@ worldPlot <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=FALS
     # Plot
     value <- 1  # this is here only to avoid a CRAN warning (no visible binding inside geom_raster)
     p <- ggplot2::ggplot(val_df, ggplot2::aes(lon, lat))
-    p <- p + ggplot2::geom_raster(aes(fill=value))
+    p <- p + ggplot2::geom_raster(ggplot2::aes(fill=value))
     p <- p + ggplot2::scale_x_continuous(expand=c(0,0))
     p <- p + ggplot2::scale_y_continuous(expand=c(0,0))
     p <- p + ggplot2::scale_fill_gradientn(colours=rainbow(4))

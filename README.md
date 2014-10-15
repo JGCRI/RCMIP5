@@ -1,4 +1,4 @@
-RCMIP5
+RCMIP5: Tools for Manipulating and Summarizing CMIP5 Data
 =======
 
 This package provides R functions for exploring, manipulating, and summarizing model outputs from the Coupled Model Intercomparison Project Phase 5 (CMIP5).
