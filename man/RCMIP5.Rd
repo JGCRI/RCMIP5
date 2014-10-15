@@ -3,7 +3,7 @@
 \name{RCMIP5}
 \alias{RCMIP5}
 \alias{RCMIP5-package}
-\title{Exploration, manipulation, and summarizing of CMIP5 data}
+\title{Tools for Manipulating and Summarizing CMIP5 Data}
 \description{
 Working with CMIP5 data can be tricky, forcing scientists to
 write custom scripts and programs. The `RCMIP5` package aims

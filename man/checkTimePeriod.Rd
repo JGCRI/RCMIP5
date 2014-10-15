@@ -37,7 +37,9 @@ Unfortunately it's impossible to automatically check the time signature for
 sub-monthly frequencies quickly without opening the netcdf file.
 }
 \examples{
+\dontrun{
 checkTimePeriod(getFileInfo())
+}
 }
 \seealso{
 \code{\link{getFileInfo}}
