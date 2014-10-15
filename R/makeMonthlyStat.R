@@ -92,10 +92,12 @@ makeMonthlyStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     
     if(verbose) cat('\nTook',timer[3], 's\n')
     
+    # Finish up
     x$val <- unname(ans)
     x$numYears <- unname(table(floor(monthIndex)))
     x$timeUnit <- "months (summarized)"
     x$time <- 1:12
-    addProvenance(x, paste("Calculated", as.character(substitute(FUN)), 
+    addProvenance(x, paste("Calculated", 
+                           paste(deparse(substitute(FUN)), collapse="; "),
                            "for months", min(x$time), "-", max(x$time)))
 } # makeMonthlyStat

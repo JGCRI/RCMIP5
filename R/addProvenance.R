@@ -58,6 +58,13 @@ addProvenance <- function(x, msg, verbose=FALSE) {
     nr <- nrow(x$provenance) + 1
     x$provenance[nr, "timestamp"] <- Sys.time()
     if(class(msg) == "character") {
+        # Trim multiple spaces (happens with custom FUNs in makeStat functions)
+        # from http://stackoverflow.com/questions/14737266/removing-multiple-spaces-and-trailing-spaces-using-gsub
+        msg <- gsub("^ *|(?<= ) | *$", "", msg, perl=T)
+        # Remove artifacts for prettier code in message
+        msg <- gsub("{;", "{", msg, fixed=T)
+        msg <- gsub("; }", " }", msg, fixed=T)
+        
         if(verbose) cat("Adding message to provenance")
         x$provenance[nr, "caller"] <- parentcall
         x$provenance[nr, "message"] <- msg

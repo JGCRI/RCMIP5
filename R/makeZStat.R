@@ -101,19 +101,8 @@ makeZStat <- function(x, verbose=FALSE, parallel=FALSE, FUN=mean, ...) {
     x$val <- unname(ans)
     x$numZs <- length(x$Z)
     x$Z <- NULL
-
-    if(verbose){
-        cat('function attributes:\n')
-        print(attributes(FUN))
-    }
-    #Try to deal gracefully with multi-line user defined functions
-    if(is.null(attributes(FUN))){
-        funStr <- as.character(substitute(FUN))
-    }else{
-        funStr <- paste(as.character(attributes(FUN)$srcref), collapse='\n')
-    }
-
-    if(verbose) cat('funStr: ',funStr, '\n')
-    addProvenance(x, paste("Calculated [", funStr,
-                           "] for Z (", x$dimNames[3], ")") )
-} # makeDepthLevStat
+    addProvenance(x, paste("Computed", 
+                           paste(deparse(substitute(FUN)), collapse="; "),
+                           "for Z"))
+    
+} # makeZStat

@@ -109,3 +109,18 @@ test_that("makeGlobalStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[3:(ndims-1)], dim(d$val)[3:(ndims-1)]) # time should match    
     expect_equal(dim(res$val)[ndims], dim(d$val)[ndims]) # time should match    
 })
+
+test_that("makeGlobalStat handles custom function", {
+    years <- 1850:1851
+    d <- cmip5data(years)
+    
+    res <- makeGlobalStat(d, verbose=F, FUN=function(x, w) {
+        a <- weighted.mean(x, w)
+        b <- a
+        b
+    }
+    )
+    
+    # Do years match what we expect?
+    expect_equal(res$time, d$time)
+})

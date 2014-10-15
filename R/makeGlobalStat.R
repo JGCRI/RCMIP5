@@ -123,10 +123,11 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, parallel=FALSE, FUN=weig
     
     # Finish up
     x$val <- unname(ans)
-    x[c('lat', 'lon')] <- NULL
-    x$variable <- paste(as.character(substitute(FUN)), "of", x$variable)
     x$numCells <- length(areavals)
-    addProvenance(x, paste("Computed global", x$variable))
+    x[c('lat', 'lon')] <- NULL    
+    addProvenance(x, paste("Computed", 
+                           paste(deparse(substitute(FUN)), collapse="; "),
+                           "for lon and lat"))
 } # makeGlobalStat
 
 #' Weighted sum--i.e., sum of weighted means. Convenience function

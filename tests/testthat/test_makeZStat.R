@@ -77,3 +77,18 @@ test_that("makeZStat handles 3-dimensional data", {
     d <- cmip5data(years, Z=F)
     expect_warning(makeZStat(d))
 })
+
+test_that("makeZStat handles custom function", {
+    years <- 1850:1851
+    d <- cmip5data(years, Z=T)
+    
+    res <- makeZStat(d, verbose=F, FUN=function(x) {
+        a <- mean(x)
+        b <- a
+        b
+    }
+    )
+    
+    # Do years match what we expect?
+    expect_equal(res$time, d$time)
+})

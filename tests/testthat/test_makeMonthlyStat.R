@@ -95,3 +95,18 @@ test_that("makeMonthlyStat handles 4-dimensional data", {
     expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
     expect_equal(dim(res$val)[4], 12)  # temporal size match
 })
+
+test_that("makeMonthlyStat handles custom function", {
+    years <- 1850:1851
+    d <- cmip5data(years)
+    
+    res <- makeMonthlyStat(d, verbose=F, FUN=function(x) {
+        a <- mean(x)
+        b <- a
+        b
+    }
+    )
+    
+    # Do years match what we expect?
+    expect_equal(res$time, 1:12)
+})
