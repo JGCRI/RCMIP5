@@ -1,3 +1,9 @@
+RCMIP5 <nextversion>
+===========
+
+* Provenance now handles multi-line custom functions correctly.
+
+
 RCMIP5 1.0
 ===========
 
