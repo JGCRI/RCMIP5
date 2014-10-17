@@ -77,22 +77,22 @@ cmip5data <- function(x=list(),
                       Z=FALSE, Zsize=5,
                       time=TRUE, monthly=TRUE,
                       randomize=FALSE, verbose=FALSE) {
-    
+
     # Sanity checks
     stopifnot(is.numeric(c(lonsize, latsize, Zsize)))
     stopifnot(is.logical(c(lonlat, Z, time, monthly, randomize)))
-    
+
     if (is.list(x)) {          # If x is a list then we are done.
         # Just cast it directly to a cmip5data object
         if(verbose) cat("Casting list to cmip5data\n")
         structure(x, class="cmip5data")
-        
+
     } else if(is.numeric(x)) {  # Create sample data
         if(verbose) cat("Creating new cmip5data\n")
-        
+
         # Construct two lists which will be used to create the sample data:
         # ... result and debug.
-        
+
         # result holds the primary data of interest
         result <- list(
             files=NULL,
@@ -109,14 +109,14 @@ cmip5data <- function(x=list(),
             time=NULL,
             dimNames=NULL
         )
-        
+
         valdims <- c(1, 1, 1, 1)
         debug <- list()
-        
+
         # If this data will have spatial dimensions, construct
         if(lonlat) {
             if(verbose) cat("Adding spatial dimensions\n")
-            
+
             # realistic lon (0 to 360) and lat (-90 to 90) numbers
             result$lon <- 360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
             result$lat <- 180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2
@@ -127,11 +127,11 @@ cmip5data <- function(x=list(),
         } else {
             result$dimNames <- c(NA, NA)
         }
-        
+
         # If this data will have Z dimension, construct
         if(Z) {
             if(verbose) cat("Adding Z dimensions\n")
-            
+
             result$Z <- c(0:(Zsize-1))
             result$dimNames <- c(result$dimNames, "Z")
             valdims[3] <- Zsize
@@ -139,11 +139,11 @@ cmip5data <- function(x=list(),
         } else {
             result$dimNames <- c(result$dimNames, NA)
         }
-        
+
         # If this data will have time dimension, construct
         if(time) {
             if(verbose) cat("Adding time dimensions\n")
-            
+
             years <- x
             ppy <- ifelse(monthly, 12, 1)  # periods per year
             result$calendarStr <- "360_day"
@@ -161,7 +161,7 @@ cmip5data <- function(x=list(),
             result$dimNames <- c(result$dimNames, NA)
             result$domain <- "fx"
         }
-        
+
         # Generate fake data
         if(randomize) {
             valData <- runif(n=prod(valdims))
@@ -171,10 +171,10 @@ cmip5data <- function(x=list(),
         result$val <- array(valData, dim=valdims)
         result$valUnit <- "unit"
         result$debug <- debug
-        
+
         # Add debug info and set class
         result <- structure(result, class="cmip5data")
-        
+
         # Initialize provenance and return
         addProvenance(result, "Dummy data created")
     } else {
@@ -189,26 +189,25 @@ cmip5data <- function(x=list(),
 #' @details Prints a one-line summary of the object
 #' @method print cmip5data
 #' @export
-#' @keywords internal
 print.cmip5data <- function(x, ...) {
-    
+
     if(is.null(x$variable)) {
         cat("(Empty cmip5data object)")
         return()
     }
-    
+
     ansStr <- paste0('CMIP5: ', x$variable, ", ", x$model, " ", x$experiment)
-    
+
     if(!is.null(x$time)) {
         ansStr <- paste0(ansStr, ", ", floor(min(x$time, na.rm=TRUE)),
                          " to ", floor(max(x$time, na.rm=TRUE)))
     }
-    
+
     if(!is.null(x$ensembles)) {
         ansStr <- paste0(ansStr, ", from ", length(x$ensembles), " ",
                          ifelse(length(x$ensembles)==1, "ensemble", "ensembles"))
     }
-    
+
     cat(ansStr, "\n")
     cat(...)
 } # print.cmip5data
@@ -221,12 +220,11 @@ print.cmip5data <- function(x, ...) {
 #' @return A summary structure of the object.
 #' @method summary cmip5data
 #' @export
-#' @keywords internal
 summary.cmip5data <- function(object, ...) {
-    
+
     ans <- list()
     class(ans) <- "summary.cmip5data"
-    
+
     # cmip5 objects should always have the following defined:
     ans$variable <- object$variable
     ans$valUnit <- object$valUnit
@@ -234,43 +232,43 @@ summary.cmip5data <- function(object, ...) {
     ans$model <- object$model
     ans$experiment <- object$experiment
     ans$ensembles <- object$ensembles
-    
+
     ans$type <- "CMIP5 data"
-    
+
     #    if(grepl('makeAnnualStat', rev(object$provenance$caller)[1])) {
     #        ans$type <-  paste(ans$type, "annual summary [",
     #                           paste(unique(object$numPerYear), collapse=', '),
-    #                           "]") 
+    #                           "]")
     #    }
-    
+
     if(!is.null(object$numPerYear)) {
-        ans$type <-  paste0(ans$type, " (annual summary of ", mean(object$numPerYear), " times)")  
+        ans$type <-  paste0(ans$type, " (annual summary of ", mean(object$numPerYear), " times)")
     }
     if(!is.null(object$numYears)) {
         ans$type <- paste0(ans$type, " (monthly summary of ", mean(object$numYears), " years)")
-    } 
+    }
     if(!is.null(object$numCells)) {
         ans$type <- paste0(ans$type, " (spatial summary of ", object$numCells, " cells)")
-    } 
+    }
     if(!is.null(object$filtered)) {
         ans$type <- paste(ans$type, "(filtered)")
     }
-    
+
     #    if(!is.null(object$area)) {
     #        ans$type <- paste(ans$type, "(regridded)")
     #    }
-    
+
     ans$spatial <- paste0("lon [", length(object$lon),
                           "] lat [", length(object$lat),
                           "] Z [", length(object$Z), "]")
-    
+
     ans$time <- paste0(object$debug$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
     ans$size <- as.numeric(object.size(object))
     ans$valsummary <- c(min(as.vector(object$val), na.rm=TRUE),
                         mean(as.vector(object$val), na.rm=TRUE),
                         max(as.vector(object$val), na.rm=TRUE))
     ans$provenance <- object$provenance
-    
+
     return(ans)
 } # summary.cmip5data
 
@@ -294,7 +292,8 @@ print.summary.cmip5data <- function(x, ...) {
     cat("Provenance has", nrow(x$provenance), "entries\n")
 } # print.summary.cmip5data
 
-#' Convert a cmip5data object to a data frame
+#' Convert a cmip5data object to a data frame. It is recommended that you use
+#' as.array or as.data.frame to access the simulation results.
 #'
 #' @param x A \code{\link{cmip5data}} object
 #' @param ... Other parameters
@@ -302,26 +301,46 @@ print.summary.cmip5data <- function(x, ...) {
 #' @param originalNames logical. Use original dimension names from file?
 #' @return The object converted, as well as possible, to a data frame
 #' @export
-#' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) {
-    if(verbose) cat("Melting...\n")
-    if(originalNames)
-        dimNames <- x$dimNames
-    else
-        dimNames <- c("lon", "lat", "Z", "time")
-    df <- reshape2::melt(x$val, varnames=dimNames)
-    
-    # Fill in dimensional data. Note that if one of these vectors (x$lon, x$lat,
-    # x$Z, x$time) doesn't exist, it will be removed from the data frame.
-    # Note the order here (column 4...1) matters, because we're potentially
-    # removing columns as we go!
-    df[4] <- x$time[df[,4]]
-    df[3] <- x$Z[df[,3]]
-    df[2] <- x$lat[df[,2]]
-    df[1] <- x$lon[df[,1]]
-    
-    df
+    if(is.array(x$val)){
+        if(verbose) cat("Melting...\n")
+        if(originalNames)
+            dimNames <- x$dimNames
+        else
+            dimNames <- c("lon", "lat", "Z", "time")
+        df <- reshape2::melt(x$val, varnames=dimNames)
+
+        # Fill in dimensional data. Note that if one of these vectors
+        # (x$lon, x$lat, x$Z, x$time) doesn't exist, it will be removed
+        # from the data frame. Note the order here (column 4...1) matters,
+        # because we're potentially removing columns as we go!
+        df[4] <- as.numeric(x$time[df[,4]])
+        df[3] <- as.numeric(x$Z[df[,3]])
+        df[2] <- as.numeric(x$lat[df[,2]])
+        df[1] <- as.numeric(x$lon[df[,1]])
+
+        return(df)
+    }
+
+    if(is.data.frame(x$val)) return(x$val)
+
 } # as.data.frame.cmip5data
+
+#' Convert cmip5data object to an array. It is recommended that you use
+#' as.array or as.data.frame to access the simulation results.
+#'
+#' param x A \code{\link{cmip5data}} object
+#' @param ... Other parameters
+#' @param verbose logical. Print info as we go?
+#' @return The main object values converted to a multi-dimentional array.
+#' @export
+as.array.cmip5data <- function(x, ..., verbose=FALSE){
+    if(is.array(x$val)) return(x$val)
+
+    if(is.data.frame(x$val)){
+        return(acast(x$val, as.list(names(x$val)[-length(names(x$val))])))
+    }
+} # as.array.cmip5data
 
 #' Make package datasets and write them to disk.
 #'
@@ -337,7 +356,7 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
     stopifnot(file.exists(outpath))
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
-    
+
     for(i in 1:nrow(datasets)) {
         cat("-----------------------\n", datasets[i, "filename"], "\n")
         d <- with(datasets[i,],
