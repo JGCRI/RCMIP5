@@ -303,6 +303,7 @@ print.summary.cmip5data <- function(x, ...) {
 #' @export
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) {
     if(is.array(x$val)){
+        if(verbose) cat('Converting from array to data.frame. ')
         if(verbose) cat("Melting...\n")
         if(originalNames)
             dimNames <- x$dimNames
@@ -338,6 +339,7 @@ as.array.cmip5data <- function(x, ..., verbose=FALSE){
     if(is.array(x$val)) return(x$val)
 
     if(is.data.frame(x$val)){
+        if(verbose) cat('Converting from a data.frame to array. Casting...\n')
         return(acast(x$val, as.list(names(x$val)[-length(names(x$val))])))
     }
 } # as.array.cmip5data
