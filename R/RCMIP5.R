@@ -120,12 +120,13 @@ cmip5data <- function(x=list(),
             # realistic lon (0 to 360) and lat (-90 to 90) numbers
             result$lon <- 360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
             result$lat <- 180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2
-            result$dimNames=c("lon", "lat")
-            valdims[1:2]=c(lonsize, latsize)
+            result$dimNames <- c("lon", "lat")
+            valdims[1:2] <- c(lonsize, latsize)
             debug$lonUnit <- "degrees_east"
             debug$latUnit <- "degrees_north"
         } else {
             result$dimNames <- c(NA, NA)
+            valdims[1:2] <- c(1,1)
         }
 
         # If this data will have Z dimension, construct
@@ -138,6 +139,7 @@ cmip5data <- function(x=list(),
             debug$ZUnit <- "m"
         } else {
             result$dimNames <- c(result$dimNames, NA)
+            valdims[3] <- 1
         }
 
         # If this data will have time dimension, construct
@@ -160,8 +162,9 @@ cmip5data <- function(x=list(),
         } else {
             result$dimNames <- c(result$dimNames, NA)
             result$domain <- "fx"
-        }
 
+        }
+        result$valdims <- valdims
         # Generate fake data
         if(randomize) {
             valData <- runif(n=prod(valdims))
@@ -169,6 +172,8 @@ cmip5data <- function(x=list(),
             valData <- 1
         }
         result$val <- array(valData, dim=valdims)
+        #Convert to data frame
+        #result$val <- melt(result$val, varnames=c('lon', 'lat', 'Z', 'time'))
         result$valUnit <- "unit"
         result$debug <- debug
 
@@ -264,9 +269,16 @@ summary.cmip5data <- function(object, ...) {
 
     ans$time <- paste0(object$debug$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
     ans$size <- as.numeric(object.size(object))
-    ans$valsummary <- c(min(as.vector(object$val), na.rm=TRUE),
-                        mean(as.vector(object$val), na.rm=TRUE),
-                        max(as.vector(object$val), na.rm=TRUE))
+    if(is.array(object$val)){
+        ans$valsummary <- c(min(as.vector(object$val), na.rm=TRUE),
+                            mean(as.vector(object$val), na.rm=TRUE),
+                            max(as.vector(object$val), na.rm=TRUE))
+    }else{
+        varStr <- rev(names(object$val))[1]
+        ans$valsummary <- c(min(as.vector(object$val[[varStr]]), na.rm=TRUE),
+                            mean(as.vector(object$val[[varStr]]), na.rm=TRUE),
+                            max(as.vector(object$val[[varStr]]), na.rm=TRUE))
+    }
     ans$provenance <- object$provenance
 
     return(ans)
@@ -319,6 +331,11 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) 
         df[3] <- as.numeric(x$Z[df[,3]])
         df[2] <- as.numeric(x$lat[df[,2]])
         df[1] <- as.numeric(x$lon[df[,1]])
+
+        if(is.null(x$Z)) df$Z <- NULL
+        if(is.null(x$lat)) df$lat <- NULL
+        if(is.null(x$lon)) df$lon <- NULL
+        if(is.null(x$time)) df$time <- NULL
 
         return(df)
     }
