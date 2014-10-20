@@ -15,8 +15,6 @@
 #' variable across Zs A \code{numZs} field is also added
 #' recording the number of Z values averaged for each year, and x's original
 #' Z field is removed.
-#' @note The \code{val} component of the returned object will always be the same structure
-#' as \code{x}, i.e. of dimensions {x, y, 1, t}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @examples
 #' d <- cmip5data(1970:1975, Z=TRUE)   # sample data
@@ -44,5 +42,4 @@ makeZStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     addProvenance(x, paste("Computed", 
                            paste(deparse(substitute(FUN)), collapse="; "),
                            "for Z"))
-    
 } # makeZStat

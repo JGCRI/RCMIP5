@@ -12,10 +12,8 @@
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the monthly
 #' mean of the variable. A \code{numYears} field is also added
 #' recording the number of years averaged for each month.
-#' @details If a Z dimension is present, the stat function is calculated
-#' for all combinations of these.
-#' @note The \code{val} component of the returned object will always be the same structure
-#' as \code{x}, i.e. of dimensions {x, y, z, 12}.
+#' @details The stat function is calculated for all combinations of lon,
+#' lat, and Z (if present).
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeGlobalStat}}
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
@@ -41,7 +39,7 @@ makeMonthlyStat <- function(x, verbose=FALSE, FUN=mean, ...) {
         x$val <- summarise(grp, value=FUN(value, ...))
     }) # system.time
     
-    if(verbose) cat('\nTook',timer[3], 's\n')
+    if(verbose) cat('\nTook', timer[3], 's\n')
     
     # Finish up
     x$numYears <- unname(table(floor(monthIndex)))

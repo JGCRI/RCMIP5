@@ -9,10 +9,8 @@ Description: Working with CMIP5 data can be tricky, forcing scientists to write
     (v) regrid data, and (vi) produce easy-to-work-with graphical and data
     summaries.
 Imports:
-    abind  (>= 1.4-0),
-    plyr (>= 1.8.1),
+    dplyr (>= 0.3),
     reshape2 (>= 1.4),
-    foreach (>= 1.4.2),
     digest
 Depends:
     R (>= 2.11.0)
@@ -20,7 +18,6 @@ Suggests:
     ggplot2 (>= 0.9.3),
     ncdf4 (>= 1.9),
     ncdf (>= 1.6),
-    doParallel (>= 1.0.8),
     fields(>= 7.1),
     testthat (>= 0.9),
     knitr

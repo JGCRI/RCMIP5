@@ -1,13 +1,10 @@
 # File to source if not using package-development mode
 
 library(testthat)
-library(plyr)
-library(abind)
 library(ggplot2)
 library(reshape2)
 #library(ncdf4)
 library(digest)
-library(foreach)
 library(dplyr)
 
 # Load sample data, as package would

@@ -17,7 +17,7 @@
 #'   An overview of CMIP5 and the experiment design, Bulletin of the American
 #'   Meteorological Society, 93, 485-498.
 #'   \url{http://dx.doi.org/10.1175/BAMS-D-11-00094.1}
-#' @import plyr abind reshape2 digest foreach
+#' @import dplyr reshape2 digest
 #' @docType package
 #' @name RCMIP5
 NULL
@@ -315,22 +315,7 @@ print.summary.cmip5data <- function(x, ...) {
 #' @export
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
-    if(originalNames)
-        dimNames <- x$dimNames
-    else
-        dimNames <- c("lon", "lat", "Z", "time")
-    df <- x$val
-    
-    # Fill in dimensional data. Note that if one of these vectors (x$lon, x$lat,
-    # x$Z, x$time) doesn't exist, it will be removed from the data frame.
-    # Note the order here (column 4...1) matters, because we're potentially
-    # removing columns as we go!
-    df[4] <- x$time[df[,4]]
-    df[3] <- x$Z[df[,3]]
-    df[2] <- x$lat[df[,2]]
-    df[1] <- x$lon[df[,1]]
-    
-    df
+    x$val
 } # as.data.frame.cmip5data
 
 #' Make package datasets and write them to disk.

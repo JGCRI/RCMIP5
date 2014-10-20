@@ -1,8 +1,9 @@
 #' Compute global statistic of a variable
 #' 
-#' We frequently want a global summary for CMIP5 data, usually weighted by the 
-#' grid cell areas used by each particular model. This function does that. If no
-#' area weighting is supplied, a warning is given. The default statistic is \link{weighted.mean},
+#' Calculates a global summary for CMIP5 data, usually weighted by the 
+#' grid cell areas used by each particular model. If no
+#' area weighting is supplied, one is computed based on the lon/lat
+#' values of \code{x}. The default statistic is \link{weighted.mean},
 #' but any summary function that returns a numeric result can be used.
 #'
 #' @param x A \code{\link{cmip5data}} object
@@ -14,8 +15,8 @@
 #' same as the caller for Z (if present) and time, but lon and lat are reduced to 
 #' 1 (i.e. no dimensionality). A \code{numCells} field is also added, recording the number
 #' of cells in the spatial grid.
-#' @details If a Z dimension is present, the stat function is calculated
-#' for all combinations of these.
+#' @details The stat function is calculated for all combinations of lon,
+#' lat, and Z (if present).
 #' This function is more complicated than the other makeXxxStat functions, because
 #' it provides explicit support for area-weighted functions. We expect that 
 #' weighted.mean and a weighted sum will be the most frequent
@@ -23,8 +24,6 @@
 #' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
 #' follow the weighted.mean syntax, in particular 
 #' accepting parameters 'x' (data) and 'w' (weights) of equal size.
-#' @note The \code{val} component of the returned object will always be the same structure
-#' as \code{x}, i.e. of dimensions {1, 1, z, t}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeMonthlyStat}} 
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data

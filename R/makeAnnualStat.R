@@ -12,10 +12,8 @@
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the annual
 #' mean of the variable. A \code{numMonths} field is also added
 #' recording the number of months averaged for each year.
-#' @details If Z dimension is present, the stat function is calculated
-#' for all values of these.
-#' @note The \code{val} component of the returned object will always be the same structure
-#' as \code{x}, i.e. of dimensions {x, y, z, t}.
+#' @details The stat function is calculated for all combinations of lon,
+#' lat, and Z (if present).
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeAnnualStat(d)
