@@ -63,18 +63,18 @@ checkTimePeriod <- function(fileInfo_df) {
             timeStep <- NA
         }
 
-        if(is.na(timeStep)){
+        if(is.na(timeStep)) {
             allHere <- NA
-        }else{
+        } else {
             #Figure out the target date for the start of the next file
             nextYear <- endYear + timeStep
         }
 
         # One file is always complete
-        if(length(startYear) == 1){
+        if(length(startYear) == 1) {
             allHere <- TRUE
         # If multiple files, shift indexes to compare the start/stop values
-        }else if( !is.na(timeStep) & length(startYear) > 1) {
+        } else if( !is.na(timeStep) & length(startYear) > 1) {
             startIndex <- c(2:length(startYear))
             endIndex <- c((2:length(startYear))-1)
             allHere <- all(abs(nextYear[endIndex]-startYear[startIndex]) < 1e-6)

@@ -26,7 +26,7 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     }
 
     # If for some reason we have a -180:180 lon base, reset to span 0:360
-    if(any(lon < 0)){
+    if(any(lon < 0)) {
         lon <- lon + 180
     }
 

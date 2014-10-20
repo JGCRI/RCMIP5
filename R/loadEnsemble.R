@@ -82,13 +82,13 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     # ...conventions:variable_domain_model_experiment_ensemble_time.nc
     # ...
     domainCheck <- unname(vapply(unlist(fileList),
-                                 function(x){ unlist(strsplit(basename(x), '_'))[2] },
+                                 function(x) { unlist(strsplit(basename(x), '_'))[2] },
                                  FUN.VALUE=''))
 
     # Check that we are only loading one domain. We check this before checking
     # other CMIP5 specifications because 'fx' domains will split on '_' to a
     # different number of strings then temporal domains.
-    if(length(unique(domainCheck)) > 1){
+    if(length(unique(domainCheck)) > 1) {
         stop('Domain is not unique: [', paste(unique(domainCheck), collapse=' '), ']\n')
     }
 
@@ -97,7 +97,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 
     # Split all file names based on '_' or '.'
     cmipName <- unname(vapply(unlist(fileList),
-                              function(x){ unlist(strsplit(basename(x), '[_\\.]')) },
+                              function(x) { unlist(strsplit(basename(x), '[_\\.]')) },
                               FUN.VALUE=rep('', length=numSplits+1)))
 
     # List what order the files appear in the name, for CMIP5 this will be:

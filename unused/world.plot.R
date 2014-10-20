@@ -37,7 +37,7 @@ world.plot <- function(x, lon=NULL, lat=NULL, time=1, main=NULL, parList=NULL,
     if(verbose) cat('******world.plot starting************\n')
 
     # Sanity checks
-    if(class(x)=="cmip5data"){
+    if(class(x)=="cmip5data") {
         # Pull the lat/lon/val/main from the cmip5 object
         lon <- x$lon
         lat <- x$lat
@@ -47,11 +47,9 @@ world.plot <- function(x, lon=NULL, lat=NULL, time=1, main=NULL, parList=NULL,
         if(is.null(main)) {
             main <- sprintf('%s %s [%s]', x$model, x$variable, x$valUnit)
         }
-    }else{
+    } else {
         val <- x
     }
-
-
 
     val[!is.finite(val)] <- NA           # clean up the values to plot
 

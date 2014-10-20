@@ -55,7 +55,7 @@ test_that("makeZStat computes Z means", {
 test_that("does makeZStat correctly report multi-line functions",{
     years <- 1850:1851
     d <- cmip5data(years, Z=T)
-    res <- makeZStat(d, FUN=function(x){
+    res <- makeZStat(d, FUN=function(x) {
         mean(x)
         }, verbose=F)
 

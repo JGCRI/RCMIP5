@@ -74,7 +74,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     # Parse out the ensemble strings according to CMIP5 specifications for
     # ...file naming conventions
     ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
-                                        function(x){x[5]})))
+                                        function(x) { x[5] })))
 
     if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
 
