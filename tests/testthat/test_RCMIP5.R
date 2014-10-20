@@ -56,7 +56,7 @@ test_that("as.data.frame works", {
                  c("a", "b", "c", "d", "value"))
 })
 
-test_that("as.data.frame works", {
+test_that("as.array works", {
     arr <- as.array(cmip5data(2000:2002, Z=T))
     expect_is(arr, "array")
     expect_equal(dim(arr), c(10, 10, 5, 36))
