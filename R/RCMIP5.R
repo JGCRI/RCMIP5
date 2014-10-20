@@ -332,11 +332,6 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) 
         df[2] <- as.numeric(x$lat[df[,2]])
         df[1] <- as.numeric(x$lon[df[,1]])
 
-        if(is.null(x$Z)) df$Z <- NULL
-        if(is.null(x$lat)) df$lat <- NULL
-        if(is.null(x$lon)) df$lon <- NULL
-        if(is.null(x$time)) df$time <- NULL
-
         return(df)
     }
 
