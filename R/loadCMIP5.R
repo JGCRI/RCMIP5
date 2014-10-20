@@ -74,7 +74,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     # Parse out the ensemble strings according to CMIP5 specifications for
     # ...file naming conventions
     ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
-                                        function(x) { x[5] })))
+                                        function(x){x[5]})))
 
     if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
 
@@ -129,6 +129,18 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     if(FUNstr == "mean")
         modelTemp$val <- unname(modelTemp$val / length(modelTemp$ensembles))
 
+    if(verbose) cat("Melting to data frame\n")
+    df <- reshape2::melt(modelTemp$val, varnames=c("lon", "lat", "Z", "time"))
+    # Fill in dimensional data. Note that if one of these vectors (x$lon, x$lat,
+    # x$Z, x$time) doesn't exist, it will be removed from the data frame.
+    # Note the order here (column 4...1) matters, because we're potentially
+    # removing columns as we go!
+    if(!is.null(modelTemp$time)) df[4] <- as.numeric(modelTemp$time[df[,4]])
+    if(!is.null(modelTemp$Z)) df[3] <- as.numeric(modelTemp$Z[df[,3]])
+    if(!is.null(modelTemp$lat)) df[2] <- as.numeric(modelTemp$lat[df[,2]])
+    if(!is.null(modelTemp$lon)) df[1] <- as.numeric(modelTemp$lon[df[,1]])
+    modelTemp$val <- tbl_df( df ) # wrap as dplyr tbl
+    
     # Update provenance and return
     addProvenance(modelTemp, c(paste("Computed", FUNstr, "of ensembles:",
                                      paste(ensembleArr, collapse=' '))))
