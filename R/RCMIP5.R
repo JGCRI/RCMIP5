@@ -269,11 +269,11 @@ summary.cmip5data <- function(object, ...) {
 
     ans$time <- paste0(object$debug$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
     ans$size <- as.numeric(object.size(object))
-    if(is.array(object$val)){
+    if(is.array(object$val)) {
         ans$valsummary <- c(min(as.vector(object$val), na.rm=TRUE),
                             mean(as.vector(object$val), na.rm=TRUE),
                             max(as.vector(object$val), na.rm=TRUE))
-    }else{
+    } else {
         varStr <- rev(names(object$val))[1]
         ans$valsummary <- c(min(as.vector(object$val[[varStr]]), na.rm=TRUE),
                             mean(as.vector(object$val[[varStr]]), na.rm=TRUE),
@@ -314,7 +314,7 @@ print.summary.cmip5data <- function(x, ...) {
 #' @return The object converted, as well as possible, to a data frame
 #' @export
 as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) {
-    if(is.array(x$val)){
+    if(is.array(x$val)) {
         if(verbose) cat('Converting from array to data.frame. ')
         if(verbose) cat("Melting...\n")
         if(originalNames)
@@ -327,10 +327,10 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) 
         # (x$lon, x$lat, x$Z, x$time) doesn't exist, it will be removed
         # from the data frame. Note the order here (column 4...1) matters,
         # because we're potentially removing columns as we go!
-        df[4] <- as.numeric(x$time[df[,4]])
-        df[3] <- as.numeric(x$Z[df[,3]])
-        df[2] <- as.numeric(x$lat[df[,2]])
-        df[1] <- as.numeric(x$lon[df[,1]])
+        df[4] <- x$time[df[,4]]
+        df[3] <- x$Z[df[,3]]
+        df[2] <- x$lat[df[,2]]
+        df[1] <- x$lon[df[,1]]
 
         return(df)
     }
@@ -347,10 +347,10 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) 
 #' @param verbose logical. Print info as we go?
 #' @return The main object values converted to a multi-dimentional array.
 #' @export
-as.array.cmip5data <- function(x, ..., verbose=FALSE){
+as.array.cmip5data <- function(x, ..., verbose=FALSE) {
     if(is.array(x$val)) return(x$val)
 
-    if(is.data.frame(x$val)){
+    if(is.data.frame(x$val)) {
         if(verbose) cat('Converting from a data.frame to array. Casting...\n')
         return(acast(x$val, as.list(names(x$val)[-length(names(x$val))])))
     }
