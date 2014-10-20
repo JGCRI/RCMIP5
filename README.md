@@ -9,7 +9,7 @@ More information about the CMIP5 experiment can be found on the project home pag
 
 **Installing this package**
 
-* The RCMIP5 package can be installed from [CRAN](http://cran.r-project.org) or directly from this repository, using the devtools `install_github` command.
+* The RCMIP5 package can be installed from [CRAN](http://cran.r-project.org/package=RCMIP5) or directly from this repository, using the devtools `install_github` command.
 
 **Bugs reports**
 
