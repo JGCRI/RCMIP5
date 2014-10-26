@@ -37,6 +37,7 @@ makeZStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     if(verbose) cat('\nTook', timer[3], 's\n')
     
     # We now have new computed data. Overwrite original data and update provenance
+    x$val$Z <- NA
     x$numZs <- length(x$Z)
     x$Z <- NULL
     addProvenance(x, paste("Computed", 

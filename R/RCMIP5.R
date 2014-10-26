@@ -17,7 +17,7 @@
 #'   An overview of CMIP5 and the experiment design, Bulletin of the American
 #'   Meteorological Society, 93, 485-498.
 #'   \url{http://dx.doi.org/10.1175/BAMS-D-11-00094.1}
-#' @import dplyr reshape2 digest
+#' @import dplyr reshape2 digest abind
 #' @docType package
 #' @name RCMIP5
 NULL
@@ -179,7 +179,7 @@ cmip5data <- function(x=list(),
         if(!is.null(result$Z)) df[3] <- as.numeric(result$Z[df[,3]])
         if(!is.null(result$lat)) df[2] <- as.numeric(result$lat[df[,2]])
         if(!is.null(result$lon)) df[1] <- as.numeric(result$lon[df[,1]])
-        result$val <- tbl_df( df ) # wrap as dplyr tbl
+        result$val <- tbl_df( df ) # wrap in a dplyr tbl
         
         result$valUnit <- "unit"
         result$debug <- debug
@@ -311,12 +311,39 @@ print.summary.cmip5data <- function(x, ...) {
 #' @param x A \code{\link{cmip5data}} object
 #' @param ... Other parameters
 #' @param originalNames logical. Use original dimension names from file?
-#' @return The object converted, as well as possible, to a data frame
+#' @return The object converted to a data frame
 #' @export
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
-    x$val
+    dplyr::arrange(x$val, lon, lat, Z, time)
 } # as.data.frame.cmip5data
+
+#' Convert a cmip5data object to an array
+#'
+#' @param x A \code{\link{cmip5data}} object
+#' @param ... Other parameters
+#' @param originalNames logical. Use original dimension names from file?
+#' @return The object converted to an array
+#' @export
+#' @keywords internal
+as.array.cmip5data <- function(x, ..., originalNames=FALSE) {
+    
+    dimList <- c(length(unique(x$val$lon)),
+                 length(unique(x$val$lat)),
+                 length(unique(x$val$Z)),
+                 length(unique(x$val$time)))
+    if(originalNames)
+        dimNames <- x$dimNames
+    else
+        dimNames <- names(x$val)[1:4]
+    
+    # Remove degenerate dimensions
+    dimNames <- dimNames[!dimList %in% 1] 
+    dimList <- dimList[!dimList %in% 1]
+    
+    # Note we sort data frame before converting to array!
+    array(dplyr::arrange(x$val, lon, lat, Z, time)$value, dim=dimList)
+} # as.array.cmip5data
 
 #' Make package datasets and write them to disk.
 #'

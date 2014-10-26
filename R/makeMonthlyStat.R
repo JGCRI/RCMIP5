@@ -29,9 +29,9 @@ makeMonthlyStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     stopifnot(x$debug$timeFreqStr=="mon")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(FUN)==1 & is.function(FUN))
-        
-    monthIndex <- floor((x$time %% 1) * 12 + 1)
-       
+
+    monthIndex <- floor((x$val$time %% 1) * 12 + 1)
+    
     # Main computation code
     timer <- system.time({ # time the main computation, below
         x$val$time <- monthIndex   

@@ -38,6 +38,7 @@ makeAnnualStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     
     if(verbose) cat('\nTook', timer[3], 's\n')
     
+    x$time <- unique(floor(x$time))
     x$numPerYear <- table(floor(x$time))
     x$debug$timeFreqStr <- "years (summarized)"
     addProvenance(x, paste("Calculated", 

@@ -26,9 +26,6 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
     stopifnot(length(path)==1 & is.character(path))
     stopifnot(length(verbose)==1 & is.logical(verbose))
     
-    # The ordering of x$val dimensions is lon-lat-Z?-time?
-    # Anything else is not valid.
-    stopifnot(length(dim(x$val)) == 4) # that's all we know
     if(originalNames) 
         dimNames <- x$dimNames
     else
@@ -72,7 +69,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
     
     # Define spatial dimensions, if present
     if(verbose) cat("Defining netCDF dimensions...")
-    dimlist <- c()
+    dimlist <- list()
     if(!is.null(x$lon) & !is.null(x$lat)) {
         londim <- .ncdim_def("lon", x$debug$lonUnit, x$lon)
         latdim <- .ncdim_def("lat", x$debug$latUnit, x$lat)
@@ -96,9 +93,10 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
     valvar <- .ncvar_def(x$variable, x$valUnit, dimlist)
     
     # Create the file and write mandatory variable
+    # Note we make sure data is sorted correctly first
     if(verbose) cat("Creating and writing", file, "\n")
-    nc <- .nc_create(fqfn, valvar)
-    .ncvar_put(nc, valvar, x$val)
+    nc <- .nc_create(fqfn, valvar)    
+    .ncvar_put(nc, valvar, as.array(x))
     
     # Write spatial dimensions, if present
     if(!is.null(x$lon) & !is.null(x$lat)) {
@@ -109,18 +107,21 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
         .ncvar_put(nc, latvar, x$lat)        
     }
     
-    # Write Z and time variables, if present
+    # Write Z and time dimensions, if present
     if(!is.null(x$Z)) {
         if(verbose) cat("Writing Z\n")
         Zvar <- .ncvar_def(dimNames[3], x$debug$ZUnit, Zdim)
         .ncvar_put(nc, Zvar, x$Z) 
     }
+    if(!is.null(x$time)) {
+        if(verbose) cat("Writing time\n")
+        timevar <- .ncvar_def(dimNames[4], x$debug$timeUnit, timedim)
+        .ncvar_put(nc, timevar, x$time) 
+    }
     
     # Get package version number, allowing that there might not be one
     pkgv <- "???"
-    try({
-        pkgv <- packageVersion("RCMIP5") 
-    }, silent=T)
+    try({ pkgv <- packageVersion("RCMIP5") }, silent=T)
     
     # Write attributes
     if(verbose) cat("Writing attributes\n")    

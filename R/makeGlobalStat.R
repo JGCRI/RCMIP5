@@ -23,7 +23,7 @@
 #' calculations needed. The former is built into R, and the latter can generally
 #' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
 #' follow the weighted.mean syntax, in particular 
-#' accepting parameters 'x' (data) and 'w' (weights) of equal size.
+#' accepting parameters 'x' (data) and 'w' (weights) of equal size, as well as dots(...).
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeMonthlyStat}} 
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
@@ -58,9 +58,11 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
         x$val <- summarise(grp, value=FUN(value, areavals, ...))   
     }) # system.time
     
-    if(verbose) cat('\nTook', timer[3], 's\n')
+    if(verbose) cat('Took', timer[3], 's\n')
     
     # Finish up
+    x$val$lon <- NA
+    x$val$lat <- NA
     x$numCells <- length(areavals)
     x[c('lat', 'lon')] <- NULL    
     addProvenance(x, paste("Computed", 

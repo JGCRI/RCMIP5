@@ -5,7 +5,9 @@ library(ggplot2)
 library(reshape2)
 #library(ncdf4)
 library(digest)
+library(plyr)
 library(dplyr)
+library(abind)
 
 # Load sample data, as package would
 #load("data/tas_Amon_CMCC-CESM_historical_r1i1p1.Rdata")

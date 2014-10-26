@@ -30,7 +30,7 @@
 loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+',
                       path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
                       FUN=mean, yearRange=NULL) {
-
+    
     # Sanity checks - parameters are correct type and length
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
@@ -45,7 +45,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     stopifnot(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
     FUNstr <- as.character(substitute(FUN))
     stopifnot(FUNstr %in% c("mean", "min", "max", "sum"))
-
+    
     # If a unique ensemble is specified, jump right to loadEnsemble()
     if(!is.null(variable) & !is.null(model)
        &!is.null(experiment) & !is.null(ensemble)) {
@@ -53,39 +53,39 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
                             path=path, recursive=recursive, verbose=verbose,
                             force.ncdf=force.ncdf, yearRange=yearRange))
     }
-
+    
     # List all files that match specifications
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
-
+    
     # Only pull the files which are specified by the id strings
     fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_.*\\.nc$',
                                                variable, domain, model, experiment),
                                basename(fileList))]
-
+    
     #cat(fileList)
     if(length(fileList) == 0) {
         warning("Could not find any matching files")
         return(NULL)
     }
-
+    
     # Strip the .nc out of the file list
     fileList <- gsub('\\.nc$', '', fileList)
-
+    
     # Parse out the ensemble strings according to CMIP5 specifications for
     # ...file naming conventions
     ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
                                         function(x){x[5]})))
-
+    
     if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
-
+    
     modelTemp <- NULL              # Initalize the return data structure
     for(ensemble in ensembleArr) { # for each ensemble...
-
+        
         # load the entire ensemble
         temp <- loadEnsemble(variable, model, experiment, ensemble, domain,
                              path=path, verbose=verbose, recursive=recursive,
                              force.ncdf=force.ncdf, yearRange=yearRange)
-
+        
         if(is.null(modelTemp)) {         # If first model, just copy
             modelTemp <- temp
         } else {
@@ -95,19 +95,23 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
                    identical(temp$lon, modelTemp$lon) &
                    identical(temp$Z, modelTemp$Z) &
                    identical(temp$time, modelTemp$time)) {
-
+                
                 # Add this ensemble's data and record file and ensemble loaded
                 if(FUNstr %in% c("min", "max")) { # for min and max, compute as we go
                     if(verbose) cat("Computing", FUNstr)
                     combined <- array(c(modelTemp$val, temp$val), dim=c(dim(modelTemp$val), 2))
-                    modelTemp$val <- aaply(combined,
-                                           .margins=1:length(dim(modelTemp$val)),
-                                           .fun=FUN,
-                                           .progress=ifelse(verbose, "text", "none"))
+                    modelTemp$val <- apply(combined,
+                                           MARGIN=1:length(dim(modelTemp$val)),
+                                           FUN=FUN)
+                    
+                    #                     modelTemp$val <- plyr::aaply(combined,
+                    #                                                  .margins=1:length(dim(modelTemp$val)),
+                    #                                                  .fun=FUN,
+                    #                                                  .progress=ifelse(verbose, "text", "none"))
                 } else { # mean and sum are easier, and much faster
                     modelTemp$val <- modelTemp$val + temp$val
                 }
-
+                
                 modelTemp$files <- c( modelTemp$files, temp$files )
                 modelTemp$ensembles <- c(modelTemp$ensembles, ensemble)
                 modelTemp <- addProvenance(modelTemp, temp)
@@ -118,17 +122,17 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
             }
         } # is.null(modelTemp)
     } # for
-
+    
     # Make sure at least one ensemble was actually loaded
     if(length(modelTemp$ensembles) == 0) {
         warning(paste("No ensembles were loaded:", variable, model, experiment))
         return(NULL)
     }
-
+    
     # If taking the mean, calculate over all ensembles
     if(FUNstr == "mean")
         modelTemp$val <- unname(modelTemp$val / length(modelTemp$ensembles))
-
+    
     if(verbose) cat("Melting to data frame\n")
     df <- reshape2::melt(modelTemp$val, varnames=c("lon", "lat", "Z", "time"))
     # Fill in dimensional data. Note that if one of these vectors (x$lon, x$lat,

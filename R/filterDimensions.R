@@ -114,8 +114,6 @@ filterDimensionZ <- function(x, Zs=NULL, verbose=FALSE) {
         if(is.null(x[["Z"]])) {
             warning("No Z data found")
         } else {
-            stopifnot(length(x$Z) == dim(x$val)[3]) # Sanity check
-            
             x$val <- filter(x$val, Z %in% Zs)
             x$Z <- x$Z[x$Z %in% Zs]
             x <- addProvenance(x, paste("Filtered for Zs in range [",

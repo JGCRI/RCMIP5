@@ -36,7 +36,7 @@ checkTimePeriod <- function(fileInfo_df) {
     stopifnot("time" %in% colnames(fileInfo_df))
 
     # Use ddply to break up data frame, process and check time field, and return result
-    ddply(fileInfo_df, ddplyFields, function(x) {
+    plyr::ddply(fileInfo_df, ddplyFields, function(x) {
 
         #spilt the time signiture
         curCombo <- matrix(unlist(strsplit(as.character(x$time), '-')),
