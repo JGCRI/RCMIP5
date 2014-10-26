@@ -31,7 +31,7 @@ makeAnnualStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     
     # Main computation code
     timer <- system.time({  # time the main computation, below
-        x$val$time <- floor(x$val$time)        
+        x$val$time <- floor(x$val$time)   
         grp <- group_by(x$val, lon, lat, Z, time)
         x$val <- summarise(grp, value=FUN(value, ...))
     }) # system.time

@@ -84,8 +84,10 @@ test_that("loadCMIP5 can load using both ncdf and ncdf4", {
     path <- "../../sampledata/monthly/"
     if(!file.exists(path)) skip("Path doesn't exist")
 
-    d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)  # ncdf4
-    d2 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, force.ncdf=TRUE) # ncdf
+    d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F,
+                    yearRange=c(2029, 2032))  # ncdf4
+    d2 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, force.ncdf=TRUE,
+                    yearRange=c(2029, 2032)) # ncdf
     expect_equal(d1$val, d2$val)
     expect_equal(names(d1), names(d2))
 })
