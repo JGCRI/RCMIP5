@@ -43,7 +43,6 @@ test_that("loadEnsemble loads monthly data", {
     path <- "../../sampledata/monthly/"
     if(!file.exists(path)) skip("Path doesn't exist")
     
-    d <- loadEnsemble('nbp','HadGEM2-ES', 'rcp85', 'r3i1p1', '[^_]+', path=path, verbose=F)     # test data set
     expect_is(d, "cmip5data")
     d <- loadEnsemble('prc','GFDL-CM3', 'rcp85', 'r1i1p1', '[^_]+', path=path, verbose=F)
     expect_is(d, "cmip5data")
@@ -71,7 +70,7 @@ test_that("loadEnsemble loads 4D data", {
     d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
     expect_is(d$Z, "array")
-    expect_is(d$val, "array")
+    expect_is(d$val, "data.frame")
     
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', 
                       path=path, verbose=F)     # test data set
@@ -124,8 +123,7 @@ test_that("loadEnsemble handles data with time length=1", {
     d <- loadEnsemble("spco2", "HadGEM2-ES", "rcp85", domain="Omon",
                       ensemble="r1i1p1", path=path, verbose=F)    
     expect_is(d, "cmip5data")
-    expect_equal(length(dim(d$val)), 4)
-    expect_equal(dim(d$val)[3], 1)
+    # TODO: check dimensions
 })
 
 
@@ -141,7 +139,5 @@ test_that("loadEnsemble handles time-only data", {
                       path=path, verbose=F)
     
     expect_is(d, "cmip5data")
-    expect_equal(length(dim(d$val)), 4)
-    expect_equal(dim(d$val)[1], 1)
-    expect_equal(dim(d$val)[2], 1)
+    # TODO: check dimensions
 })

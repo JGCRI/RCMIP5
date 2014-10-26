@@ -17,14 +17,8 @@ test_that("makeAnnualStat handles bad input", {
     expect_error(makeAnnualStat(cmpi5data()))               # wrong size list d
     expect_error(makeAnnualStat(d,verbose=1))               # non-logical verbose
     expect_error(makeAnnualStat(d,verbose=c(F, F)))          # multiple verbose values
-    expect_error(makeAnnualStat(d,parallel=1))              # non-logical parallel
-    expect_error(makeAnnualStat(d,parallel=c(T, T)))         # multiple parallel values
     expect_error(makeAnnualStat(d,FUN=1))                   # non-function FUN
     expect_error(makeAnnualStat(d,FUN=c(mean, mean)))        # multiple FUN values
-    
-    d <- cmip5data(1850)
-    d$val <- array(1:2, dim=dim(d$val)-1)
-    expect_error(makeAnnualStat(d, verbose=F))        # corrupt value array
 })
 
 test_that("makeAnnualStat handles monthly data", {
@@ -48,33 +42,14 @@ test_that("makeAnnualStat handles monthly data", {
     # Do years match what we expect?
     expect_equal(res$time, years)
     
-    # Is the answer value array correctly sized?
-    expect_equal(length(dim(res$val)), length(dim(d$val)))  # same number of dimensions
-    expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size should match
-    expect_equal(dim(res$val)[3], 1)
-    expect_equal(dim(res$val)[4], length(years))  # temporal size set to # of years
-    
-    # Are the answer values numerically correct?
-    dummyans <- array(NA_real_, dim=c(dim(d$val)[c(1,2,3)], length(years)))
-    for(i in 1:length(years)) {
-        temp <- aaply(d$val[,,,years[i] == floor(d$time)], c(1,2), .fun=mean)
-        temp <- array(temp, dim=c(dim(temp), 1))
-        dummyans[,,1,i] <- temp
-    }
-    expect_equal(res$val, dummyans)
-})
-
-test_that("makeAnnualStat parallel results == serial result", {
-    library(doParallel)
-    registerDoParallel(cores=2)  # CRAN policy is 2 cores max
-    years <- 1850:1851
-    d <- cmip5data(years)
-    res_s <- makeAnnualStat(d, verbose=F, parallel=F)
-    res_p <- makeAnnualStat(d, verbose=F, parallel=T)
-    expect_equal(res_s$val, res_p$val)
-    expect_equal(res_s$time, res_p$time)
-    expect_equal(res_s$timeUnit, res_p$timeUnit)
-    expect_equal(res_s$numPerYear, res_p$numPerYear)
+    # Is the answer value data frame correctly sized?
+    expect_equal(nrow(res$val), nrow(d$val)/12)
+    expect_equal(length(res$time), length(d$time)/12)
+        
+    # Are the answer values numerically correct?    
+    d$val$time <- floor(d$val$time)
+    dummyans <- aggregate(value~lon+lat+Z+time, data=d, FUN=mean)
+    expect_equal(dummyans$value, res$val$value)
 })
 
 test_that("makeAnnualStat handles annual data", {
@@ -97,18 +72,9 @@ test_that("makeAnnualStat handles annual data", {
     # Do years match what we expect?
     expect_equal(res$time, years)
     
-    # Is the answer value array correctly sized?
-    expect_equal(dim(res$val)[1:2], dim(d$val)[1:2])   # spatial size match
-    expect_equal(dim(res$val)[length(dim(res$val))], length(years))  # temporal size match
-    
-    # Are the answer values numerically correct?
-    dummyans <- array(NA_real_, dim=c(dim(d$val)[c(1,2,3)], length(years)))
-    for(i in 1:length(years)) {
-        temp <- aaply(d$val[,,,years[i] == floor(d$time)], c(1,2), .fun=mean)
-        temp <- array(temp, dim=c(dim(temp), 1))
-        dummyans[,,1,i] <- temp
-    }
-    expect_equal(res$val, dummyans)
+    # Is the answer value array correct (unchanged except for time)?
+    expect_equal(d$val[c("lon", "lat", "Z", "value")], 
+                 res$val[c("lon", "lat", "Z", "value")])
 })
 
 test_that("makeAnnualStat handles 4-dimensional data", {
@@ -119,22 +85,24 @@ test_that("makeAnnualStat handles 4-dimensional data", {
     # Do years match what we expect?
     expect_equal(res$time, years)
     
-    # Is the answer value array correctly sized?
-    expect_equal(dim(res$val)[1:3], dim(d$val)[1:3])   # spatial size match
-    expect_equal(dim(res$val)[4], length(years))  # temporal size match
+    # Is the answer value data frame correctly sized?
+    expect_equal(nrow(res$val), nrow(d$val)/12)
+    expect_equal(length(res$time), length(d$time)/12)
+    
+    # Are the answer values numerically correct?    
+    d$val$time <- floor(d$val$time)
+    dummyans <- aggregate(value~lon+lat+Z+time, data=d, FUN=mean)
+    expect_equal(dummyans$value, res$val$value)
 })
 
 test_that("makeAnnualStat handles custom function", {
     years <- 1850:1851
     d <- cmip5data(years)
     
-    res <- makeAnnualStat(d, verbose=F, FUN=function(x) {
-        a <- mean(x)
-        b <- a
-        b
-    }
-    )
+    res <- makeAnnualStat(d, verbose=F, FUN=sd)
     
-    # Do years match what we expect?
-    expect_equal(res$time, years)
+    # Are the answer values numerically correct?    
+    d$val$time <- floor(d$val$time)
+    dummyans <- aggregate(value~lon+lat+Z+time, data=d, FUN=sd)
+    expect_equal(dummyans$value, res$val$value)
 })

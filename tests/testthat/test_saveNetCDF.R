@@ -37,7 +37,7 @@ test_that("saveNetCDF saves X-Y-T data correctly", {
         
         expect_equal(length(nc$var), 1) # variable count should match
         expect_equal(length(nc$dim), 3) # dimension count should match
-        expect_equivalent(d$val, ncvar_get(nc, "var"))  # data should match
+        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc, "var")))  # data should match
         expect_is(nc$dim$lon$units, "character")  # units should be written...
         expect_is(nc$dim$lat$units, "character")
         expect_null(nc$dim$Z$units)
@@ -60,7 +60,7 @@ test_that("saveNetCDF saves X-Y-Z-T data correctly", {
 
         expect_equal(length(nc$var), 1) # variable count should match
         expect_equal(length(nc$dim), 4) # dimension count should match
-        expect_equivalent(d$val, ncvar_get(nc, "var"))  # data should match
+        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc, "var")))  # data should match
         expect_is(nc$dim$lon$units, "character")  # units should be written...
         expect_is(nc$dim$lat$units, "character")
         expect_is(nc$dim$Z$units, "character")
@@ -83,7 +83,7 @@ test_that("saveNetCDF saves X-Y (area) data correctly", {
         
         expect_equal(length(nc$var), 1) # variable count should match
         expect_equal(length(nc$dim), 2) # dimension count should match
-        expect_equivalent(d$val[,,1,1], ncvar_get(nc))  # data should match
+        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc)))  # data should match
         expect_is(nc$dim$lon$units, "character")  # units should be written...
         expect_is(nc$dim$lat$units, "character")
         expect_null(nc$dim$depth$units)
@@ -106,7 +106,7 @@ test_that("saveNetCDF saves t (time) data correctly", {
         
         expect_equal(length(nc$var), 1) # variable count should match
         expect_equal(length(nc$dim), 1) # dimension count should match
-        expect_equivalent(d$val, ncvar_get(nc))  # data should match
+        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc)))  # data should match
         expect_null(nc$dim$lon)
         expect_null(nc$dim$lat)
         expect_null(nc$dim$Z)

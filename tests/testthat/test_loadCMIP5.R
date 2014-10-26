@@ -44,7 +44,8 @@ test_that("loadCMIP5 loads monthly data", {
     path <- "../../sampledata/monthly/"
     if(!file.exists(path)) skip("Path doesn't exist")
 
-    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)     # test data set
+    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, 
+                   yearRange=c(2029, 2032))     # test data set
     expect_is(d, "cmip5data")
     expect_equal(length(d$files), 4)                                 # should be four files
 })
@@ -55,14 +56,14 @@ test_that("loadCMIP5 loads annual data", {
     path <- "../../sampledata/annual/"
     if(!file.exists(path)) skip("Path doesn't exist")
 
-    d <- loadCMIP5('co3','HadGEM2-ES','rcp85',path=path,verbose=F)
+    d <- loadCMIP5('co3', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)
     expect_is(d,"cmip5data")
     #There is a csv file with the same base name that load should ignore
     expect_equal(length(d$files), 1)                # should be one file
 })
 
 test_that("loadEnsemble checks unique domain", {
-    expect_error(loadCMIP5("co3","fakemodel1-ES","rcp85",path='testdata_twodomains/',verbose=F))
+    expect_error(loadCMIP5("co3", "fakemodel1-ES", "rcp85", path='testdata_twodomains/',verbose=F))
 })
 
 test_that("loadCMIP5 handles spatial mismatches between ensembles", {
@@ -158,8 +159,8 @@ test_that("loadCMIP5 handles FUN correctly", {
     d_sum <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sum)
     expect_error(loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sd))
 
-    expect_equal(mean(d_mean$val), 1.5)
-    expect_equal(mean(d_min$val), 1)
-    expect_equal(mean(d_max$val), 2)
-    expect_equal(mean(d_sum$val), 3)
+    expect_equal(mean(d_mean$val$value), 1.5)
+    expect_equal(mean(d_min$val$value), 1)
+    expect_equal(mean(d_max$val$value), 2)
+    expect_equal(mean(d_sum$val$value), 3)
 })

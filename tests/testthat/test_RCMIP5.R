@@ -27,33 +27,6 @@ test_that("as.data.frame works", {
     df <- as.data.frame(cmip5data(2000:2002, Z=T))
     expect_is(df, "data.frame")
     expect_equal(names(df), c("lon", "lat", "Z", "time", "value"))
-
-    df <- as.data.frame(makeAnnualStat(cmip5data(2000:2002), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("lon", "lat", "time", "value"))
-
-    df <- as.data.frame(makeMonthlyStat(cmip5data(2000:2002), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("lon", "lat", "time", "value"))
-
-    df <- as.data.frame(makeGlobalStat(cmip5data(2000:2002), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("time", "value"))
-
-    df <- as.data.frame(makeGlobalStat(cmip5data(2000:2002, Z=T), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("Z", "time", "value"))
-
-    df <- as.data.frame(makeZStat(cmip5data(2000:2002, Z=T), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("lon", "lat", "time", "value"))
-
-    d <- cmip5data(2000:2002, Z=T)
-    d$dimNames <- c("a", "b", "c", "d")
-    expect_equal(names(as.data.frame(d, verbose=F)),
-                 c("lon", "lat", "Z", "time", "value"))
-    expect_equal(names(as.data.frame(d, verbose=F, originalNames=T)),
-                 c("a", "b", "c", "d", "value"))
 })
 
 test_that("as.array works", {
@@ -63,6 +36,5 @@ test_that("as.array works", {
 
     arr <- as.array(cmip5data(2000:2002))
     expect_is(arr, "array")
-    expect_equal(dim(arr), c(10, 10, 1, 36))
-
+    expect_equal(dim(arr), c(10, 10, 36))
 })
