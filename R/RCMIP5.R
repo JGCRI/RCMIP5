@@ -315,6 +315,8 @@ print.summary.cmip5data <- function(x, ...) {
 #' @export
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
+    # Suppress stupid NOTEs from R CMD CHECK
+    lon <- lat <- Z <- time <- NULL
     dplyr::arrange(x$val, lon, lat, Z, time)
 } # as.data.frame.cmip5data
 
@@ -341,6 +343,9 @@ as.array.cmip5data <- function(x, ..., originalNames=FALSE) {
     dimNames <- dimNames[!dimList %in% 1] 
     dimList <- dimList[!dimList %in% 1]
     
+    # Suppress stupid NOTEs from R CMD CHECK
+    lon <- lat <- Z <- time <- NULL
+        
     # Note we sort data frame before converting to array!
     array(dplyr::arrange(x$val, lon, lat, Z, time)$value, dim=dimList)
 } # as.array.cmip5data

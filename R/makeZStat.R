@@ -30,6 +30,9 @@ makeZStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     
     # Main computation code
     timer <- system.time({  # time the main computation, below
+        # Suppress stupid NOTEs from R CMD CHECK
+        lon <- lat <- time <- value <- NULL
+        
         grp <- group_by(x$val, lon, lat, time)
         x$val <- summarise(grp, value=FUN(value, ...))
     }) # system.time

@@ -54,6 +54,9 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
     
     # Main computation code
     timer <- system.time({ # time the main computation
+        # Suppress stupid NOTEs from R CMD CHECK
+        Z <- time <- value <- NULL
+        
         grp <- group_by(x$val, Z, time)
         x$val <- summarise(grp, value=FUN(value, areavals, ...))   
     }) # system.time

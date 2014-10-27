@@ -55,6 +55,9 @@ filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
         if(is.null(x[["lon"]])) {
             warning("No lon data found")
         } else {
+            # Suppress stupid NOTEs from R CMD CHECK
+            lon <- NULL
+            
             x$val <- filter(x$val, lon %in% lons)
             x$lon <- x$lon[x$lon %in% lons]
             x <- addProvenance(x, paste("Filtered for lons in range [",
@@ -84,6 +87,9 @@ filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
         if(is.null(x[["lat"]])) {
             warning("No lat data found")
         } else {
+            # Suppress stupid NOTEs from R CMD CHECK
+            lat <- NULL
+            
             x$val <- filter(x$val, lat %in% lats)
             x$lat <- x$lat[x$lat %in% lats]
             x <- addProvenance(x, paste("Filtered for lats in range [",
@@ -114,6 +120,9 @@ filterDimensionZ <- function(x, Zs=NULL, verbose=FALSE) {
         if(is.null(x[["Z"]])) {
             warning("No Z data found")
         } else {
+            # Suppress stupid NOTEs from R CMD CHECK
+            Z <- NULL
+            
             x$val <- filter(x$val, Z %in% Zs)
             x$Z <- x$Z[x$Z %in% Zs]
             x <- addProvenance(x, paste("Filtered for Zs in range [",
@@ -144,6 +153,9 @@ filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
         if(is.null(x[["time"]])) {
             warning("No time data found")
         } else {
+            # Suppress stupid NOTEs from R CMD CHECK
+            time <- NULL
+            
             years <- unique(floor(years)) # no fractional or duplicate years allowed
             x$val <- filter(x$val, floor(time) %in% years)
             x$time <- x$time[floor(x$time) %in% years]
