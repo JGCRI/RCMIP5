@@ -17,10 +17,45 @@ test_that("cmip5data print method works", {
     # not sure what to test here, except that no error
 })
 
-test_that("cmip5data summary method works", {
-    d <- cmip5data(2000:2005)
+test_that("cmip5data summary method detects summaries", {
+    d <- cmip5data(2000:2005, Z=T)
     expect_output(print(summary(d)), "CMIP5")
-    # not sure what to test here, except that no error
+    
+    # Summary should let user know data have been run through stat fn
+    da <- makeAnnualStat(d)
+    expect_output(print(summary(da)), "annual summary")
+    dm <- makeMonthlyStat(d)
+    expect_output(print(summary(dm)), "monthly summary")
+    dz <- makeZStat(d)
+    expect_output(print(summary(dz)), "Z summary")
+    dg <- makeGlobalStat(d)
+    expect_output(print(summary(dg)), "spatial summary")
+    
+    # Multiple stat functions should be detected
+    dag <- makeGlobalStat(da)
+    expect_output(print(summary(dag)), "annual summary")
+    expect_output(print(summary(dag)), "spatial summary")
+    daz <- makeZStat(da)
+    expect_output(print(summary(daz)), "annual summary")
+    expect_output(print(summary(daz)), "Z summary")
+    dmg <- makeGlobalStat(dm)
+    expect_output(print(summary(dmg)), "monthly summary")
+    expect_output(print(summary(dmg)), "spatial summary")
+    dmz <- makeZStat(dm)
+    expect_output(print(summary(dmz)), "monthly summary")
+    expect_output(print(summary(dmz)), "Z summary")
+    
+    # All filter functions should be detected
+    df <- filterDimensions(d, years=2000:2002)
+    expect_output(print(summary(df)), "filtered")
+    df <- filterDimensions(d, months=1:6)
+    expect_output(print(summary(df)), "filtered")
+    df <- filterDimensions(d, lons=d$lon)
+    expect_output(print(summary(df)), "filtered")
+    df <- filterDimensions(d, lats=d$lat)
+    expect_output(print(summary(df)), "filtered")
+    df <- filterDimensions(d, Zs=d$Z)
+    expect_output(print(summary(df)), "filtered")
 })
 
 test_that("as.data.frame works", {
