@@ -103,14 +103,13 @@ cmip5data <- function(x=list(),
             domain="domain",
             val=NULL,
             valUnit=NULL,
-            lon=NULL,
-            lat=NULL,
-            Z=NULL,
-            time=NULL,
+            lon=NA,
+            lat=NA,
+            Z=NA,
+            time=NA,
             dimNames=NULL
         )
         
-        valdims <- c(1, 1, 1, 1)
         debug <- list()
         
         # If this data will have spatial dimensions, construct
@@ -121,7 +120,6 @@ cmip5data <- function(x=list(),
             result$lon <- 360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
             result$lat <- 180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2
             result$dimNames=c("lon", "lat")
-            valdims[1:2]=c(lonsize, latsize)
             debug$lonUnit <- "degrees_east"
             debug$latUnit <- "degrees_north"
         } else {
@@ -134,7 +132,6 @@ cmip5data <- function(x=list(),
             
             result$Z <- c(0:(Zsize-1))
             result$dimNames <- c(result$dimNames, "Z")
-            valdims[3] <- Zsize
             debug$ZUnit <- "m"
         } else {
             result$dimNames <- c(result$dimNames, NA)
@@ -156,33 +153,27 @@ cmip5data <- function(x=list(),
             # convert day based calandar to year based
             result$time <- debug$timeRaw/360+min(years)
             result$dimNames <- c(result$dimNames, "time")
-            valdims[4] <- ppy*length(years)
         } else {
             result$dimNames <- c(result$dimNames, NA)
             result$domain <- "fx"
         }
         
-        # Generate fake data
+        # Make data frame and fill it with fake data
+        result$val <- expand.grid(lon=result$lon, lat=result$lat,
+                                  Z=result$Z, time=result$time)
         if(randomize) {
-            valData <- runif(n=prod(valdims))
+            result$val$value <- runif(n=nrow(result$val))
         } else {
-            valData <- 1
-        }
-        result$val <- array(valData, dim=valdims)
-        
-        df <- reshape2::melt(result$val, varnames=c("lon", "lat", "Z", "time"))
-        # Fill in dimensional data. Note that if one of these vectors (x$lon, x$lat,
-        # x$Z, x$time) doesn't exist, it will be removed from the data frame.
-        # Note the order here (column 4...1) matters, because we're potentially
-        # removing columns as we go!
-        if(!is.null(result$time)) df[4] <- as.numeric(result$time[df[,4]])
-        if(!is.null(result$Z)) df[3] <- as.numeric(result$Z[df[,3]])
-        if(!is.null(result$lat)) df[2] <- as.numeric(result$lat[df[,2]])
-        if(!is.null(result$lon)) df[1] <- as.numeric(result$lon[df[,1]])
-        result$val <- tbl_df( df ) # wrap in a dplyr tbl
-        
+            result$val$value <- 1
+        }        
         result$valUnit <- "unit"
         result$debug <- debug
+        
+        # Change any NA dimension (was needed for expand.grid above) to NULL
+        if(all(is.na(result$lon))) result$lon <- NULL
+        if(all(is.na(result$lat))) result$lat <- NULL
+        if(all(is.na(result$Z))) result$Z <- NULL
+        if(all(is.na(result$time))) result$time <- NULL
         
         # Add debug info and set class
         result <- structure(result, class="cmip5data")
@@ -345,7 +336,7 @@ as.array.cmip5data <- function(x, ..., originalNames=FALSE) {
     
     # Suppress stupid NOTEs from R CMD CHECK
     lon <- lat <- Z <- time <- NULL
-        
+    
     # Note we sort data frame before converting to array!
     array(dplyr::arrange(x$val, lon, lat, Z, time)$value, dim=dimList)
 } # as.array.cmip5data

@@ -23,6 +23,7 @@ test_that("cmip5data generates annual and monthly data", {
     d <- cmip5data(1)
     expect_is(d, "cmip5data")
     expect_equal(ncol(d$val), 5)
+    expect_equal(all(d$val$Z), NA)
     expect_equal(length(unique(d$val$lon)), length(d$lon))
     expect_equal(length(unique(d$val$lat)), length(d$lat))
     expect_equal(length(unique(d$val$time)), length(d$time))    
@@ -31,6 +32,7 @@ test_that("cmip5data generates annual and monthly data", {
     
     d <- cmip5data(1, monthly=F)
     expect_equal(ncol(d$val), 5)
+    expect_equal(all(d$val$Z), NA)
     expect_equal(length(unique(d$val$lon)), length(d$lon))
     expect_equal(length(unique(d$val$lat)), length(d$lat))
     expect_equal(length(unique(d$val$time)), length(d$time))
@@ -59,6 +61,8 @@ test_that("cmip5data creates area-only data", {
     latsize <- 10
     d <- cmip5data(1, lonsize=lonsize, latsize=latsize, time=F, verbose=F)
     expect_equal(ncol(d$val), 5)
+    expect_equal(all(d$val$Z), NA)
+    expect_equal(all(d$val$time), NA)
     expect_equal(length(unique(d$val$lon)), length(d$lon))
     expect_equal(length(unique(d$val$lat)), length(d$lat))
     expect_is(d$lon, "numeric")
@@ -72,7 +76,9 @@ test_that("cmip5data creates area and Z data", {
     latsize <- 10
     Zsize <- 5
     d <- cmip5data(1, lonsize=lonsize, latsize=latsize, Z=T, Zsize=Zsize, time=F, verbose=F)
+
     expect_equal(ncol(d$val), 5)
+    expect_equal(all(d$val$time), NA)    
     expect_equal(length(unique(d$val$lon)), length(d$lon))
     expect_equal(length(unique(d$val$lat)), length(d$lat))
     expect_equal(length(unique(d$val$Z)), length(d$Z))
@@ -85,6 +91,9 @@ test_that("cmip5data creates area and Z data", {
 test_that("cmip5data creates time-only data", {
     d <- cmip5data(1, lonlat=F, Z=F, verbose=F)
     expect_equal(ncol(d$val), 5)
+    expect_equal(all(d$val$lon), NA)
+    expect_equal(all(d$val$lat), NA)
+    expect_equal(all(d$val$Z), NA)
     expect_equal(length(unique(d$val$time)), length(d$time))
     expect_null(d$lon)
     expect_null(d$lat)

@@ -15,7 +15,7 @@
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @param FUN function. Function (mean, min, max, or sum) to apply across ensembles
 #' @param yearRange numeric of length 2. If supplied, load only these years of data
-#' @return A \code{\link{cmip5data}} object
+#' @return A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
 #' @note The \code{yearRange} parameter is intended to help users deal with large
 #' CMIP5 data files on memory-limited machines, e.g. by allowing them to process
 #' smaller chunks of such files.
@@ -86,15 +86,17 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
                              path=path, verbose=verbose, recursive=recursive,
                              force.ncdf=force.ncdf, yearRange=yearRange)
         
+        # If nothing loaded, skip and go on to next ensemble
+        if(is.null(temp)) next
+        
         if(is.null(modelTemp)) {         # If first model, just copy
             modelTemp <- temp
         } else {
             # Make sure lat-lon-Z-time match
-            if(all(dim(temp) == dim(modelTemp)) &
-                   identical(temp$lat, modelTemp$lat) &
+            if(all(identical(temp$lat, modelTemp$lat) &
                    identical(temp$lon, modelTemp$lon) &
                    identical(temp$Z, modelTemp$Z) &
-                   identical(temp$time, modelTemp$time)) {
+                   identical(temp$time, modelTemp$time))) {
                 
                 # Add this ensemble's data and record file and ensemble loaded
                 if(FUNstr %in% c("min", "max")) { # for min and max, compute as we go
@@ -124,7 +126,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     } # for
     
     # Make sure at least one ensemble was actually loaded
-    if(length(modelTemp$ensembles) == 0) {
+    if(is.null(modelTemp) | length(modelTemp$ensembles) == 0) {
         warning(paste("No ensembles were loaded:", variable, model, experiment))
         return(NULL)
     }
@@ -133,16 +135,27 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     if(FUNstr == "mean")
         modelTemp$val <- unname(modelTemp$val / length(modelTemp$ensembles))
     
+    # Melt to data frame and fill in dimensional data
     if(verbose) cat("Melting to data frame\n")
     df <- reshape2::melt(modelTemp$val, varnames=c("lon", "lat", "Z", "time"))
-    # Fill in dimensional data. Note that if one of these vectors (x$lon, x$lat,
-    # x$Z, x$time) doesn't exist, it will be removed from the data frame.
-    # Note the order here (column 4...1) matters, because we're potentially
-    # removing columns as we go!
-    if(!is.null(modelTemp$time)) df[4] <- as.numeric(modelTemp$time[df[,4]])
-    if(!is.null(modelTemp$Z)) df[3] <- as.numeric(modelTemp$Z[df[,3]])
-    if(!is.null(modelTemp$lat)) df[2] <- as.numeric(modelTemp$lat[df[,2]])
-    if(!is.null(modelTemp$lon)) df[1] <- as.numeric(modelTemp$lon[df[,1]])
+    # Fill in dimensional data
+    if(!is.null(modelTemp$lon))
+        df$lon <- as.numeric(modelTemp$lon[df$lon])
+    else 
+        df$lon <- NA
+    if(!is.null(modelTemp$lat))
+        df$lat <- as.numeric(modelTemp$lat[df$lat])
+    else 
+        df$lat <- NA
+    if(!is.null(modelTemp$Z))
+        df$Z <- as.numeric(modelTemp$Z[df$Z])
+    else 
+        df$Z <- NA
+    if(!is.null(modelTemp$time))
+        df$time <- as.numeric(modelTemp$time[df$time])
+    else 
+        df$time <- NA    
+    
     modelTemp$val <- tbl_df( df ) # wrap as dplyr tbl
     
     # Update provenance and return

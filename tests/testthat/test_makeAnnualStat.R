@@ -48,7 +48,7 @@ test_that("makeAnnualStat handles monthly data", {
         
     # Are the answer values numerically correct?    
     d$val$time <- floor(d$val$time)
-    dummyans <- aggregate(value~lon+lat+Z+time, data=d, FUN=mean)
+    dummyans <- aggregate(value~lon+lat+time, data=d, FUN=mean)
     expect_equal(dummyans$value, res$val$value)
 })
 
@@ -103,6 +103,6 @@ test_that("makeAnnualStat handles custom function", {
     
     # Are the answer values numerically correct?    
     d$val$time <- floor(d$val$time)
-    dummyans <- aggregate(value~lon+lat+Z+time, data=d, FUN=sd)
+    dummyans <- aggregate(value~lon+lat+time, data=d, FUN=sd)
     expect_equal(dummyans$value, res$val$value)
 })

@@ -13,12 +13,11 @@
 #' @param verbose logical. Print info as we go?
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @param yearRange numeric of length 2. If supplied, load only these years of data inclusively between these years.
-#' @return A \code{\link{cmip5data}} object.
+#' @return A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
 #' @details This function is the core of RCMIP5's data-loading. It loads all files matching
 #' the experiment, variable, model, ensemble, and domain supplied by the caller.
-#' @note The \code{yearRange} parameter is intended to help users deal with large
-#' CMIP5 data files on memory-limited machines, e.g. by allowing them to process
-#' smaller chunks of such files.
+#' @note This function is not intended to be called directly by the user; it will return
+#' the \code{val} component as a multidimensional array, not a data frame.
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
 loadEnsemble <- function(variable, model, experiment, ensemble, domain,
@@ -295,6 +294,9 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         .nc_close(nc)
     } # for filenames
 
+    # If nothing loaded...
+    if(length(val) == 0) return(NULL)
+    
     x <- cmip5data(list(files=loadedFiles, val=unname(val), valUnit=valUnit,
                         lat=latArr, lon=lonArr, Z=ZArr, time=timeArr,
                         variable=variable, model=model, domain=domain,

@@ -58,7 +58,7 @@ test_that("loadCMIP5 loads annual data", {
 
     d <- loadCMIP5('co3', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)
     expect_is(d,"cmip5data")
-    #There is a csv file with the same base name that load should ignore
+    # There is a csv file with the same base name that load should ignore
     expect_equal(length(d$files), 1)                # should be one file
 })
 
@@ -137,9 +137,8 @@ test_that("loadCMIP5 handles YearRange", {
     expect_equal(length(d$time), 24)
 
     # yearRange doesn't overlap with files
-    d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, yearRange=c(2030, 2031))
-    expect_null(d$time)
-    expect_null(dim(d$val))
+    expect_warning(loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, 
+                             yearRange=c(1999, 2000)))
 })
 
 test_that("loadCMIP5 handles FUN correctly", {
