@@ -255,6 +255,10 @@ summary.cmip5data <- function(object, ...) {
     if(!is.null(object$numCells)) {
         ans$type <- paste0(ans$type, " (spatial summary of ", object$numCells, " cells)")
     } 
+    if(!is.null(object$numZs)) {
+        ans$type <- paste0(ans$type, " (Z summary of ", object$numZs, " levels)")
+    } 
+    
     if(!is.null(object$filtered)) {
         ans$type <- paste(ans$type, "(filtered)")
     }
@@ -315,24 +319,21 @@ as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
 #'
 #' @param x A \code{\link{cmip5data}} object
 #' @param ... Other parameters
-#' @param originalNames logical. Use original dimension names from file?
+#' @param drop logical. Drop degenerate dimensions?
 #' @return The object converted to an array
 #' @export
 #' @keywords internal
-as.array.cmip5data <- function(x, ..., originalNames=FALSE) {
+as.array.cmip5data <- function(x, ..., drop=TRUE) {
     
     dimList <- c(length(unique(x$val$lon)),
                  length(unique(x$val$lat)),
                  length(unique(x$val$Z)),
                  length(unique(x$val$time)))
-    if(originalNames)
-        dimNames <- x$dimNames
-    else
-        dimNames <- names(x$val)[1:4]
     
     # Remove degenerate dimensions
-    dimNames <- dimNames[!dimList %in% 1] 
-    dimList <- dimList[!dimList %in% 1]
+    if(drop) {
+        dimList <- dimList[!dimList %in% 1]        
+    }
     
     # Suppress stupid NOTEs from R CMD CHECK
     lon <- lat <- Z <- time <- NULL

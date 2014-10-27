@@ -72,4 +72,8 @@ test_that("as.array works", {
     arr <- as.array(cmip5data(2000:2002))
     expect_is(arr, "array")
     expect_equal(dim(arr), c(10, 10, 36))
+    
+    arr <- as.array(cmip5data(2000:2002), drop=FALSE)
+    expect_is(arr, "array")
+    expect_equal(dim(arr), c(10, 10, 1, 36))
 })
