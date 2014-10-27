@@ -93,14 +93,14 @@ Provenance has 6 entries
 
 Here we see the name of the variable, model, experiment, the fact that this came from two ensembles, the data range
 and spatial dimensions, time dimensions and frequency ('mon' - monthly), size in memory, and a note about the 
-provenance (see below). Everything looks good. Assuming the `ggplot2` package is installed, we might want to make a quick plot of the data to check:
+provenance (see below). Everything looks good. ~~Assuming the `ggplot2` package is installed, we might want to make a quick plot of the data to check:~~
 
 ```
-> worldPlot(co2, time=1:12)  # first 12 months, i.e. all of 2006
+> # dont run: worldPlot(co2, time=1:12)  # first 12 months, i.e. all of 2006
 ```
 
-The resulting plot isn't very interesting, as CO2 is a well-mixed gas, but would be useful if we were working with
-a spatially variable output.
+~~The resulting plot isn't very interesting, as CO2 is a well-mixed gas, but would be useful if we were working with
+a spatially variable output.~~ [worldPlot has been removed from `RCMIP5` for now.]
 
 ## Compute global means
 
@@ -121,8 +121,7 @@ Running in serial
 Took 0.03 s
 ```
 
-The second step, `makeAnnualStat`, was relatively slow (and can be *very* slow for large datasets).^[All the `make...Stat` functions have a optional `parallel` parameter that will use the `foreach` package and any available parallelized backend.] Also note that because we didn't supply any grid cell area data to `makeAnnualStat`, it computed its own.
-Now we look at the resulting data:
+Note that because we didn't supply any grid cell area data to `makeAnnualStat`, it computed its own. Now we look at the resulting data:
 
 ```
 > summary(co2summary)
