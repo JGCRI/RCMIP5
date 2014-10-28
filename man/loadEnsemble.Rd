@@ -29,7 +29,7 @@ loadEnsemble(variable, model, experiment, ensemble, domain, path = ".",
 \item{yearRange}{numeric of length 2. If supplied, load only these years of data inclusively between these years.}
 }
 \value{
-A \code{\link{cmip5data}} object.
+A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
 }
 \description{
 Loads the data for a particular CMIP5 experiment-variable-model-ensemble
@@ -40,9 +40,8 @@ This function is the core of RCMIP5's data-loading. It loads all files matching
 the experiment, variable, model, ensemble, and domain supplied by the caller.
 }
 \note{
-The \code{yearRange} parameter is intended to help users deal with large
-CMIP5 data files on memory-limited machines, e.g. by allowing them to process
-smaller chunks of such files.
+This function is not intended to be called directly by the user; it will return
+the \code{val} component as a multidimensional array, not a data frame.
 
 This is an internal RCMIP5 function and not exported.
 }
