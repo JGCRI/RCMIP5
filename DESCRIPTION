@@ -10,17 +10,14 @@ Description: Working with CMIP5 data can be tricky, forcing scientists to write
     summaries.
 Imports:
     abind (>= 1.4),
-    plyr (>= 1.8),
     dplyr (>= 0.3),
     reshape2 (>= 1.4),
     digest
 Depends:
     R (>= 3.1.0)
 Suggests:
-    ggplot2 (>= 0.9.3),
     ncdf4 (>= 1.9),
     ncdf (>= 1.6),
-    fields(>= 7.1),
     testthat (>= 0.9),
     knitr
 Version: 1.0
