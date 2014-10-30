@@ -96,7 +96,7 @@ and spatial dimensions, time dimensions and frequency ('mon' - monthly), size in
 provenance (see below). Everything looks good. Assuming the `ggplot2` package is installed, we might want to make a quick plot of the data to check:
 
 ```
-> worldPlot(co2, time=1:12)  # first 12 months, i.e. all of 2006
+> # RCMIP5::worldPlot(co2, time=1:12)  # first 12 months, i.e. all of 2006
 ```
 
 The resulting plot isn't very interesting, as CO2 is a well-mixed gas, but would be useful if we were working with

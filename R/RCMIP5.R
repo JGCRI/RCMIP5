@@ -342,7 +342,7 @@ as.data.frame.cmip5data <- function(x, ..., verbose=FALSE, originalNames=FALSE) 
 #' Convert cmip5data object to an array. It is recommended that you use
 #' as.array or as.data.frame to access the simulation results.
 #'
-#' param x A \code{\link{cmip5data}} object
+#' @param x A \code{\link{cmip5data}} object
 #' @param ... Other parameters
 #' @param verbose logical. Print info as we go?
 #' @return The main object values converted to a multi-dimentional array.
