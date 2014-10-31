@@ -33,15 +33,15 @@ test_that("loadCMIP5 handles bad input", {
 test_that("loadCMIP5 handles no files found", {            # no netcdf files found
     w <- getOption('warn')
     options(warn=-1)
-    expect_warning(loadCMIP5("","","",path=normalizePath("testdata_none/")))
-    expect_is(loadCMIP5("","","",path=normalizePath("testdata_none/")),"NULL")
+    expect_warning(loadCMIP5("","","",path=("testdata_none")))
+    expect_is(loadCMIP5("","","",path=("testdata_none")),"NULL")
     options(warn=w)
 })
 
 test_that("loadCMIP5 loads monthly data", {
     skip_on_cran()
 
-    path <- "../../sampledata/monthly/"
+    path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
 
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)     # test data set
@@ -52,7 +52,7 @@ test_that("loadCMIP5 loads monthly data", {
 test_that("loadCMIP5 loads annual data", {
     skip_on_cran()
 
-    path <- "../../sampledata/annual/"
+    path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
 
     d <- loadCMIP5('co3','HadGEM2-ES','rcp85',path=path,verbose=F)
@@ -66,7 +66,7 @@ test_that("loadEnsemble checks unique domain", {
 })
 
 test_that("loadCMIP5 handles spatial mismatches between ensembles", {
-    path <- "testdata_mismatch/"
+    path <- "testdata_mismatch"
 
     # Test data created by
     # d1 <- cmip5data(1850,lonsize=10,latsize=10)
@@ -80,7 +80,7 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
 test_that("loadCMIP5 can load using both ncdf and ncdf4", {
     skip_on_cran()
 
-    path <- "../../sampledata/monthly/"
+    path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
 
     d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)  # ncdf4
@@ -92,7 +92,7 @@ test_that("loadCMIP5 can load using both ncdf and ncdf4", {
 test_that("loadCMIP5 can load area files", {
     skip_on_cran()
 
-    path <- "../../sampledata/fx/"
+    path <- "../../sampledata/fx"
     if(!file.exists(path)) skip("Path doesn't exist")
 
     # areacella_fx_GFDL-CM3_historical_r0i0p0.nc
@@ -103,7 +103,7 @@ test_that("loadCMIP5 can load area files", {
 test_that("loadCMIP5 correctly extracts start year", {
     skip_on_cran()
 
-    path <- "../../sampledata/monthly/"
+    path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
 
     d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F)
@@ -113,7 +113,7 @@ test_that("loadCMIP5 correctly extracts start year", {
 test_that("loadCMIP5 handles YearRange", {
     skip_on_cran()
 
-    path <- "../../sampledata/monthly/"
+    path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
 
     # These ../../sample data are 200512-203011 and 203012-205511 (with 2 ensembles)
@@ -146,7 +146,7 @@ test_that("loadCMIP5 handles YearRange", {
 
 test_that("loadCMIP5 handles FUN correctly", {
 
-    path <- "testdata_twoensembles/"
+    path <- "testdata_twoensembles"
     # These two files (saved by saveNetCDF) have all 1's and 2's,
     # respectively, in their data
 

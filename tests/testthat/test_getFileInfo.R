@@ -23,7 +23,7 @@ test_that("getFileInfo handles bad input", {
 test_that("getFileInfo handles no input", {                 # no netcdf files found
     w <- getOption('warn')
     options(warn=-1)
-    path <- normalizePath("testdata_none/")
+    path <- ("testdata_none")
     expect_warning(getFileInfo(path),"No netcdf files found")
     expect_is(getFileInfo(path),"NULL")
     options(warn=w)
@@ -32,7 +32,7 @@ test_that("getFileInfo handles no input", {                 # no netcdf files fo
 test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf filenames
     w <- getOption('warn')
     options(warn=-1)
-    path <- normalizePath("testdata_badfilename/")
+    path <- ("testdata_badfilename")
     expect_warning(getFileInfo(path),"Unexpected")
     expect_is(getFileInfo(path),"NULL")
     options(warn=w)
@@ -41,7 +41,6 @@ test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf fi
 test_that("getFileInfo handles annual netcdfs", {
     path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
-    path <- normalizePath(path)
     
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
@@ -55,8 +54,7 @@ test_that("getFileInfo handles annual netcdfs", {
 test_that("getFileInfo handles monthly netcdfs", {
     path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
-    path <- normalizePath(path)
-        
+           
     d <- getFileInfo(path)
     d <- d[complete.cases(d),]
     expect_is(d,"data.frame")
@@ -68,8 +66,7 @@ test_that("getFileInfo handles monthly netcdfs", {
 test_that("getFileInfo handles fixed netcdfs", {
     path <- "../../sampledata/fx"
     if(!file.exists(path)) skip("Path doesn't exist")
-    path <- normalizePath(path)
-        
+         
     d <- getFileInfo(path)
     expect_is(d,"data.frame")
     expect_equal(ncol(d),9)
@@ -79,7 +76,6 @@ test_that("getFileInfo handles fixed netcdfs", {
 test_that("getFileInfo handles fixed and temporal netcdfs together", {
     path <- "../../sampledata"
     if(!file.exists(path)) skip("Path doesn't exist")
-    path <- normalizePath(path)
         
     d <- getFileInfo(path)
     expect_is(d,"data.frame")

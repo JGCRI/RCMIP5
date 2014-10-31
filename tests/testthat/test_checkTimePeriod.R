@@ -12,7 +12,7 @@ library(testthat)
 context("checkTimePeriod")
 
 test_that("checkTimePeriod handles bad input", {
-    path <- "../../sampledata/"
+    path <- "../../sampledata"
     if(!file.exists(path)) skip("Path doesn't exist")
     
     d <- getFileInfo(path)
@@ -23,7 +23,7 @@ test_that("checkTimePeriod handles bad input", {
 })
 
 test_that("checkTimePeriod correctly finds missing files", {
-    path <- normalizePath("testdata_missingfile/")
+    path <- ("testdata_missingfile")
     d <- checkTimePeriod(getFileInfo(path))
     expect_is(d,"data.frame")
     expect_equal(nrow(d), 2)     # should be two cases
@@ -45,7 +45,7 @@ test_that("checkTimePeriod correctly sees continuous files", {
 })
 
 test_that("checkTimePeriod correctly parses dates", {
-    path <- "../../sampledata/"
+    path <- "../../sampledata"
     if(!file.exists(path)) skip("Path doesn't exist")
     
     d <- checkTimePeriod(getFileInfo(path))
@@ -58,7 +58,7 @@ test_that("checkTimePeriod correctly parses dates", {
 })
 
 test_that('checkTimePeriod correctly flags sub-monthly ensembles', {
-    path <- normalizePath('testdata_shortFreq/')
+    path <- ('testdata_shortFreq')
     d <- checkTimePeriod(getFileInfo(path))
     expect_true(is.na(d$allHere))
 })
