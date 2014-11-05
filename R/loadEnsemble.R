@@ -138,6 +138,9 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         if(verbose) cat('Loading', fileStr, "\n")
         nc <- .nc_open(fileStr, write=FALSE)
 
+        # Get variable names available
+        varNames <- unlist(lapply(nc$var, FUN=function(x) { x$name }))
+                
         # Get dimension names for 'variable'
         dimNames <- unlist(lapply(nc$var[[variable]]$dim, FUN=function(x) { x$name }))
         if(verbose) cat("-", variable, "dimension names:", dimNames, "\n")
@@ -149,6 +152,12 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         latArr <- NULL
         latUnit <- NULL
         if(length(dimNames) > 1) {
+            # If 'lon' and 'lat' are available, use those. Otherwise load
+            # whatever is specified by the main variable's dimensionality
+            # TODO: this is a temporary (?) hack re issue #96
+            if('lon' %in% varNames) dimNames[1] <- 'lon'
+            if('lat' %in% varNames) dimNames[2] <- 'lat'
+            
             lonArr <- .ncvar_get(nc, varid=dimNames[1])
             lonUnit <- .ncatt_get(nc, dimNames[1], 'units')$value
             latArr <- .ncvar_get(nc, varid=dimNames[2])
@@ -158,7 +167,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # (Looking at you, GFDL.) If this occurs, strip down to 1
             if(length(dim(lonArr)) > 1) lonArr <- as.vector(lonArr[,1])
             if(length(dim(latArr)) > 1) latArr <- as.vector(latArr[1,])
-        }
+         }
 
         # Get the time frequency. Note that this should be related to
         # ...the domain (ie 'mon' should be the frequency of the domain 'Amon').
