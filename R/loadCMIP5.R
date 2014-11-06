@@ -46,14 +46,6 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     FUNstr <- as.character(substitute(FUN))
     stopifnot(FUNstr %in% c("mean", "min", "max", "sum"))
     
-    # If a unique ensemble is specified, jump right to loadEnsemble()
-    if(!is.null(variable) & !is.null(model)
-       &!is.null(experiment) & !is.null(ensemble)) {
-        return(loadEnsemble(variable, model, experiment, ensemble, domain,
-                            path=path, recursive=recursive, verbose=verbose,
-                            force.ncdf=force.ncdf, yearRange=yearRange))
-    }
-    
     # List all files that match specifications
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     
