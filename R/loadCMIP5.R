@@ -27,7 +27,7 @@
 #' loadCMIP5(experiment='rcp85', variable='prc', model='GFDL-CM3', ensemble='r1i1p1')
 #' }
 #' @export
-loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+',
+loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_]+',
                       path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
                       FUN=mean, yearRange=NULL) {
     
@@ -50,8 +50,8 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     
     # Only pull the files which are specified by the id strings
-    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_.*\\.nc$',
-                                               variable, domain, model, experiment),
+    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_%s_.*\\.nc$',
+                                               variable, domain, model, experiment, ensemble),
                                basename(fileList))]
     
     #cat(fileList)
@@ -86,9 +86,9 @@ loadCMIP5 <- function(variable, model, experiment, ensemble=NULL, domain='[^_]+'
         } else {
             # Make sure lat-lon-Z-time match
             if(all(identical(temp$lat, modelTemp$lat) &
-                   identical(temp$lon, modelTemp$lon) &
-                   identical(temp$Z, modelTemp$Z) &
-                   identical(temp$time, modelTemp$time))) {
+                       identical(temp$lon, modelTemp$lon) &
+                       identical(temp$Z, modelTemp$Z) &
+                       identical(temp$time, modelTemp$time))) {
                 
                 # Add this ensemble's data and record file and ensemble loaded
                 if(FUNstr %in% c("min", "max")) { # for min and max, compute as we go
