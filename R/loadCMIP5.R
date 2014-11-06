@@ -50,7 +50,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
     
     # Only pull the files which are specified by the id strings
-    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_%s_.*\\.nc$',
+    fileList <- fileList[grepl(pattern=sprintf('^%s_%s_%s_%s_%s.*\\.nc$',
                                                variable, domain, model, experiment, ensemble),
                                basename(fileList))]
     

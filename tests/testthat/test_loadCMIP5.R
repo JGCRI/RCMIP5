@@ -93,7 +93,6 @@ test_that("loadCMIP5 can load using both ncdf and ncdf4", {
 })
 
 test_that("loadCMIP5 can load area files", {
-    skip_on_cran()
 
     path <- "../../sampledata/fx/"
     if(!file.exists(path)) skip("Path doesn't exist")
