@@ -100,6 +100,8 @@ test_that("loadCMIP5 can load area files", {
     # areacella_fx_GFDL-CM3_historical_r0i0p0.nc
     d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F)
     expect_is(d, "cmip5data")
+    expect_null(d$Z)
+    expect_null(d$time)    
 })
 
 test_that("loadCMIP5 correctly extracts start year", {

@@ -77,7 +77,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         temp <- loadEnsemble(variable, model, experiment, ensemble, domain,
                              path=path, verbose=verbose, recursive=recursive,
                              force.ncdf=force.ncdf, yearRange=yearRange)
-        
+
         # If nothing loaded, skip and go on to next ensemble
         if(is.null(temp)) next
         

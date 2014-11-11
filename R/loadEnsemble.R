@@ -273,8 +273,10 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         } # if year range
         
         # Update running time data
-        timeRaw <- c(timeRaw, thisTimeRaw)
-        timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
+        if(!is.null(thisTimeRaw)) {
+            timeRaw <- c(timeRaw, thisTimeRaw)
+            timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
+        }
         
         # Finally, load the actual data and its units
         vardata <- .ncvar_get(nc, varid=variable, start=start, count=count)
