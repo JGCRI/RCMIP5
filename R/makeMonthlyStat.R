@@ -29,7 +29,7 @@ makeMonthlyStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     stopifnot(x$debug$timeFreqStr=="mon")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(FUN)==1 & is.function(FUN))
-
+    
     monthIndex <- floor((x$val$time %% 1) * 12 + 1)
     
     # Main computation code
@@ -41,12 +41,23 @@ makeMonthlyStat <- function(x, verbose=FALSE, FUN=mean, ...) {
         
         grp <- group_by(x$val, lon, lat, Z, time)
         x$val <- summarise(grp, value=FUN(value, ...))
+        
+        # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
+        # command above may have removed some lon/lat combinations
+        if(length(unique(x$val$lon)) < length(x$lon) |
+               length(unique(x$val$lat)) < length(x$lat)) {
+            if(verbose) cat("Replacing missing lon/lat combinations\n")
+            
+            # Fix this by generating all lon/lat pairs and combining with answer
+            full_data <- tbl_df(expand.grid(lon=x$lon, lat=x$lat))
+            x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
+        }
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
     
     # Finish up
-    x$numYears <- unname(table(floor(monthIndex)))
+    x$numYears <- as.data.frame(table(floor(monthIndex)))$Freq
     x$timeUnit <- "months (summarized)"
     x$time <- 1:12
     addProvenance(x, paste("Calculated", 

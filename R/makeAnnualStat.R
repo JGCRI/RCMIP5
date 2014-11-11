@@ -32,18 +32,29 @@ makeAnnualStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     # Main computation code
     timer <- system.time({  # time the main computation, below
         x$val$time <- floor(x$val$time)   
-
+        
         # Suppress stupid NOTEs from R CMD CHECK
         lon <- lat <- Z <- time <- value <- NULL
         
         grp <- group_by(x$val, lon, lat, Z, time)
         x$val <- summarise(grp, value=FUN(value, ...))
+        
+        # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
+        # command above may have removed some lon/lat combinations
+        if(length(unique(x$val$lon)) < length(x$lon) |
+               length(unique(x$val$lat)) < length(x$lat)) {
+            if(verbose) cat("Replacing missing lon/lat combinations\n")
+            
+            # Fix this by generating all lon/lat pairs and combining with answer
+            full_data <- tbl_df(expand.grid(lon=x$lon, lat=x$lat))
+            x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
+        }
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
     
+    x$numPerYear <- as.data.frame(table(floor(x$time)))$Freq
     x$time <- unique(floor(x$time))
-    x$numPerYear <- table(floor(x$time))
     x$debug$timeFreqStr <- "years (summarized)"
     addProvenance(x, paste("Calculated", 
                            paste(deparse(substitute(FUN)), collapse="; "),
