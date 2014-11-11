@@ -202,10 +202,15 @@ print.cmip5data <- function(x, ...) {
     
     ansStr <- paste0('CMIP5: ', x$variable, ", ", x$model, " ", x$experiment)
     
-    if(!is.null(x$time)) {
-        ansStr <- paste0(ansStr, ", ", floor(min(x$time, na.rm=TRUE)),
-                         " to ", floor(max(x$time, na.rm=TRUE)))
+    spaceStr <- paste(length(x$lon), "x", length(x$lat), "x", length(x$Z))
+    ansStr <- paste0(ansStr, ", ", spaceStr)
+    
+    timeStr <- "no time"
+    if(!is.null(x$time) & length(x$time) > 0) {
+        timeStr <- paste(floor(min(x$time, na.rm=TRUE)), "to",
+                         floor(max(x$time, na.rm=TRUE)))
     }
+    ansStr <- paste0(ansStr, ", ", timeStr)
     
     if(!is.null(x$ensembles)) {
         ansStr <- paste0(ansStr, ", from ", length(x$ensembles), " ",
