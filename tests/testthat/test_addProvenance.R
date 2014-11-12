@@ -2,19 +2,13 @@
 
 # Uses the testthat package
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
-library(testthat)
-
-# To run this code: 
-#   source("addProvenance.R")
-#   library(testthat)
-#   test_file("tests/testthat/test_addProvenance.R")
 
 context("addProvenance")
 
 test_that("addProvenance handles bad input", {
     expect_error(addProvenance())
     expect_error(addProvenance(x=3))
-    expect_error(addProvenance(cmip5data(), msg=3))
+    expect_error(addProvenance(cmip5data(), msg=3))    
 })
 
 test_that("addProvenance initializes", {

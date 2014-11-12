@@ -13,18 +13,17 @@
 #' @param verbose logical. Print info as we go?
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @param yearRange numeric of length 2. If supplied, load only these years of data inclusively between these years.
-#' @return A \code{\link{cmip5data}} object.
+#' @return A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
 #' @details This function is the core of RCMIP5's data-loading. It loads all files matching
 #' the experiment, variable, model, ensemble, and domain supplied by the caller.
-#' @note The \code{yearRange} parameter is intended to help users deal with large
-#' CMIP5 data files on memory-limited machines, e.g. by allowing them to process
-#' smaller chunks of such files.
+#' @note This function is not intended to be called directly by the user; it will return
+#' the \code{val} component as a multidimensional array, not a data frame.
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
 loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                          path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
                          yearRange=NULL) {
-
+    
     # Sanity checks - make sure all parameters are correct class and length
     stopifnot(length(variable)==1 & is.character(variable))
     stopifnot(length(model)==1 & is.character(model))
@@ -37,7 +36,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(force.ncdf)==1 & is.logical(force.ncdf))
     stopifnot(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
-
+    
     # We prefer to use the 'ncdf4' package, but Windows has problems with this,
     # ...so if it's not installed can also use 'ncdf'
     if(force.ncdf | !require(ncdf4, quietly=!verbose)) {
@@ -58,10 +57,10 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         .ncvar_get <- ncdf4::ncvar_get
         .nc_close <- ncdf4::nc_close
     }
-
+    
     # List all files that match specifications
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
-
+    
     # Match file names with valid CMIP5 patterns:
     # ...variable_domain_model_experiment_ensemble followed by either
     # ...a '_' or a '.' depending on whether a time period is specified or not.
@@ -71,40 +70,40 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                                                variable, domain, model,
                                                experiment, ensemble),
                                basename(fileList))]
-
+    
     if(length(fileList)==0) {
         warning(paste("Could not find any matching files for",
                       variable, domain, model, experiment, ensemble))
         return(NULL)
     }
-
+    
     # Get the domains of all files we want to load. Recall CMIP5 naming
     # ...conventions:variable_domain_model_experiment_ensemble_time.nc
     # ...
     domainCheck <- unname(vapply(unlist(fileList),
                                  function(x) { unlist(strsplit(basename(x), '_'))[2] },
                                  FUN.VALUE=''))
-
+    
     # Check that we are only loading one domain. We check this before checking
     # other CMIP5 specifications because 'fx' domains will split on '_' to a
     # different number of strings then temporal domains.
     if(length(unique(domainCheck)) > 1) {
         stop('Domain is not unique: [', paste(unique(domainCheck), collapse=' '), ']\n')
     }
-
+    
     # Get the number of pieces of CMIP5 information strings
     numSplits <- length(unlist(strsplit(basename(fileList[1]), '_')))
-
+    
     # Split all file names based on '_' or '.'
     cmipName <- unname(vapply(unlist(fileList),
                               function(x) { unlist(strsplit(basename(x), '[_\\.]')) },
                               FUN.VALUE=rep('', length=numSplits+1)))
-
+    
     # List what order the files appear in the name, for CMIP5 this will be:
     # ...variable_domain_model_experiment_ensemble_time.nc Note that we
     # ...aren't interested in checking the time string
     checkField <- list(variable=1, domain=2, model=3, experiment=4, ensemble=5)
-
+    
     # Go through and make sure that we have unique variable, domain, model,
     # ...experiment, and ensemble strings for the set of files we are trying
     # ...to load. We want to avoid trying to load a file from ModelA and ModelB
@@ -123,7 +122,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             eval(parse(text=paste(checkStr, ' <- "', tempStr[1], '"', sep='')))
         }
     }
-
+    
     # Go through and load the data
     val <- c() # variable to temporarily holds main data
     timeRaw <- c()
@@ -131,21 +130,21 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     ZUnit <- NULL
     valUnit <- NULL
     loadedFiles <- c()
-
+    
     # Note that list.files returns a sorted list so these file should already
     # be in temporal order if the ensemble is split over multiple files.
     for(fileStr in fileList) {
         if(verbose) cat('Loading', fileStr, "\n")
         nc <- .nc_open(fileStr, write=FALSE)
-
+        
         # Get variable names available
         varNames <- unlist(lapply(nc$var, FUN=function(x) { x$name }))
-                
+        
         # Get dimension names for 'variable'
         dimNames <- unlist(lapply(nc$var[[variable]]$dim, FUN=function(x) { x$name }))
         if(verbose) cat("-", variable, "dimension names:", dimNames, "\n")
         stopifnot(length(dimNames) %in% c(1, 2, 3, 4)) # that's all we know
-
+        
         # Most, but not all, files have longitude and latitude. Load if available.
         lonArr <- NULL
         lonUnit <- NULL
@@ -162,18 +161,18 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             lonUnit <- .ncatt_get(nc, dimNames[1], 'units')$value
             latArr <- .ncvar_get(nc, varid=dimNames[2])
             latUnit <- .ncatt_get(nc, dimNames[2], 'units')$value
-
+            
             # Some models provide two-dimensional arrays of their lon and lat values.
             # (Looking at you, GFDL.) If this occurs, strip down to 1
             if(length(dim(lonArr)) > 1) lonArr <- as.vector(lonArr[,1])
             if(length(dim(latArr)) > 1) latArr <- as.vector(latArr[1,])
-         }
-
+        }
+        
         # Get the time frequency. Note that this should be related to
         # ...the domain (ie 'mon' should be the frequency of the domain 'Amon').
         # ...In theory we could extract this from the domain
         timeFreqStr <- .ncatt_get(nc, varid=0, "frequency")$value
-
+        
         # Non-fixed files have a time dimension to deal with:
         if(! timeFreqStr %in% 'fx') {
             # Get the time unit (e.g. 'days since 1860')
@@ -182,7 +181,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # Get the type of calendar used (e.g. 'noleap')
             calendarStr <- .ncatt_get(nc, timeName, 'calendar')$value
             calendarUnitsStr <- .ncatt_get(nc, timeName, 'units')$value
-
+            
             # Extract the number of days in a year
             if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)) {
                 calendarDayLength <- as.numeric(regmatches(calendarStr,
@@ -190,34 +189,34 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             } else {
                 calendarDayLength <- 365
             }
-
+            
             # Extract the year we are references in calendar
             # Set the default to year 1, month 1, day 1, hour 0, min 0, sec 0
             defaultCalendarArr <- c(1, 1, 1, 0, 0, 0)
-
+            
             # Split the calandar unit string based on a '-', space, or ':'
             # ...this allows us to deal with YYYY-MM-DD hh:mm:ss, YYYY-MM-DD, or
             # ...YYYY-M-D
             calendarArr <- unlist(strsplit(calendarUnitsStr, split='[- :]'))
-
+            
             # Check that the time is going to be in days otherwise latter
             # ...calculations for time array break
             stopifnot(any(grepl('day', calendarArr)))
-
+            
             # extract just the digits
             calendarArr <- as.numeric(calendarArr[grepl('^\\d+$', calendarArr)])
-
+            
             # swap the default values with the extracted values, we assume
             # ... that years are listed before months, before days, and so on
             temp <- defaultCalendarArr
             temp[1:length(calendarArr)] <- calendarArr
             calendarArr <- temp
-
+            
             # calculate the decimal starting year
             startYr <- sum((calendarArr - c(0, 1, 1, 0, 0, 0))
                            / c(1, 12, calendarDayLength, calendarDayLength*24,
                                calendarDayLength*24*60, calendarDayLength*24*60*60))
-
+            
             # Load the actual time
             thisTimeRaw <- .ncvar_get(nc, varid=timeName)
             # convert from days (we assume the units are days) to years
@@ -233,14 +232,14 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             thisTimeRaw <- NULL
             thisTimeArr <- NULL
         }
-
+        
         # Load the 4th dimension, if present:
         ZArr <- NULL
         if(length(dimNames) == 4) {
             ZArr <- .ncvar_get(nc, varid=dimNames[3])
             ZUnit <- .ncatt_get(nc, dimNames[3], 'units')$value
         }
-
+        
         # If yearRange supplied, calculate filter for the data load below
         start <- NA
         count <- NA
@@ -252,7 +251,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                 if(verbose) cat("- skipping file because not in yearRange\n")
                 next
             }
-
+            
             # Calculate what positions in time array fall within yearRange
             # find first time match
             tstart <- match(min(yearRange), floor(thisTimeArr))
@@ -260,56 +259,61 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # find last time match
             tend <- match(max(yearRange)+1, floor(thisTimeArr)) - 1
             if(is.na(tend)) tend <- length(thisTimeArr)
-
+            
             # Construct the 'start' and 'count' arrays for ncvar_get below
             # (See ncvar_get documentation for what these mean.)
             ndims <- nc$var[[variable]]$ndims
             start <- c(rep(1, ndims-1), tstart)
             count <- c(rep(-1, ndims-1), tend-tstart+1)
             if(verbose) cat("- loading only timeslices", tstart, "-",tend, "\n")
-
+            
             # Trim the already-loaded time arrays to match
             thisTimeArr <- thisTimeArr[tstart:tend]
             thisTimeRaw <- thisTimeRaw[tstart:tend]
         } # if year range
-
+        
         # Update running time data
-        timeRaw <- c(timeRaw, thisTimeRaw)
-        timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
-
+        if(!is.null(thisTimeRaw)) {
+            timeRaw <- c(timeRaw, thisTimeRaw)
+            timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
+        }
+        
         # Finally, load the actual data and its units
         vardata <- .ncvar_get(nc, varid=variable, start=start, count=count)
         if(verbose) cat("- data", dim(vardata), "\n")
         valUnit <- .ncatt_get(nc, variable, 'units')$value  # load units
         loadedFiles <- c(loadedFiles, basename(fileStr))
-
+        
         # Restore any 'missing' dimensions (because not present, or length=1),
         # inserting NAs into dimNames to mark what wasn't present in file
         temp <- restoreMissingDims(dim(vardata), dimNames, lonArr, latArr, ZArr,
                                    thisTimeRaw, verbose)
         vardata <- array(vardata, dim=temp[["dims"]])
         dimNames <- temp[["dimNames"]]
-
+        
         # Test that spatial dimensions are identical across files
         if(length(val) > 0 & length(dimNames) > 2) {
             stopifnot(all(dim(val)[1:(length(dim(val))-1)] ==
                               dim(vardata)[1:(length(dim(vardata))-1)]))
         }
-
+        
         # Bind the main variable along time dimension to previously loaded data
         # Note that the time dimension, if present, is guaranteed to be last
         # ...see ncdf4 documentation
         val <- abind(val, vardata, along=length(dim(vardata)))
-
+        
         .nc_close(nc)
     } # for filenames
-
+    
+    # If nothing loaded...
+    if(length(val) == 0) return(NULL)
+    
     x <- cmip5data(list(files=loadedFiles, val=unname(val), valUnit=valUnit,
                         lat=latArr, lon=lonArr, Z=ZArr, time=timeArr,
                         variable=variable, model=model, domain=domain,
                         experiment=experiment, ensembles=ensemble,
                         dimNames=dimNames,
-
+                        
                         debug=list(startYr=startYr,
                                    lonUnit=lonUnit, latUnit=latUnit,
                                    ZUnit=ZUnit,
@@ -319,12 +323,12 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                                    calendarStr=calendarStr, timeRaw=timeRaw,
                                    calendarDayLength=calendarDayLength)
     ))
-
+    
     # Add the provenance information, with a line for each loaded file
     for(f in fileList) {
         x <- addProvenance(x, paste("Loaded", basename(f)))
     }
-
+    
     x
 } # loadEnsemble
 
@@ -367,7 +371,7 @@ restoreMissingDims <- function(dims, dimNames, lonArr, latArr, ZArr, thisTimeRaw
         if(verbose) cat("- adding extra dimension for time\n")
         dims <- c(dims, 1)
     }
-
+    
     # At this point, we've restored all dimensions dropped due to length 1 issues
     # But we want all data moving through RCMIP5 to have four dimensions
     if(length(dims) == 1) {  # assume time only
@@ -386,6 +390,6 @@ restoreMissingDims <- function(dims, dimNames, lonArr, latArr, ZArr, thisTimeRaw
         # no change needed
     } else
         stop("Variable dimensions out of bounds!")
-
+    
     list(dims=dims, dimNames=dimNames)
 } # restoreMissingDimensions

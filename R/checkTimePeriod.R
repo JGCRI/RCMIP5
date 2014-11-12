@@ -28,31 +28,34 @@
 #' @seealso \code{\link{getFileInfo}}
 #' @export
 checkTimePeriod <- function(fileInfo_df) {
-
+    
     # Sanity checks
     stopifnot(is.data.frame(fileInfo_df))
     ddplyFields <- c("domain", "experiment","model","variable","ensemble")
     stopifnot(all(ddplyFields %in% colnames(fileInfo_df)))
     stopifnot("time" %in% colnames(fileInfo_df))
-
+    
     # Use ddply to break up data frame, process and check time field, and return result
-    ddply(fileInfo_df, ddplyFields, function(x) {
-
-        #spilt the time signiture
+    result <- data.frame()
+    splitter <- apply( fileInfo_df[, ddplyFields], 1, paste, collapse="-" )
+    for(i in unique(splitter)) {
+        x <- fileInfo_df[splitter==i,]
+        
+        # split the time signiture
         curCombo <- matrix(unlist(strsplit(as.character(x$time), '-')),
                            ncol=2, byrow=TRUE)
-
-        #Find the starting and ending decimal year
+        
+        # Find the starting and ending decimal year
         startYear <- as.numeric(substr(curCombo[,1], 1, 4))
         endYear <- as.numeric(substr(curCombo[,2], 1, 4))
-
+        
         # pull the time step from the domain name
         if(all(x$domain %in% 'fx')) { # fixed
-            #don't even process fixed files
-            return(NULL)
+            # don't even process fixed files
+            next
         } else if(all(grepl('mon', x$domain))) { # monthly
             timeStep <- 1/12
-            #convert to decimal years
+            # convert to decimal years
             startYear <- startYear+(as.numeric(substr(curCombo[,1], 5, 6))-1)/12
             endYear <- endYear + (as.numeric(substr(curCombo[,2], 5, 6))-1)/12
         } else if(all(grepl('yr', x$domain))) { # annual
@@ -62,33 +65,37 @@ checkTimePeriod <- function(fileInfo_df) {
             #... year lengths. The user must check the strings by hand.
             timeStep <- NA
         }
-
+        
         if(is.na(timeStep)) {
             allHere <- NA
         } else {
-            #Figure out the target date for the start of the next file
+            # Figure out the target date for the start of the next file
             nextYear <- endYear + timeStep
         }
-
+        
         # One file is always complete
         if(length(startYear) == 1) {
             allHere <- TRUE
-        # If multiple files, shift indexes to compare the start/stop values
+            # If multiple files, shift indexes to compare the start/stop values
         } else if( !is.na(timeStep) & length(startYear) > 1) {
             startIndex <- c(2:length(startYear))
             endIndex <- c((2:length(startYear))-1)
             allHere <- all(abs(nextYear[endIndex]-startYear[startIndex]) < 1e-6)
         }
-
+        
         # return answering data frame which contains
         #   yrStr - All orginal year strings for reference (useful if something is wrong).
         #   allHere - boolean saying if the strings match up
         #   startDate - earliest time stamp
         #   endDate - latest time stamp
-        data.frame(yrStr=paste(x$time, collapse=';'),
-                   allHere=allHere,
-                   startDate=min(startYear),
-                   endDate=max(endYear),
-                   files=length(startYear))
-    }) # ddply
+        result <- rbind(result, cbind(
+            x[1, ddplyFields],
+            data.frame(yrStr=paste(x$time, collapse=';'),
+                       allHere=allHere,
+                       startDate=min(startYear),
+                       endDate=max(endYear),
+                       files=length(startYear))
+        ))
+    }
+    result
 } # checkTimePeriod

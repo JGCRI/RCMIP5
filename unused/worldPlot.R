@@ -17,7 +17,6 @@ worldPlot <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=FALS
  
     # Sanity checks
     stopifnot(class(x)=="cmip5data")
-    stopifnot(length(dim(x$val)) == 4)
     stopifnot(is.numeric(time)) 
     stopifnot(is.logical(capMinMax) & length(capMinMax)==1)
     stopifnot(is.logical(verbose) & length(verbose)==1)
@@ -27,7 +26,7 @@ worldPlot <- function(x, time=1, splitPacific=TRUE, capMinMax=TRUE, verbose=FALS
     # Preliminaries
     lon <- x$lon
     lat <- x$lat
-    val <- x$val[,,1,time]  # only use the first lev/depth
+    val <- filter(x$val, Z == min(x$val$Z))  # only use the first lev/depth
     
     # Split at the Pacific ocean
     if(splitPacific) {

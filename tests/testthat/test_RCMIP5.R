@@ -17,43 +17,51 @@ test_that("cmip5data print method works", {
     # not sure what to test here, except that no error
 })
 
-test_that("cmip5data summary method works", {
-    d <- cmip5data(2000:2005)
+test_that("cmip5data summary method detects summaries", {
+    d <- cmip5data(2000:2005, Z=T)
     expect_output(print(summary(d)), "CMIP5")
-    # not sure what to test here, except that no error
+    
+    # Summary should let user know data have been run through stat fn
+    da <- makeAnnualStat(d)
+    expect_output(print(summary(da)), "annual summary")
+    dm <- makeMonthlyStat(d)
+    expect_output(print(summary(dm)), "monthly summary")
+    dz <- makeZStat(d)
+    expect_output(print(summary(dz)), "Z summary")
+    dg <- makeGlobalStat(d)
+    expect_output(print(summary(dg)), "spatial summary")
+    
+    # Multiple stat functions should be detected
+    dag <- makeGlobalStat(da)
+    expect_output(print(summary(dag)), "annual summary")
+    expect_output(print(summary(dag)), "spatial summary")
+    daz <- makeZStat(da)
+    expect_output(print(summary(daz)), "annual summary")
+    expect_output(print(summary(daz)), "Z summary")
+    dmg <- makeGlobalStat(dm)
+    expect_output(print(summary(dmg)), "monthly summary")
+    expect_output(print(summary(dmg)), "spatial summary")
+    dmz <- makeZStat(dm)
+    expect_output(print(summary(dmz)), "monthly summary")
+    expect_output(print(summary(dmz)), "Z summary")
+    
+    # All filter functions should be detected
+    df <- filterDimensions(d, years=2000:2002)
+    expect_output(print(summary(df)), "filtered")
+    df <- filterDimensions(d, months=1:6)
+    expect_output(print(summary(df)), "filtered")
+    df <- filterDimensions(d, lons=d$lon)
+    expect_output(print(summary(df)), "filtered")
+    df <- filterDimensions(d, lats=d$lat)
+    expect_output(print(summary(df)), "filtered")
+    df <- filterDimensions(d, Zs=d$Z)
+    expect_output(print(summary(df)), "filtered")
 })
 
 test_that("as.data.frame works", {
     df <- as.data.frame(cmip5data(2000:2002, Z=T))
     expect_is(df, "data.frame")
     expect_equal(names(df), c("lon", "lat", "Z", "time", "value"))
-
-    df <- as.data.frame(makeAnnualStat(cmip5data(2000:2002), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("lon", "lat", "time", "value"))
-
-    df <- as.data.frame(makeMonthlyStat(cmip5data(2000:2002), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("lon", "lat", "time", "value"))
-
-    df <- as.data.frame(makeGlobalStat(cmip5data(2000:2002), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("time", "value"))
-
-    df <- as.data.frame(makeGlobalStat(cmip5data(2000:2002, Z=T), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("Z", "time", "value"))
-
-    df <- as.data.frame(makeZStat(cmip5data(2000:2002, Z=T), verbose=F))
-    expect_is(df, "data.frame")
-    expect_equal(names(df), c("lon", "lat", "time", "value"))
-
-    d <- cmip5data(2000:2002, Z=T)
-    d$dimNames <- c("a", "b", "c", "d")
-    expect_equal(names(as.data.frame(d, verbose=F)),
-                 c("lon", "lat", "Z", "time", "value"))
-    expect_equal(names(as.data.frame(d, verbose=F, originalNames=T)),
-                 c("a", "b", "c", "d", "value"))
 })
 
 test_that("as.array works", {
@@ -63,6 +71,9 @@ test_that("as.array works", {
 
     arr <- as.array(cmip5data(2000:2002))
     expect_is(arr, "array")
+    expect_equal(dim(arr), c(10, 10, 36))
+    
+    arr <- as.array(cmip5data(2000:2002), drop=FALSE)
+    expect_is(arr, "array")
     expect_equal(dim(arr), c(10, 10, 1, 36))
-
 })

@@ -77,7 +77,7 @@ test_that("mergeExperiments merges monthly data", {
     y <- cmip5data(6:10)    
     res <- mergeExperiments(x, y, verbose=F)
     
-    expect_equal(length(x$val) + length(y$val), length(res$val))
+    expect_equal(nrow(x$val) + nrow(y$val), nrow(res$val))
     expect_equal(length(x$time) + length(y$time), length(res$time))
     expect_equal(c(x$files, y$files), res$files)
     expect_true(grepl(x$experiment, res$experiment)) # each experiment name should appear
@@ -95,7 +95,7 @@ test_that("mergeExperiments merges annual data", {
     y <- cmip5data(6:10, monthly=F)    
     res <- mergeExperiments(x, y, verbose=F)
     
-    expect_equal(length(x$val) + length(y$val), length(res$val))
+    expect_equal(nrow(x$val) + nrow(y$val), nrow(res$val))
     expect_equal(length(x$time) + length(y$time), length(res$time))
 })
 
@@ -104,6 +104,6 @@ test_that("mergeExperiments merges 4-dimensional data", {
     y <- cmip5data(6:10, Z=T)    
     res <- mergeExperiments(x, y, verbose=F)
     
-    expect_equal(length(x$val) + length(y$val), length(res$val))
+    expect_equal(nrow(x$val) + nrow(y$val), nrow(res$val))
     expect_equal(length(x$time) + length(y$time), length(res$time))
 })
