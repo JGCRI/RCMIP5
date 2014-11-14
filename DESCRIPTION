@@ -16,6 +16,7 @@ Imports:
 Depends:
     R (>= 3.1.0)
 Suggests:
+    ggplot2 (>= 0.9),
     ncdf4 (>= 1.9),
     ncdf (>= 1.6),
     testthat (>= 0.9),
