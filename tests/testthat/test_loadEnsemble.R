@@ -38,6 +38,7 @@ test_that("loadEnsemble handles no files found", {            # no netcdf files 
 })
 
 test_that("loadEnsemble loads monthly data", {
+    
     skip_on_cran()
     
     path <- "../../sampledata/monthly"
@@ -46,28 +47,30 @@ test_that("loadEnsemble loads monthly data", {
     d <- loadEnsemble('prc','GFDL-CM3', 'rcp85', 'r1i1p1', '[^_]+', path=path, verbose=F)
     expect_is(d, "cmip5data")
     d <- loadEnsemble('prc','GFDL-CM3','rcp85','r1i1p1','[^_]+', path=path, verbose=F)     
-    expect_is(d,"cmip5data")
-    expect_equal(length(d$files),1)                                 # should be one file
+    expect_is(d, "cmip5data")
+    expect_equal(length(d$files), 1)                                 # should be one file
 })
 
 test_that("loadEnsemble loads annual data", {
+    
     skip_on_cran()
     
     path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
     
     d <- loadEnsemble('co3', 'HadGEM2-ES', 'rcp85', 'r1i1p1', '[^_]+', path=path, verbose=F)
-    expect_is(d,"cmip5data")
+    expect_is(d, "cmip5data")
 })
 
 test_that("loadEnsemble loads 4D data", {
+    
     skip_on_cran()
     
     path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
     
     d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path, verbose=F)     # test data set
-    expect_is(d,"cmip5data")
+    expect_is(d, "cmip5data")
     expect_is(d$Z, "array")
     expect_is(d$val, "array")
     
@@ -89,17 +92,19 @@ test_that("loadEnsemble checks unique domain", {
 })
 
 test_that("loadEnsemble assigns ancillary data", {
+    
     skip_on_cran()
     
     path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
     
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', path=path,verbose=F)
-    expect_is(d,"cmip5data")
+    expect_is(d, "cmip5data")
     expect_true(!is.null(d$provenance))
 })
 
 test_that("loadEnsemble handles 2D lon and lat", {
+    
     skip_on_cran()
     
     path <- "../../sampledata"
@@ -114,6 +119,7 @@ test_that("loadEnsemble handles 2D lon and lat", {
 })
 
 test_that("loadEnsemble handles data with time length=1", {
+
     skip_on_cran()
     
     path <- "../../sampledata"
@@ -129,6 +135,7 @@ test_that("loadEnsemble handles data with time length=1", {
 
 
 test_that("loadEnsemble handles time-only data", {
+    
     skip_on_cran()
     
     path <- "../../sampledata"
