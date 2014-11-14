@@ -31,15 +31,19 @@ makeAnnualStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     
     # Main computation code
     timer <- system.time({  # time the main computation, below
-        x$val$time <- floor(x$val$time)   
+        # Put data in consistent order BEFORE overwriting time
+        x$val <- group_by(x$val, lon, lat, Z, time) %>%
+            arrange()
+        
+        x$val$year <- floor(x$val$time)   
         
         # Suppress stupid NOTEs from R CMD CHECK
         lon <- lat <- Z <- time <- value <- NULL
         
-        # Put data in consistent order and compute
-        x$val <- arrange(x$val, lon, lat, Z, time) %>%   
-            group_by(lon, lat, Z, time) %>%
+        x$val <- group_by(x$val, lon, lat, Z, year) %>%
             summarise(value=FUN(value, ...))
+        x$val$time <- x$val$year
+        x$val$year <- NULL
         
         # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
         # command above may have removed some lon/lat combinations

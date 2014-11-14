@@ -29,20 +29,23 @@ makeMonthlyStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     stopifnot(x$debug$timeFreqStr=="mon")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(FUN)==1 & is.function(FUN))
-    
-    monthIndex <- floor((x$val$time %% 1) * 12 + 1)
-    
+
     # Main computation code
     timer <- system.time({ # time the main computation, below
-        x$val$time <- monthIndex  
+        # Put data in consistent order BEFORE overwriting time
+        x$val <- group_by(x$val, lon, lat, Z, time) %>%
+            arrange()
+        
+        monthIndex <- floor((x$val$time %% 1) * 12 + 1)
+        x$val$month <- monthIndex  
         
         # Suppress stupid NOTEs from R CMD CHECK
         lon <- lat <- Z <- time <- value <- NULL
         
-        # Put data in consistent order and compute
-        x$val <- arrange(x$val, Z, time, lon, lat) %>%   
-            group_by(lon, lat, Z, time) %>%
+        x$val <- group_by(x$val, lon, lat, Z, month) %>%
             summarise(value=FUN(value, ...))
+        x$val$time <- x$val$month
+        x$val$month <- NULL
         
         # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
         # command above may have removed some lon/lat combinations

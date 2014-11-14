@@ -34,7 +34,8 @@ makeZStat <- function(x, verbose=FALSE, FUN=mean, ...) {
         lon <- lat <- time <- value <- NULL
         
         # Put data in consistent order and compute
-        x$val <- arrange(x$val, lon, lat, time, Z) %>%   
+        x$val <- group_by(x$val, lon, lat, time, Z) %>%
+            arrange() %>%   
             group_by(lon, lat, time) %>%
             summarise(value=FUN(value, ...))
     }) # system.time
