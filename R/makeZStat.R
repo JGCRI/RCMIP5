@@ -33,8 +33,10 @@ makeZStat <- function(x, verbose=FALSE, FUN=mean, ...) {
         # Suppress stupid NOTEs from R CMD CHECK
         lon <- lat <- time <- value <- NULL
         
-        grp <- group_by(x$val, lon, lat, time)
-        x$val <- summarise(grp, value=FUN(value, ...))
+        # Put data in consistent order and compute
+        x$val <- arrange(x$val, lon, lat, time, Z) %>%   
+            group_by(lon, lat, time) %>%
+            summarise(value=FUN(value, ...))
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')

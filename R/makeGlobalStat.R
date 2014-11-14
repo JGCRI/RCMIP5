@@ -43,22 +43,28 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
     if(is.null(area)) {
         if(verbose) cat("No grid areas supplied; using calculated values\n")
         x <- addProvenance(x, "About to compute global stat. Grid areas calculated.")
-        areavals <- reshape2::melt(calcGridArea(x$lon, x$lat, verbose=verbose))$value
+        areavals <- reshape2::melt(calcGridArea(x$lon, x$lat, verbose=verbose), varnames=c("lon", "lat"))
     } else {
         stopifnot(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
         x <- addProvenance(x, "About to compute global stat. Grid areas from following data:")
         x <- addProvenance(x, area)
-        areavals <- area$val$value
+        areavals <- area$val
     }
     if(verbose) cat("Area data length", length(areavals), "\n")    
     
     # Main computation code
     timer <- system.time({ # time the main computation
-        # Suppress stupid NOTEs from R CMD CHECK
-        Z <- time <- value <- NULL
         
-        grp <- group_by(x$val, Z, time)
-        x$val <- summarise(grp, value=FUN(value, areavals, ...))   
+        # Suppress stupid NOTEs from R CMD CHECK
+        lon <- lat <- Z <- time <- value <- NULL
+        
+        # Area and value data need to be in identical order
+        areavals <- arrange(areavals, lon, lat)
+        x$val <- arrange(x$val, Z, time, lon, lat)        
+        
+        #        grp <- group_by(x$val, Z, time)
+        x$val <- group_by(x$val, Z, time) %>% 
+            summarise(value=FUN(value, areavals$value, ...))   
     }) # system.time
     
     if(verbose) cat('Took', timer[3], 's\n')

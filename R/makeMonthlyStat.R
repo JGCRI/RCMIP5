@@ -39,8 +39,10 @@ makeMonthlyStat <- function(x, verbose=FALSE, FUN=mean, ...) {
         # Suppress stupid NOTEs from R CMD CHECK
         lon <- lat <- Z <- time <- value <- NULL
         
-        grp <- group_by(x$val, lon, lat, Z, time)
-        x$val <- summarise(grp, value=FUN(value, ...))
+        # Put data in consistent order and compute
+        x$val <- arrange(x$val, Z, time, lon, lat) %>%   
+            group_by(lon, lat, Z, time) %>%
+            summarise(value=FUN(value, ...))
         
         # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
         # command above may have removed some lon/lat combinations
