@@ -59,12 +59,12 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
         lon <- lat <- Z <- time <- value <- NULL
         
         # Area and value data need to be in identical order
-        areavals <- arrange(areavals, lon, lat)
-        x$val <- arrange(x$val, Z, time, lon, lat)        
-        
-        #        grp <- group_by(x$val, Z, time)
-        x$val <- group_by(x$val, Z, time) %>% 
-            summarise(value=FUN(value, areavals$value, ...))   
+        areavals <- group_by(areavals, lon, lat) %>%
+            arrange()
+        x$val <- group_by(x$val, Z, time, lon, lat) %>% 
+            arrange() %>%
+            group_by(Z, time) %>% 
+            summarise(value=FUN(value, areavals$value))   
     }) # system.time
     
     if(verbose) cat('Took', timer[3], 's\n')
