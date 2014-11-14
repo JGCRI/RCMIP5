@@ -158,14 +158,16 @@ cmip5data <- function(x=list(),
             result$domain <- "fx"
         }
         
-        # Make data frame and fill it with fake data
+        # Make data frame, fill it with fake data, wrap as tbl_df
         result$val <- expand.grid(lon=result$lon, lat=result$lat,
                                   Z=result$Z, time=result$time)
         if(randomize) {
             result$val$value <- runif(n=nrow(result$val))
         } else {
             result$val$value <- 1
-        }        
+        }      
+        result$val <- tbl_df(result$val)
+        
         result$valUnit <- "unit"
         result$debug <- debug
         
