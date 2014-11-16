@@ -29,7 +29,7 @@ makeMonthlyStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     stopifnot(x$debug$timeFreqStr=="mon")
     stopifnot(length(verbose)==1 & is.logical(verbose))
     stopifnot(length(FUN)==1 & is.function(FUN))
-
+    
     # Main computation code
     timer <- system.time({ # time the main computation, below
         # Put data in consistent order BEFORE overwriting time
@@ -40,10 +40,17 @@ makeMonthlyStat <- function(x, verbose=FALSE, FUN=mean, ...) {
         x$val$month <- monthIndex  
         
         # Suppress stupid NOTEs from R CMD CHECK
-        lon <- lat <- Z <- time <- value <- NULL
+        lon <- lat <- Z <- time <- month <- value <- `.` <- NULL
         
+        # Put data in consistent order and compute
+        
+        # Instead of "summarise(value=FUN(value, ...))", we use the do()
+        # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
+        # the ellipses cause big problems. This solution thanks to Dennis
+        # Murphy on the manipulatr listesrv.
         x$val <- group_by(x$val, lon, lat, Z, month) %>%
-            summarise(value=FUN(value, ...))
+            do(data.frame(value = FUN(.$value, ...))) %>%
+            ungroup()
         x$val$time <- x$val$month
         x$val$month <- NULL
         

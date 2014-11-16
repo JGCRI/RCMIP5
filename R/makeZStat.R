@@ -31,13 +31,19 @@ makeZStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     # Main computation code
     timer <- system.time({  # time the main computation, below
         # Suppress stupid NOTEs from R CMD CHECK
-        lon <- lat <- time <- value <- NULL
+        lon <- lat <- Z <- time <- value <- `.` <- NULL
         
         # Put data in consistent order and compute
+        
+        # Instead of "summarise(value=FUN(value, ...))", we use the do()
+        # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
+        # the ellipses cause big problems. This solution thanks to Dennis
+        # Murphy on the manipulatr listesrv.
         x$val <- group_by(x$val, lon, lat, time, Z) %>%
             arrange() %>%   
             group_by(lon, lat, time) %>%
-            summarise(value=FUN(value, ...))
+            do(data.frame(value = FUN(.$value, ...))) %>%
+            ungroup()
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')

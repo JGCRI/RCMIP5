@@ -56,15 +56,23 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
     timer <- system.time({ # time the main computation
         
         # Suppress stupid NOTEs from R CMD CHECK
-        lon <- lat <- Z <- time <- value <- NULL
+        lon <- lat <- Z <- time <- value <- `.` <- NULL
         
-        # Area and value data need to be in identical order
+        # Area and value data need to be in identical lon/lat order
         areavals <- group_by(areavals, lon, lat) %>%
             arrange()
+        
+        # Put data in consistent order and compute
+        
+        # Instead of "summarise(value=FUN(value, ...))", we use the do()
+        # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
+        # the ellipses cause big problems. This solution thanks to Dennis
+        # Murphy on the manipulatr listesrv.
         x$val <- group_by(x$val, Z, time, lon, lat) %>% 
             arrange() %>%
-            group_by(Z, time) %>% 
-            summarise(value=FUN(value, areavals$value))   
+            group_by(Z, time) %>%
+            do(data.frame(value = FUN(.$value, areavals$value, ...))) %>%
+            ungroup()    
     }) # system.time
     
     if(verbose) cat('Took', timer[3], 's\n')

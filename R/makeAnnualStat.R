@@ -38,10 +38,17 @@ makeAnnualStat <- function(x, verbose=FALSE, FUN=mean, ...) {
         x$val$year <- floor(x$val$time)   
         
         # Suppress stupid NOTEs from R CMD CHECK
-        lon <- lat <- Z <- time <- value <- NULL
+        lon <- lat <- Z <- time <- year <- value <- `.` <- NULL
         
+        # Put data in consistent order and compute
+        
+        # Instead of "summarise(value=FUN(value, ...))", we use the do()
+        # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
+        # the ellipses cause big problems. This solution thanks to Dennis
+        # Murphy on the manipulatr listesrv.
         x$val <- group_by(x$val, lon, lat, Z, year) %>%
-            summarise(value=FUN(value, ...))
+            do(data.frame(value = FUN(.$value, ...))) %>%
+            ungroup()
         x$val$time <- x$val$year
         x$val$year <- NULL
         
