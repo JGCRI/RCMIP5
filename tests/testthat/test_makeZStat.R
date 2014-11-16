@@ -45,12 +45,23 @@ test_that("makeZStat computes Z means", {
     expect_equal(mean(res$val$value), mean(d$val$value))
 })
 
-test_that("makeZStat handles custom function", {
+test_that("makeZStat handles custom function and dots", {
     years <- 1850:1851
-    d <- cmip5data(years)
+    d <- cmip5data(years, lonsize=2, latsize=2, Z=T)
     
-    res <- makeZStat(d, verbose=F, FUN=sd)
+    # All data 1, except max Z is 2
+    d$val$value <- 1
+    d$val$value[d$val$Z ==max(d$Z)] <- 2    
+    w <- c(rep(1, length(d$Z)-1), length(d$Z)-1)
     
-    # Do years match what we expect?
-    expect_equal(res$time, d$time)
+    res1 <- makeZStat(d, verbose=F, FUN=weighted.mean, w)
+    expect_is(res1, "cmip5data")
+    
+    myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
+    res2 <- makeZStat(d, verbose=F, FUN=myfunc, w)
+    expect_is(res1, "cmip5data")
+    
+    # Are the answer values numerically correct?
+    expect_true(all(res1$val$value == 1.5))    
+    expect_true(all(res2$val$value == 1.5))    
 })

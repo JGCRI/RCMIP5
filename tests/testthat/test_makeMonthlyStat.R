@@ -76,15 +76,25 @@ test_that("makeMonthlyStat handles 4-dimensional data", {
     expect_equal(dummyans$value, res$val$value)
 })
 
-test_that("makeMonthlyStat handles custom function", {
+test_that("makeMonthlyStat handles custom function and dots", {
     years <- 1850:1851
-    d <- cmip5data(years)
+    d <- cmip5data(years, lonsize=2, latsize=2)
     
-    res <- makeMonthlyStat(d, verbose=F, FUN=sd)
+    # All 1850 data 1, all 1851 data 2
+    d$val$value <- 1
+    d$val$value[floor(d$val$time) ==years[2]] <- 2    
+    w <- c(3, 1)
+    
+    res1 <- makeMonthlyStat(d, verbose=F, FUN=weighted.mean, w)
+    expect_is(res1, "cmip5data")
+    
+    myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
+    res2 <- makeMonthlyStat(d, verbose=F, FUN=myfunc, w)
+    expect_is(res1, "cmip5data")
     
     # Are the answer values numerically correct?    
-    d$val$time <- floor((d$val$time %% 1) * 12 + 1)
-    dummyans <- aggregate(value~lon+lat+time, data=d, FUN=sd)
-    expect_equal(dummyans$value, res$val$value)
+    # Eleven 1's and one 11, weighted by 1's and an 11 respectively
+    # (11*1 + 11*2) / (11*1 + 1*11) = 1.5
+    expect_true(all(res1$val$value == 1.25))    
+    expect_true(all(res2$val$value == 1.25))    
 })
-

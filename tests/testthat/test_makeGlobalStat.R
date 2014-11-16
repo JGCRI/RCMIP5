@@ -86,14 +86,27 @@ test_that("makeGlobalStat handles 4-dimensional data", {
     expect_equal(nrow(res$val), nrow(d$val)/length(d$lon)/length(d$lat))
 })
 
-test_that("makeGlobalStat handles custom function", {
+test_that("makeGlobalStat handles custom function and dots", {
     years <- 1850:1851
-    d <- cmip5data(years)
+    d <- cmip5data(years, lonsize=2, latsize=2)
+    darea <- cmip5data(0, time=F, lonsize=2, latsize=2)
     
-    res <- makeGlobalStat(d, verbose=F, FUN=function(x, w, ...) {
-        weighted.mean(x, w, ...)   
-    })
+    # All data 1 except for max lon/lat is 2
+    d$val$value <- 1
+    d$val$value[d$val$lon == max(d$lon) & d$val$lat == max(d$lat)] <- 2    
+    darea$val$value <- c(1, 1, 1, 3)
     
-    # Do years match what we expect?
-    expect_equal(res$time, d$time)
+    res1 <- makeGlobalStat(d, darea, verbose=F, FUN=weighted.mean)
+    expect_is(res1, "cmip5data")
+    
+    myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
+    res2 <- makeGlobalStat(d, darea, verbose=F, FUN=myfunc)
+    expect_is(res1, "cmip5data")
+    
+    # Are the answer values numerically correct?    
+    # Eleven 1's and one 11, weighted by 1's and an 11 respectively
+    # (11*1 + 11*2) / (11*1 + 1*11) = 1.5
+    expect_true(all(res1$val$value == 1.5))    
+    expect_true(all(res2$val$value == 1.5))    
 })
+
