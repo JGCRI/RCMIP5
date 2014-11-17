@@ -47,12 +47,16 @@ test_that("makeZStat computes Z means", {
 
 test_that("makeZStat handles custom function and dots", {
     years <- 1850:1851
-    d <- cmip5data(years, lonsize=2, latsize=2, Z=T)
+    llsize <- 2
+    d <- cmip5data(years, lonsize=llsize, latsize=llsize, Z=T)
     
     # All data 1, except max Z is 2
     d$val$value <- 1
     d$val$value[d$val$Z ==max(d$Z)] <- 2    
     w <- c(rep(1, length(d$Z)-1), length(d$Z)-1)
+    
+    # Compute correct answer
+    ans <- aggregate(value~lon+lat+time, data=d$val, FUN=weighted.mean, w=w)
     
     res1 <- makeZStat(d, verbose=F, FUN=weighted.mean, w)
     expect_is(res1, "cmip5data")
@@ -61,7 +65,7 @@ test_that("makeZStat handles custom function and dots", {
     res2 <- makeZStat(d, verbose=F, FUN=myfunc, w)
     expect_is(res1, "cmip5data")
     
-    # Are the answer values numerically correct?
-    expect_true(all(res1$val$value == 1.5))    
-    expect_true(all(res2$val$value == 1.5))    
+    # Are the result values correct?    
+    expect_equal(res1$val$value, ans$value)
+    expect_equal(res2$val$value, ans$value)
 })

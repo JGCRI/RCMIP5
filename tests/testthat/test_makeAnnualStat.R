@@ -97,7 +97,8 @@ test_that("makeAnnualStat handles 4-dimensional data", {
 
 test_that("makeAnnualStat handles custom function and dots", {
     years <- 1850:1851
-    d <- cmip5data(years, lonsize=2, latsize=2)
+    llsize <- 2
+    d <- cmip5data(years, lonsize=llsize, latsize=llsize)
     
     # All data 1, except December, which is 2
     d$val$value <- 1
@@ -106,6 +107,10 @@ test_that("makeAnnualStat handles custom function and dots", {
     # Weights are all 1 except December, which is 11
     w <- c(rep(1, 11), 11)
     
+    # Compute correct answer
+    d$val$year <- floor(d$val$time)
+    ans <- aggregate(value~lon+lat+year, data=d$val, FUN=weighted.mean, w=w)
+    
     res1 <- makeAnnualStat(d, verbose=F, FUN=weighted.mean, w)
     expect_is(res1, "cmip5data")
     
@@ -113,9 +118,7 @@ test_that("makeAnnualStat handles custom function and dots", {
     res2 <- makeAnnualStat(d, verbose=F, FUN=myfunc, w)
     expect_is(res1, "cmip5data")
     
-    # Are the answer values numerically correct?    
-    # Eleven 1's and one 11, weighted by 1's and an 11 respectively
-    # (11*1 + 11*2) / (11*1 + 1*11) = 1.5
-    expect_true(all(res1$val$value == 1.5))    
-    expect_true(all(res2$val$value == 1.5))    
+    # Are the result values correct?    
+    expect_equal(res1$val$value, ans$value)
+    expect_equal(res2$val$value, ans$value)
 })

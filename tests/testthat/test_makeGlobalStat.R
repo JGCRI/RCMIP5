@@ -88,14 +88,18 @@ test_that("makeGlobalStat handles 4-dimensional data", {
 
 test_that("makeGlobalStat handles custom function and dots", {
     years <- 1850:1851
-    d <- cmip5data(years, lonsize=2, latsize=2)
-    darea <- cmip5data(0, time=F, lonsize=2, latsize=2)
+    llsize <- 2
+    d <- cmip5data(years, lonsize=llsize, latsize=llsize)
+    darea <- cmip5data(0, time=F, lonsize=llsize, latsize=llsize)
     
     # All data 1 except for max lon/lat is 2
     d$val$value <- 1
     d$val$value[d$val$lon == max(d$lon) & d$val$lat == max(d$lat)] <- 2    
-    darea$val$value <- c(1, 1, 1, 3)
+    darea$val$value <- c(rep(1, llsize*llsize-1), llsize*llsize-1)
     
+    # Compute correct answer
+    ans <- aggregate(value~time, data=d$val, FUN=weighted.mean, w=darea$val$value)
+        
     res1 <- makeGlobalStat(d, darea, verbose=F, FUN=weighted.mean)
     expect_is(res1, "cmip5data")
     
@@ -103,37 +107,38 @@ test_that("makeGlobalStat handles custom function and dots", {
     res2 <- makeGlobalStat(d, darea, verbose=F, FUN=myfunc)
     expect_is(res1, "cmip5data")
     
-    # Are the answer values numerically correct?    
-    # Eleven 1's and one 11, weighted by 1's and an 11 respectively
-    # (11*1 + 11*2) / (11*1 + 1*11) = 1.5
-    expect_true(all(res1$val$value == 1.5))    
-    expect_true(all(res2$val$value == 1.5))    
+    # Are the result values correct?    
+    expect_equal(res1$val$value, ans$value)    
+    expect_equal(res2$val$value, ans$value)
 })
 
 test_that("makeGlobalStat sorts before computing", {
     years <- 1850:1851
-    d <- cmip5data(years, lonsize=2, latsize=2, monthly=F)
-    darea <- cmip5data(0, time=F, lonsize=2, latsize=2)
+    llsize <- 2
+    d <- cmip5data(years, lonsize=llsize, latsize=llsize, monthly=F)
+    darea <- cmip5data(0, time=F, lonsize=llsize, latsize=llsize)
     
     # All data 1 except for max lon/lat is 2
     d$val$value <- 1
     d$val$value[d$val$lon == max(d$lon) & d$val$lat == max(d$lat)] <- 2    
-    darea$val$value <- c(1, 1, 1, 3)
+    darea$val$value <- c(rep(1, llsize*llsize-1), llsize*llsize-1)
     
-    # Now we put `darea` out of order
+    # Compute correct answer
+    ans <- aggregate(value~time, data=d$val, FUN=weighted.mean, w=darea$val$value)
+    
+    # Now we put `darea` out of order and call makeGlobalStat
     darea$val <- arrange(darea$val, desc(lon), desc(lat))
-    
     res1 <- makeGlobalStat(d, darea, verbose=F)
     expect_is(res1, "cmip5data")
 
     # makeGlobalStat should be sorted darea correctly before calculating
-    # Are the answer values numerically correct?    
-    expect_true(all(res1$val$value == 1.5))
+    # Are the result values correct?    
+    expect_equal(res1$val$value, ans$value)
     
     # Put data out of order and test again
     d$val <- arrange(d$val, desc(lon), desc(lat))
     res2 <- makeGlobalStat(d, darea, verbose=F)
-    expect_true(all(res2$val$value == 1.5))
+    expect_equal(res2$val$value, ans$value)
 })
 
 
