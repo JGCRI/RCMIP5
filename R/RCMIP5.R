@@ -148,12 +148,18 @@ cmip5data <- function(x=list(),
             debug$startYr <- years[1]
             debug$calendarStr <- "360_day"
             debug$timeUnit <- paste0("days since ",years[1],"-01-01")
-            # '+15' initalizes all time stamps to be middle of the month
-            debug$timeRaw <- (360/ppy*c(0:(length(years)*ppy-1) )+15)
+            
+            if(monthly) {
+                # '+15' initalizes all time stamps to be middle of the month
+                debug$timeRaw <- (360/ppy*c(0:(length(years)*ppy-1) )+15)    
+                result$time <- debug$timeRaw/360+min(years)    
+            } else {
+                debug$timeRaw <- result$time <- years
+            }
+            
             # convert day based calandar to year based
-            result$time <- debug$timeRaw/360+min(years)
             result$dimNames <- c(result$dimNames, "time")
-        } else {
+        } else { # no time
             result$dimNames <- c(result$dimNames, NA)
             result$domain <- "fx"
         }
