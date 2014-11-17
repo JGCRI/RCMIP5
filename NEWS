@@ -1,7 +1,13 @@
-RCMIP5 <nextversion>
+RCMIP5 1.1
 ===========
 
+* Much faster thanks to shifting computations from `plyr` and `abind` to `dplyr`.
+
 * Provenance now handles multi-line custom functions correctly.
+
+* Removed support for `ncdf`.
+
+* Many new tests.
 
 
 RCMIP5 1.0
