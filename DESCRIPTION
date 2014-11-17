@@ -6,8 +6,7 @@ Description: Working with CMIP5 data can be tricky, forcing scientists to write
     to (i) explore what data have been downloaded, (ii) identify missing data,
     (iii) average (or apply other mathematical operations) across experimental
     ensembles, (iv) produce both temporal and spatial statistical summaries,
-    (v) regrid data, and (vi) produce easy-to-work-with graphical and data
-    summaries.
+    and (v) produce easy-to-work-with graphical and data summaries.
 Imports:
     abind (>= 1.4),
     dplyr (>= 0.3),
