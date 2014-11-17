@@ -110,3 +110,30 @@ test_that("makeGlobalStat handles custom function and dots", {
     expect_true(all(res2$val$value == 1.5))    
 })
 
+test_that("makeGlobalStat sorts before computing", {
+    years <- 1850:1851
+    d <- cmip5data(years, lonsize=2, latsize=2, monthly=F)
+    darea <- cmip5data(0, time=F, lonsize=2, latsize=2)
+    
+    # All data 1 except for max lon/lat is 2
+    d$val$value <- 1
+    d$val$value[d$val$lon == max(d$lon) & d$val$lat == max(d$lat)] <- 2    
+    darea$val$value <- c(1, 1, 1, 3)
+    
+    # Now we put `darea` out of order
+    darea$val <- arrange(darea$val, desc(lon), desc(lat))
+    
+    res1 <- makeGlobalStat(d, darea, verbose=F)
+    expect_is(res1, "cmip5data")
+
+    # makeGlobalStat should be sorted darea correctly before calculating
+    # Are the answer values numerically correct?    
+    expect_true(all(res1$val$value == 1.5))
+    
+    # Put data out of order and test again
+    d$val <- arrange(d$val, desc(lon), desc(lat))
+    res2 <- makeGlobalStat(d, darea, verbose=F)
+    expect_true(all(res2$val$value == 1.5))
+})
+
+
