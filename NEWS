@@ -3,9 +3,11 @@ RCMIP5 1.1
 
 * Much faster thanks to shifting computations from `plyr` and `abind` to `dplyr`.
 
+* New checks for odd edge cases in loadEnsemble().
+
 * Provenance now handles multi-line custom functions correctly.
 
-* Removed support for `ncdf`.
+* Removed support for old `ncdf` from saveNetCDF().
 
 * Many new tests.
 
