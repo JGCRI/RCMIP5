@@ -53,7 +53,7 @@ NULL
 #'  \item{lat}{Numeric vector containing latitude values; may be \code{NULL}}
 #'  \item{Z}{Numeric vector Z values; may be \code{NULL}}
 #'  \item{time}{Numeric vector containing time values; may be \code{NULL}}
-#'  \item{dimNames}{Array of strings containing the original (netcdf) dimension names}
+#'  \item{dimNames}{Array of strings containing the original (NetCDF) dimension names}
 #'  \item{calendarStr}{String defining the calendar type; may be \code{NULL}}
 #'  \item{debug}{List with additional data (subject to change)}
 #'  \item{provenance}{Data frame with the object's provenance. See \code{\link{addProvenance}}}

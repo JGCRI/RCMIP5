@@ -1,8 +1,8 @@
-#' Save a cmip5data object to netCDF format
+#' Save a cmip5data object to NetCDF format
 #' 
 #' There are at least three ways to save a \code{\link{cmip5data}} object.
 #' First, \link{save} it. Second, use \link{as.data.frame}. Third, this function
-#' will write out a new netCDF file readable by any netCDF-aware software.
+#' will write out a new NetCDF file readable by any NetCDF-aware software.
 #'
 #' @param x A \code{\link{cmip5data}} object
 #' @param file Filename desired. If omitted one will be generated automatically.
@@ -16,7 +16,7 @@
 #' CMIP5 naming convention (but appending 'RCMIP5'). \code{\link{loadCMIP5}} should be
 #' able to read this file. If \code{saveProvenance} is specified, the provenance is saved
 #' separately in a comma-separated file of the same name but appending "_prov.csv".
-#' (Provenance messages are always saved as netcdf file attributes.)
+#' (Provenance messages are always saved as NetCDF file attributes.)
 saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, 
                        saveProvenance=TRUE, originalNames=FALSE, force.ncdf=FALSE) {
     
@@ -45,7 +45,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
             .ncvar_put <- ncdf::put.var.ncdf
             .nc_close <- ncdf::close.ncdf
         } else {
-            stop("No netCDF (either 'ncdf4' or 'ncdf') package is available")            
+            stop("No NetCDF (either 'ncdf4' or 'ncdf') package is available")            
         }
     } else {
         .nc_create <- ncdf4::nc_create
@@ -68,7 +68,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
     fqfn <- paste(path, file, sep="/")
     
     # Define spatial dimensions, if present
-    if(verbose) cat("Defining netCDF dimensions...")
+    if(verbose) cat("Defining NetCDF dimensions...")
     dimlist <- list()
     if(!is.null(x$lon) & !is.null(x$lat)) {
         londim <- .ncdim_def("lon", x$debug$lonUnit, x$lon)
@@ -89,7 +89,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
     if(verbose) cat(length(dimlist), "dimensions for", x$variable, "\n")
     
     # Define mandatory variable
-    if(verbose) cat("Defining main netCDF variable\n")
+    if(verbose) cat("Defining main NetCDF variable\n")
     valvar <- .ncvar_def(x$variable, x$valUnit, dimlist)
     
     # Create the file and write mandatory variable
@@ -134,7 +134,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE,
         .ncatt_put(nc, 0, paste0("provenance", i), x$provenance[i, "message"])
     }
     
-    # All done with netCDF. Close file, inform user
+    # All done with NetCDF Close file, inform user
     .nc_close(nc)
     if(verbose) cat("Wrote", round(file.info(fqfn)$size/1024/1024, 2), "MB\n")
     

@@ -35,7 +35,7 @@ getFileInfo <- function(path='.', recursive=TRUE) {
 
     # Check that there are nc files to process
     if(!length(fullFile)) {
-        warning('No netcdf files found')
+        warning('No NetCDF files found')
         return(NULL)
     }
 

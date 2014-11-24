@@ -182,7 +182,7 @@ at each step, and a checksum (MD5 hash) of the data. The provenance can be expor
 
 ## Next steps and final notes
 
-As noted above, we can simply use `as.data.frame` to convert our `cmip5data` object to a standard data frame. We could also `saveNetCDF(co2summary)` to save it as a netcdf file, for example to send to a colleague; the provenance is saved as netcdf global attributes, and optionally as an accompanying text file.
+As noted above, we can simply use `as.data.frame` to convert our `cmip5data` object to a standard data frame. We could also `saveNetCDF(co2summary)` to save it as a Network Common Data Format (NetCDF) file, for example to send to a colleague; the provenance is saved as netcdf global attributes, and optionally as an accompanying text file.
 
 Given the above example, it's straightforward to process a whole collection of CMIP5 data-for example, all the co2 data across experiments and models. For example:
 

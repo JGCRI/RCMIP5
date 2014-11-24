@@ -30,7 +30,7 @@ test_that("loadCMIP5 handles bad input", {
     expect_error(loadCMIP5("","","",yearRange=1))             # yearRange wrong length
 })
 
-test_that("loadCMIP5 handles no files found", {            # no netcdf files found
+test_that("loadCMIP5 handles no files found", {            # no NetCDF files found
     w <- getOption('warn')
     options(warn=-1)
     expect_warning(loadCMIP5("","","",path=("testdata_none")))

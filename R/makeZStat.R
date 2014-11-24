@@ -1,7 +1,7 @@
 #' Compute Z-dimension statistic of a variable
 #'
 #' Some CMIP5 data are four-dimensional: in addition to longitude, latitude,
-#' and time, they include a Z dimension (typically encoded in the netcdf file as
+#' and time, they include a Z dimension (typically encoded in the NetCDF file as
 #' 'depth' or 'lev'). This function computes a summary statistic for all Z values.
 #' The default statistic is \link{mean}, but any summary
 #' function that returns a numeric result (including weighted.mean, if you

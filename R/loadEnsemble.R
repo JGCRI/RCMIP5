@@ -49,7 +49,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             .ncvar_get <- ncdf::get.var.ncdf
             .nc_close <- ncdf::close.ncdf
         } else {
-            stop("No netCDF (either 'ncdf4' or 'ncdf') package is available")
+            stop("No NetCDF (either 'ncdf4' or 'ncdf') package is available")
         }
     } else {
         .nc_open <- ncdf4::nc_open
@@ -335,7 +335,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
 
 #' Restore missing and/or degenerate dimensions in the data
 #'
-#' @param dims the data array just loaded from the netcdf
+#' @param dims the data array just loaded from the NetCDF
 #' @param dimNames vector of dimensions names present in file
 #' @param lonArr numeric vector of longitude values
 #' @param latArr numeric vector of latitude values

@@ -34,7 +34,7 @@ This only works for files that are in domains 'fx', 'mon', or 'yr'.
 Decimal time is (year + (month-1)/12).
 
 Unfortunately it's impossible to automatically check the time signature for
-sub-monthly frequencies quickly without opening the netcdf file.
+sub-monthly frequencies quickly without opening the NetCDF file.
 }
 \examples{
 \dontrun{

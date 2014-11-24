@@ -20,16 +20,16 @@ test_that("getFileInfo handles bad input", {
     expect_error(getFileInfo(recursive=1))                  # non-logical recursive
 })
 
-test_that("getFileInfo handles no input", {                 # no netcdf files found
+test_that("getFileInfo handles no input", {                 # no NetCDF files found
     w <- getOption('warn')
     options(warn=-1)
     path <- ("testdata_none")
-    expect_warning(getFileInfo(path),"No netcdf files found")
+    expect_warning(getFileInfo(path),"No NetCDF files found")
     expect_is(getFileInfo(path),"NULL")
     options(warn=w)
 })
 
-test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf filenames
+test_that("getFileInfo handles non-CMIP5 NetCDFs", {        # improper NetCDF filenames
     w <- getOption('warn')
     options(warn=-1)
     path <- ("testdata_badfilename")
@@ -38,7 +38,7 @@ test_that("getFileInfo handles non-CMIP5 netcdfs", {        # improper netcdf fi
     options(warn=w)
 })
 
-test_that("getFileInfo handles annual netcdfs", {
+test_that("getFileInfo handles annual NetCDFs", {
     path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
     
@@ -51,7 +51,7 @@ test_that("getFileInfo handles annual netcdfs", {
     expect_equal(d[1, "time"],"2171-2172")
 })
 
-test_that("getFileInfo handles monthly netcdfs", {
+test_that("getFileInfo handles monthly NetCDFs", {
     path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
            
@@ -63,7 +63,7 @@ test_that("getFileInfo handles monthly netcdfs", {
     expect_equal(d[1,"path"],path)
 })
 
-test_that("getFileInfo handles fixed netcdfs", {
+test_that("getFileInfo handles fixed NetCDFs", {
     path <- "../../sampledata/fx"
     if(!file.exists(path)) skip("Path doesn't exist")
          
@@ -73,7 +73,7 @@ test_that("getFileInfo handles fixed netcdfs", {
     expect_equal(d[1,"path"],path)
 })
 
-test_that("getFileInfo handles fixed and temporal netcdfs together", {
+test_that("getFileInfo handles fixed and temporal NetCDFs together", {
     path <- "../../sampledata"
     if(!file.exists(path)) skip("Path doesn't exist")
         

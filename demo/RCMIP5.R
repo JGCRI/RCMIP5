@@ -5,7 +5,7 @@
 ## 
 ## This script does not demonstrate the functionality of getFileInfo(),
 ## checkTimePeriod(), or loadCMIP5(), all of which require
-## existing CMIP5 netcdf files.
+## existing CMIP5 NetCDF files.
 readline("<return>")
 
 ## Create random (dummy) data
@@ -61,6 +61,6 @@ readline("<return>")
 print(head(as.data.frame(historical)))
 readline("<return>")
 
-## ...or save them as netcdf files. (Not run.)
+## ...or save them as NetCDF files. (Not run.)
 
 ## All done!
