@@ -24,10 +24,9 @@
 getFileInfo <- function(path='.', recursive=TRUE) {
 
     # Sanity checks
-    stopifnot(length(path)==1 & is.character(path))
-    stopifnot(length(recursive)==1 & is.logical(recursive))
-    stopifnot(file.exists(path))
-
+    assert_that(is.dir(path))
+    assert_that(is.readable(path))
+    assert_that(is.flag(recursive))
 
     # Pull all nc files from the directory
     fullFile <- list.files(path=path, pattern='nc$',
@@ -104,4 +103,4 @@ getFileInfo <- function(path='.', recursive=TRUE) {
                               stringsAsFactors=FALSE)
 
     return(fileInfo.df)
-}
+} # getFileInfo

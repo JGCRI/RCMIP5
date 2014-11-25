@@ -17,7 +17,7 @@
 #'   An overview of CMIP5 and the experiment design, Bulletin of the American
 #'   Meteorological Society, 93, 485-498.
 #'   \url{http://dx.doi.org/10.1175/BAMS-D-11-00094.1}
-#' @import dplyr reshape2 digest abind
+#' @import dplyr reshape2 digest abind assertthat
 #' @docType package
 #' @name RCMIP5
 NULL
@@ -79,8 +79,15 @@ cmip5data <- function(x=list(),
                       randomize=FALSE, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(is.numeric(c(lonsize, latsize, Zsize)))
-    stopifnot(is.logical(c(lonlat, Z, time, monthly, randomize)))
+    assert_that(is.flag(lonlat))
+    assert_that(is.numeric(lonsize))
+    assert_that(is.numeric(latsize))
+    assert_that(is.flag(Z))
+    assert_that(is.numeric(Zsize))
+    assert_that(is.flag(time))
+    assert_that(is.flag(monthly))
+    assert_that(is.flag(randomize))
+    assert_that(is.flag(verbose))
     
     if (is.list(x)) {          # If x is a list then we are done.
         # Just cast it directly to a cmip5data object
@@ -323,6 +330,10 @@ print.summary.cmip5data <- function(x, ...) {
 #' @export
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
+    
+    # Sanity checks
+    assert_that(is.flag(originalNames))
+    
     # Suppress stupid NOTEs from R CMD CHECK
     lon <- lat <- Z <- time <- NULL
     dplyr::arrange(x$val, lon, lat, Z, time)
@@ -337,6 +348,9 @@ as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
 #' @export
 #' @keywords internal
 as.array.cmip5data <- function(x, ..., drop=TRUE) {
+    
+    # Sanity checks
+    assert_that(is.flag(drop))
     
     dimList <- c(length(unique(x$val$lon)),
                  length(unique(x$val$lat)),
@@ -365,8 +379,15 @@ as.array.cmip5data <- function(x, ..., drop=TRUE) {
 #' @note This is an internal RCMIP5 function and not exported.
 #' @keywords internal
 makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") {
+    
+    # Sanity checks
+    assert_that(is.dir(path))
+    assert_that(is.readable(path))
+    assert_that(is.numeric(maxSize))
     if(!file.exists(outpath)) dir.create(outpath)
-    stopifnot(file.exists(outpath))
+    assert_that(is.dir(outpath))
+    assert_that(is.writeable(outpath))
+    
     datasets <- getFileInfo(path)
     if(is.null(datasets)) return()
     

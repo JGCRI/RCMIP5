@@ -22,9 +22,9 @@
 addProvenance <- function(x, msg, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(class(x)=="cmip5data")
-    stopifnot(class(msg) %in% c("character", "NULL", "cmip5data"))
-    stopifnot(length(verbose)==1 & is.logical(verbose))
+    assert_that(class(x)=="cmip5data")
+    assert_that(class(msg) %in% c("character", "NULL", "cmip5data"))
+    assert_that(is.flag(verbose))
     
     # Get package version number, allowing that there might not be one
     pkgv <- "???"

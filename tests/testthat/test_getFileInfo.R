@@ -12,8 +12,7 @@ library(testthat)
 context("getFileInfo")
 
 test_that("getFileInfo handles bad input", {
-    expect_error(getFileInfo("does_not_exist"),"file.exists\\(path) is not TRUE")
-                                                            # path does not exist
+    expect_error(getFileInfo("does_not_exist"))             # path does not exist
     expect_error(getFileInfo(path=c("1","2")))              # multi-value path
     expect_error(getFileInfo(recursive=c(T,F)))             # multi-value recursive
     expect_error(getFileInfo(12))                           # non-character path

@@ -9,6 +9,7 @@ library(plyr)
 library(dplyr)
 library(abind)
 library(devtools)
+library(assertthat)
 
 # Load sample data, as package would
 #load("data/tas_Amon_CMCC-CESM_historical_r1i1p1.Rdata")

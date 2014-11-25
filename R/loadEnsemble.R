@@ -25,20 +25,19 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                          yearRange=NULL) {
     
     # Sanity checks - make sure all parameters are correct class and length
-    stopifnot(length(variable)==1 & is.character(variable))
-    stopifnot(length(model)==1 & is.character(model))
-    stopifnot(length(experiment)==1 & is.character(experiment))
-    stopifnot(length(ensemble)==1 & is.character(ensemble))
-    stopifnot(length(domain)==1 & is.character(domain))
-    stopifnot(length(path)==1 & is.character(path)) # valid path?
-    stopifnot(file.exists(path))
-    stopifnot(length(recursive)==1 & is.logical(recursive))
-    stopifnot(length(verbose)==1 & is.logical(verbose))
-    stopifnot(length(force.ncdf)==1 & is.logical(force.ncdf))
-    stopifnot(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
+    assert_that(length(variable)==1 & is.character(variable))
+    assert_that(length(model)==1 & is.character(model))
+    assert_that(length(experiment)==1 & is.character(experiment))
+    assert_that(length(ensemble)==1 & is.character(ensemble))
+    assert_that(length(domain)==1 & is.character(domain))
+    assert_that(is.dir(path))
+    assert_that(is.readable(path))
+    assert_that(is.flag(recursive))
+    assert_that(is.flag(verbose))
+    assert_that(is.flag(force.ncdf))
+    assert_that(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
     
-    # We prefer to use the 'ncdf4' package, but Windows has problems with this,
-    # ...so if it's not installed can also use 'ncdf'
+    # We prefer to use the 'ncdf4' package, but if not installed can use 'ncdf'
     if(force.ncdf | !require(ncdf4, quietly=!verbose)) {
         if(require(ncdf, quietly=!verbose)) {
             # The ncdf and ncdf4 functions are mostly parameter-identical.
@@ -143,7 +142,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         # Get dimension names for 'variable'
         dimNames <- unlist(lapply(nc$var[[variable]]$dim, FUN=function(x) { x$name }))
         if(verbose) cat("-", variable, "dimension names:", dimNames, "\n")
-        stopifnot(length(dimNames) %in% c(1, 2, 3, 4)) # that's all we know
+        assert_that(length(dimNames) %in% c(1, 2, 3, 4)) # that's all we know
         
         # Most, but not all, files have longitude and latitude. Load if available.
         lonArr <- NULL
@@ -201,7 +200,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             
             # Check that the time is going to be in days otherwise latter
             # ...calculations for time array break
-            stopifnot(any(grepl('day', calendarArr)))
+            assert_that(any(grepl('day', calendarArr)))
             
             # extract just the digits
             calendarArr <- as.numeric(calendarArr[grepl('^\\d+$', calendarArr)])
@@ -293,7 +292,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         
         # Test that spatial dimensions are identical across files
         if(length(val) > 0 & length(dimNames) > 2) {
-            stopifnot(all(dim(val)[1:(length(dim(val))-1)] ==
+            assert_that(all(dim(val)[1:(length(dim(val))-1)] ==
                               dim(vardata)[1:(length(dim(vardata))-1)]))
         }
         

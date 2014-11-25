@@ -40,7 +40,6 @@ test_that("loadCMIP5 handles no files found", {            # no NetCDF files fou
 
 test_that("loadCMIP5 loads monthly data", {
     
-    
     skip_on_cran()
 
     path <- "../../sampledata/monthly"
@@ -53,7 +52,6 @@ test_that("loadCMIP5 loads monthly data", {
 })
 
 test_that("loadCMIP5 loads annual data", {
-    
     
     skip_on_cran()
 
@@ -68,12 +66,10 @@ test_that("loadCMIP5 loads annual data", {
 
 test_that("loadEnsemble checks unique domain", {
     
-    
     expect_error(loadCMIP5("co3", "fakemodel1-ES", "rcp85", path='testdata_twodomains/',verbose=F))
 })
 
 test_that("loadCMIP5 handles spatial mismatches between ensembles", {
-    
     
     path <- "testdata_mismatch"
 
@@ -89,7 +85,9 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
 test_that("loadCMIP5 can load using both ncdf and ncdf4", {
     
     skip_on_cran()
-
+    if(suppressWarnings(!require(ncdf, quietly=T))) skip("ncdf not available")
+    if(suppressWarnings(!require(ncdf4, quietly=T))) skip("ncdf4 not available")
+    
     path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
 

@@ -12,9 +12,9 @@
 calcGridArea<- function(lon, lat, verbose=FALSE) {
 
     # Sanity checks - parameter classes and lengths
-    stopifnot(is.numeric(lat))
-    stopifnot(is.numeric(lon))
-    stopifnot(length(verbose)==1 & is.logical(verbose))
+    assert_that(is.numeric(lat))
+    assert_that(is.numeric(lon))
+    assert_that(is.flag(verbose))
 
     if(verbose) cat('Calculating grid cell areas...\n')
     numLat <- length(lat)

@@ -33,11 +33,11 @@
 makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) {
     
     # Sanity checks
-    stopifnot(class(x)=="cmip5data")
-    stopifnot(is.null(area) | class(area)=="cmip5data")
-    stopifnot(length(verbose)==1 & is.logical(verbose))
-    stopifnot(length(FUN)==1 & is.function(FUN))
-    
+    assert_that(class(x)=="cmip5data")
+    assert_that(is.null(area) | class(area)=="cmip5data")
+    assert_that(is.flag(verbose))
+    assert_that(is.function(FUN))
+
     # Get and check area data, using 1's if nothing supplied
     areavals <- NA
     if(is.null(area)) {
@@ -45,7 +45,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
         x <- addProvenance(x, "About to compute global stat. Grid areas calculated.")
         areavals <- reshape2::melt(calcGridArea(x$lon, x$lat, verbose=verbose), varnames=c("lon", "lat"))
     } else {
-        stopifnot(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
+        assert_that(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
         x <- addProvenance(x, "About to compute global stat. Grid areas from following data:")
         x <- addProvenance(x, area)
         areavals <- area$val

@@ -19,10 +19,11 @@
 saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TRUE, originalNames=FALSE) {
     
     # Sanity checks - class and length of parameters
-    stopifnot(class(x)=="cmip5data")
-    stopifnot(is.null(file) | (length(file)==1 & is.character(file)))
-    stopifnot(length(path)==1 & is.character(path))
-    stopifnot(length(verbose)==1 & is.logical(verbose))
+    assert_that(class(x)=="cmip5data")
+    assert_that(is.null(file) | (length(file)==1 & is.character(file)))
+    assert_that(is.dir(path))
+    assert_that(is.writeable(path))
+    assert_that(is.flag(verbose))
     
     if(originalNames) 
         dimNames <- x$dimNames

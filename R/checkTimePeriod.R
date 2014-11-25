@@ -30,12 +30,12 @@
 checkTimePeriod <- function(fileInfo_df) {
     
     # Sanity checks
-    stopifnot(is.data.frame(fileInfo_df))
+    assert_that(is.data.frame(fileInfo_df))
     ddplyFields <- c("domain", "experiment","model","variable","ensemble")
-    stopifnot(all(ddplyFields %in% colnames(fileInfo_df)))
-    stopifnot("time" %in% colnames(fileInfo_df))
+    assert_that(all(ddplyFields %in% colnames(fileInfo_df)))
+    assert_that("time" %in% colnames(fileInfo_df))
     
-    # Use ddply to break up data frame, process and check time field, and return result
+    # Break up data frame, process and check time field, and return result
     result <- data.frame()
     splitter <- apply( fileInfo_df[, ddplyFields], 1, paste, collapse="-" )
     for(i in unique(splitter)) {

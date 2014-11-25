@@ -24,9 +24,9 @@
 makeZStat <- function(x, verbose=FALSE, FUN=mean, ...) {
     
     # Sanity checks
-    stopifnot(class(x)=="cmip5data")
-    stopifnot(length(verbose)==1 & is.logical(verbose))
-    stopifnot(length(FUN)==1 & is.function(FUN))
+    assert_that(class(x)=="cmip5data")
+    assert_that(is.flag(verbose))
+    assert_that(is.function(FUN))
     
     # Main computation code
     timer <- system.time({  # time the main computation, below

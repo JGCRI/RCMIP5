@@ -32,19 +32,20 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
                       FUN=mean, yearRange=NULL) {
     
     # Sanity checks - parameters are correct type and length
-    stopifnot(length(variable)==1 & is.character(variable))
-    stopifnot(length(model)==1 & is.character(model))
-    stopifnot(length(experiment)==1 & is.character(experiment))
-    stopifnot(length(ensemble)==1 & is.character(ensemble) | is.null(ensemble))
-    stopifnot(length(domain)==1 & is.character(domain))
-    stopifnot(length(path)==1 & is.character(path))
-    stopifnot(file.exists(path))
-    stopifnot(length(recursive)==1 & is.logical(recursive))
-    stopifnot(length(verbose)==1 & is.logical(verbose))
-    stopifnot(length(force.ncdf)==1 & is.logical(force.ncdf))
-    stopifnot(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
+    assert_that(length(variable)==1 & is.character(variable))
+    assert_that(length(model)==1 & is.character(model))
+    assert_that(length(experiment)==1 & is.character(experiment))
+    assert_that(length(ensemble)==1 & is.character(ensemble) | is.null(ensemble))
+    assert_that(length(domain)==1 & is.character(domain))
+    assert_that(is.dir(path))
+    assert_that(is.readable(path))
+    assert_that(is.flag(recursive))
+    assert_that(is.flag(verbose))
+    assert_that(is.flag(force.ncdf))
+    assert_that(is.function(FUN))
+    assert_that(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
     FUNstr <- as.character(substitute(FUN))
-    stopifnot(FUNstr %in% c("mean", "min", "max", "sum"))
+    assert_that(FUNstr %in% c("mean", "min", "max", "sum"))
     
     # List all files that match specifications
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)

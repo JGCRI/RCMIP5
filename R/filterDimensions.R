@@ -25,15 +25,15 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, Zs=NULL,
                              years=NULL, months=NULL, verbose=FALSE) {
     
     # Sanity checks
-    stopifnot(class(x)=="cmip5data")
-    stopifnot(length(verbose)==1 & is.logical(verbose))
-        
+    assert_that(class(x)=="cmip5data")
+    assert_that(is.flag(verbose))
+    
     x <- filterDimensionLon(x, lons, verbose)
     x <- filterDimensionLat(x, lats, verbose)
     x <- filterDimensionZ(x, Zs, verbose)
     x <- filterDimensionTimeYears(x, years, verbose)
     x <- filterDimensionTimeMonths(x, months, verbose)
-        
+    
     x
 } # filterDimensions
 
@@ -47,11 +47,13 @@ filterDimensions <- function(x, lons=NULL, lats=NULL, Zs=NULL,
 #' @keywords internal
 filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
     
-    # Sanity check
-    stopifnot(is.null(lons) | class(lons) %in% c("numeric", "integer", "array"))
-    
-    # Filter longitude dimension
     if(!is.null(lons)) {
+        
+        # Sanity checks
+        assert_that(is.numeric(lons))
+        assert_that(is.flag(verbose))   
+        
+        # Filter longitude dimension
         if(is.null(x[["lon"]])) {
             warning("No lon data found")
         } else {
@@ -79,11 +81,13 @@ filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
 #' @keywords internal
 filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
     
-    # Sanity check
-    stopifnot(is.null(lats) | class(lats) %in% c("numeric", "integer", "array"))
-    
     # Filter latitude dimension
     if(!is.null(lats)) {
+
+        # Sanity checks
+        assert_that(is.numeric(lats))
+        assert_that(is.flag(verbose))
+        
         if(is.null(x[["lat"]])) {
             warning("No lat data found")
         } else {
@@ -111,12 +115,12 @@ filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
 #' @keywords internal
 filterDimensionZ <- function(x, Zs=NULL, verbose=FALSE) {
     
-    # Sanity checks
-    stopifnot(is.null(Zs) | class(Zs) %in% c("numeric", "integer", "array"))
-    
-    # Filter Z dimension
-    ndim <- length(dim(x$val))
     if(!is.null(Zs)) {
+
+        # Sanity checks
+        assert_that(is.numeric(Zs))
+        assert_that(is.flag(verbose))
+        
         if(is.null(x[["Z"]])) {
             warning("No Z data found")
         } else {
@@ -144,12 +148,12 @@ filterDimensionZ <- function(x, Zs=NULL, verbose=FALSE) {
 #' @keywords internal
 filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
     
-    # Sanity checks
-    stopifnot(is.null(years) | class(years) %in% c("numeric", "integer", "array"))
-    
-    # Filter time (years) dimension
-    ndim <- length(dim(x$val))
     if(!is.null(years)) {
+
+        # Sanity checks
+        assert_that(is.numeric(years))
+        assert_that(is.flag(verbose))
+        
         if(is.null(x[["time"]])) {
             warning("No time data found")
         } else {
@@ -178,13 +182,13 @@ filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
 #' @keywords internal
 filterDimensionTimeMonths <- function(x, months=NULL, verbose=FALSE) {
     
-    # Sanity checks
-    stopifnot(is.null(months) | class(months) %in% c("numeric", "integer", "array"))
-    stopifnot(months %in% 1:12)
-    
-    # Filter time (months) dimension
-    ndim <- length(dim(x$val))
     if(!is.null(months)) {
+
+        # Sanity checks
+        assert_that(is.numeric(months))
+        assert_that(all(months %in% 1:12))
+        assert_that(is.flag(verbose))
+               
         if(is.null(x[["time"]])) {
             warning("No time data found")
         } else if(x$debug$timeFreqStr != "mon") {

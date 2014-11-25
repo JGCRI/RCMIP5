@@ -11,6 +11,7 @@ Imports:
     abind (>= 1.4),
     dplyr (>= 0.3),
     reshape2 (>= 1.4),
+    assertthat (>= 0.1),
     digest
 Depends:
     R (>= 3.1.0)
