@@ -65,7 +65,7 @@ filterDimensionLon <- function(x, lons=NULL, verbose=FALSE) {
             x <- addProvenance(x, paste("Filtered for lons in range [",
                                         paste(range(lons), collapse=', '), "]"))
             x$filtered <- TRUE
-            if(verbose) cat("Filtered by lon, dim =", dim(x$val), "\n")
+            if(verbose) cat("Filtered by lon\n")
         }
     }
     x
@@ -99,7 +99,7 @@ filterDimensionLat <- function(x, lats=NULL, verbose=FALSE) {
             x <- addProvenance(x, paste("Filtered for lats in range [",
                                         paste(range(lats), collapse=', '), "]"))
             x$filtered <- TRUE
-            if(verbose) cat("Filtered by lat, dim =", dim(x$val), "\n")
+            if(verbose) cat("Filtered by lat\n")
         }
     }
     x
@@ -132,7 +132,7 @@ filterDimensionZ <- function(x, Zs=NULL, verbose=FALSE) {
             x <- addProvenance(x, paste("Filtered for Zs in range [",
                                         paste(range(Zs), collapse=', '), "]"))
             x$filtered <- TRUE
-            if(verbose) cat("Filtered by Z, dim =", dim(x$val), "\n")
+            if(verbose) cat("Filtered by Z\n")
         }
     }
     x
@@ -166,7 +166,7 @@ filterDimensionTimeYears <- function(x, years=NULL, verbose=FALSE) {
             x <- addProvenance(x, paste("Filtered for years in range [",
                                         paste(range(years), collapse=', '), "]"))
             x$filtered <- TRUE
-            if(verbose) cat("Filtered by year, dim =", dim(x$val), "\n")
+            if(verbose) cat("Filtered by year\n")
         }
     }
     x
@@ -202,7 +202,7 @@ filterDimensionTimeMonths <- function(x, months=NULL, verbose=FALSE) {
             x <- addProvenance(x, paste("Filtered for months in range [",
                                         paste(range(months), collapse=', '), "]"))
             x$filtered <- TRUE
-            if(verbose) cat("Filtered by month, dim =", dim(x$val), "\n")
+            if(verbose) cat("Filtered by month\n")
         }
     }
     x
