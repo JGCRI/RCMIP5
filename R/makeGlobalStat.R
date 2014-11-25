@@ -17,7 +17,7 @@
 #' of cells in the spatial grid.
 #' @details The stat function is calculated for all combinations of lon,
 #' lat, and Z (if present).
-#' This function is more complicated than the other makeXxxStat functions, because
+#' This function is more complicated than the other make...Stat functions, because
 #' it provides explicit support for area-weighted functions. We expect that 
 #' weighted.mean and a weighted sum will be the most frequent
 #' calculations needed. The former is built into R, and the latter can generally

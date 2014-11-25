@@ -3,14 +3,14 @@
 #' We frequently want to filter CMIP5 data according to some predetermined
 #' criteria: only high-latitude cells, for example, or certain years, months,
 #' Zs, etc. This function provides convenient one-stop service
-#' for such filtering.
+#' for such tasks.
 #' 
 #' @param x A \code{\link{cmip5data}} object
 #' @param lons numeric vector. Longitudes to filter
 #' @param lats numeric vector. Latitudes to filter
 #' @param Zs numeric vector. Z values to filter
-#' @param years numeric vector
-#' @param months numeric vector
+#' @param years numeric vector. Years to filter
+#' @param months numeric vector. Months (1-12) to filter
 #' @param verbose logical. Print info as we go?
 #' @return The filtered \code{\link{cmip5data}} object.
 #' @note If a filter is requested but no relevant data are present,

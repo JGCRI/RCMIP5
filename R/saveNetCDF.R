@@ -1,8 +1,9 @@
 #' Save a cmip5data object to NetCDF format
 #' 
 #' There are at least three ways to save a \code{\link{cmip5data}} object.
-#' First, \link{save} it. Second, use \link{as.data.frame}. Third, this function
-#' will write out a new NetCDF file readable by any NetCDF-aware software.
+#' First, \link{save} it. Second, use \link{as.data.frame} or \link{as.array}.
+#' Third, this function, which will write out a new NetCDF file readable by 
+#' any NetCDF-aware software.
 #'
 #' @param x A \code{\link{cmip5data}} object
 #' @param file Filename desired. If omitted one will be generated automatically.
@@ -11,11 +12,12 @@
 #' @param saveProvenance Save the provenance separately?
 #' @param originalNames logical. Use original dimension names from file?
 #' @return The fully-qualified filename that was written (invisible).
-#' @details If no filename is provided, a meaningful one will be assigned based on the
-#' CMIP5 naming convention (but appending 'RCMIP5'). \code{\link{loadCMIP5}} should be
-#' able to read this file. If \code{saveProvenance} is specified, the provenance is saved
-#' separately in a comma-separated file of the same name but appending "_prov.csv".
-#' (Provenance messages are always saved as NetCDF file attributes.)
+#' @details If no filename is provided, a meaningful one will be assigned based on 
+#' the CMIP5 naming convention (but appending 'RCMIP5'). The \code{\link{loadCMIP5}} 
+#' function should be able to read this file. If \code{saveProvenance} is specified, 
+#' the provenance is saved separately in a comma-separated file of the same name but
+#' appending "_prov.csv". (Provenance messages are always saved as NetCDF file attributes.)
+#' @note This function requires the \code{ncdf4} package; \code{ncdf} is not supported.
 saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TRUE, originalNames=FALSE) {
     
     # Sanity checks - class and length of parameters
