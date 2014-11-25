@@ -69,11 +69,13 @@ Loading ~/my/cmip5/files/co2_Amon_CanESM2_rcp85_r2i1p1_200601-210012.nc
 - co2 dimension names: lon lat plev time 
 - loading only timeslices 1 - 60 
 - data 128 64 22 60 
+Melting to data frame
 ```
 
 `loadCMIP5` reports that there are two ensembles to average (r1i1p1 and r2i1p1), the name of each file it loads, the 
-dimension names, the fact that it's only reading the first five years, and the resulting data array size: 128 (lon) x 64 (lat) 
-x 22 (plev, which will be renamed 'Z' when read in) x 60 (time).
+dimension names, the fact that it's only reading the first five years, and the overall data array size: 128 (lon) x 64 (lat) 
+x 22 (plev, which will be renamed 'Z' when read in) x 60 (time). These data are converted to a data frame for fast 
+processing in later steps.
 
 ## Examining the data
 
@@ -93,14 +95,15 @@ Provenance has 6 entries
 
 Here we see the name of the variable, model, experiment, the fact that this came from two ensembles, the data range
 and spatial dimensions, time dimensions and frequency ('mon' - monthly), size in memory, and a note about the 
-provenance (see below). Everything looks good. ~~Assuming the `ggplot2` package is installed, we might want to make a quick plot of the data to check:~~
+provenance (see below). Everything looks good. Assuming the `ggplot2` package is installed, we might want to make 
+a quick plot of the data to check:
 
 ```
-> # worldPlot(co2, time=1:12)  # first 12 months, i.e. all of 2006
+> worldPlot(co2, time=1:12)  # first 12 months, i.e. all of 2006
 ```
 
-~~The resulting plot isn't very interesting, as CO2 is a well-mixed gas, but would be useful if we were working with
-a spatially variable output.~~ [worldPlot has been removed from `RCMIP5` for now.]
+The resulting plot isn't very interesting, as CO2 is a well-mixed gas, but would be useful if we were working with
+a spatially variable output.
 
 ## Compute global means
 
@@ -112,12 +115,10 @@ data to a global mean value. This can be done as follows:
 > co2surf <- filterDimensions(co2, Zs=co2$Z[1], verbose=T)
 Filtered by Z, dim = 128 64 1 60 
 > co2annual <- makeAnnualStat(co2surf, verbose=T)
-Running in serial
-Took 6.41 s
+Took 1.41 s
 > co2summary <- makeGlobalStat(co2annual, verbose=T)
 No grid areas supplied; using calculated values
 Calculating grid cell areas...
-Running in serial
 Took 0.03 s
 ```
 
