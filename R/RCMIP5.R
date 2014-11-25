@@ -217,7 +217,7 @@ print.cmip5data <- function(x, ...) {
     
     ansStr <- paste0('CMIP5: ', x$variable, ", ", x$model, " ", x$experiment)
     
-    spaceStr <- paste(length(x$lon), "x", length(x$lat), "x", length(x$Z))
+    spaceStr <- paste(length(x$lon), "x", length(x$lat), "x", length(x$Z), "x", length(x$time))
     ansStr <- paste0(ansStr, ", ", spaceStr)
     
     timeStr <- "no time"
