@@ -12,10 +12,10 @@ readline("<return>")
 historical <- cmip5data(2001:2005, randomize=T)
 print(historical)
 
-## Printing a data set displays a one-line summary, showing the 
-## variable, model, experiment, years, data matrix dimensions 
-## (here 10 longitude cells by 10 latitude cells by 60 months) 
-## and number of ensembles.
+## Printing a monthly data set displays a one-line summary, showing 
+## the variable, model, experiment, years, data matrix dimensions 
+## (here 10 longitude cells by 10 latitude cells by 0 Z levels,
+## over 5 years or 60 months) and number of ensembles.
 readline("<return>")
 
 ## Limiting to the tropics
@@ -25,13 +25,12 @@ print(historical)
 ## We've filtered these data to just the tropics, -30 to 30 latitude.
 readline("<return>")
 
-## Computing annual mean. For faster processing, run with 'parallel=TRUE'
+## Compute annual mean
 print(makeAnnualStat(historical, verbose=T))
 
-## After this operation that data have been reduced from 60 months to 
-## 10 annual means. Note the 'annual summary' note when printing.
-## The makeAnnualStat function can apply any summary function, 
-## not just mean, and pass any additional parameters via (...).
+## After this operation the data have been reduced from 60 months to 
+## 5 annual means. Note the makeAnnualStat (and all the make...Stat 
+## functions) can apply any summary function, not just mean.
 readline("<return>")
 
 ## Computing global area-weighted mean:
@@ -40,11 +39,11 @@ print(globalmean)
 
 ## This computed a 'global' (but here tropical, since we 
 ## previously filtered the data to just those latitudes) mean.
-## Note printing the resulting data set confirms
-## that the data dimensions are 1 x 1 x 120 months.
+## Printing the resulting data set confirms that there's no 
+## spatial dimensions left, only time.
 ##
-## Because we didn't supply area data to makeGlobalStat, it
-## made it own estimation of grid cell areas.
+## Note that because we didn't supply area data to makeGlobalStat,
+## it made its own estimation of grid cell areas.
 readline("<return>")
 
 ## More detailed look at the resulting dataset:
@@ -57,7 +56,7 @@ readline("<return>")
 print(globalmean$provenance[c("timestamp","message")])
 readline("<return>")
 
-## It's easy to convert 'cmip5data' structures to data frames:
+## It's easy to convert 'cmip5data' structures to arrays or data frames:
 print(head(as.data.frame(historical)))
 readline("<return>")
 
