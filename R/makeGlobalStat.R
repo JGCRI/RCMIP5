@@ -50,7 +50,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
         x <- addProvenance(x, area)
         areavals <- area$val
     }
-    if(verbose) cat("Area data length", length(areavals), "\n")    
+    if(verbose) cat("Area data length", nrow(areavals), "\n")    
     
     # Main computation code
     timer <- system.time({ # time the main computation
