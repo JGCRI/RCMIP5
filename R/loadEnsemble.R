@@ -248,6 +248,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             if(min(yearRange) > max(floor(thisTimeArr)) |
                    max(yearRange) < min(floor(thisTimeArr))) {
                 if(verbose) cat("- skipping file because not in yearRange\n")
+                .nc_close(nc)
                 next
             }
             
