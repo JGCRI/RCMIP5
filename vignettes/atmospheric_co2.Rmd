@@ -147,14 +147,14 @@ The summary reports that `co2annual` is an annual summary of filtered data, and 
 3 1e+05 2008 384.7202
 4 1e+05 2009 386.9201
 5 1e+05 2010 389.2190
-> plot(df$time, df$value, type='b')
+> plot(co2_df$time, co2_df$value, type='b')
 ```
 ```{r, echo=FALSE}
-df <- structure(list(Z = c(1e+05, 1e+05, 1e+05, 1e+05, 1e+05), time = c(2006, 
+co2_df <- structure(list(Z = c(1e+05, 1e+05, 1e+05, 1e+05, 1e+05), time = c(2006, 
 2007, 2008, 2009, 2010), value = c(380.717267354329, 382.683990478516, 
 384.720212300618, 386.920120239258, 389.219032287598)), .Names = c("Z", 
 "time", "value"), row.names = c(NA, -5L), class = "data.frame")
-plot(df$time, df$value, type='b')
+plot(co2_df$time, co2_df$value, type='b')
 ```
 
 ## Provenance
@@ -183,15 +183,15 @@ at each step, and a checksum (MD5 hash) of the data. The provenance can be expor
 
 ## Speed considerations
 
-The CMIP5 data files can be *very* large, such that loading (not to mention processing) them can be slow or impossible even on computers with plenty of memory. Some tips on dealing with this:
+The CMIP5 data files can be *very* large, such that loading (not to mention processing) them is slow or impossible even on computers with plenty of memory. Some tips on dealing with this:
 
-* Use the `yearRange` parameter of `loadCMIP5()` to process smaller chunks of the data, re-combining only at the end. For the largest CMIP5 data sets, we've found it necessary to process 1-5 years at a time, even on a powerful machine.
+* Use the `yearRange` parameter of `loadCMIP5()` to process smaller chunks of the data, re-combining only at the end. For the largest CMIP5 data sets, we've found it sometimes necessary to process 1-5 years at a time, even on a powerful machine.
 * If combining results as you go, don't repeatedly `rbind()` data frames together. Either write data out to a tempfile, or pre-allocate one results array beforehand. 
 * Order of operations matters! Process the most expensive (largest) dimensions first; for example, `makeGlobalStat()` should usually come before `makeAnnualStat()`.
 
 ## Next steps and final notes
 
-As noted above, we can simply use `as.data.frame` to convert our `cmip5data` object to a standard data frame. We could also `saveNetCDF(co2summary)` to save it as a Network Common Data Format (NetCDF) file, for example to send to a colleague; the provenance is saved as netcdf global attributes, and optionally as an accompanying text file.
+As noted above, we can simply use `as.data.frame` to convert our `cmip5data` object to a standard data frame. We could also `saveNetCDF(co2summary)` to save it as a Network Common Data Format (NetCDF) file, for example to send to a colleague; the provenance is saved as NetCDF global attributes, and optionally as an accompanying text file.
 
 Given the above example, it's straightforward to process a whole collection of CMIP5 data-for example, all the co2 data across experiments and models. For example:
 
