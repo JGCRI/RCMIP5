@@ -122,7 +122,7 @@ Calculating grid cell areas...
 Took 0.03 s
 ```
 
-Note that because we didn't supply any grid cell area data to `makeAnnualStat`, it computed its own. Now we look at the resulting data:
+Note that because we didn't supply any grid cell area data to `makeGlobalStat`, it computed its own. Now we look at the resulting data:
 
 ```
 > summary(co2summary)
@@ -180,6 +180,14 @@ the provenance of the `co2summary` object, we see a record of the steps performe
 
 The provenance also records what function (with parameter values) wrote each message, the data dimensions
 at each step, and a checksum (MD5 hash) of the data. The provenance can be exported, saved alongside the data, etc.
+
+## Speed considerations
+
+The CMIP5 data files can be *very* large, such that loading (not to mention processing) them can be slow or impossible even on computers with plenty of memory. Some tips on dealing with this:
+
+* Use the `yearRange` parameter of `loadCMIP5()` to process smaller chunks of the data, re-combining only at the end. For the largest CMIP5 data sets, we've found it necessary to process 1-5 years at a time, even on a powerful machine.
+* If combining results as you go, don't repeatedly `rbind()` data frames together. Either write data out to a tempfile, or pre-allocate one results array beforehand. 
+* Order of operations matters! Process the most expensive (largest) dimensions first; for example, `makeGlobalStat()` should usually come before `makeAnnualStat()`.
 
 ## Next steps and final notes
 
