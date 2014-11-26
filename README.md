@@ -23,5 +23,5 @@ More information about CMIP5 can be found on the [project home page](http://cmip
 * See http://cmip.llnl.gov/cmip5/publications/allpublications about registering CMIP5 manuscripts.
 * If you use this package/code in your work, please cite it! See `citation("RCMIP5")`.
 * Behind the scenes, RCMIP5 uses the [dplyr](http://cran.r-project.org/package=dplyr) package for heavy data lifting.
-* Want to get started? An extensive vignette and demo are included with the package.
+* Want to get started? An extensive [vignette](http://cran.r-project.org/web/packages/RCMIP5/vignettes/atmospheric_co2.html) and demo are included with the package.
 
