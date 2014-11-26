@@ -1,6 +1,6 @@
 # Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
 
-language: c
+language: objective-c
 
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
