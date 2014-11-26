@@ -2,6 +2,11 @@
 
 language: objective-c
 
+env:
+  global:
+    - R_CHECK_ARGS="--no-build-vignettes --no-manual --timings"
+    - _R_CHECK_TIMINGS_="0"
+
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
@@ -11,6 +16,10 @@ install:
   - ./travis-tool.sh install_deps
 
 script: ./travis-tool.sh run_tests
+
+after_script:
+  - ./travis-tool.sh dump_logs_by_extension "timings"
+  - ./travis-tool.sh dump_sysinfo
 
 on_failure:
   - ./travis-tool.sh dump_logs
