@@ -1,6 +1,8 @@
 RCMIP5: Tools for Manipulating and Summarizing CMIP5 Data
 =======
 
+[![Build Status](https://travis-ci.org/JGCRI/RCMIP5.png?branch=master)](https://travis-ci.org/JGCRI/RCMIP5)
+
 This package provides R functions for exploring, manipulating, and summarizing model outputs from the Coupled Model Intercomparison Project Phase 5 (CMIP5).
 
 Working with CMIP5 data can be tricky, forcing scientists to write custom scripts and programs. The `RCMIP5` package aims to ease this process, providing a reproducible, robust, and high-performance set of functions to (i) explore what data have been downloaded, (ii) identify missing data, (iii) average (or apply other mathematical operations) across experimental ensembles, (iv) produce both temporal and spatial statistical summaries, and (v) produce easy-to-work-with graphical and data summaries. 
