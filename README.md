@@ -15,7 +15,7 @@ More information about CMIP5 can be found on the [project home page](http://cmip
 
 **Bug reports**
 
-* CMIP5 data are highly variable in their structure and assumptions, and there are undoubtedly cases we haven't encountered or anticipated. If you find a bug (something unexpected happens or the code crashes) we want to know about it!
+* CMIP5 data are highly variable in their structure and assumptions, and there are undoubtedly edge cases we haven't encountered or anticipated. If you find a bug (something unexpected happens or the code crashes) we want to know about it!
 * Please either [open an issue](https://github.com/JGCRI/RCMIP5/issues/new), or email one of the maintainers.
 * In either case, give us a *reproducible example*: tell us (i) what file(s) you were trying to process, (ii) what sequence of operations led to the problem, and (iii) any other pertinent information.
 
