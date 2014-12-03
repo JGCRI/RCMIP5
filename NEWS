@@ -1,3 +1,13 @@
+RCMIP5 1.x
+===========
+
+* Now use `assertthat` for pre- and post-assertions.
+
+* Vignette updates.
+
+* Bug fixes: file close on loadEnsemble() skip (#106); fractional yearRange (#107)
+
+
 RCMIP5 1.1
 ===========
 
