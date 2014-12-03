@@ -245,6 +245,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         if(!is.null(yearRange) & !is.null(thisTimeArr)) {
             # User has requested to load a temporal subset of the data.
             # First question: does this file overlap at all?
+            yearRange <- sapply(yearRange, floor) # strip off any decimals
             if(min(yearRange) > max(floor(thisTimeArr)) |
                    max(yearRange) < min(floor(thisTimeArr))) {
                 if(verbose) cat("- skipping file because not in yearRange\n")
