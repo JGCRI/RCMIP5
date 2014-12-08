@@ -62,17 +62,17 @@ test_that("loadEnsemble loads annual data", {
     expect_is(d, "cmip5data")
 })
 
+test_that("loadEnsemble catches malformed lon/lat/Z/time data", {
+    # These is a real CMIP5 file with problems
+    expect_error(loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path, verbose=F))        
+})
+
 test_that("loadEnsemble loads 4D data", {
     
     skip_on_cran()
     
     path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
-    
-    d <- loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path, verbose=F)     # test data set
-    expect_is(d, "cmip5data")
-    expect_is(d$Z, "array")
-    expect_is(d$val, "array")
     
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', 
                       path=path, verbose=F)     # test data set

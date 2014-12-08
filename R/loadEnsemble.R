@@ -158,15 +158,20 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             
             lonArr <- .ncvar_get(nc, varid=dimNames[1])
             lonUnit <- .ncatt_get(nc, dimNames[1], 'units')$value
+            
             latArr <- .ncvar_get(nc, varid=dimNames[2])
             latUnit <- .ncatt_get(nc, dimNames[2], 'units')$value
             
             # Some models provide two-dimensional arrays of their lon and lat values.
-            # (Looking at you, GFDL.) If this occurs, strip down to 1
+            # (Looking at you, GFDL.) If this occurs, reduce to 1 dimension
             if(length(dim(lonArr)) > 1) lonArr <- as.vector(lonArr[,1])
             if(length(dim(latArr)) > 1) latArr <- as.vector(latArr[1,])
+            
+            # At this point, shouldn't have any duplicate values
+            if(any(c(duplicated(latArr), duplicated(lonArr))))
+                stop("Duplicate values in this file's lon/lat data")
         }
-        
+
         # Get the time frequency. Note that this should be related to
         # ...the domain (ie 'mon' should be the frequency of the domain 'Amon').
         # ...In theory we could extract this from the domain
@@ -220,6 +225,9 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             thisTimeRaw <- .ncvar_get(nc, varid=timeName)
             # convert from days (we assume the units are days) to years
             thisTimeArr <- thisTimeRaw / calendarDayLength + startYr
+            
+            if(any(duplicated(thisTimeRaw)))
+                stop("Duplicate values in this file's time data")
         } else { # this is a fx variable. Set most things to NULL
             startYr <- NULL
             timeArr <- NULL
@@ -237,6 +245,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         if(length(dimNames) == 4) {
             ZArr <- .ncvar_get(nc, varid=dimNames[3])
             ZUnit <- .ncatt_get(nc, dimNames[3], 'units')$value
+            if(any(duplicated(ZArr)))
+                stop("Duplicate values in this file's Z data")
         }
         
         # If yearRange supplied, calculate filter for the data load below
