@@ -95,4 +95,4 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
 #' @return Weighted mean multipled by sum of weights.
 #' @export
 #' @seealso \code{\link{weighted.mean}}
-weighted.sum <- function(x, w=rep(1, length(x)), ...) { weighted.mean(x, w, ...) * sum(w) }
+weighted.sum <- function(x, w=rep(1, length(x)), ...) weighted.mean(x, w, ...) * sum(w)
