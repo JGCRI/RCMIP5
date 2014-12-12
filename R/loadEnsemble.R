@@ -228,6 +228,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             
             if(any(duplicated(thisTimeRaw)))
                 stop("Duplicate values in this file's time data")
+            
         } else { # this is a fx variable. Set most things to NULL
             startYr <- NULL
             timeArr <- NULL
@@ -285,6 +286,11 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         
         # Update running time data
         if(!is.null(thisTimeRaw)) {
+            # Any overlap between this file's time array and previous data?
+            if(min(length(timeRaw) && min(thisTimeRaw) < max(timeRaw))) {
+                stop("Time overlap between files; this should not occur")
+            }
+         
             timeRaw <- c(timeRaw, thisTimeRaw)
             timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
         }
