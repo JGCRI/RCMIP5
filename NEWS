@@ -5,7 +5,7 @@ RCMIP5 1.x
 
 * Vignette updates.
 
-* Bug fixes: file close on loadEnsemble() skip (#106); fractional yearRange (#107)
+* Bug fixes: file close on loadEnsemble() skip (#106); fractional yearRange (#107); overlapping files (#109)
 
 
 RCMIP5 1.1
