@@ -1,0 +1,17 @@
+---
+title: "RCMIP5: Tools for Manipulating and Summarizing CMIP5 Data"
+author: "Katherine Todd-Brown, Corinne Hartin, and Ben Bond-Lamberty"
+date: "January 18, 2015"
+output: html_document
+---
+
+* Paragraph on CMIP5 [ktb]
+
+* Paragraph on need for CMIP5 summaries?
+    + i.e. applications outside of climate science
+
+* Paragraph on R, reproducibility/provenance, open science [bbl]
+
+* Incorporate vignette
+
+* Conclusions

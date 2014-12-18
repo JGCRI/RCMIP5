@@ -1,9 +1,11 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-sampledata/
-ToddBrown/
+
 cran-comments.md
-unused/
+manuscript/
+sampledata/
 sourceall.R
+ToddBrown/
+unused/
 
 ^\.travis\.yml$
