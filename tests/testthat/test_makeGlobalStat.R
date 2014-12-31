@@ -53,7 +53,7 @@ test_that("makeGlobalStat weights correctly", {
     d <- cmip5data(1850, randomize=T, monthly=F)
     darea <- cmip5data(0, time=F, randomize=T)  # create an area file
     
-    res <- makeGlobalStat(d, area=darea, verbose=F)
+    res <- makeGlobalStat(d, area=darea, sortData=F, verbose=F)
     
     # Are the answer values numerically correct?
     dummyans <- weighted.mean(d$val$value, w=darea$val$value)
@@ -63,7 +63,7 @@ test_that("makeGlobalStat weights correctly", {
 test_that("weighted.sum works correctly", {
     d <- cmip5data(1850, randomize=T, monthly=F)
     darea <- cmip5data(0, time=F, randomize=T)
-    res <- makeGlobalStat(d, area=darea, verbose=F, FUN=weighted.sum)
+    res <- makeGlobalStat(d, area=darea, verbose=F, sortData=F, FUN=weighted.sum)
     
     # Are the answer values numerically correct?
     dummyans <- weighted.sum(d$val$value, w=darea$val$value)
@@ -100,11 +100,11 @@ test_that("makeGlobalStat handles custom function and dots", {
     # Compute correct answer
     ans <- aggregate(value~time, data=d$val, FUN=weighted.mean, w=darea$val$value)
         
-    res1 <- makeGlobalStat(d, darea, verbose=F, FUN=weighted.mean)
+    res1 <- makeGlobalStat(d, darea, verbose=F, sortData=F, FUN=weighted.mean)
     expect_is(res1, "cmip5data")
     
     myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
-    res2 <- makeGlobalStat(d, darea, verbose=F, FUN=myfunc)
+    res2 <- makeGlobalStat(d, darea, verbose=F, sortData=F, FUN=myfunc)
     expect_is(res1, "cmip5data")
     
     # Are the result values correct?    
@@ -134,6 +134,9 @@ test_that("makeGlobalStat sorts before computing", {
     # makeGlobalStat should be sorted darea correctly before calculating
     # Are the result values correct?    
     expect_equal(res1$val$value, ans$value)
+    
+    # This should generate a warning, because sortData not specified
+    expect_warning(makeGlobalStat(d, darea, verbose=F))
     
     # Put data out of order and test again
     d$val <- arrange(d$val, desc(lon), desc(lat))

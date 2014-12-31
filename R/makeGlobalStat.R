@@ -72,6 +72,8 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
                 arrange()
             x$val <- group_by(x$val, Z, time, lon, lat) %>% 
                 arrange()            
+        } else if(missing(sortData) & !missing(area)) {
+            warning("Note: 'area' supplied but 'sortData' unspecified; no sorting performed")
         }
         
         # Instead of "summarise(value=FUN(value, ...))", we use the do()
