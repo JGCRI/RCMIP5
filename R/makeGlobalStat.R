@@ -9,6 +9,7 @@
 #' @param x A \code{\link{cmip5data}} object
 #' @param area An area \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
+#' @param sortData logical. Sort \code{x} and \code{area} before computing?
 #' @param FUN function. Function to apply across grid
 #' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object, in which the \code{val} dimensions are the
@@ -22,20 +23,24 @@
 #' weighted.mean and a weighted sum will be the most frequent
 #' calculations needed. The former is built into R, and the latter can generally
 #' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
-#' follow the weighted.mean syntax, in particular 
-#' accepting parameters 'x' (data) and 'w' (weights) of equal size, as well as dots(...).
+#' follow the weighted.mean syntax, in particular accepting parameters 'x' 
+#' (data) and 'w' (weights) of equal size, as well as dots(...).
+#' @note If \code{x} and optional \code{area} are not in the same order, make
+#' sure to specify \code{sortData=TRUE}.
 #' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeMonthlyStat}} 
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeGlobalStat(d)
 #' summary(makeGlobalStat(d))
 #' @export
-makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) {
+makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE, 
+                           FUN=weighted.mean, ...) {
     
     # Sanity checks
     assert_that(class(x)=="cmip5data")
     assert_that(is.null(area) | class(area)=="cmip5data")
     assert_that(is.flag(verbose))
+    assert_that(is.flag(sortData))
     assert_that(is.function(FUN))
 
     # Get and check area data, using 1's if nothing supplied
@@ -58,19 +63,23 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, FUN=weighted.mean, ...) 
         # Suppress stupid NOTEs from R CMD CHECK
         lon <- lat <- Z <- time <- value <- `.` <- NULL
         
-        # Area and value data need to be in identical lon/lat order
-        areavals <- group_by(areavals, lon, lat) %>%
-            arrange()
-        
-        # Put data in consistent order and compute
+        # The data may be (but hopefully are not) out of order, and if 
+        # the user specifies to `sortData`, arrange everything so that 
+        # area and data order is guaranteed to match. This is expensive, though
+        if(sortData) {
+            if(verbose) cat("Sorting data...\n")
+            areavals <- group_by(areavals, lon, lat) %>%
+                arrange()
+            x$val <- group_by(x$val, Z, time, lon, lat) %>% 
+                arrange()            
+        }
         
         # Instead of "summarise(value=FUN(value, ...))", we use the do()
         # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
         # the ellipses cause big problems. This solution thanks to Dennis
-        # Murphy on the manipulatr listesrv.
-        x$val <- group_by(x$val, Z, time, lon, lat) %>% 
-            arrange() %>%
-            group_by(Z, time) %>%
+        # Murphy on the manipulatr listesrv.        
+        if(verbose) cat("Calculating data...\n")
+        x$val <- group_by(x$val, Z, time) %>%
             do(data.frame(value = FUN(.$value, areavals$value, ...))) %>%
             ungroup()    
     }) # system.time

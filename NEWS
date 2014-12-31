@@ -7,6 +7,8 @@ RCMIP5 1.x
 
 * Bug fixes: file close on loadEnsemble() skip (#106); fractional yearRange (#107); overlapping files (#109)
 
+* Data sorting now optional for all stat operations (#112).
+
 
 RCMIP5 1.1
 ===========

@@ -128,7 +128,7 @@ test_that("makeGlobalStat sorts before computing", {
     
     # Now we put `darea` out of order and call makeGlobalStat
     darea$val <- arrange(darea$val, desc(lon), desc(lat))
-    res1 <- makeGlobalStat(d, darea, verbose=F)
+    res1 <- makeGlobalStat(d, darea, verbose=F, sortData=TRUE)
     expect_is(res1, "cmip5data")
 
     # makeGlobalStat should be sorted darea correctly before calculating
@@ -137,7 +137,7 @@ test_that("makeGlobalStat sorts before computing", {
     
     # Put data out of order and test again
     d$val <- arrange(d$val, desc(lon), desc(lat))
-    res2 <- makeGlobalStat(d, darea, verbose=F)
+    res2 <- makeGlobalStat(d, darea, verbose=F, sortData=TRUE)
     expect_equal(res2$val$value, ans$value)
 })
 

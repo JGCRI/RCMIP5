@@ -90,11 +90,11 @@ test_that("makeMonthlyStat handles custom function and dots", {
     d$val$month <- floor((d$val$time %% 1) * 12 + 1)
     ans <- aggregate(value~lon+lat+month, data=d$val, FUN=weighted.mean, w=w)
     
-    res1 <- makeMonthlyStat(d, verbose=F, FUN=weighted.mean, w)
+    res1 <- makeMonthlyStat(d, verbose=F, sortData=F, FUN=weighted.mean, w)
     expect_is(res1, "cmip5data")
     
     myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
-    res2 <- makeMonthlyStat(d, verbose=F, FUN=myfunc, w)
+    res2 <- makeMonthlyStat(d, verbose=F, sortData=F, FUN=myfunc, w)
     expect_is(res1, "cmip5data")
     
     # Are the answer values numerically correct?    

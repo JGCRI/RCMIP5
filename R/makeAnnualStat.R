@@ -7,6 +7,7 @@
 #'
 #' @param x A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
+#' @param sortData logical. Sort \code{x} and \code{area} before computing?
 #' @param FUN function. Function to apply across months of year
 #' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the annual
@@ -14,6 +15,8 @@
 #' recording the number of months averaged for each year.
 #' @details The stat function is calculated for all combinations of lon,
 #' lat, and Z (if present).
+#' @note If \code{x} is not in a needed order (for example, \code{FUN} uses
+#' weights in a different order), be sure to specify \code{sortData=TRUE}.
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeAnnualStat(d)
@@ -21,26 +24,29 @@
 #' summary(makeAnnualStat(d, FUN=sd))
 #' @seealso \code{\link{makeZStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
-makeAnnualStat <- function(x, verbose=FALSE, FUN=mean, ...) {
+makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
     
     # Sanity checks
     assert_that(class(x)=="cmip5data")
     assert_that(is.flag(verbose))
+    assert_that(is.flag(sortData))
     assert_that(is.function(FUN))
     
     # Main computation code
     timer <- system.time({  # time the main computation, below
-        # Put data in consistent order BEFORE overwriting time
-        x$val <- group_by(x$val, lon, lat, Z, time) %>%
-            arrange()
-        
-        x$val$year <- floor(x$val$time)   
         
         # Suppress stupid NOTEs from R CMD CHECK
         lon <- lat <- Z <- time <- year <- value <- `.` <- NULL
         
-        # Put data in consistent order and compute
+        # Put data in consistent order BEFORE overwriting time
+        if(sortData) {
+            if(verbose) cat("Sorting data...\n")
+            x$val <- group_by(x$val, lon, lat, Z, time) %>%
+                arrange()            
+        }
         
+        x$val$year <- floor(x$val$time)   
+                
         # Instead of "summarise(value=FUN(value, ...))", we use the do()
         # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
         # the ellipses cause big problems. This solution thanks to Dennis

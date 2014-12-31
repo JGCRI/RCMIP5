@@ -58,11 +58,11 @@ test_that("makeZStat handles custom function and dots", {
     # Compute correct answer
     ans <- aggregate(value~lon+lat+time, data=d$val, FUN=weighted.mean, w=w)
     
-    res1 <- makeZStat(d, verbose=F, FUN=weighted.mean, w)
+    res1 <- makeZStat(d, verbose=F, sortData=F, FUN=weighted.mean, w)
     expect_is(res1, "cmip5data")
     
     myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
-    res2 <- makeZStat(d, verbose=F, FUN=myfunc, w)
+    res2 <- makeZStat(d, verbose=F, sortData=F, FUN=myfunc, w)
     expect_is(res1, "cmip5data")
     
     # Are the result values correct?    
