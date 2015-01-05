@@ -53,6 +53,8 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     if(verbose) cat("Defining NetCDF dimensions...")
     dimlist <- list()
     if(!is.null(x$lon) & !is.null(x$lat)) {
+        assert_that(!is.null(x$debug$lonUnit))
+        assert_that(!is.null(x$debug$latUnit))
         londim <- ncdf4::ncdim_def("lon", x$debug$lonUnit, x$lon)
         latdim <- ncdf4::ncdim_def("lat", x$debug$latUnit, x$lat)
         dimlist <- list(londim, latdim) # for now assume no Z/time        
@@ -60,11 +62,15 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     
     # Define Z and time dimensions, if present
     if(!is.null(x$Z)) {
+        assert_that(!is.null(x$debug$ZUnit))
         Zdim <- ncdf4::ncdim_def(dimNames[3], x$debug$ZUnit, x$Z)
         dimlist <- list(londim, latdim, Zdim)
     }
     if(!is.null(x$time)) {
-        timedim <- ncdf4::ncdim_def(dimNames[length(dimNames)], x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
+        assert_that(!is.null(x$debug$timeUnit))
+        assert_that(!is.null(x$debug$timeRaw))
+        assert_that(!is.null(x$calendarStr))
+        timedim <- ncdf4::ncdim_def(dimNames[length(dimNames)], x$debug$timeUnit, x$debug$timeRaw, calendar=x$calendarStr)
         dimlist[[length(dimlist)+1]] <- timedim     
     }
     
@@ -98,7 +104,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     if(!is.null(x$time)) {
         if(verbose) cat("Writing time\n")
         timevar <- ncdf4::ncvar_def(dimNames[4], x$debug$timeUnit, timedim)
-        ncdf4::ncvar_put(nc, timevar, x$time) 
+        ncdf4::ncvar_put(nc, timevar, x$debug$timeRaw) 
     }
     
     # Get package version number, allowing that there might not be one
