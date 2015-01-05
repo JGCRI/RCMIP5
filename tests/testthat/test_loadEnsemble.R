@@ -149,3 +149,12 @@ test_that("loadEnsemble handles time-only data", {
     expect_is(d, "cmip5data")
     # TODO: check dimensions
 })
+
+test_that("loadEnsemble detects overlapping files", {
+        
+    path <- "testdata_overlap"
+    # These two files (saved by saveNetCDF) have overlapping time periods
+    
+    expect_error(loadEnsemble("var", "m", "ex", path=path))
+})
+
