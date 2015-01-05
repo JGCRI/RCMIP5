@@ -287,7 +287,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         # Update running time data
         if(!is.null(thisTimeRaw)) {
             # Any overlap between this file's time array and previous data?
-            if(min(length(timeRaw) && min(thisTimeRaw) < max(timeRaw))) {
+#            print(thisTimeArr)
+            if(!is.null(timeArr) && min(thisTimeArr) < max(timeArr)) {
                 stop("Time overlap between files; this should not occur")
             }
          
