@@ -111,14 +111,33 @@ test_that("makeAnnualStat handles custom function and dots", {
     d$val$year <- floor(d$val$time)
     ans <- aggregate(value~lon+lat+year, data=d$val, FUN=weighted.mean, w=w)
     
-    res1 <- makeAnnualStat(d, verbose=F, sortData=F, FUN=weighted.mean, w)
+    res1 <- makeAnnualStat(d, verbose=F, sortData=F, filterNum=T, FUN=weighted.mean, w)
     expect_is(res1, "cmip5data")
     
     myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
-    res2 <- makeAnnualStat(d, verbose=F, sortData=F, FUN=myfunc, w)
+    res2 <- makeAnnualStat(d, verbose=F, sortData=F, filterNum=T, FUN=myfunc, w)
     expect_is(res1, "cmip5data")
     
     # Are the result values correct?    
     expect_equal(res1$val$value, ans$value)
     expect_equal(res2$val$value, ans$value)
+})
+
+test_that("makeAnnualStat handles missing months", {
+    years <- 1850:1851
+    llsize <- 2
+    d <- cmip5data(years, lonsize=llsize, latsize=llsize)
+    d$val$value <- 1
+    
+    res1 <- makeAnnualStat(d)
+    expect_equal(res1$numPerYear, c(12, 12))
+    
+    d2 <- d
+    d2$val <- d$val[d$val$time != d$val$time[1],]
+    
+    res2 <- makeAnnualStat(d2)
+    expect_equal(res2$numPerYear, c(12))
+    res3 <- makeAnnualStat(d2, filterNum=F)
+    expect_equal(res3$numPerYear, c(11, 12))
+    
 })

@@ -8,6 +8,8 @@
 #' @param x A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
 #' @param sortData logical. Sort \code{x} and \code{area} before computing?
+#' @param filterNum logical. Only keep the years which share the most common time number of entries.
+#' For example, only keep years with 12 months.
 #' @param FUN function. Function to apply across months of year
 #' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the annual
@@ -24,8 +26,7 @@
 #' summary(makeAnnualStat(d, FUN=sd))
 #' @seealso \code{\link{makeZStat}} \code{\link{makeGlobalStat}} \code{\link{makeMonthlyStat}}
 #' @export
-makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
-    
+makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN=mean, ...) {
     # Sanity checks
     assert_that(class(x)=="cmip5data")
     assert_that(is.flag(verbose))
@@ -45,17 +46,39 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
                 arrange()            
         }
         
-        x$val$year <- floor(x$val$time)   
+        x$val$year <- floor(x$val$time) 
+        
                 
         # Instead of "summarise(value=FUN(value, ...))", we use the do()
         # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
         # the ellipses cause big problems. This solution thanks to Dennis
         # Murphy on the manipulatr listesrv.
         x$val <- group_by(x$val, lon, lat, Z, year) %>%
-            do(data.frame(value = FUN(.$value, ...))) %>%
+            do(data.frame(value = FUN(.$value, ...),
+                          counts = length(.$value))) %>%
             ungroup()
+        freqTable <- unique(x$val[,c('year', 'counts')])
+        
+        if(filterNum){
+            if(verbose){
+                print('Filtering based on number in annual aggregation: ')
+                print(freqTable)
+                print('number required: ')
+                print(freqTable$year[which.max(freqTable$counts)] )
+            }
+            x$val <- x$val[x$val$count == max(freqTable$counts), 
+                           c('lon', 'lat', 'Z', 'year', 'value')]
+            x$numPerYear <- freqTable$counts[freqTable$counts == max(freqTable$counts)]
+        }else{
+            x$val <- x$val[,c('lon', 'lat', 'Z', 'year', 'value')]
+            x$numPerYear <- freqTable$counts[order(freqTable$year)]
+        }
         x$val$time <- x$val$year
         x$val$year <- NULL
+        
+        if(verbose){
+            print(head(x$val))
+        }
         
         # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
         # command above may have removed some lon/lat combinations
@@ -71,9 +94,9 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
     
     if(verbose) cat('\nTook', timer[3], 's\n')
     
-    x$numPerYear <- as.data.frame(table(floor(x$time)))$Freq
-    x$time <- unique(floor(x$time))
+    x$time <- sort(freqTable$year)
     x$debug$timeFreqStr <- "years (summarized)"
+    x$debug$AnnualFreqTable <- freqTable
     addProvenance(x, paste("Calculated", 
                            paste(deparse(substitute(FUN)), collapse="; "),
                            "for years", min(x$time), "-", max(x$time)))
