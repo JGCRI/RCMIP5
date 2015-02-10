@@ -77,3 +77,9 @@ test_that("as.array works", {
     expect_is(arr, "array")
     expect_equal(dim(arr), c(10, 10, 1, 36))
 })
+
+test_that("weighted.mean works", {
+ 
+    
+})
+

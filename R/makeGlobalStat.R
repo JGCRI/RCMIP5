@@ -21,20 +21,21 @@
 #' This function is more complicated than the other make...Stat functions, because
 #' it provides explicit support for area-weighted functions. We expect that 
 #' weighted.mean and a weighted sum will be the most frequent
-#' calculations needed. The former is built into R, and the latter can generally
-#' be calculated as weighted.mean * sum(area). A user-supplied stat function must 
+#' calculations needed. Note that the base R \code{weighted.mean} function doesn't
+#' work well for CMIP5 data, and so \code{cmip5.weighted.mean} is used as a default
+#' function. Any other user-supplied stat function must 
 #' follow the weighted.mean syntax, in particular accepting parameters 'x' 
 #' (data) and 'w' (weights) of equal size, as well as dots(...).
 #' @note If \code{x} and optional \code{area} are not in the same order, make
 #' sure to specify \code{sortData=TRUE}.
-#' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeMonthlyStat}} 
+#' @seealso \code{\link{makeAnnualStat}} \code{\link{makeZStat}} \code{\link{makeMonthlyStat}} \code{\link{cmip5.weighted.mean}}
 #' @examples
 #' d <- cmip5data(1970:1975)   # sample data
 #' makeGlobalStat(d)
 #' summary(makeGlobalStat(d))
 #' @export
 makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE, 
-                           FUN=weighted.mean, ...) {
+                           FUN=cmip5.weighted.mean, ...) {
     
     # Sanity checks
     assert_that(class(x)=="cmip5data")
@@ -97,13 +98,3 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
                            paste(deparse(substitute(FUN)), collapse="; "),
                            "for lon and lat"))
 } # makeGlobalStat
-
-#' Weighted sum--i.e., sum of weighted means. Convenience function
-#'
-#' @param x vector of data
-#' @param w vector of weights
-#' @param ... passed on to weighted.mean
-#' @return Weighted mean multipled by sum of weights.
-#' @export
-#' @seealso \code{\link{weighted.mean}}
-weighted.sum <- function(x, w=rep(1, length(x)), ...) weighted.mean(x, w, ...) * sum(w)

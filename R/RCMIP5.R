@@ -407,3 +407,23 @@ makePackageData <- function(path="./sampledata", maxSize=Inf, outpath="./data") 
         }
     }
 } # makePackageData
+
+#' Alternative weighted mean
+#'
+#' @param x vector of data
+#' @param w vector of weights
+#' @param na.rm Remove NAs in both data and weights?
+#' @return Weighted mean of \code{x}, using weights \code{d}.
+#' @details The \code{stats} version of weighted.mean doesn't handle weights in a very 
+#' useful way. Specifically, it will remove missing \code{x} values, but not missing weights.
+#' A fair number of CMIP5 models have \code{NA} values in their grid areas, so this will
+#' quickly cause problems. This function removes (if \code{na.rm=TRUE}) missing observations
+#' and weights before computing the weighted mean.
+#' @export
+#' @seealso \code{\link{weighted.mean}}
+cmip5.weighted.mean <- function(x, w=rep(1, length(x)), na.rm=TRUE) {
+    assert_that(length(x) == length(w))
+    na <- FALSE
+    if(na.rm) na <- is.na(x) | is.na(w)
+    sum((x*w)[!na]) / sum(w[!na])
+} # cmip5.weighted.mean
