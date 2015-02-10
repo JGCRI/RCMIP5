@@ -5,13 +5,41 @@ date: "January 18, 2015"
 output: html_document
 ---
 
-* Paragraph on CMIP5 [ktb]
+**Introduction to CMIP5 [ktb]**
 
-* Paragraph on need for CMIP5 summaries?
-    + i.e. applications outside of climate science
+Introduction.
+the Coupled Model Intercomparison Project Phase 5 (CMIP5).
 
-* Paragraph on R, reproducibility/provenance, open science [bbl]
+**Need for CMIP5 summaries?**
 
-* Incorporate vignette
+Everyone has to summarize CMIP5 data in some way to work with it, reinventing wheel each time. This is nontrivial, and because of the many quirks of the CMIP5 database (despite best intentions of modeling teams, whom we applaud):
 
-* Conclusions
+* different grids, years
+* inconsistencies in netcdf file format and assumptions
+* other?
+
+
+**R, reproducibility/provenance, open science [bbl]**
+
+Here we introduce the *RCMIP5* package--collection of software tools--for working with CMIP5 data. This package aims to provide a reproducible, robust, and high-performance set of functions to (i) explore what data have been downloaded from CMIP5 archives, (ii) identify missing data, (iii) average (or apply other mathematical operations) across experimental ensembles, (iv) produce both temporal and spatial statistical summaries, and (v) produce easy-to-work-with graphical and data summaries. The package also includes pre-summarized global means for a variety of frequent model outputs such as atmospheric CO2 and global mean temperature.
+
+RCMIP5 is written in R (http://www.r-project.org), the open-source statistical language increasingly used for data processing and analysis across many scientific disciplines {Tippmann, 2014 #4171}. Open source is particularly importance in climate and global change-related fields {Easterbrook, 2014 #4137}, but increasingly practiced and demanded in general. RCMIP5 supports reproducible research in computation science {Peng, 2011 #4187}{Boettiger, 2014 #4185}, first by being freely available and open source; in its explicit support for tracking data *provenance*; and by including cryptographic hashes (checksums) of its data processing steps.
+
+**Example**
+
+Incorporate vignette.
+
+**Conclusions**
+
+We hope RCMIP5 will be a useful, flexible, and high-performance tool for researchers working with CMIP5 data, enabling faster, better, more reproducible science. We welcome contributions and ideas...
+
+
+**References**
+
+Boettiger, C.: An introduction to Docker for reproducible research, with examples from the R environment, arXiv, http://arxiv.org/abs/1410.0846, arXiv:1410.0846, 2014.
+
+Easterbrook, S. M.: Open code for open science?, Nature Geoscience, 7, 779-781, 10.1038/ngeo2283, 2014.
+
+Tippmann, S.: Programming tools: Adventures with R, Nature, 517, 109-110, 10.1038/517109a, 2014.
+
+Wolkovich, E. M., Regetz, J., and O'Connor, M. I.: Advances in global change research require open science by individual researchers, Global Change Biol., 18, 2102-2110, 10.1111/j.1365-2486.2012.02693.x, 2012.
