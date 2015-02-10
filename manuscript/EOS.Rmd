@@ -5,29 +5,51 @@ date: "January 18, 2015"
 output: html_document
 ---
 
-**Introduction to CMIP5 [ktb]**
+**Introduction to CMIP5 [ch]**
 
 Introduction.
 the Coupled Model Intercomparison Project Phase 5 (CMIP5).
 
-**Need for CMIP5 summaries?**
+**Need for CMIP5 summaries?[bbl/ktb]**
 
-Everyone has to summarize CMIP5 data in some way to work with it, reinventing wheel each time. This is nontrivial, and because of the many quirks of the CMIP5 database (despite best intentions of modeling teams, whom we applaud):
+CMIP5 variables are provided at a range of temporal resolutions depending on the modeling center discression. In addition, beyond a few key variables, not every proposed variable is simulated and/or supplied by each model. This can make managing downloads and model intercomparion difficult. As a result there are a few key function which are repeated over and over again when studies work with CMIP5 simulations, reinventing wheel each time. This is both time intenstive and nontrivial, because of the many quirks of the CMIP5 database (despite best intentions of modeling teams, whom we applaud):
 
-* different grids, years
-* inconsistencies in netcdf file format and assumptions
-* other?
+* different grids, resolutions, and years
+* inconsistencies in netcdf file formats (ie. missing variables coded differently, variable split into multiple files based on time)
+* inconsistant variable aggrigation (ie. some models report land fraction which impacts global land means/totals)
 
 
 **R, reproducibility/provenance, open science [bbl]**
 
-Here we introduce the *RCMIP5* package--collection of software tools--for working with CMIP5 data. This package aims to provide a reproducible, robust, and high-performance set of functions to (i) explore what data have been downloaded from CMIP5 archives, (ii) identify missing data, (iii) average (or apply other mathematical operations) across experimental ensembles, (iv) produce both temporal and spatial statistical summaries, and (v) produce easy-to-work-with graphical and data summaries. The package also includes pre-summarized global means for a variety of frequent model outputs such as atmospheric CO2 and global mean temperature.
+Here we introduce the *RCMIP5* package--collection of software tools--for working with CMIP5 data. This package aims to provide a reproducible, robust, and high-performance set of functions to (i) explore what data have been downloaded from CMIP5 archives, (ii) identify missing data, (iii) spatial/temporal slicing and average (or apply other mathematical operations) across experimental ensembles, (iv) produce both temporal and spatial statistical summaries, and (v) produce easy-to-work-with graphical and data summaries. The package also includes pre-summarized global means for a variety of frequent model outputs such as atmospheric CO2 and global mean temperature.
 
 RCMIP5 is written in R (http://www.r-project.org), the open-source statistical language increasingly used for data processing and analysis across many scientific disciplines {Tippmann, 2014 #4171}. Open source is particularly importance in climate and global change-related fields {Easterbrook, 2014 #4137}, but increasingly practiced and demanded in general. RCMIP5 supports reproducible research in computation science {Peng, 2011 #4187}{Boettiger, 2014 #4185}, first by being freely available and open source; in its explicit support for tracking data *provenance*; and by including cryptographic hashes (checksums) of its data processing steps.
 
 **Example**
 
-Incorporate vignette.
+We touch on a few of the basic functions included in this package. A more detailed vingette is available through CRAN.
+
+```{r loaddefaults, echo=FALSE}
+library(RCMIP5)
+mypath <- "../sampledata"
+```
+
+```{r loaddefaults, eval=FALSE}
+library(RCMIP5)
+mypath <- "~/my/path/to/data"
+```
+
+CMIP5 includes a large number of simulations which can result in thousands of files that need to be managed for model intercomparison studies. We provided several functions to assist with this including the following example where a single variable-experiment is extracted from the list of downloaded CMIP5 files.
+
+```{r checkdownloads}
+c5files <- getFileInfo(mypath)
+print(knitr::kable(head(c5files)))
+
+nbpfiles <- subset(c5files, variable=="nbp" & experiment=="historical")
+print(knitr::kable(nbpfiles))
+```
+
+TODO Slice, world plot and global seasonal mean or annual mean
 
 **Conclusions**
 
