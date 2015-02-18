@@ -10,6 +10,14 @@ output: html_document
 Introduction.
 the Coupled Model Intercomparison Project Phase 5 (CMIP5).
 
+The 5th Coupled Model Intercomparison Project (CMIP5) consists of a series of coordinated model experiments that provide the framework to address three key questions: 1) what are the mechanisms responsible for model differences in feedbacks particularly within the carbon cycle and clouds, 2) how well can we predict climate on multiple time scales, and 3) why do similarly forced models produce a range of responses (Taylor et al., 2012).  CMIP5 produced multiple simulations, decadal hindcasts and predictions, long-term simulations, atmosphere-only, and four future scenario simulations.  More than 20 modeling groups from all over the world used more than 50 models to performed aspects of these simulations.  CMIP5 allows for new opportunities of model evaluation, fundamental science exploration, and understanding impacts and policy issues under changing climate scenarios. 
+
+Reference:
+Taylor, K. E., Stouffer, R. J., and Meehl, G. A.: An Overview of CMIP5 and the Experiment Design, Bulletin of the American Meteorological Society, 93, 485-498, 10.1175/BAMS-D-11-00094.1, 2012.
+
+
+
+
 **Need for CMIP5 summaries?[bbl/ktb]**
 
 CMIP5 variables are provided at a range of temporal resolutions depending on the modeling center discression. In addition, beyond a few key variables, not every proposed variable is simulated and/or supplied by each model. This can make managing downloads and model intercomparion difficult. As a result there are a few key function which are repeated over and over again when studies work with CMIP5 simulations, reinventing wheel each time. This is both time intenstive and nontrivial, because of the many quirks of the CMIP5 database (despite best intentions of modeling teams, whom we applaud):
