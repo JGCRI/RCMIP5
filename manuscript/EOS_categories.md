@@ -1,4 +1,4 @@
-http://onlinelibrary.wiley.com/journal/10.1002/%28ISSN%292324-9250/homepage/categories_of_contributions.htm
+https://eos.org/learn-more-about-eos/view-editorial-policies
 
 # Categories of Contributions
 
