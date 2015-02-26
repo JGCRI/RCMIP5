@@ -5,20 +5,11 @@ date: "January 18, 2015"
 output: html_document
 ---
 
-**Introduction to CMIP5 [ch]**
+**Need for future climate projections and CMIP5**
 
-Introduction.
-the Coupled Model Intercomparison Project Phase 5 (CMIP5).
+TODO: paragraph on frequent need for past/future climate projections by biogeoscientists, ecologists, policy makers, etc. Define ESM.
 
-The 5th Coupled Model Intercomparison Project (CMIP5) consists of a series of coordinated model experiments that provide the framework to address three key questions: 1) what are the mechanisms responsible for model differences in feedbacks particularly within the carbon cycle and clouds, 2) how well can we predict climate on multiple time scales, and 3) why do similarly forced models produce a range of responses (Taylor et al., 2012).  CMIP5 produced multiple simulations, decadal hindcasts and predictions, long-term simulations, atmosphere-only, and four future scenario simulations.  More than 20 modeling groups from all over the world used more than 50 models to performed aspects of these simulations.  CMIP5 allows for new opportunities of model evaluation, fundamental science exploration, and understanding impacts and policy issues under changing climate scenarios. 
-
-Reference:
-Taylor, K. E., Stouffer, R. J., and Meehl, G. A.: An Overview of CMIP5 and the Experiment Design, Bulletin of the American Meteorological Society, 93, 485-498, 10.1175/BAMS-D-11-00094.1, 2012.
-
-
-
-
-**Need for CMIP5 summaries?[bbl/ktb]**
+One of the most common source of such data is the archive of the 5th Coupled Model Intercomparison Project (CMIP5). CMIP5 consisted of a series of coordinated ESM experiments addressing three key questions: identifying the mechanisms responsible for model differences in feedbacks, particularly within the carbon cycle and clouds; quantifying how well models predict climate on multiple time scales; and examining why similarly forced models produce a range of responses (Taylor et al., 2012). CMIP5 produced multiple simulations from more than 20 modeling groups worldwide, including decadal hindcasts and predictions, long-term simulations, atmosphere-only, and four future scenario simulations. More than 20 modeling groups from all over the world used more than 50 models for CMIP5. The resulting model outputs allows have enabled model evaluation, fundamental science exploration, and understanding impacts and policy issues under changing climate scenarios.
 
 CMIP5 variables are provided at a range of temporal resolutions depending on the modeling center discression. In addition, beyond a few key variables, not every proposed variable is simulated and/or supplied by each model. This can make managing downloads and model intercomparion difficult. As a result there are a few key function which are repeated over and over again when studies work with CMIP5 simulations, reinventing wheel each time. This is both time intenstive and nontrivial, because of the many quirks of the CMIP5 database (despite best intentions of modeling teams, whom we applaud):
 
@@ -26,10 +17,9 @@ CMIP5 variables are provided at a range of temporal resolutions depending on the
 * inconsistencies in netcdf file formats (ie. missing variables coded differently, variable split into multiple files based on time)
 * inconsistant variable aggrigation (ie. some models report land fraction which impacts global land means/totals)
 
+**RCMIP5 package**
 
-**R, reproducibility/provenance, open science [bbl]**
-
-Here we introduce the *RCMIP5* package--collection of software tools--for working with CMIP5 data. This package aims to provide a reproducible, robust, and high-performance set of functions to (i) explore what data have been downloaded from CMIP5 archives, (ii) identify missing data, (iii) spatial/temporal slicing and average (or apply other mathematical operations) across experimental ensembles, (iv) produce both temporal and spatial statistical summaries, and (v) produce easy-to-work-with graphical and data summaries. The package also includes pre-summarized global means for a variety of frequent model outputs such as atmospheric CO2 and global mean temperature.
+To help researchers deal with these issues, here we introduce the *RCMIP5* package--collection of software tools--for working with CMIP5 data. This package aims to provide a reproducible, robust, and high-performance set of functions to (i) explore what data have been downloaded from CMIP5 archives, (ii) identify missing data, (iii) spatial/temporal slicing and average (or apply other mathematical operations) across experimental ensembles, (iv) produce both temporal and spatial statistical summaries, and (v) produce easy-to-work-with graphical and data summaries. The package also includes pre-summarized global means for a variety of frequent model outputs such as atmospheric CO2 and global mean temperature.
 
 RCMIP5 is written in R (http://www.r-project.org), the open-source statistical language increasingly used for data processing and analysis across many scientific disciplines {Tippmann, 2014 #4171}. Open source is particularly importance in climate and global change-related fields {Easterbrook, 2014 #4137}, but increasingly practiced and demanded in general. RCMIP5 supports reproducible research in computation science {Peng, 2011 #4187}{Boettiger, 2014 #4185}, first by being freely available and open source; in its explicit support for tracking data *provenance*; and by including cryptographic hashes (checksums) of its data processing steps.
 
@@ -69,6 +59,8 @@ We hope RCMIP5 will be a useful, flexible, and high-performance tool for researc
 Boettiger, C.: An introduction to Docker for reproducible research, with examples from the R environment, arXiv, http://arxiv.org/abs/1410.0846, arXiv:1410.0846, 2014.
 
 Easterbrook, S. M.: Open code for open science?, Nature Geoscience, 7, 779-781, 10.1038/ngeo2283, 2014.
+
+Taylor, K. E., Stouffer, R. J., and Meehl, G. A.: An Overview of CMIP5 and the Experiment Design, Bulletin of the American Meteorological Society, 93, 485-498, 10.1175/BAMS-D-11-00094.1, 2012.
 
 Tippmann, S.: Programming tools: Adventures with R, Nature, 517, 109-110, 10.1038/517109a, 2014.
 
