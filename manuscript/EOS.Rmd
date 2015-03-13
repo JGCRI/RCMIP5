@@ -7,7 +7,10 @@ output: html_document
 
 **Need for future climate projections and CMIP5**
 
-TODO: paragraph on frequent need for past/future climate projections by biogeoscientists, ecologists, policy makers, etc. Define ESM.
+It has been noted previously that we are in the middle of one of the largest experiments of mankind. 
+How the Earth system will respond to the addition of CO2 to the atmosphere by various anthropogenic source is of interest not just from an academic prospective but also socital.
+Earth system models allow us to both explore teh societal impacts of climate change but also the connections between dispargent systems within a broader Earth system context.
+
 
 One of the most common source of such data is the archive of the 5th Coupled Model Intercomparison Project (CMIP5). CMIP5 consisted of a series of coordinated ESM experiments addressing three key questions: identifying the mechanisms responsible for model differences in feedbacks, particularly within the carbon cycle and clouds; quantifying how well models predict climate on multiple time scales; and examining why similarly forced models produce a range of responses (Taylor et al., 2012). CMIP5 produced multiple simulations from more than 20 modeling groups worldwide, including decadal hindcasts and predictions, long-term simulations, atmosphere-only, and four future scenario simulations. More than 20 modeling groups from all over the world used more than 50 models for CMIP5. The resulting model outputs allows have enabled model evaluation, fundamental science exploration, and understanding impacts and policy issues under changing climate scenarios.
 
@@ -27,8 +30,9 @@ RCMIP5 is written in R (http://www.r-project.org), the open-source statistical l
 
 We touch on a few of the basic functions included in this package. A more detailed vingette is available through CRAN.
 
-```{r loaddefaults, echo=FALSE}
+```{r loaddefaultsTrue, echo=FALSE}
 library(RCMIP5)
+library(plyr)
 mypath <- "../sampledata"
 ```
 
