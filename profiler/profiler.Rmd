@@ -1,0 +1,14 @@
+---
+title: "Profile the various load/aggregation options for large & small files"
+author: "K Todd-Brown (ktoddbrown@gmail.com); Ben Bond-Lamberty"
+date: "March 26, 2015"
+output: html_document
+---
+
+Run package loads/calcs
+
+Run 'pure' hard coded loads/calcs w/ 1) data.frame 2) array 3) raster.
+
+Table by model: size of org file, time to load, size of loaded variable, time to merge 2 ensembles, time to calculate annual mean, time to calc global mean, time to calc annual -> global mean
+
+Report machine: # core, CPU speed, memory
