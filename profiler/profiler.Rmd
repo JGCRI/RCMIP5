@@ -5,7 +5,7 @@ date: "March 26, 2015"
 output: html_document
 ---
 
-Run package loads/calcs
+Run package loads/calcs w/ current git committ number
 
 Run 'pure' hard coded loads/calcs w/ 1) data.frame 2) array 3) raster.
 
