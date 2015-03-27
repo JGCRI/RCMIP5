@@ -5,10 +5,39 @@ date: "March 26, 2015"
 output: html_document
 ---
 
-Run package loads/calcs w/ current git committ number
+Run RCMIP5 loads/calcs 1) current package 2) current git commit number
 
 Run 'pure' hard coded loads/calcs w/ 1) data.frame 2) array 3) raster.
 
 Table by model: size of org file, time to load, size of loaded variable, time to merge 2 ensembles, time to calculate annual mean, time to calc global mean, time to calc annual -> global mean
 
+Big model: CCSM4 (404417K) gpp - historical
+Small model: HadGEM2-ES (32649K) nbp - historical
+
 Report machine: # core, CPU speed, memory
+
+```{r setup}
+small.file <- list(model='HadGEM2-ES', experiment='historical', variable='nbp', ensemble=list('r3i1p1', 'r4i1p1'), domain=list('Lmon', 'Lmon'), path='../sampledata/monthly', filename=list('../sampledata/monthly/nbp_Lmon_HadGEM2-ES_historical_r3i1p1_195912-198411.nc','../sampledata/monthly/nbp_Lmon_HadGEM2-ES_historical_r4i1p1_195912-198411.nc'))
+
+```
+
+```{r RCMIP5small, cache=TRUE}
+library(RCMIP5)
+
+variableTime <- system.time(firstVar <- loadCMIP5(model=small.file$model, variable=small.file$variable, experiment=small.file$experiment, ensemble=small.file$ensemble[[1]], domain=small.file$domain[[1]], path=small.file$path))[3]
+
+mergeTime <- system.time(mergeVar <- loadCMIP5(model=small.file$model, variable=small.file$variable, experiment=small.file$experiment, domain=small.file$domain[[1]], path=small.file$path))[3]
+
+annualTime <- system.time(annualVar <- makeAnnualStat(firstVar))[3]
+
+globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
+
+report.df <- data.frame(method=paste('RCMIP5', packageVersion('RCMIP5'), sep='v'), 
+                 loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
+                 fileSize=file.info(small.file$filename[[1]])$size, 
+                 loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
+row.names(report.df) <- NULL
+
+print(report.df)
+```
+
