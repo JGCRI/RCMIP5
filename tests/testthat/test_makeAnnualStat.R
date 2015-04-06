@@ -123,21 +123,17 @@ test_that("makeAnnualStat handles custom function and dots", {
     expect_equal(res2$val$value, ans$value)
 })
 
-test_that("makeAnnualStat handles missing months", {
+test_that("makeAnnualStat computes numPerYear correctly", {
     years <- 1850:1851
-    llsize <- 2
-    d <- cmip5data(years, lonsize=llsize, latsize=llsize)
-    d$val$value <- 1
+    d <- cmip5data(years)
     
     res1 <- makeAnnualStat(d)
     expect_equal(res1$numPerYear, c(12, 12))
     
-    d2 <- d
-    d2$val <- d$val[d$val$time != d$val$time[1],]
-    
-    res2 <- makeAnnualStat(d2)
+    # Get rid of first month. makeAnnualStat should drop this month when completeYears is TRUE
+    d$val <- d$val[d$val$time != d$val$time[1],] 
+    res2 <- makeAnnualStat(d, filterNum=TRUE)
     expect_equal(res2$numPerYear, c(12))
-    res3 <- makeAnnualStat(d2, filterNum=F)
+    res3 <- makeAnnualStat(d, filterNum=FALSE)
     expect_equal(res3$numPerYear, c(11, 12))
-    
 })

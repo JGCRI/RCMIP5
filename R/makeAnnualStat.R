@@ -48,7 +48,6 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
         
         x$val$year <- floor(x$val$time) 
         
-                
         # Instead of "summarise(value=FUN(value, ...))", we use the do()
         # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
         # the ellipses cause big problems. This solution thanks to Dennis
@@ -59,24 +58,23 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
             ungroup()
         freqTable <- unique(x$val[,c('year', 'counts')])
         
-        if(filterNum){
-            if(verbose){
+        if(filterNum) {
+            if(verbose) {
                 print('Filtering based on number in annual aggregation: ')
                 print(freqTable)
                 print('number required: ')
                 print(freqTable$year[which.max(freqTable$counts)] )
             }
-            x$val <- x$val[x$val$count == max(freqTable$counts), 
-                           c('lon', 'lat', 'Z', 'year', 'value')]
+            x$val <- x$val[x$val$count == max(freqTable$counts),]
             x$numPerYear <- freqTable$counts[freqTable$counts == max(freqTable$counts)]
-        }else{
-            x$val <- x$val[,c('lon', 'lat', 'Z', 'year', 'value')]
+        } else {
             x$numPerYear <- freqTable$counts[order(freqTable$year)]
         }
+        x$val <- x$val[c('lon', 'lat', 'Z', 'year', 'value')]
         x$val$time <- x$val$year
         x$val$year <- NULL
         
-        if(verbose){
+        if(verbose) {
             print(head(x$val))
         }
         
