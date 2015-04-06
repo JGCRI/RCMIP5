@@ -2,7 +2,6 @@
 
 library(testthat)
 library(ggplot2)
-library(reshape2)
 #library(ncdf4)
 library(digest)
 library(plyr)
