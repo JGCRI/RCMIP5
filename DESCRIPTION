@@ -10,7 +10,6 @@ Description: Working with CMIP5 data can be tricky, forcing scientists to write
 Imports:
     abind (>= 1.4),
     dplyr (>= 0.3),
-    reshape2 (>= 1.4),
     assertthat (>= 0.1),
     digest
 Depends:
@@ -21,7 +20,7 @@ Suggests:
     ncdf (>= 1.6),
     testthat (>= 0.9),
     knitr
-Version: 1.1
+Version: 1.1.9000
 Authors@R: c( person("Ben", "Bond-Lamberty", role = c("aut")),
     person("Kathe", "Todd-Brown", role = c("aut", "cre"), email =
     "ktoddbrown@gmail.com") )
