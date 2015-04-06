@@ -22,16 +22,19 @@ profile_file <- function(...) {
     
     version <- packageVersion("RCMIP5")
     
-    load_time <- system.time(try(x <- loadCMIP5(...)))[3]
+    ef <- function(e) { NA }
+
+    cat("Loading...\n")
+    load_time <- tryCatch(system.time(x <- loadCMIP5(...))[3], error=ef)
     
-    # TODO: change to using tryCatch and return NA if any error
+    size <- format(object.size(x), units="Mb")
     
-    size <- as.numeric(object.size(x))
+    cat("Annual stat...\n")
+    astat_time <- tryCatch(system.time(makeAnnualStat(x, sortData=TRUE))[3], error=ef)
+    cat("Global stat...\n")
+    gstat_time <- tryCatch(system.time(makeGlobalStat(x))[3], error=ef)
     
-    astat_time <- system.time(try(makeAnnualStat(x)))[3]
-    gstat_time <- system.time(try(makeGlobalStat(x)))[3]
-    
-    list(version, load_time, size, astat_time, gstat_time)
+    list('version'=version, 'load_time'=load_time, 'size'=size, 'astat_time'=astat_time, 'gstat_time'=gstat_time)
 }
 
 
