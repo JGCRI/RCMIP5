@@ -128,28 +128,16 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     if(FUNstr == "mean")
         modelTemp$val <- unname(modelTemp$val / length(modelTemp$ensembles))
     
-    # Melt to data frame and fill in dimensional data
-    if(verbose) cat("Melting to data frame\n")
-    df <- reshape2::melt(modelTemp$val, varnames=c("lon", "lat", "Z", "time"))
-    # Fill in dimensional data
-    if(!is.null(modelTemp$lon))
-        df$lon <- as.numeric(modelTemp$lon[df$lon])
-    else 
-        df$lon <- NA
-    if(!is.null(modelTemp$lat))
-        df$lat <- as.numeric(modelTemp$lat[df$lat])
-    else 
-        df$lat <- NA
-    if(!is.null(modelTemp$Z))
-        df$Z <- as.numeric(modelTemp$Z[df$Z])
-    else 
-        df$Z <- NA
-    if(!is.null(modelTemp$time))
-        df$time <- as.numeric(modelTemp$time[df$time])
-    else 
-        df$time <- NA    
-    
-    modelTemp$val <- tbl_df( df ) # wrap as dplyr tbl
+    # Convert the array (from ncdf4) to a data frame (for use with dplyr)
+    if(verbose) cat("Converting to data frame\n")
+    lon <- lat <- Z <- time <- NA
+    if(!is.null(modelTemp$lon)) lon <- modelTemp$lon
+    if(!is.null(modelTemp$lat)) lat <- modelTemp$lat
+    if(!is.null(modelTemp$Z)) Z <- modelTemp$Z
+    if(!is.null(modelTemp$time)) time <- modelTemp$time
+    df <- expand.grid('lon'=lon, 'lat'=lat, 'Z'=Z, 'time'=time)
+    df$value <- as.numeric(modelTemp$val)
+    modelTemp$val <- tbl_df( df ) # wrap as a dplyr tbl
     
     # Update provenance and return
     addProvenance(modelTemp, c(paste("Computed", FUNstr, "of ensembles:",
