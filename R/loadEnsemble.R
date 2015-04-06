@@ -170,6 +170,9 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # At this point, shouldn't have any duplicate values
             if(any(c(duplicated(latArr), duplicated(lonArr))))
                 stop("Duplicate values in this file's lon/lat data")
+            
+            attributes(lonArr) <- NULL
+            attributes(latArr) <- NULL
         }
 
         # Get the time frequency. Note that this should be related to
@@ -223,6 +226,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             
             # Load the actual time
             thisTimeRaw <- .ncvar_get(nc, varid=timeName)
+            attributes(thisTimeRaw) <- NULL
+            
             # convert from days (we assume the units are days) to years
             thisTimeArr <- thisTimeRaw / calendarDayLength + startYr
             
@@ -245,6 +250,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         ZArr <- NULL
         if(length(dimNames) == 4) {
             ZArr <- .ncvar_get(nc, varid=dimNames[3])
+            attributes(ZArr) <- NULL
             ZUnit <- .ncatt_get(nc, dimNames[3], 'units')$value
             if(any(duplicated(ZArr)))
                 stop("Duplicate values in this file's Z data")

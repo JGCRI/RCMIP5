@@ -77,13 +77,13 @@ test_that("loadEnsemble loads 4D data", {
     d <- loadEnsemble('co3','HadGEM2-ES','rcp85','r1i1p1', '[^_]+', 
                       path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_is(d$Z, "array")
+    expect_is(d$Z, "numeric")
     
     path <- "../../sampledata/monthly"
     d <- loadEnsemble('tsl','GFDL-CM3','historicalGHG','r1i1p1', '[^_]+', 
                       path=path, verbose=F)     # test data set
     expect_is(d,"cmip5data")
-    expect_is(d$Z, "array")
+    expect_is(d$Z, "numeric")
 })
 
 test_that("loadEnsemble checks unique domain", {
