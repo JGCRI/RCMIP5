@@ -19,22 +19,24 @@ Report machine: # core, CPU speed, memory
 
 ```{r setup}
 library(RCMIP5)
-source("profiler/profiler.R")
+library(ncdf4)
+library(assertthat)
+source("profiler.R")
 
 small.file <- list(model='HadGEM2-ES', experiment='historical', variable='nbp', ensemble=list('r3i1p1', 'r4i1p1'), domain=list('Lmon', 'Lmon'), path='../sampledata/monthly', filename=list('../sampledata/monthly/nbp_Lmon_HadGEM2-ES_historical_r3i1p1_195912-198411.nc','../sampledata/monthly/nbp_Lmon_HadGEM2-ES_historical_r4i1p1_195912-198411.nc'))
 
 ```
 
 ```{r RCMIP5small, cache=TRUE}
-
-print()
 variableTime <- system.time(firstVar <- loadCMIP5(model=small.file$model, variable=small.file$variable, experiment=small.file$experiment, ensemble=small.file$ensemble[[1]], domain=small.file$domain[[1]], path=small.file$path))[3]
 
 mergeTime <- system.time(mergeVar <- loadCMIP5(model=small.file$model, variable=small.file$variable, experiment=small.file$experiment, domain=small.file$domain[[1]], path=small.file$path))[3]
 
 annualTime <- system.time(annualVar <- makeAnnualStat(firstVar))[3]
 
-globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
+globalVar <- NA
+globalTime <- NA
+#globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
 
 report.df <- data.frame(method=paste('RCMIP5', packageVersion('RCMIP5'), sep='v'), 
                  loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
@@ -45,3 +47,112 @@ row.names(report.df) <- NULL
 print(report.df)
 ```
 
+```{r arraySmall, cache=TRUE}
+loadNCDF <- function(filename, varStr){
+    nc <- nc_open(filename, write=FALSE)
+    ans <- ncvar_get(nc, varid=varStr)
+    
+    dimNames <- unlist(lapply(nc$var[[varStr]]$dim, FUN=function(x) { x$name }))
+    # Get the time unit (e.g. 'days since 1860')
+    timeName <- dimNames[length(dimNames)]
+    timeUnit <- ncatt_get(nc, timeName, 'units')$value
+    # Get the type of calendar used (e.g. 'noleap')
+    calendarStr <- ncatt_get(nc, timeName, 'calendar')$value
+    calendarUnitsStr <- ncatt_get(nc, timeName, 'units')$value
+            
+    # Extract the number of days in a year
+    if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)) {
+        calendarDayLength <- as.numeric(regmatches(calendarStr,
+                                                   regexpr('\\d{3}', calendarStr)))
+        } else {
+            calendarDayLength <- 365
+            }
+    
+    # Extract the year we are references in calendar
+    # Set the default to year 1, month 1, day 1, hour 0, min 0, sec 0
+    defaultCalendarArr <- c(1, 1, 1, 0, 0, 0)
+    
+    # Split the calandar unit string based on a '-', space, or ':'
+    # ...this allows us to deal with YYYY-MM-DD hh:mm:ss, YYYY-MM-DD, or
+    # ...YYYY-M-D
+    calendarArr <- unlist(strsplit(calendarUnitsStr, split='[- :]'))
+    
+    # Check that the time is going to be in days otherwise latter
+    # ...calculations for time array break
+    assert_that(any(grepl('day', calendarArr)))
+    
+    # extract just the digits
+    calendarArr <- as.numeric(calendarArr[grepl('^\\d+$', calendarArr)])
+    
+    # swap the default values with the extracted values, we assume
+    # ... that years are listed before months, before days, and so on
+    temp <- defaultCalendarArr
+    temp[1:length(calendarArr)] <- calendarArr
+    calendarArr <- temp
+    
+    # calculate the decimal starting year
+    startYr <- sum((calendarArr - c(0, 1, 1, 0, 0, 0))
+                   / c(1, 12, calendarDayLength, calendarDayLength*24,
+                       calendarDayLength*24*60, calendarDayLength*24*60*60))
+    
+    # Load the actual time
+    thisTimeRaw <- ncvar_get(nc, varid=timeName)
+    attributes(thisTimeRaw) <- NULL
+    
+    # convert from days (we assume the units are days) to years
+    thisTimeArr <- thisTimeRaw / calendarDayLength + startYr
+    
+    nc_close(nc)
+    return(list(val=ans, time=thisTimeArr))
+}
+
+variableTime <- system.time(firstVar <- loadNCDF(small.file$filename[[1]], varStr=small.file$variable)$val)[3]
+
+mergeTime <- system.time(mergeVar <- (loadNCDF(small.file$filename[[1]], varStr=small.file$variable)$val + loadNCDF(small.file$filename[[2]], varStr=small.file$variable)$val)/2)[3]
+
+annualTime <- system.time(
+    {temp <- loadNCDF(small.file$filename[[1]], varStr=small.file$variable)
+    rawYrs <- table(floor(temp$time))
+    yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
+    annualVar <- vapply(unique(yrs), FUN=function(yrNum){apply(temp$val[,,yrNum == yrs], c(1,2), mean)}, FUN.VALUE=temp$val[,,1])})[3]
+
+globalTime <- NA
+globalVar <- NA
+#globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
+
+temp <- data.frame(method='ncdf-array', 
+                 loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
+                 fileSize=file.info(small.file$filename[[1]])$size, 
+                 loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
+row.names(temp) <- NULL
+report.df <- rbind(report.df, temp)
+```
+
+```{r dataFrameSmall, cache=TRUE}
+toDF <- function(ncdfload){
+    ans <- melt(ncdfload$val)
+    ans$Var3 <- ncdfload$time[ans$Var3]
+    names(ans) <- c('lonIndex', 'latIndex', 'time', 'val')
+    return(ans)
+}
+ variableTime <- system.time(firstVar <- toDF(loadNCDF(small.file$filename[[1]], varStr=small.file$variable)))[3]
+
+# mergeTime <- system.time(mergeVar <- (loadNCDF(small.file$filename[[1]], varStr=small.file$variable)$val + loadNCDF(small.file$filename[[2]], varStr=small.file$variable)$val)/2)[3]
+# 
+# annualTime <- system.time(
+#     {temp <- loadNCDF(small.file$filename[[1]], varStr=small.file$variable)
+#     rawYrs <- table(floor(temp$time))
+#     yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
+#     annualVar <- vapply(unique(yrs), FUN=function(yrNum){apply(temp$val[,,yrNum == yrs], c(1,2), mean)}, FUN.VALUE=temp$val[,,1])})[3]
+
+globalTime <- NA
+globalVar <- NA
+#globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
+
+temp <- data.frame(method='ncdf-array', 
+                 loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
+                 fileSize=file.info(small.file$filename[[1]])$size, 
+                 loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
+row.names(temp) <- NULL
+report.df <- rbind(report.df, temp)
+```
