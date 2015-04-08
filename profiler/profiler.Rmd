@@ -21,30 +21,40 @@ Report machine: # core, CPU speed, memory
 library(RCMIP5)
 library(ncdf4)
 library(assertthat)
+library(reshape2)
+library(plyr)
+library(raster)
 source("profiler.R")
 
-small.file <- list(model='HadGEM2-ES', experiment='historical', variable='nbp', ensemble=list('r3i1p1', 'r4i1p1'), domain=list('Lmon', 'Lmon'), path='../sampledata/monthly', filename=list('../sampledata/monthly/nbp_Lmon_HadGEM2-ES_historical_r3i1p1_195912-198411.nc','../sampledata/monthly/nbp_Lmon_HadGEM2-ES_historical_r4i1p1_195912-198411.nc'))
+small.file <- list(model='HadGEM2-ES', experiment='historical', variable='nbp', ensemble=list('r3i1p1', 'r4i1p1'), domain=list('Lmon', 'Lmon'), path='../sampledata/monthly', 
+                   areafile='../sampledata/fx/areacella_fx_HadGEM2-ES_historical_r0i0p0.nc',
+                   filename=list('../sampledata/monthly/nbp_Lmon_HadGEM2-ES_historical_r3i1p1_195912-198411.nc','../sampledata/monthly/nbp_Lmon_HadGEM2-ES_historical_r4i1p1_195912-198411.nc'))
 
 ```
 
 ```{r RCMIP5small, cache=TRUE}
-variableTime <- system.time(firstVar <- loadCMIP5(model=small.file$model, variable=small.file$variable, experiment=small.file$experiment, ensemble=small.file$ensemble[[1]], domain=small.file$domain[[1]], path=small.file$path))[3]
 
-mergeTime <- system.time(mergeVar <- loadCMIP5(model=small.file$model, variable=small.file$variable, experiment=small.file$experiment, domain=small.file$domain[[1]], path=small.file$path))[3]
+profileRCMIP5 <- function(file.info){
+    variableTime <- system.time(firstVar <- loadCMIP5(model=file.info$model, variable=file.info$variable, experiment=file.info$experiment, ensemble=file.info$ensemble[[1]], domain=file.info$domain[[1]], path=file.info$path))[3]
+    
+    mergeTime <- system.time(mergeVar <- loadCMIP5(model=file.info$model, variable=file.info$variable, experiment=file.info$experiment, domain=file.info$domain[[1]], path=file.info$path))[3]
+    
+    annualTime <- system.time(annualVar <- makeAnnualStat(firstVar))[3]
+    
+    globalVar <- NA
+    globalTime <- NA
+    #globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
+    
+    temp <- data.frame(method=paste('RCMIP5', packageVersion('RCMIP5'), sep='v'), 
+                       loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=NA, 
+                       fileSize=file.info(file.info$filename[[1]])$size, 
+                       loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = NA)
+    row.names(temp) <- NULL
+    
+    return(temp)
+}
 
-annualTime <- system.time(annualVar <- makeAnnualStat(firstVar))[3]
-
-globalVar <- NA
-globalTime <- NA
-#globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
-
-report.df <- data.frame(method=paste('RCMIP5', packageVersion('RCMIP5'), sep='v'), 
-                 loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
-                 fileSize=file.info(small.file$filename[[1]])$size, 
-                 loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
-row.names(report.df) <- NULL
-
-print(report.df)
+report.df <- profileRCMIP5(small.file)
 ```
 
 ```{r arraySmall, cache=TRUE}
@@ -53,6 +63,7 @@ loadNCDF <- function(filename, varStr){
     ans <- ncvar_get(nc, varid=varStr)
     
     dimNames <- unlist(lapply(nc$var[[varStr]]$dim, FUN=function(x) { x$name }))
+    if('time' %in% dimNames){
     # Get the time unit (e.g. 'days since 1860')
     timeName <- dimNames[length(dimNames)]
     timeUnit <- ncatt_get(nc, timeName, 'units')$value
@@ -101,58 +112,145 @@ loadNCDF <- function(filename, varStr){
     
     # convert from days (we assume the units are days) to years
     thisTimeArr <- thisTimeRaw / calendarDayLength + startYr
-    
+    }else{
+        thisTimeArr <- NULL
+    }
     nc_close(nc)
     return(list(val=ans, time=thisTimeArr))
 }
 
-variableTime <- system.time(firstVar <- loadNCDF(small.file$filename[[1]], varStr=small.file$variable)$val)[3]
+profileArray <- function(file.info){
+    variableTime <- system.time(firstVar <- loadNCDF(file.info$filename[[1]], varStr=file.info$variable))[3]
+    
+    mergeTime <- system.time(mergeVar <- (loadNCDF(file.info$filename[[1]], varStr=file.info$variable)$val + loadNCDF(file.info$filename[[2]], varStr=file.info$variable)$val)/2)[3]
+    
+    annualTime <- system.time(
+        {
+            rawYrs <- table(floor(firstVar$time))
+            yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
+            annualVar <- vapply(unique(yrs), FUN=function(yrNum){apply(firstVar$val[,,yrNum == yrs], c(1,2), mean)}, FUN.VALUE=firstVar$val[,,1])
+            })[3]
+    
+    globalTime <- system.time({
+        area.ls <- loadNCDF(file.info$areafile, 'areacella')
+        globalVar <- apply(annualVar, c(3), function(x){sum(x*area.ls$val, na.rm=TRUE)})
+        })[3]
+    
+    print(sprintf('annual global summary for %s-%s-%s', file.info$model, file.info$experiment, file.info$variable))
+    print(globalVar)
+    
+    temp <- data.frame(method='ncdf-array', 
+                       loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
+                       fileSize=file.info(file.info$filename[[1]])$size, 
+                       loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
+    row.names(temp) <- NULL
+    return(temp)
+}
 
-mergeTime <- system.time(mergeVar <- (loadNCDF(small.file$filename[[1]], varStr=small.file$variable)$val + loadNCDF(small.file$filename[[2]], varStr=small.file$variable)$val)/2)[3]
-
-annualTime <- system.time(
-    {temp <- loadNCDF(small.file$filename[[1]], varStr=small.file$variable)
-    rawYrs <- table(floor(temp$time))
-    yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
-    annualVar <- vapply(unique(yrs), FUN=function(yrNum){apply(temp$val[,,yrNum == yrs], c(1,2), mean)}, FUN.VALUE=temp$val[,,1])})[3]
-
-globalTime <- NA
-globalVar <- NA
-#globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
-
-temp <- data.frame(method='ncdf-array', 
-                 loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
-                 fileSize=file.info(small.file$filename[[1]])$size, 
-                 loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
-row.names(temp) <- NULL
-report.df <- rbind(report.df, temp)
+report.df <- rbind(report.df, profileArray(small.file))
 ```
 
 ```{r dataFrameSmall, cache=TRUE}
+
 toDF <- function(ncdfload){
     ans <- melt(ncdfload$val)
-    ans$Var3 <- ncdfload$time[ans$Var3]
-    names(ans) <- c('lonIndex', 'latIndex', 'time', 'val')
+    if(is.null(ncdfload$time)){
+        names(ans) <- c('lonIndex', 'latIndex', 'val')
+    }else{ 
+        ans$Var3 <- ncdfload$time[ans$Var3]
+        names(ans) <- c('lonIndex', 'latIndex', 'time', 'val')
+    }
     return(ans)
 }
- variableTime <- system.time(firstVar <- toDF(loadNCDF(small.file$filename[[1]], varStr=small.file$variable)))[3]
 
-# mergeTime <- system.time(mergeVar <- (loadNCDF(small.file$filename[[1]], varStr=small.file$variable)$val + loadNCDF(small.file$filename[[2]], varStr=small.file$variable)$val)/2)[3]
-# 
-# annualTime <- system.time(
-#     {temp <- loadNCDF(small.file$filename[[1]], varStr=small.file$variable)
-#     rawYrs <- table(floor(temp$time))
-#     yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
-#     annualVar <- vapply(unique(yrs), FUN=function(yrNum){apply(temp$val[,,yrNum == yrs], c(1,2), mean)}, FUN.VALUE=temp$val[,,1])})[3]
-
-globalTime <- NA
-globalVar <- NA
-#globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
-
-temp <- data.frame(method='ncdf-array', 
+profileDataframe <- function(file.info){
+    variableTime <- system.time(firstVar <- toDF(loadNCDF(file.info$filename[[1]], varStr=file.info$variable)))[3]
+    
+    mergeTime <- system.time({
+        firstVar <- toDF(loadNCDF(file.info$filename[[1]], varStr=file.info$variable))
+        secondVar <- toDF(loadNCDF(file.info$filename[[1]], varStr=file.info$variable))                     
+        mergeVar <- merge(firstVar, secondVar, by=c('lonIndex', 'latIndex', 'time'))
+        mergeVar$val <- (mergeVar$val.x + mergeVar$val.y)/2
+        mergeVar$val.x <- NULL
+        mergeVar$val.y <- NULL
+        })[3]
+    
+    annualTime <- system.time(
+        {firstVar$yrs <- floor(firstVar$time)
+         annualVar <- ddply(firstVar, c('lonIndex', 'latIndex', 'yrs'), function(x){
+             if(length(x$val) != 12){
+                 return(data.frame(val=NA))
+                 }else{
+                     return(data.frame(val=mean(x$val)))
+                     }
+             firstVar$yrs <- NULL
+             return(ans)})
+         })[3]
+    
+    globalTime <- system.time({
+        area.ls <- toDF(loadNCDF(file.info$areafile, 'areacella'))
+        globalVar <- merge(annualVar, area.ls, by=c('lonIndex', 'latIndex'))
+        globalVar <- ddply(globalVar, c('yrs'), function(x){
+            data.frame(val=sum(x$val.x*x$val.y, na.rm=TRUE))
+            })
+        })[3]
+    
+    print(sprintf('annual global summary for %s-%s-%s', file.info$model, file.info$experiment, file.info$variable))
+    print(globalVar$yrs)
+    print(globalVar$val)
+    
+    temp <- data.frame(method='ncdf-dataframe', 
                  loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
-                 fileSize=file.info(small.file$filename[[1]])$size, 
+                 fileSize=file.info(file.info$filename[[1]])$size, 
                  loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
 row.names(temp) <- NULL
-report.df <- rbind(report.df, temp)
+    return(temp)
+}
+
+report.df <- rbind(report.df, profileDataframe(small.file))
+```
+
+```{r rasterInMemory, cache=TRUE}
+#file.info <- small.file
+
+profileRasterInMemory <- function(file.info){
+    variableTime <- system.time(firstVar <- stack(file.info$filename[[1]]))[3]
+    
+    mergeTime <- system.time({
+            firstVar <- stack(file.info$filename[[1]])
+            secondVar <- stack(file.info$filename[[1]])                     
+            mergeVar <- (firstVar + secondVar)/2
+            })[3]
+    
+    annualTime <- system.time({
+        yrs <- as.numeric(substr(names(firstVar), 2, 5))
+        annualVar <- stackApply(firstVar, yrs - yrs[1] + 1, mean)
+        names(annualVar) <- unique(yrs)
+    })[3]
+    
+    globalTime <- system.time({
+        areaVar <- raster(file.info$areafile, varname='areacella')
+        globalVar <- cellStats(annualVar*areaVar, stat='sum')
+        names(globalVar) <- names(annualVar)
+    })[3]
+    
+    print(sprintf('annual global summary for %s-%s-%s', file.info$model, file.info$experiment, file.info$variable))
+    print(globalVar)
+    
+    temp <- data.frame(method='raster', 
+                     loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
+                     fileSize=file.info(file.info$filename[[1]])$size, 
+                     fileReadSize=object.size(firstVar)[[1]], inMemSize= object.size(mergeVar)[[1]], 
+                     annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
+    return(temp)
+}
+#report.df <- profileRasterInMemory(small.file)
+report.df <- merge(report.df, profileRasterInMemory(small.file), all=TRUE)
+
+```
+
+```{r}
+report.df[,grepl('Size$', names(report.df))] <- report.df[,grepl('Size$', names(report.df))]/1e6
+names(report.df)[,grepl('Size$', names(report.df))] <- paste(names(report.df)[,grepl('Size$', names(report.df))], '[Mb]')
+print(knitr::kable(report.df))
 ```

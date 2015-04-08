@@ -20,6 +20,7 @@ ToddBrown/anuGrid
 #R data files
 *.RData
 #image files
+*_cache
 *.pdf
 *.png
 *.R#
