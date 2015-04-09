@@ -78,7 +78,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         temp <- loadEnsemble(variable, model, experiment, ensemble, domain,
                              path=path, verbose=verbose, recursive=recursive,
                              force.ncdf=force.ncdf, yearRange=yearRange)
-
+        
         # If nothing loaded, skip and go on to next ensemble
         if(is.null(temp)) next
         
@@ -87,9 +87,9 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         } else {
             # Make sure lat-lon-Z-time match
             if(all(identical(temp$lat, modelTemp$lat) &
-                       identical(temp$lon, modelTemp$lon) &
-                       identical(temp$Z, modelTemp$Z) &
-                       identical(temp$time, modelTemp$time))) {
+                   identical(temp$lon, modelTemp$lon) &
+                   identical(temp$Z, modelTemp$Z) &
+                   identical(temp$time, modelTemp$time))) {
                 
                 # Add this ensemble's data and record file and ensemble loaded
                 if(FUNstr %in% c("min", "max")) { # for min and max, compute as we go
@@ -130,12 +130,36 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     
     # Convert the array (from ncdf4) to a data frame (for use with dplyr)
     if(verbose) cat("Converting to data frame\n")
-    lon <- lat <- Z <- time <- NA
-    if(!is.null(modelTemp$lon)) lon <- modelTemp$lon
-    if(!is.null(modelTemp$lat)) lat <- modelTemp$lat
-    if(!is.null(modelTemp$Z)) Z <- modelTemp$Z
-    if(!is.null(modelTemp$time)) time <- modelTemp$time
-    df <- expand.grid('lon'=lon, 'lat'=lat, 'Z'=Z, 'time'=time)
+    
+    ndims <- length(dim(modelTemp$lon))
+    attributes(modelTemp$lon) <- NULL
+    attributes(modelTemp$lat) <- NULL
+    
+    # Some models provide two-dimensional arrays of their (possibly
+    # irregular) lon and lat values. In this case, use only those pairs
+    if(ndims > 1) {
+        assert_that(length(modelTemp$lon) == length(modelTemp$lat))
+
+        Z <- time <- NA
+        lonlatreps <- length(modelTemp$val) / length(modelTemp$lon)
+        if(!is.null(modelTemp$Z)) Z <- modelTemp$Z
+        if(!is.null(modelTemp$time)) time <- modelTemp$time
+        df <- data.frame('lon'=rep(modelTemp$lon, each=lonlatreps),
+                         'lat'=rep(modelTemp$lon, each=lonlatreps),
+                         'Z'=Z,
+                         'time'=time)
+        
+    } else {
+        # More common: if zero- or one-dimensional lat and lon
+        # In this case generate all combinations
+        lon <- lat <- Z <- time <- NA
+        if(!is.null(modelTemp$lon)) lon <- modelTemp$lon
+        if(!is.null(modelTemp$lat)) lat <- modelTemp$lat
+        if(!is.null(modelTemp$Z)) Z <- modelTemp$Z
+        if(!is.null(modelTemp$time)) time <- modelTemp$time
+        df <- expand.grid('lon'=lon, 'lat'=lat, 'Z'=Z, 'time'=time)
+    }
+
     df$value <- as.numeric(modelTemp$val)
     modelTemp$val <- tbl_df( df ) # wrap as a dplyr tbl
     

@@ -112,10 +112,8 @@ test_that("loadEnsemble handles 2D lon and lat", {
     
     d <- loadEnsemble('tos','GFDL-ESM2G', 'historical', 'r1i1p1', '[^_]+', path=path, verbose=F)
     expect_is(d, "cmip5data")
-    expect_is(d$lon, "numeric")
-    expect_is(d$lat, "numeric")
-    expect_null(dim(d$lon))
-    expect_null(dim(d$lat))    
+    expect_is(d$lon, "matrix")
+    expect_is(d$lat, "matrix")
 })
 
 test_that("loadEnsemble handles data with time length=1", {

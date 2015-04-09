@@ -161,18 +161,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             
             latArr <- .ncvar_get(nc, varid=dimNames[2])
             latUnit <- .ncatt_get(nc, dimNames[2], 'units')$value
-            
-            # Some models provide two-dimensional arrays of their lon and lat values.
-            # (Looking at you, GFDL.) If this occurs, reduce to 1 dimension
-            if(length(dim(lonArr)) > 1) lonArr <- as.vector(lonArr[,1])
-            if(length(dim(latArr)) > 1) latArr <- as.vector(latArr[1,])
-            
-            # At this point, shouldn't have any duplicate values
-            if(any(c(duplicated(latArr), duplicated(lonArr))))
-                stop("Duplicate values in this file's lon/lat data")
-            
-            attributes(lonArr) <- NULL
-            attributes(latArr) <- NULL
         }
 
         # Get the time frequency. Note that this should be related to

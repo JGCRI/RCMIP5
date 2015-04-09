@@ -49,7 +49,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
     if(is.null(area)) {
         if(verbose) cat("No grid areas supplied; using calculated values\n")
         x <- addProvenance(x, "About to compute global stat. Grid areas calculated.")
-        areavals <- expand.grid('lon'=x$lon, 'lat'=x$lat)
+        areavals <- x$val[c('lon', 'lat')]
         areavals$value <- as.numeric(calcGridArea(x$lon, x$lat, verbose=verbose))
     } else {
         assert_that(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
