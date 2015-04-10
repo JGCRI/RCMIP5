@@ -145,7 +145,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         if(!is.null(modelTemp$Z)) Z <- modelTemp$Z
         if(!is.null(modelTemp$time)) time <- modelTemp$time
         df <- data.frame('lon'=rep(modelTemp$lon, each=lonlatreps),
-                         'lat'=rep(modelTemp$lon, each=lonlatreps),
+                         'lat'=rep(modelTemp$lat, each=lonlatreps),
                          'Z'=Z,
                          'time'=time)
         
