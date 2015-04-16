@@ -28,3 +28,5 @@ inst/doc
 
 cran-comments.md
 
+
+profiler/profiler_cache/*
