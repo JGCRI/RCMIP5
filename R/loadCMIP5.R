@@ -29,7 +29,7 @@
 #' @export
 loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_]+',
                       path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
-                      FUN=mean, yearRange=NULL) {
+                      FUN=mean, yearRange=NULL, loadAs='data.frame') {
     
     # Sanity checks - parameters are correct type and length
     assert_that(length(variable)==1 & is.character(variable))
@@ -160,8 +160,15 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         df <- expand.grid('lon'=lon, 'lat'=lat, 'Z'=Z, 'time'=time)
     }
 
-    df$value <- as.numeric(modelTemp$val)
-    modelTemp$val <- tbl_df( df ) # wrap as a dplyr tbl
+    
+    if(identical(loadAs, 'data.frame')){
+        df$value <- as.numeric(modelTemp$val)
+        modelTemp$val <- tbl_df( df ) # wrap as a dplyr tbl
+    }else if(identical(loadAs, 'array')){
+        #do nothing
+    }else{
+        stop('loadAs is not recognized')
+    }
     
     # Update provenance and return
     addProvenance(modelTemp, c(paste("Computed", FUNstr, "of ensembles:",

@@ -293,9 +293,17 @@ summary.cmip5data <- function(object, ...) {
     
     ans$time <- paste0(object$debug$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
     ans$size <- as.numeric(object.size(object))
-    ans$valsummary <- c(min(object$val$value, na.rm=TRUE),
+    if(identical(class(object$val), 'data.frame')){
+        ans$valsummary <- c(min(object$val$value, na.rm=TRUE),
                         mean(object$val$value, na.rm=TRUE),
                         max(object$val$value, na.rm=TRUE))
+    }else if(identical(class(object$val), 'array')){
+        ans$valsummary <- c(min(object$val, na.rm=TRUE),
+                            mean(object$val, na.rm=TRUE),
+                            max(object$val, na.rm=TRUE))
+    }else{
+        stop('Class of value is not recognized.')
+    }
     ans$provenance <- object$provenance
     
     return(ans)
@@ -312,8 +320,7 @@ summary.cmip5data <- function(object, ...) {
 print.summary.cmip5data <- function(x, ...) {
     cat(x$type, "\n")
     cat("Variable: ", x$variable, " (", x$valUnit, ") from model ", x$model, "\n", sep="")
-    cat("Data range: ", round(x$valsummary[1], 2), "-", round(x$valsummary[3], 2),
-        "  Mean: ", round(x$valsummary[2], 2), "\n", sep="")
+    cat(sprintf("Data range: %.2g to %.2g Mean: %.2g\n", x$valsummary[1], x$valsummary[3],  x$valsummary[2]))
     cat("Experiment:", x$experiment, "-", length(x$ensembles), "ensemble(s)\n")
     cat("Spatial dimensions:", x$spatial, "\n")
     cat("Time dimension:", x$time, "\n")
