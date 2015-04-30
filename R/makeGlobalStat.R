@@ -57,6 +57,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
         }
     } else {
         assert_that(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
+        assert_that(identical(class(area$val) & class(x$val)))
         x <- addProvenance(x, "About to compute global stat. Grid areas from following data:")
         x <- addProvenance(x, area)
         areavals <- area$val
@@ -66,7 +67,10 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
     # Main computation code
     timer <- system.time({ # time the main computation
         if(identical(class(x$val), 'array')){
+            myDim <- dim(x$val)
             x$val <- apply(x$val, c(3,4), function(xx){FUN(xx, areavals, ...)})
+            myDim[1:2] <- c(1,1)
+            dim(x$val) <- myDim
         }else{
             # Suppress stupid NOTEs from R CMD CHECK
             lon <- lat <- Z <- time <- value <- `.` <- NULL
