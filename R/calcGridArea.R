@@ -19,10 +19,15 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     if(verbose) cat('Calculating grid cell areas...\n')
     numLat <- length(lat)
     numLon <- length(lon)
+    
+    lat <- sort(lat)
+    lon <- sort(lon)
 
     # Check that the latitudes are centered in the grids
     if(any(abs(lat) == 90)) {
-        stop('No grid cell can be centered at pole.')
+        warning('Grid cell cannot be centered at pole. Resetting to half-way between pole and last grid.')
+        lat[1] <- mean(lat[1:2])
+        lat[numLat] <- mean(lat[numLat-0:1])
     }
 
     # If for some reason we have a -180:180 lon base, reset to span 0:360
