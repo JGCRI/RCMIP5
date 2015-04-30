@@ -35,66 +35,88 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
     
     # Main computation code
     timer <- system.time({  # time the main computation, below
-        
-        # Suppress stupid NOTEs from R CMD CHECK
-        lon <- lat <- Z <- time <- year <- value <- `.` <- NULL
-        
-        # Put data in consistent order BEFORE overwriting time
-        if(sortData) {
-            if(verbose) cat("Sorting data...\n")
-            x$val <- group_by(x$val, lon, lat, Z, time) %>%
-                arrange()            
-        }
-        
-        x$val$year <- floor(x$val$time) 
-        
-        # Instead of "summarise(value=FUN(value, ...))", we use the do()
-        # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
-        # the ellipses cause big problems. This solution thanks to Dennis
-        # Murphy on the manipulatr listesrv.
-        x$val <- group_by(x$val, lon, lat, Z, year) %>%
-            do(data.frame(value = FUN(.$value, ...),
-                          counts = length(.$value))) %>%
-            ungroup()
-        freqTable <- unique(x$val[,c('year', 'counts')])
-        
-        if(filterNum) {
-            if(verbose) {
-                print('Filtering based on number in annual aggregation: ')
-                print(freqTable)
-                print('number required: ')
-                print(freqTable$year[which.max(freqTable$counts)] )
+        if(identical(class(x$val), 'array')){
+            rawYrs <- table(floor(x$time))
+            if(filterNum){
+                yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
             }
-            x$val <- x$val[x$val$count == max(freqTable$counts),]
-            x$numPerYear <- freqTable$counts[freqTable$counts == max(freqTable$counts)]
-        } else {
-            x$numPerYear <- freqTable$counts[order(freqTable$year)]
-        }
-        x$val <- x$val[c('lon', 'lat', 'Z', 'year', 'value')]
-        x$val$time <- x$val$year
-        x$val$year <- NULL
-        
-        if(verbose) {
-            print(head(x$val))
-        }
-        
-        # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
-        # command above may have removed some lon/lat combinations
-        if(length(unique(x$val$lon)) < length(x$lon) |
-               length(unique(x$val$lat)) < length(x$lat)) {
-            if(verbose) cat("Replacing missing lon/lat combinations\n")
+            myDim <- dim(x$val)
+            x$val <- vapply(yrs, 
+                                FUN=function(yrNum){
+                                    temp <- x$val[,,,yrNum == floor(x$time)]
+                                    myDim[4] <- sum(yrNum == floor(x$time))
+                                    dim(temp) <- myDim
+                                    temp <- apply(temp, c(1,2,3), FUN)#, ...)
+                                    myDim[4] <- 1
+                                    dim(temp) <- myDim
+                                    return(temp)}, 
+                                FUN.VALUE=x$val[,,,1])
+            myDim[4] <- length(yrs)
+            dim(x$val) <- myDim
+            x$time <- yrs
+            x$debug$AnnualFreqTable <- rawYrs
+        }else{
             
-            # Fix this by generating all lon/lat pairs and combining with answer
-            full_data <- tbl_df(expand.grid(lon=x$lon, lat=x$lat))
-            x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
+            # Suppress stupid NOTEs from R CMD CHECK
+            lon <- lat <- Z <- time <- year <- value <- `.` <- NULL
+            
+            # Put data in consistent order BEFORE overwriting time
+            if(sortData) {
+                if(verbose) cat("Sorting data...\n")
+                x$val <- group_by(x$val, lon, lat, Z, time) %>%
+                    arrange()            
+            }
+            
+            x$val$year <- floor(x$val$time) 
+            
+            # Instead of "summarise(value=FUN(value, ...))", we use the do()
+            # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
+            # the ellipses cause big problems. This solution thanks to Dennis
+            # Murphy on the manipulatr listesrv.
+            x$val <- group_by(x$val, lon, lat, Z, year) %>%
+                do(data.frame(value = FUN(.$value, ...),
+                              counts = length(.$value))) %>%
+                ungroup()
+            freqTable <- unique(x$val[,c('year', 'counts')])
+            
+            if(filterNum) {
+                if(verbose) {
+                    print('Filtering based on number in annual aggregation: ')
+                    print(freqTable)
+                    print('number required: ')
+                    print(freqTable$year[which.max(freqTable$counts)] )
+                }
+                x$val <- x$val[x$val$count == max(freqTable$counts),]
+                x$numPerYear <- freqTable$counts[freqTable$counts == max(freqTable$counts)]
+            } else {
+                x$numPerYear <- freqTable$counts[order(freqTable$year)]
+            }
+            x$val <- x$val[c('lon', 'lat', 'Z', 'year', 'value')]
+            x$val$time <- x$val$year
+            x$val$year <- NULL
+            
+            if(verbose) {
+                print(head(x$val))
+            }
+            
+            # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
+            # command above may have removed some lon/lat combinations
+            if(length(unique(x$val$lon)) < length(x$lon) |
+                   length(unique(x$val$lat)) < length(x$lat)) {
+                if(verbose) cat("Replacing missing lon/lat combinations\n")
+                
+                # Fix this by generating all lon/lat pairs and combining with answer
+                full_data <- tbl_df(expand.grid(lon=x$lon, lat=x$lat))
+                x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
+            }
+            x$time <- sort(freqTable$year)
+            x$debug$AnnualFreqTable <- freqTable
         }
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
     
-    x$time <- sort(freqTable$year)
     x$debug$timeFreqStr <- "years (summarized)"
-    x$debug$AnnualFreqTable <- freqTable
     addProvenance(x, paste("Calculated", 
                            paste(deparse(substitute(FUN)), collapse="; "),
                            "for years", min(x$time), "-", max(x$time)))
