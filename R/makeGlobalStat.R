@@ -57,7 +57,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
         }
     } else {
         assert_that(identical(x$lat, area$lat) & identical(x$lon, area$lon))  # must match
-        assert_that(identical(class(area$val) & class(x$val)))
+        assert_that(identical(class(area$val), class(x$val)))
         x <- addProvenance(x, "About to compute global stat. Grid areas from following data:")
         x <- addProvenance(x, area)
         areavals <- area$val
