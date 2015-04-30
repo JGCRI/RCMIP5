@@ -49,7 +49,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
     if(is.null(area)) {
         if(verbose) cat("No grid areas supplied; using calculated values\n")
         x <- addProvenance(x, "About to compute global stat. Grid areas calculated.")
-        if(identical(class(x$value), 'array')){
+        if(identical(class(x$val), 'array')){
             areavals <- calcGridArea(x$lon, x$lat, verbose=verbose)
         }else{
             areavals <- data.frame(lon=rep(x$lon, times=length(x$lat)), lat=rep(x$lat, each=length(x$lon)),
@@ -65,40 +65,45 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
     
     # Main computation code
     timer <- system.time({ # time the main computation
-        
-        # Suppress stupid NOTEs from R CMD CHECK
-        lon <- lat <- Z <- time <- value <- `.` <- NULL
-        
-        # The data may be (but hopefully are not) out of order, and if 
-        # the user specifies to `sortData`, arrange everything so that 
-        # area and data order is guaranteed to match. This is expensive, though
-        if(sortData) {
-            if(verbose) cat("Sorting data...\n")
-            areavals <- group_by(areavals, lon, lat) %>%
-                arrange()
-            x$val <- group_by(x$val, Z, time, lon, lat) %>% 
-                arrange()            
-        } else if(missing(sortData) & !missing(area)) {
-            warning("Note: 'area' supplied but 'sortData' unspecified; no sorting performed")
+        if(identical(class(x$val), 'array')){
+            x$val <- apply(x$val, c(3,4), function(xx){FUN(xx, areavals, ...)})
+        }else{
+            # Suppress stupid NOTEs from R CMD CHECK
+            lon <- lat <- Z <- time <- value <- `.` <- NULL
+            
+            # The data may be (but hopefully are not) out of order, and if 
+            # the user specifies to `sortData`, arrange everything so that 
+            # area and data order is guaranteed to match. This is expensive, though
+            if(sortData) {
+                if(verbose) cat("Sorting data...\n")
+                areavals <- group_by(areavals, lon, lat) %>%
+                    arrange()
+                x$val <- group_by(x$val, Z, time, lon, lat) %>% 
+                    arrange()            
+            } else if(missing(sortData) & !missing(area)) {
+                warning("Note: 'area' supplied but 'sortData' unspecified; no sorting performed")
+            }
+            
+            # Instead of "summarise(value=FUN(value, ...))", we use the do()
+            # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
+            # the ellipses cause big problems. This solution thanks to Dennis
+            # Murphy on the manipulatr listesrv.        
+            if(verbose) cat("Calculating data...\n")
+            x$val <- group_by(x$val, Z, time) %>%
+                do(data.frame(value = FUN(.$value, areavals$value, ...))) %>%
+                ungroup() 
+            x$val$lon <- NA
+            x$val$lat <- NA
+            x[c('lat', 'lon')] <- NULL  
         }
-        
-        # Instead of "summarise(value=FUN(value, ...))", we use the do()
-        # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
-        # the ellipses cause big problems. This solution thanks to Dennis
-        # Murphy on the manipulatr listesrv.        
-        if(verbose) cat("Calculating data...\n")
-        x$val <- group_by(x$val, Z, time) %>%
-            do(data.frame(value = FUN(.$value, areavals$value, ...))) %>%
-            ungroup()    
     }) # system.time
     
     if(verbose) cat('Took', timer[3], 's\n')
     
     # Finish up
-    x$val$lon <- NA
-    x$val$lat <- NA
+    x$lat <- NULL
+    x$lon <- NULL
     x$numCells <- length(areavals)
-    x[c('lat', 'lon')] <- NULL    
     addProvenance(x, paste("Computed", 
                            paste(deparse(substitute(FUN)), collapse="; "),
                            "for lon and lat"))
