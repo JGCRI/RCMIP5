@@ -18,7 +18,9 @@ Small model: HadGEM2-ES (32649K) nbp - historical
 Report machine: # core, CPU speed, memory
 
 ```{r setup}
-library(RCMIP5)
+#library(RCMIP5)
+RDirPath <- '../R'
+source("../sourceall.R")
 library(ncdf4)
 library(assertthat)
 library(reshape2)
@@ -41,10 +43,10 @@ profileRCMIP5 <- function(file.info){
     
     annualTime <- system.time(annualVar <- makeAnnualStat(firstVar))[3]
     
-    globalVar <- NA
-    globalTime <- NA
-    #globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
-    
+    #globalVar <- NA
+    #globalTime <- NA
+    globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
+    print(globalVar$val$value)
     temp <- data.frame(method=paste('RCMIP5', packageVersion('RCMIP5'), sep='v'), 
                        loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=NA, 
                        fileSize=file.info(file.info$filename[[1]])$size, 
@@ -55,6 +57,30 @@ profileRCMIP5 <- function(file.info){
 }
 
 report.df <- profileRCMIP5(small.file)
+```
+
+```{r CMIP5Array, cache=TRUE}
+profileRCMIP5Array <- function(file.info){
+    variableTime <- system.time(firstVar <- loadCMIP5(model=file.info$model, variable=file.info$variable, experiment=file.info$experiment, ensemble=file.info$ensemble[[1]], domain=file.info$domain[[1]], path=file.info$path, loadAs='array'))[3]
+    
+    mergeTime <- system.time(mergeVar <- loadCMIP5(model=file.info$model, variable=file.info$variable, experiment=file.info$experiment, domain=file.info$domain[[1]], path=file.info$path, loadAs='array'))[3]
+    
+    annualTime <- system.time(annualVar <- makeAnnualStat(firstVar))[3]
+    
+    globalTime <- system.time(globalVar <- makeGlobalStat(annualVar))[3]
+    print(globalVar$val[TRUE])
+    temp <- data.frame(method=paste('RCMIP5.array', packageVersion('RCMIP5'), sep='v'), 
+                       loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=NA, 
+                       fileSize=file.info(file.info$filename[[1]])$size, 
+                       loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = NA)
+    row.names(temp) <- NULL
+    
+    return(temp)
+}
+
+
+report.df <- rbind(report.df, profileRCMIP5Array(small.file))
+
 ```
 
 ```{r arraySmall, cache=TRUE}
@@ -149,6 +175,8 @@ profileArray <- function(file.info){
 
 report.df <- rbind(report.df, profileArray(small.file))
 ```
+
+
 
 ```{r dataFrameSmall, cache=TRUE}
 
@@ -248,9 +276,11 @@ profileRasterInMemory <- function(file.info){
 report.df <- merge(report.df, profileRasterInMemory(small.file), all=TRUE)
 
 ```
-
+```{r}
+save(report.df, file='profiler.RData')
+```
 ```{r}
 report.df[,grepl('Size$', names(report.df))] <- report.df[,grepl('Size$', names(report.df))]/1e6
-names(report.df)[,grepl('Size$', names(report.df))] <- paste(names(report.df)[,grepl('Size$', names(report.df))], '[Mb]')
+names(report.df)[grepl('Size$', names(report.df))] <- paste(names(report.df)[grepl('Size$', names(report.df))], '[Mb]')
 print(knitr::kable(report.df))
 ```
