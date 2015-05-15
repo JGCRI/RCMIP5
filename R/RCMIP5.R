@@ -221,7 +221,7 @@ cmip5data <- function(x=list(),
 #' @keywords internal
 print.cmip5data <- function(x, ...) {
     
-    if(is.null(x$variable)) {
+    if(all(unlist(lapply(x, is.null)))) {
         cat("(Empty cmip5data object)")
         return()
     }
