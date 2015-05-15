@@ -7,7 +7,7 @@ getProjectionMatrix <- function(orgArea, projArea, verbose=FALSE){
     assert_that(all(!apply(projArea$lon, c(2), is.unsorted)), all(!apply(projArea$lat, c(1), is.unsorted)))
 
     extractBounds <- function(lat, lon){
-        ans <- list(lat=lat, lon=lon, area)
+        ans <- list(lat=lat, lon=lon)
         ans$maxLat <- cbind((lat[,(2:dim(lat)[2])] + lat[,(2:dim(lat)[2])-1])/2, 90)
         ans$minLat <- cbind(-90, (lat[,(2:dim(lat)[2])] + lat[,(2:dim(lat)[2])-1])/2)
         ans$maxLon <- rbind((lon[(2:dim(lon)[1]), ] + lon[(2:dim(lon)[1])-1, ])/2, 
@@ -81,8 +81,12 @@ regrid <- function(orgVar, projLat, projLon,
     projVar$lon <- projLon
     projVar$lat <- projLat
     if(is.null(projArea)){
-        projArea <- calcGridArea(lon=projLon[,1], lat=projVar$lat[1,])
+        projArea <- list(lon=projLon, lat=projLat, val= calcGridArea(lon=projLon[,1], lat=projVar$lat[1,]))
     }
+    
+    ifelse(length(dim(projArea$val)) == 2,  dim(projArea$val) <- c(dim(projArea$val), 1, 1), dim(projArea$val) <- dim(projArea$val))
+    ifelse(length(dim(orgArea$val)) == 2,  dim(orgArea$val) <- c(dim(orgArea$val), 1, 1), dim(orgArea$val) <- dim(orgArea$val))
+    
     if(is.null(projectionMatrix) | 
            !all(dim(projectionMatrix) == c(prod(dim(orgArea$lat)[1:2]), prod(dim(projVar$lat)[1:2])))){
         projectionMatrix <- getProjectionMatrix(orgArea, projVar)   
@@ -95,11 +99,11 @@ regrid <- function(orgVar, projLat, projLon,
         #print(sum(temp[TRUE], na.rm=TRUE))
         #print(sum(ans[TRUE], na.rm=TRUE))
         #assert_that(sum(temp[TRUE], na.rm=TRUE) - sum(ans[TRUE], na.rm=TRUE) < 1e-6*sum(temp[TRUE], na.rm=TRUE))
-        return(ans/projVar$area[TRUE])
+        return(ans/projArea$val[TRUE])
     })
     dim(projVar$val) <- c(dim(projVar$lat), dim(orgVar$val)[c(3,4)])
     
     projVar$projectionMatrix <- projectionMatrix
-    projVar <- addProvenance(projVar, paste('Shifting grid size from [', dim(orgVar$val), '] to [', dim(projVar$val), ']'))
+    projVar <- addProvenance(projVar, paste('Shifting grid size from [', dim(orgVar$val), '] to [', dim(projVar$val), ']', collapse = ', '))
     return(projVar)
 }

@@ -20,7 +20,7 @@ test_that('regrid returns expected values for simple case', {
     orgLat <- matrix(seq(-90, 90-180/numOrgLat, by=180/numOrgLat) + 180/numOrgLat/2, nrow=numOrgLon, ncol=numOrgLat, byrow=TRUE)
     
     orgArea <- list(lon = orgLon, lat=orgLat, val= matrix(1, nrow=numOrgLon, ncol=numOrgLat))
-    orgVar <- list(lon = orgLon, lat=orgLat, val=rep(1:numOrgLat, times=numOrgLon))
+    orgVar <- cmip5data(x=list(lon = orgLon, lat=orgLat, val=rep(1:numOrgLat, times=numOrgLon)))
     dim(orgVar$val) <- c(numOrgLon, numOrgLat, 1, 1)
    
     numProjLon <- 2
@@ -28,15 +28,29 @@ test_that('regrid returns expected values for simple case', {
     projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, nrow=numProjLon, ncol=numProjLat)
     projLat <- matrix(seq(-90, 90-180/numProjLon, by=180/numProjLon) + 180/numProjLon/2, nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
     projArea <- list(lon = projLon, lat=projLat, val= matrix(1, nrow=numProjLon, ncol=numProjLat))
+    projArea$val <- projArea$val/sum(projArea$val, na.rm=TRUE)*sum(orgArea$val, na.rm=TRUE)
     transferMatrix <- getProjectionMatrix(orgArea = orgArea, projArea=projArea)
-    test <- regrid(orgVar, projLat, projLon)
+    
+    
+    test <- regrid(orgVar, projLat, projLon, orgArea=orgArea, projArea=projArea)
+    
+    expect_equal(test$val[TRUE], c(1, 2, 1, 2) + c(1, 2, 1, 2)*1/3)
 })
 
 test_that('regrid test for data', {
-    d <- regrid(orgVar = loadCMIP5(experiment='historical', variable='nbp', model='HadGEM2-ES', loadAs='array'),
-           projLat=143, projLon=190, 
-           orgArea = loadCMIP5(experiment='historical', variable='areacella', model='HadGEM2-ES', loadAs='array'),
+    numProjLon <- 360
+    numProjLat <- 180
+    projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, nrow=numProjLon, ncol=numProjLat)
+    projLat <- matrix(seq(-90, 90-180/numProjLon, by=180/numProjLon) + 180/numProjLon/2, nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
+    
+    orgVar <- loadCMIP5(experiment='historical', variable='nbp', model='HadGEM2-ES', loadAs='array')
+    orgArea <- loadCMIP5(experiment='historical', variable='areacella', model='HadGEM2-ES', loadAs='array')
+    d <- regrid(orgVar = orgVar, projLat=projLat, projLon=projLon, 
+           orgArea = orgArea,
            verbose=FALSE)
     
+    ##TODO images don't match up... needs debugging
+    image(d$val[,,1,1])
+    image(orgVar$val[,,1,1])
 
 })
