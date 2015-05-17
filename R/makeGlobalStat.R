@@ -43,15 +43,15 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
     assert_that(is.flag(verbose))
     assert_that(is.flag(sortData))
     assert_that(is.function(FUN))
-
+    
     # Get and check area data, using 1's if nothing supplied
     areavals <- NA
     if(is.null(area)) {
         if(verbose) cat("No grid areas supplied; using calculated values\n")
         x <- addProvenance(x, "About to compute global stat. Grid areas calculated.")
-        if(identical(class(x$val), 'array')){
+        if(is.array(x$val)) {
             areavals <- calcGridArea(x$lon, x$lat, verbose=verbose)
-        }else{
+        } else {
             areavals <- data.frame(lon=rep(x$lon, times=length(x$lat)), lat=rep(x$lat, each=length(x$lon)),
                                    value=as.numeric(calcGridArea(x$lon, x$lat, verbose=verbose)))
         }
@@ -66,12 +66,12 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
     
     # Main computation code
     timer <- system.time({ # time the main computation
-        if(identical(class(x$val), 'array')){
+        if(is.array(x$val)) {
             myDim <- dim(x$val)
-            x$val <- apply(x$val, c(3,4), function(xx){FUN(xx, areavals, ...)})
+            x$val <- apply(x$val, c(3,4), function(xx) {FUN(xx, areavals, ...)})
             myDim[1:2] <- c(1,1)
             dim(x$val) <- myDim
-        }else{
+        } else {
             # Suppress stupid NOTEs from R CMD CHECK
             lon <- lat <- Z <- time <- value <- `.` <- NULL
             

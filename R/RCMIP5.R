@@ -170,7 +170,7 @@ cmip5data <- function(x=list(),
             result$dimNames <- c(result$dimNames, NA)
             result$domain <- "fx"
         }
-        if(identical(loadAs, 'data.frame')){
+        if(identical(loadAs, 'data.frame')) {
             # Make data frame, fill it with fake data, wrap as tbl_df
             result$val <- expand.grid(lon=result$lon, lat=result$lat,
                                       Z=result$Z, time=result$time)
@@ -180,7 +180,7 @@ cmip5data <- function(x=list(),
                 result$val$value <- 1
             }      
             result$val <- tbl_df(result$val)
-        }else if(identical(loadAs, 'array')){
+        } else if(identical(loadAs, 'array')) {
             finalDim <- c(length(result$lon), length(result$lat),
                           length(result$Z), length(result$time))
             if(randomize) {
@@ -189,7 +189,7 @@ cmip5data <- function(x=list(),
                 result$val <- rep(1, prod(finalDim))
             } 
             dim(result$val) <- finalDim
-        }else{
+        } else {
             stop('invalid loadAs flag')
         }
         result$valUnit <- "unit"
@@ -304,16 +304,16 @@ summary.cmip5data <- function(object, ...) {
     
     ans$time <- paste0(object$debug$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
     ans$size <- as.numeric(object.size(object))
-    if(identical(class(object$val), 'array')){
+    if(is.array(object$val)) {
         ans$valsummary <- c(min(object$val, na.rm=TRUE),
                             mean(object$val, na.rm=TRUE),
                             max(object$val, na.rm=TRUE))
-    }else{
+    } else {
         ans$valsummary <- c(min(object$val$value, na.rm=TRUE),
-                        mean(object$val$value, na.rm=TRUE),
-                        max(object$val$value, na.rm=TRUE))
-    #}else{
-    #    stop('Class of value is not recognized.')
+                            mean(object$val$value, na.rm=TRUE),
+                            max(object$val$value, na.rm=TRUE))
+        #} else {
+        #    stop('Class of value is not recognized.')
     }
     ans$provenance <- object$provenance
     

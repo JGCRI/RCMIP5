@@ -9,7 +9,7 @@
 #orgLon <- cmip5obj$lon
 #orgLat <- cmip5obj$lat
 #check (?make) orginal area file
-#if(is.null(org_area)){
+#if(is.null(org_area)) {
 #   org_area <- calcGridArea(lon=orgLon, lat=orgLat)
 #}
 

@@ -1,4 +1,4 @@
-if(!'RDirPath' %in% ls()){
+if(!'RDirPath' %in% ls()) {
     RDirPath <- 'R'
 }
 

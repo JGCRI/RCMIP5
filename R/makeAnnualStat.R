@@ -35,27 +35,27 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
     
     # Main computation code
     timer <- system.time({  # time the main computation, below
-        if(identical(class(x$val), 'array')){
+        if(is.array(x$val)) {
             rawYrs <- table(floor(x$time))
-            if(filterNum){
+            if(filterNum) {
                 yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
             }
             myDim <- dim(x$val)
             x$val <- vapply(yrs, 
-                                FUN=function(yrNum){
-                                    temp <- x$val[,,,yrNum == floor(x$time)]
-                                    myDim[4] <- sum(yrNum == floor(x$time))
-                                    dim(temp) <- myDim
-                                    temp <- apply(temp, c(1,2,3), FUN)#, ...)
-                                    myDim[4] <- 1
-                                    dim(temp) <- myDim
-                                    return(temp)}, 
-                                FUN.VALUE=x$val[,,,1])
+                            FUN=function(yrNum) {
+                                temp <- x$val[,,,yrNum == floor(x$time)]
+                                myDim[4] <- sum(yrNum == floor(x$time))
+                                dim(temp) <- myDim
+                                temp <- apply(temp, c(1,2,3), FUN)#, ...)
+                                myDim[4] <- 1
+                                dim(temp) <- myDim
+                                return(temp)}, 
+                            FUN.VALUE=x$val[,,,1])
             myDim[4] <- length(yrs)
             dim(x$val) <- myDim
             x$time <- yrs
             x$debug$AnnualFreqTable <- rawYrs
-        }else{
+        } else {
             
             # Suppress stupid NOTEs from R CMD CHECK
             lon <- lat <- Z <- time <- year <- value <- `.` <- NULL

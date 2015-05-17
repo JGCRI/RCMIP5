@@ -67,7 +67,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     # Parse out the ensemble strings according to CMIP5 specifications for
     # ...file naming conventions
     ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
-                                        function(x){x[5]})))
+                                        function(x) {x[5]})))
     
     if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
     
@@ -87,9 +87,9 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         } else {
             # Make sure lat-lon-Z-time match
             if(all(identical(temp$lat, modelTemp$lat) &
-                   identical(temp$lon, modelTemp$lon) &
-                   identical(temp$Z, modelTemp$Z) &
-                   identical(temp$time, modelTemp$time))) {
+                       identical(temp$lon, modelTemp$lon) &
+                       identical(temp$Z, modelTemp$Z) &
+                       identical(temp$time, modelTemp$time))) {
                 
                 # Add this ensemble's data and record file and ensemble loaded
                 if(FUNstr %in% c("min", "max")) { # for min and max, compute as we go
@@ -139,7 +139,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     # irregular) lon and lat values. In this case, use only those pairs
     if(ndims > 1) {
         assert_that(length(modelTemp$lon) == length(modelTemp$lat))
-
+        
         Z <- time <- NA
         lonlatreps <- length(modelTemp$val) / length(modelTemp$lon)
         if(!is.null(modelTemp$Z)) Z <- modelTemp$Z
@@ -159,14 +159,14 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         if(!is.null(modelTemp$time)) time <- modelTemp$time
         df <- expand.grid('lon'=lon, 'lat'=lat, 'Z'=Z, 'time'=time)
     }
-
     
-    if(identical(loadAs, 'data.frame')){
+    
+    if(identical(loadAs, 'data.frame')) {
         df$value <- as.numeric(modelTemp$val)
         modelTemp$val <- tbl_df( df ) # wrap as a dplyr tbl
-    }else if(identical(loadAs, 'array')){
+    } else if(identical(loadAs, 'array')) {
         #do nothing
-    }else{
+    } else {
         stop('loadAs is not recognized')
     }
     
