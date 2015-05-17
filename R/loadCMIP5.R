@@ -15,6 +15,7 @@
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @param FUN function. Function (mean, min, max, or sum) to apply across ensembles
 #' @param yearRange numeric of length 2. If supplied, load only years of data in this range
+#' @param loadAs a string identifying possible structures for values. Currently: 'data.frame' and 'array' the only valid options.
 #' @return A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
 #' @note The \code{yearRange} parameter is intended to help users deal with large
 #' CMIP5 data files on memory-limited machines, e.g. by allowing them to process

@@ -40,6 +40,7 @@ NULL
 #' @param monthly logical. Monthly (if not, annual) data?
 #' @param randomize logical. Random sample data?
 #' @param verbose logical. Print info as we go?
+#' @param loadAs a string identifying possible structures for values. Currently: 'data.frame' and 'array' the only valid options.
 #' @return A cmip5data object, which is a list with the following fields:
 #'  \item{files}{Array of strings containg the file(s) included in this dataset}
 #'  \item{variable}{String containg the variable name described by this dataset}
