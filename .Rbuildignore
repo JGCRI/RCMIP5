@@ -7,5 +7,6 @@ sampledata/
 sourceall.R
 ToddBrown/
 unused/
+profiler/
 
 ^\.travis\.yml$
