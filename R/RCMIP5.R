@@ -88,6 +88,7 @@ cmip5data <- function(x=list(),
     assert_that(is.flag(monthly))
     assert_that(is.flag(randomize))
     assert_that(is.flag(verbose))
+    assert_that(loadAs %in% c("data.frame", "array"))
     
     if (is.list(x)) {          # If x is a list then we are done.
         # Just cast it directly to a cmip5data object
@@ -110,10 +111,10 @@ cmip5data <- function(x=list(),
             domain="domain",
             val=NULL,
             valUnit=NULL,
-            lon=NA,
-            lat=NA,
-            Z=NA,
-            time=NA,
+            lon=NULL,
+            lat=NULL,
+            Z=NULL,
+            time=NULL,
             dimNames=NULL
         )
         
@@ -126,6 +127,9 @@ cmip5data <- function(x=list(),
             # realistic lon (0 to 360) and lat (-90 to 90) numbers
             result$lon <- 360/lonsize * c(0:(lonsize-1))  + 360/lonsize/2
             result$lat <- 180/latsize * c(0:(latsize-1)) - 90 + 180/latsize/2
+            # Convert to two dimensions
+            result$lon <- array(result$lon, dim=c(lonsize, latsize))
+            result$lat <- array(rep(result$lat, 1, each=lonsize), dim=c(lonsize, latsize))
             result$dimNames=c("lon", "lat")
             debug$lonUnit <- "degrees_east"
             debug$latUnit <- "degrees_north"
@@ -170,40 +174,33 @@ cmip5data <- function(x=list(),
             result$dimNames <- c(result$dimNames, NA)
             result$domain <- "fx"
         }
-        if(identical(loadAs, 'data.frame')) {
-            # Make data frame, fill it with fake data, wrap as tbl_df
-            result$val <- expand.grid(lon=result$lon, lat=result$lat,
-                                      Z=result$Z, time=result$time)
-            if(randomize) {
-                result$val$value <- runif(n=nrow(result$val))
-            } else {
-                result$val$value <- 1
-            }      
-            result$val <- tbl_df(result$val)
-        } else if(identical(loadAs, 'array')) {
-            finalDim <- c(length(result$lon), length(result$lat),
-                          length(result$Z), length(result$time))
-            if(randomize) {
-                result$val <- runif(n=prod(finalDim))
-            } else {
-                result$val <- rep(1, prod(finalDim))
-            } 
-            dim(result$val) <- finalDim
+        
+        # Create the data array
+        finalDim <- c(length(result$lon[,1]), length(result$lat[1,]),
+                      length(result$Z), length(result$time))
+        finalDim <- finalDim[finalDim > 0]
+        if(randomize) {
+            result$val <- runif(n=prod(finalDim))
         } else {
-            stop('invalid loadAs flag')
-        }
+            result$val <- rep(1, prod(finalDim))
+        } 
+        dim(result$val) <- finalDim
+
+        # TODO: KTB - probably want to call restoreMissingDimensions here?
+        # The array isn't guaranteed to be four-dimensional
+        
+        # Miscellany
         result$valUnit <- "unit"
         result$debug <- debug
-        
-        # Change any NA dimension (was needed for expand.grid above) to NULL
-        if(all(is.na(result$lon))) result$lon <- NULL
-        if(all(is.na(result$lat))) result$lat <- NULL
-        if(all(is.na(result$Z))) result$Z <- NULL
-        if(all(is.na(result$time))) result$time <- NULL
         
         # Add debug info and set class
         result <- structure(result, class="cmip5data")
         
+        # Convert to data frame representation, if requested
+        if(loadAs == 'data.frame') {
+            result$val <- convert_array_to_df(result, verbose)
+        }
+
         # Initialize provenance and return
         addProvenance(result, "Dummy data created")
     } else {

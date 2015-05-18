@@ -158,11 +158,21 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             
             lonArr <- .ncvar_get(nc, varid=dimNames[1])
             lonUnit <- .ncatt_get(nc, dimNames[1], 'units')$value
+            lonLen <- ifelse(length(dim(lonArr)) > 1, dim(lonArr)[1], length(lonArr))
             
             latArr <- .ncvar_get(nc, varid=dimNames[2])
             latUnit <- .ncatt_get(nc, dimNames[2], 'units')$value
+            latLen <- ifelse(length(dim(latArr)) > 1, dim(latArr)[1], length(latArr))
+            
+            # Some models provide 1-D arrays, some 2-D. Convert all to the latter
+            if(length(dim(lonArr)) < 2) {
+                lonArr <- array(lonArr, dim=c(lonLen, latLen))
+            }
+            if(length(dim(latArr)) < 2) {
+                latArr <- array(rep(latArr, 1, each=lonLen), dim=c(lonLen, latLen))
+            }
         }
-
+        
         # Get the time frequency. Note that this should be related to
         # ...the domain (ie 'mon' should be the frequency of the domain 'Amon').
         # ...In theory we could extract this from the domain
@@ -284,7 +294,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             if(!is.null(timeArr) && min(thisTimeArr) < max(timeArr)) {
                 stop("Time overlap between files; this should not occur")
             }
-         
+            
             timeRaw <- c(timeRaw, thisTimeRaw)
             timeArr <- c(timeArr, thisTimeRaw / calendarDayLength + startYr)
         }
@@ -305,7 +315,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         # Test that spatial dimensions are identical across files
         if(length(val) > 0 & length(dimNames) > 2) {
             assert_that(all(dim(val)[1:(length(dim(val))-1)] ==
-                              dim(vardata)[1:(length(dim(vardata))-1)]))
+                                dim(vardata)[1:(length(dim(vardata))-1)]))
         }
         
         # Bind the main variable along time dimension to previously loaded data

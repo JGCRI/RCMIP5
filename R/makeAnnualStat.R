@@ -101,12 +101,12 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
             
             # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
             # command above may have removed some lon/lat combinations
-            if(length(unique(x$val$lon)) < length(x$lon) |
-                   length(unique(x$val$lat)) < length(x$lat)) {
+            if(length(unique(x$val$lon)) < length(unique(as.numeric(x$lon))) |
+                   length(unique(x$val$lat)) < length(unique(as.numeric(x$lat)))) {
                 if(verbose) cat("Replacing missing lon/lat combinations\n")
                 
                 # Fix this by generating all lon/lat pairs and combining with answer
-                full_data <- tbl_df(expand.grid(lon=x$lon, lat=x$lat))
+                full_data <- tbl_df(data.frame(lon=x$lon, lat=x$lat))
                 x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
             }
             x$time <- sort(freqTable$year)

@@ -52,7 +52,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
         if(is.array(x$val)) {
             areavals <- calcGridArea(x$lon, x$lat, verbose=verbose)
         } else {
-            areavals <- data.frame(lon=rep(x$lon, times=length(x$lat)), lat=rep(x$lat, each=length(x$lon)),
+            areavals <- data.frame(lon=x$lon, lat=x$lat,
                                    value=as.numeric(calcGridArea(x$lon, x$lat, verbose=verbose)))
         }
     } else {
