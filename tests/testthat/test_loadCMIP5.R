@@ -113,13 +113,14 @@ test_that("loadCMIP5 can load area files", {
     
 })
 
-test_that("Converts to and reads arrays formats agree"){
+test_that("Converts to and reads arrays formats agree", {
+    #skip_on_cran()
     path <- "../../sampledata"
-    d <- loadCMIP5(variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1')
-    darray <-  loadCMIP5(variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1', loadAs='array')
+    d <- loadCMIP5(path=path, variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1')
+    darray <-  loadCMIP5(path=path, variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1', loadAs='array')
     
     expect_equal(as.array(d, drop=FALSE), darray$val)
-}
+})
 
 test_that("loadCMIP5 correctly extracts start year", {
     
