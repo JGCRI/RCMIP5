@@ -381,7 +381,7 @@ as.array.cmip5data <- function(x, ..., drop=TRUE) {
     lon <- lat <- Z <- time <- NULL
     
     # Note we sort data frame before converting to array!
-    array(dplyr::arrange(x$val, lon, lat, Z, time)$value, dim=dimList)
+    array(dplyr::arrange(x$val, time, Z, lat, lon)$value, dim=dimList)
 } # as.array.cmip5data
 
 #' Make package datasets and write them to disk.

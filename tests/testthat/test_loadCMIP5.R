@@ -109,8 +109,17 @@ test_that("loadCMIP5 can load area files", {
     d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F)
     expect_is(d, "cmip5data")
     expect_null(d$Z)
-    expect_null(d$time)    
+    expect_null(d$time)
+    
 })
+
+test_that("Converts to and reads arrays formats agree"){
+    path <- "../../sampledata"
+    d <- loadCMIP5(variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1')
+    darray <-  loadCMIP5(variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1', loadAs='array')
+    
+    expect_equal(as.array(d, drop=FALSE), darray$val)
+}
 
 test_that("loadCMIP5 correctly extracts start year", {
     
