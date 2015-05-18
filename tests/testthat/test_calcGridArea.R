@@ -35,7 +35,8 @@ test_that("Test 1 degree grids", {
 })
 
 test_that("Test global totals with real data", {
-    d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', verbose=F, loadAs='array')
+    path <- "../../sampledata"
+    d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F, loadAs='array')
     
     area <- calcGridArea(lat=d$lat, lon=d$lon)
     expect_less_than(max(as.numeric(abs(area-d$val[,,1,1])/d$val[,,1,1])), 1e-3)
