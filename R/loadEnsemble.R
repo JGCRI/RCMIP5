@@ -13,6 +13,7 @@
 #' @param verbose logical. Print info as we go?
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @param yearRange numeric of length 2. If supplied, load only these years of data inclusively between these years.
+#' @param ZRange numeric of length 2. If supplied, load only Z data within this range.
 #' @return A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
 #' @details This function is the core of RCMIP5's data-loading. It loads all files matching
 #' the experiment, variable, model, ensemble, and domain supplied by the caller.
@@ -22,7 +23,7 @@
 #' @keywords internal
 loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                          path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
-                         yearRange=NULL) {
+                         yearRange=NULL, ZRange=NULL) {
     
     # Sanity checks - make sure all parameters are correct class and length
     assert_that(length(variable)==1 & is.character(variable))
@@ -36,6 +37,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     assert_that(is.flag(verbose))
     assert_that(is.flag(force.ncdf))
     assert_that(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
+    assert_that(is.null(ZRange) | length(ZRange)==2 & is.numeric(ZRange))
     
     # We prefer to use the 'ncdf4' package, but if not installed can use 'ncdf'
     if(force.ncdf | !require(ncdf4, quietly=!verbose)) {
@@ -254,9 +256,13 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                 stop("Duplicate values in this file's Z data")
         }
         
+        # Construct the 'start' and 'count' arrays for ncvar_get below
+        # (See ncvar_get documentation for what these mean.)
+        ndims <- nc$var[[variable]]$ndims
+        start <- rep(1, ndims)
+        count <- rep(-1, ndims)
+
         # If yearRange supplied, calculate filter for the data load below
-        start <- NA
-        count <- NA
         if(!is.null(yearRange) & !is.null(thisTimeArr)) {
             # User has requested to load a temporal subset of the data.
             # First question: does this file overlap at all?
@@ -276,17 +282,34 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             tend <- match(max(yearRange)+1, floor(thisTimeArr)) - 1
             if(is.na(tend)) tend <- length(thisTimeArr)
             
-            # Construct the 'start' and 'count' arrays for ncvar_get below
-            # (See ncvar_get documentation for what these mean.)
-            ndims <- nc$var[[variable]]$ndims
-            start <- c(rep(1, ndims-1), tstart)
-            count <- c(rep(-1, ndims-1), tend-tstart+1)
+            # Modify the 'start' and 'count' arrays for ncvar_get below
+            start[ndims] <- tstart
+            count[ndims] <- tend-tstart+1
             if(verbose) cat("- loading only timeslices", tstart, "-",tend, "\n")
             
             # Trim the already-loaded time arrays to match
             thisTimeArr <- thisTimeArr[tstart:tend]
             thisTimeRaw <- thisTimeRaw[tstart:tend]
         } # if year range
+
+        # If ZRange supplied, calculate filter for the data load below
+        if(!is.null(ZRange) & !is.null(ZArr)) {
+            Zinrange <- min(ZRange) <= ZArr & max(ZRange) > ZArr
+            if(any(Zinrange)) {
+                zstart <- min(which(Zinrange))
+                zend <- max(which(Zinrange))
+                # Modify the 'start' and 'count' arrays for ncvar_get below
+                ndims <- nc$var[[variable]]$ndims
+                start[ndims-1] <- zstart
+                count[ndims-1] <- zend - zstart + 1
+                ZArr <- ZArr[Zinrange]
+                if(verbose) cat("- loading only Z values", zstart, "-", zend, "\n")            
+            } else {
+                if(verbose) cat("- skipping file because not in ZRange\n")
+                .nc_close(nc)
+                next
+            }
+        }
         
         # Update running time data
         if(!is.null(thisTimeRaw)) {

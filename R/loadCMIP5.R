@@ -15,6 +15,7 @@
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @param FUN function. Function (mean, min, max, or sum) to apply across ensembles
 #' @param yearRange numeric of length 2. If supplied, load only years of data in this range
+#' @param ZRange numeric of length 2. If supplied, load only Z data within this range.
 #' @return A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
 #' @note The \code{yearRange} parameter is intended to help users deal with large
 #' CMIP5 data files on memory-limited machines, e.g. by allowing them to process
@@ -29,7 +30,7 @@
 #' @export
 loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_]+',
                       path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
-                      FUN=mean, yearRange=NULL, loadAs='data.frame') {
+                      FUN=mean, yearRange=NULL, ZRange=NULL, loadAs='data.frame') {
     
     # Sanity checks - parameters are correct type and length
     assert_that(length(variable)==1 & is.character(variable))
@@ -44,6 +45,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     assert_that(is.flag(force.ncdf))
     assert_that(is.function(FUN))
     assert_that(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
+    assert_that(is.null(ZRange) | length(ZRange)==2 & is.numeric(ZRange))
     FUNstr <- as.character(substitute(FUN))
     assert_that(FUNstr %in% c("mean", "min", "max", "sum"))
     assert_that(loadAs %in% c("data.frame", "array"))
@@ -80,7 +82,7 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         # load the entire ensemble
         temp <- loadEnsemble(variable, model, experiment, ensemble, domain,
                              path=path, verbose=verbose, recursive=recursive,
-                             force.ncdf=force.ncdf, yearRange=yearRange)
+                             force.ncdf=force.ncdf, yearRange=yearRange, ZRange=ZRange)
         
         # If nothing loaded, skip and go on to next ensemble
         if(is.null(temp)) next
