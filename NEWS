@@ -11,6 +11,8 @@ RCMIP5 1.2
 
 * Data sorting now optional for all stat operations (#112).
 
+* New `ZRange` parameter allows `loadCMIP5` to only load parts of files.
+
 
 RCMIP5 1.1
 ===========
