@@ -43,7 +43,7 @@ test_that("makeMonthlyStat handles monthly data", {
     expect_equal(res$time, 1:12)
     
     # Is the answer value data frame correctly sized?
-    expect_equal(nrow(res$val), length(d$lon) * length(d$lat) * 12) 
+    expect_equal(nrow(res$val), length(d$lon) * 12) 
     expect_equal(length(res$time), 12)
     
     # Are the answer values numerically correct?    
@@ -67,7 +67,7 @@ test_that("makeMonthlyStat handles 4-dimensional data", {
     expect_equal(res$time, 1:12)
     
     # Is the answer value data frame correctly sized?
-    expect_equal(nrow(res$val), length(d$lon) * length(d$lat) * length(d$Z) * 12) 
+    expect_equal(nrow(res$val), length(d$lon) * length(d$Z) * 12) 
     expect_equal(length(res$time), 12)
     
     # Are the answer values numerically correct?    

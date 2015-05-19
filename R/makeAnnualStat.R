@@ -35,27 +35,30 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
     
     # Main computation code
     timer <- system.time({  # time the main computation, below
-        if(identical(class(x$val), 'array')){
+        if(is.array(x$val)) {
             rawYrs <- table(floor(x$time))
-            if(filterNum){
+            if(filterNum) {
                 yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
+            }else{
+                yrs <- as.numeric(names(rawYrs))
             }
             myDim <- dim(x$val)
             x$val <- vapply(yrs, 
-                                FUN=function(yrNum){
-                                    temp <- x$val[,,,yrNum == floor(x$time)]
-                                    myDim[4] <- sum(yrNum == floor(x$time))
-                                    dim(temp) <- myDim
-                                    temp <- apply(temp, c(1,2,3), FUN)#, ...)
-                                    myDim[4] <- 1
-                                    dim(temp) <- myDim
-                                    return(temp)}, 
-                                FUN.VALUE=x$val[,,,1])
+                            FUN=function(yrNum) {
+                                temp <- x$val[,,,yrNum == floor(x$time)]
+                                myDim[4] <- sum(yrNum == floor(x$time))
+                                dim(temp) <- myDim
+                                temp <- apply(temp, c(1,2,3), FUN)#, ...)
+                                myDim[4] <- 1
+                                dim(temp) <- myDim
+                                return(temp)}, 
+                            FUN.VALUE=x$val[,,,1])
             myDim[4] <- length(yrs)
             dim(x$val) <- myDim
             x$time <- yrs
+            x$numPerYear <- as.integer(rawYrs[as.numeric(names(rawYrs)) %in% yrs])
             x$debug$AnnualFreqTable <- rawYrs
-        }else{
+        } else {
             
             # Suppress stupid NOTEs from R CMD CHECK
             lon <- lat <- Z <- time <- year <- value <- `.` <- NULL
@@ -101,12 +104,12 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
             
             # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
             # command above may have removed some lon/lat combinations
-            if(length(unique(x$val$lon)) < length(x$lon) |
-                   length(unique(x$val$lat)) < length(x$lat)) {
+            if(length(unique(x$val$lon)) < length(unique(as.numeric(x$lon))) |
+                   length(unique(x$val$lat)) < length(unique(as.numeric(x$lat)))) {
                 if(verbose) cat("Replacing missing lon/lat combinations\n")
                 
                 # Fix this by generating all lon/lat pairs and combining with answer
-                full_data <- tbl_df(expand.grid(lon=x$lon, lat=x$lat))
+                full_data <- tbl_df(data.frame(lon=x$lon, lat=x$lat))
                 x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
             }
             x$time <- sort(freqTable$year)

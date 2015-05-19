@@ -43,7 +43,7 @@ test_that("makeGlobalStat handles monthly data", {
     expect_equal(res$time, d$time)
     
     # Is the answer value data frame correctly sized?
-    expect_equal(nrow(res$val), nrow(d$val)/length(d$lon)/length(d$lat))
+    expect_equal(nrow(res$val), nrow(d$val)/length(d$lon))
     
     # Are the answer values numerically correct?
     expect_equal(mean(res$val$value), mean(d$val$value))  # no weighting
@@ -83,7 +83,7 @@ test_that("makeGlobalStat handles 4-dimensional data", {
     expect_equal(res$time, d$time)
     
     # Is the answer value array correctly sized?
-    expect_equal(nrow(res$val), nrow(d$val)/length(d$lon)/length(d$lat))
+    expect_equal(nrow(res$val), nrow(d$val)/length(d$lon))
 })
 
 test_that("makeGlobalStat handles custom function and dots", {
@@ -127,7 +127,7 @@ test_that("makeGlobalStat sorts before computing", {
     ans <- aggregate(value~time, data=d$val, FUN=weighted.mean, w=darea$val$value)
     
     # Now we put `darea` out of order and call makeGlobalStat
-    darea$val <- arrange(darea$val, desc(lon), desc(lat))
+    darea$val <- dplyr::arrange(darea$val, desc(lon), desc(lat))
     res1 <- makeGlobalStat(d, darea, verbose=F, sortData=TRUE)
     expect_is(res1, "cmip5data")
 
@@ -139,7 +139,8 @@ test_that("makeGlobalStat sorts before computing", {
     expect_warning(makeGlobalStat(d, darea, verbose=F))
     
     # Put data out of order and test again
-    d$val <- arrange(d$val, desc(lon), desc(lat))
+    #d$val <- d$val[order(d$val$lon, d$val$lat, decreasing=TRUE),]
+    d$val <- dplyr::arrange(d$val, desc(lon), desc(lat))
     res2 <- makeGlobalStat(d, darea, verbose=F, sortData=TRUE)
     expect_equal(res2$val$value, ans$value)
 })

@@ -22,7 +22,7 @@
 addProvenance <- function(x, msg, verbose=FALSE) {
     
     # Sanity checks
-    assert_that(class(x)=="cmip5data")
+    assert_that(class(x) == "cmip5data")
     assert_that(class(msg) %in% c("character", "NULL", "cmip5data"))
     assert_that(is.flag(verbose))
     

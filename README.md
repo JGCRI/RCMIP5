@@ -11,19 +11,19 @@ More information about CMIP5 can be found on the [project home page](http://cmip
 
 **Installing this package**
 
-* The RCMIP5 package can be installed from [CRAN](http://cran.r-project.org/package=RCMIP5) or directly from this repository, using the devtools `install_github` command.
+* The RCMIP5 package can be installed from [CRAN](http://cran.r-project.org/package=RCMIP5) or directly from this repository, using the `devtools::install_github` command.
 
 **Bug reports**
 
 * CMIP5 data are highly variable in their structure and assumptions, and there are undoubtedly edge cases we haven't encountered or anticipated. If you find a bug (something unexpected happens or the code crashes) we want to know about it!
 * Please either [open an issue](https://github.com/JGCRI/RCMIP5/issues/new), or email one of the maintainers.
-* In either case, give us a *reproducible example*: tell us (i) what file(s) you were trying to process, (ii) what sequence of operations led to the problem, and (iii) any other pertinent information.
+* In either case, give us a *reproducible example*: tell us (i) what file(s) you were trying to process, (ii) what sequence of operations led to the problem, (iii) the output of `sessionInfo()`, and (iv) any other pertinent information.
 
 **Other important notes**
 
 * This package does *not* handle downloading (i.e. from nodes in the Earth System Grid Federation, http://esgf.org) the NetCDF data themselves. Sorry.
 * See http://cmip.llnl.gov/cmip5/publications/allpublications about registering CMIP5 manuscripts.
 * If you use this package/code in your work, please cite it! See `citation("RCMIP5")`.
-* Behind the scenes, RCMIP5 uses the [dplyr](http://cran.r-project.org/package=dplyr) package for heavy data lifting.
+* Behind the scenes, RCMIP5 uses the [dplyr](http://cran.r-project.org/package=dplyr) package for heavy data lifting, but it can optionally use an array implementation, depending heavily on [abind](http://cran.r-project.org/web/packages/abind/index.html), instead.
 * Want to get started? An extensive [vignette](http://cran.r-project.org/web/packages/RCMIP5/vignettes/atmospheric_co2.html) and demo are included with the package.
 

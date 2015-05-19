@@ -15,6 +15,8 @@
 #' @param force.ncdf Force use of the less-desirable ncdf package for testing?
 #' @param FUN function. Function (mean, min, max, or sum) to apply across ensembles
 #' @param yearRange numeric of length 2. If supplied, load only years of data in this range
+#' @param ZRange numeric of length 2. If supplied, load only Z data within this range.
+#' @param loadAs a string identifying possible structures for values. Currently: 'data.frame' and 'array' the only valid options.
 #' @return A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
 #' @note The \code{yearRange} parameter is intended to help users deal with large
 #' CMIP5 data files on memory-limited machines, e.g. by allowing them to process
@@ -29,7 +31,7 @@
 #' @export
 loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_]+',
                       path='.', recursive=TRUE, verbose=FALSE, force.ncdf=FALSE,
-                      FUN=mean, yearRange=NULL, loadAs='data.frame') {
+                      FUN=mean, yearRange=NULL, ZRange=NULL, loadAs='data.frame') {
     
     # Sanity checks - parameters are correct type and length
     assert_that(length(variable)==1 & is.character(variable))
@@ -44,8 +46,10 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     assert_that(is.flag(force.ncdf))
     assert_that(is.function(FUN))
     assert_that(is.null(yearRange) | length(yearRange)==2 & is.numeric(yearRange))
+    assert_that(is.null(ZRange) | length(ZRange)==2 & is.numeric(ZRange))
     FUNstr <- as.character(substitute(FUN))
     assert_that(FUNstr %in% c("mean", "min", "max", "sum"))
+    assert_that(loadAs %in% c("data.frame", "array"))
     
     # List all files that match specifications
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
@@ -67,17 +71,19 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     # Parse out the ensemble strings according to CMIP5 specifications for
     # ...file naming conventions
     ensembleArr <- unique(unlist(lapply(strsplit(basename(fileList), '_'),
-                                        function(x){x[5]})))
+                                        function(x) {x[5]})))
     
-    if(verbose) cat('Averaging ensembles:', ensembleArr, '\n')
+    # -----------------------------------------------------------------------------------------------
+    # Loop through ensembles, loading each and adding to data
     
+    if(verbose) cat('Averaging ensembles:', ensembleArr, '\n') 
     modelTemp <- NULL              # Initalize the return data structure
     for(ensemble in ensembleArr) { # for each ensemble...
         
         # load the entire ensemble
         temp <- loadEnsemble(variable, model, experiment, ensemble, domain,
                              path=path, verbose=verbose, recursive=recursive,
-                             force.ncdf=force.ncdf, yearRange=yearRange)
+                             force.ncdf=force.ncdf, yearRange=yearRange, ZRange=ZRange)
         
         # If nothing loaded, skip and go on to next ensemble
         if(is.null(temp)) next
@@ -87,9 +93,9 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
         } else {
             # Make sure lat-lon-Z-time match
             if(all(identical(temp$lat, modelTemp$lat) &
-                   identical(temp$lon, modelTemp$lon) &
-                   identical(temp$Z, modelTemp$Z) &
-                   identical(temp$time, modelTemp$time))) {
+                       identical(temp$lon, modelTemp$lon) &
+                       identical(temp$Z, modelTemp$Z) &
+                       identical(temp$time, modelTemp$time))) {
                 
                 # Add this ensemble's data and record file and ensemble loaded
                 if(FUNstr %in% c("min", "max")) { # for min and max, compute as we go
@@ -117,7 +123,10 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
             }
         } # is.null(modelTemp)
     } # for
-    
+
+    # -----------------------------------------------------------------------------------------------
+    # All done loading. Sanity checks and final calculations
+
     # Make sure at least one ensemble was actually loaded
     if(is.null(modelTemp) | length(modelTemp$ensembles) == 0) {
         warning(paste("No ensembles were loaded:", variable, model, experiment))
@@ -125,48 +134,22 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     }
     
     # If taking the mean, calculate over all ensembles
-    if(FUNstr == "mean")
+    if(FUNstr == "mean") {
         modelTemp$val <- unname(modelTemp$val / length(modelTemp$ensembles))
-    
-    # Convert the array (from ncdf4) to a data frame (for use with dplyr)
-    if(verbose) cat("Converting to data frame\n")
-    
-    ndims <- length(dim(modelTemp$lon))
-    attributes(modelTemp$lon) <- NULL
-    attributes(modelTemp$lat) <- NULL
-    
-    # Some models provide two-dimensional arrays of their (possibly
-    # irregular) lon and lat values. In this case, use only those pairs
-    if(ndims > 1) {
-        assert_that(length(modelTemp$lon) == length(modelTemp$lat))
-
-        Z <- time <- NA
-        lonlatreps <- length(modelTemp$val) / length(modelTemp$lon)
-        if(!is.null(modelTemp$Z)) Z <- modelTemp$Z
-        if(!is.null(modelTemp$time)) time <- modelTemp$time
-        df <- data.frame('lon'=rep(modelTemp$lon, each=lonlatreps),
-                         'lat'=rep(modelTemp$lat, each=lonlatreps),
-                         'Z'=Z,
-                         'time'=time)
-        
-    } else {
-        # More common: if zero- or one-dimensional lat and lon
-        # In this case generate all combinations
-        lon <- lat <- Z <- time <- NA
-        if(!is.null(modelTemp$lon)) lon <- modelTemp$lon
-        if(!is.null(modelTemp$lat)) lat <- modelTemp$lat
-        if(!is.null(modelTemp$Z)) Z <- modelTemp$Z
-        if(!is.null(modelTemp$time)) time <- modelTemp$time
-        df <- expand.grid('lon'=lon, 'lat'=lat, 'Z'=Z, 'time'=time)
     }
 
+    assert_that(length(modelTemp$lon) == length(modelTemp$lat))
+    assert_that(length(dim(modelTemp$lon)) == 2)
+    assert_that(length(dim(modelTemp$lat)) == 2)
     
-    if(identical(loadAs, 'data.frame')){
-        df$value <- as.numeric(modelTemp$val)
-        modelTemp$val <- tbl_df( df ) # wrap as a dplyr tbl
-    }else if(identical(loadAs, 'array')){
-        #do nothing
-    }else{
+    # -----------------------------------------------------------------------------------------------
+    # At this point we're all done with loading. Put data into final format and return
+    
+    if(identical(loadAs, 'data.frame')) {
+        modelTemp$val <- convert_array_to_df(modelTemp, verbose)
+    } else if(identical(loadAs, 'array')) {
+        # Do nothing
+    } else {
         stop('loadAs is not recognized')
     }
     
@@ -175,3 +158,33 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
                                      paste(ensembleArr, collapse=' '))))
 } # loadCMIP5
 
+#' Convert array format cmip5data to data frame format
+#'
+#' @param x A \code{\link{cmip5data}} object
+#' @param verbose logical. Print info as we go?
+#' @details Convert array format cmip5data to data frame format, for use with dplyr.
+#' @note This is an internal RCMIP5 function and not exported.
+#' @keywords internal
+convert_array_to_df <- function(x, verbose=FALSE) {
+    
+    # Sanity checks
+    assert_that(class(x) == "cmip5data")
+    assert_that(is.flag(verbose))
+    assert_that(is.array(x$val))
+    
+    if(verbose) cat("Converting to data frame\n")
+    lon <- lat <- Z <- time <- NA
+    if(!is.null(x$lon)) lon <- x$lon
+    if(!is.null(x$lat)) lat <- x$lat
+    if(!is.null(x$Z)) Z <- x$Z
+    if(!is.null(x$time)) time <- x$time
+    # R uses "column major order" - the first subscript moves fastest
+    # Prepare out data frame in this order too
+    df <- data.frame('lon'=rep(lon, times=length(Z) * length(time)),
+                     'lat'=rep(lat, times=length(Z) * length(time)),
+                     'Z'=rep(Z, each=length(lon)),
+                     'time'=rep(time, each=length(Z) * length(lon)))
+    
+    df$value <- as.numeric(x$val)
+    tbl_df(df) # wrap as a dplyr tbl and return
+} # convert_array_to_df

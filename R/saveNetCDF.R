@@ -6,7 +6,7 @@
 #' any NetCDF-aware software.
 #'
 #' @param x A \code{\link{cmip5data}} object
-#' @param file Filename desired. If omitted one will be generated automatically.
+#' @param file Filename; if omitted one will be generated automatically.
 #' @param path File path.
 #' @param verbose logical. Print info as we go?
 #' @param saveProvenance Save the provenance separately?
@@ -18,6 +18,7 @@
 #' the provenance is saved separately in a comma-separated file of the same name but
 #' appending "_prov.csv". (Provenance messages are always saved as NetCDF file attributes.)
 #' @note This function requires the \code{ncdf4} package; \code{ncdf} is not supported.
+#' @export
 saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TRUE, originalNames=FALSE) {
     
     # Sanity checks - class and length of parameters
@@ -47,26 +48,32 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
         file <- paste(x$variable, x$domain, x$model, x$experiment, ensembles, 
                       paste(mintime, maxtime, sep="-"), "RCMIP5.nc", sep="_")
     }
-    fqfn <- paste(path, file, sep="/")
+    fqfn <- file.path(path, file)
     
     # Define spatial dimensions, if present
-    if(verbose) cat("Defining NetCDF dimensions...")
     dimlist <- list()
+    varlist <- list()
     if(!is.null(x$lon) & !is.null(x$lat)) {
+        if(verbose) cat("Defining spatial dimensions...")
+        idim <- ncdf4::ncdim_def("i", "1", 1:ncol(x$lon), longname="cell index along first dimension (lon)")
+        jdim <- ncdf4::ncdim_def("j", "1", 1:nrow(x$lat), longname="cell index along second dimension (lat)")
+        dimlist <- list(idim, jdim) # for now assume no Z/time        
         assert_that(!is.null(x$debug$lonUnit))
         assert_that(!is.null(x$debug$latUnit))
-        londim <- ncdf4::ncdim_def("lon", x$debug$lonUnit, x$lon)
-        latdim <- ncdf4::ncdim_def("lat", x$debug$latUnit, x$lat)
-        dimlist <- list(londim, latdim) # for now assume no Z/time        
+        lonvar <- ncdf4::ncvar_def("lon", x$debug$lonUnit, dimlist)
+        latvar <- ncdf4::ncvar_def("lat", x$debug$latUnit, dimlist)
+        varlist <- list(lonvar, latvar)
     }
     
     # Define Z and time dimensions, if present
     if(!is.null(x$Z)) {
+        if(verbose) cat("Defining Z dimension...")
         assert_that(!is.null(x$debug$ZUnit))
         Zdim <- ncdf4::ncdim_def(dimNames[3], x$debug$ZUnit, x$Z)
-        dimlist <- list(londim, latdim, Zdim)
+        dimlist[[length(dimlist)+1]] <- Zdim
     }
     if(!is.null(x$time)) {
+        if(verbose) cat("Defining time dimension...")
         assert_that(!is.null(x$debug$timeUnit))
         assert_that(!is.null(x$debug$timeRaw))
         assert_that(!is.null(x$calendarStr))
@@ -79,30 +86,29 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     # Define mandatory variable
     if(verbose) cat("Defining main NetCDF variable\n")
     valvar <- ncdf4::ncvar_def(x$variable, x$valUnit, dimlist)
+    varlist[[length(varlist)+1]] <- valvar
     
     # Create the file and write mandatory variable
-    # Note we make sure data is sorted correctly first
+    # Note we make sure data is sorted correctly first TODO
     if(verbose) cat("Creating and writing", file, "\n")
-    nc <- ncdf4::nc_create(fqfn, valvar)    
+    nc <- ncdf4::nc_create(fqfn, varlist)    
     ncdf4::ncvar_put(nc, valvar, as.array(x))
     
-    # Write spatial dimensions, if present
+    # Write spatial dimension data, if present
     if(!is.null(x$lon) & !is.null(x$lat)) {
-        if(verbose) cat("Writing lon and lat\n")
-        lonvar <- ncdf4::ncvar_def("lon", x$debug$lonUnit, londim)
-        latvar <- ncdf4::ncvar_def("lat", x$debug$latUnit, londim)
+        if(verbose) cat("Writing lon and lat data\n")
         ncdf4::ncvar_put(nc, lonvar, x$lon)
         ncdf4::ncvar_put(nc, latvar, x$lat)        
     }
     
     # Write Z and time dimensions, if present
     if(!is.null(x$Z)) {
-        if(verbose) cat("Writing Z\n")
+        if(verbose) cat("Writing Z data\n")
         Zvar <- ncdf4::ncvar_def(dimNames[3], x$debug$ZUnit, Zdim)
         ncdf4::ncvar_put(nc, Zvar, x$Z) 
     }
     if(!is.null(x$time)) {
-        if(verbose) cat("Writing time\n")
+        if(verbose) cat("Writing time data\n")
         timevar <- ncdf4::ncvar_def(dimNames[4], x$debug$timeUnit, timedim)
         ncdf4::ncvar_put(nc, timevar, x$debug$timeRaw) 
     }
@@ -114,7 +120,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     # Write attributes
     if(verbose) cat("Writing attributes\n")    
     ncdf4::ncatt_put(nc, 0, "software", paste("Written by RCMIP5", pkgv, 
-                                        "under", R.version.string, date()))
+                                              "under", R.version.string, date()))
     if(!is.null(x$time)) {
         ncdf4::ncatt_put(nc, 0, "frequency", x$debug$timeFreqStr)
     }

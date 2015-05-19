@@ -37,13 +37,14 @@ test_that("saveNetCDF saves X-Y-T data correctly", {
     
     if(file.exists(dfile)) {
         nc <- nc_open(dfile)
-        test <- ncvar_get(nc, "var")
         
-        expect_equal(length(nc$var), 1) # variable count should match
+        expect_equal(length(nc$var), 3) # variable count be main+2 spatial
         expect_equal(length(nc$dim), 3) # dimension count should match
-        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc, "var")))  # data should match
-        expect_is(nc$dim$lon$units, "character")  # units should be written...
-        expect_is(nc$dim$lat$units, "character")
+        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc, d$variable)))  # data should match
+        expect_equivalent(d$lon, ncvar_get(nc, "lon"))  # lon data should match
+        expect_equivalent(d$lat, ncvar_get(nc, "lat"))  # lat data should match
+        expect_is(nc$dim$i$units, "character")  # units should be written...
+        expect_is(nc$dim$j$units, "character")
         expect_null(nc$dim$Z$units)
         expect_is(nc$dim$time$units, "character")
         expect_is(nc$dim$time$units, "character")
@@ -62,13 +63,14 @@ test_that("saveNetCDF saves X-Y-Z-T data correctly", {
     
     if(file.exists(dfile)) {
         nc <- nc_open(dfile)
-        test <- ncvar_get(nc, "var")
 
-        expect_equal(length(nc$var), 1) # variable count should match
+        expect_equal(length(nc$var), 3) # variable count be main+2 spatial
         expect_equal(length(nc$dim), 4) # dimension count should match
-        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc, "var")))  # data should match
-        expect_is(nc$dim$lon$units, "character")  # units should be written...
-        expect_is(nc$dim$lat$units, "character")
+        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc, d$variable)))  # data should match
+        expect_equivalent(d$lon, ncvar_get(nc, "lon"))  # lon data should match
+        expect_equivalent(d$lat, ncvar_get(nc, "lat"))  # lat data should match
+        expect_is(nc$dim$i$units, "character")  # units should be written...
+        expect_is(nc$dim$j$units, "character")
         expect_is(nc$dim$Z$units, "character")
         expect_is(nc$dim$time$units, "character")
         expect_is(nc$dim$time$units, "character")
@@ -87,13 +89,14 @@ test_that("saveNetCDF saves X-Y (area) data correctly", {
     
     if(file.exists(dfile)) {
         nc <- nc_open(dfile)
-        test <- ncvar_get(nc)
         
-        expect_equal(length(nc$var), 1) # variable count should match
+        expect_equal(length(nc$var), 3) # variable count be main+2 spatial
         expect_equal(length(nc$dim), 2) # dimension count should match
-        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc)))  # data should match
-        expect_is(nc$dim$lon$units, "character")  # units should be written...
-        expect_is(nc$dim$lat$units, "character")
+        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc, d$variable)))  # data should match
+        expect_equivalent(d$lon, ncvar_get(nc, "lon"))  # lon data should match
+        expect_equivalent(d$lat, ncvar_get(nc, "lat"))  # lat data should match
+        expect_is(nc$dim$i$units, "character")  # units should be written...
+        expect_is(nc$dim$j$units, "character")
         expect_null(nc$dim$depth$units)
         expect_null(nc$dim$lev$units)
         expect_null(nc$dim$time$units)
@@ -112,11 +115,10 @@ test_that("saveNetCDF saves t (time) data correctly", {
     
     if(file.exists(dfile)) {
         nc <- nc_open(dfile)
-        test <- ncvar_get(nc)
         
         expect_equal(length(nc$var), 1) # variable count should match
         expect_equal(length(nc$dim), 1) # dimension count should match
-        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc)))  # data should match
+        expect_equivalent(d$val$value, as.numeric(ncvar_get(nc, d$variable)))  # data should match
         expect_null(nc$dim$lon)
         expect_null(nc$dim$lat)
         expect_null(nc$dim$Z)

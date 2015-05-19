@@ -12,6 +12,8 @@ library(testthat)
 
 context("makeAnnualStat")
 
+implementations <- c("data.frame", "array")
+
 test_that("makeAnnualStat handles bad input", {
     expect_error(makeAnnualStat(1))                         # non-list d
     expect_error(makeAnnualStat(cmpi5data()))               # wrong size list d
@@ -23,82 +25,100 @@ test_that("makeAnnualStat handles bad input", {
 
 test_that("makeAnnualStat handles monthly data", {
     years <- 1850:1851
-    d <- cmip5data(years)
-    res <- makeAnnualStat(d, verbose=F)
     
-    # Is 'res' correct type and size?
-    expect_is(res,"cmip5data")
-    
-    # Did unchanging info get copied correctly?
-    expect_equal(res$lon, d$lon)
-    expect_equal(res$lat, d$lat)
-    expect_equal(res$valUnit, d$valUnit)
-    expect_equal(res$files, d$files)
-    
-    # numPerYear set and provenance updated?
-    expect_is(res$numPerYear, "integer")
-    expect_more_than(nrow(res$provenance), nrow(d$provenance))
-    
-    # Do years match what we expect?
-    expect_equal(res$time, years)
-    
-    # Is the answer value data frame correctly sized?
-    expect_equal(nrow(res$val), nrow(d$val)/12)
-    expect_equal(length(res$time), length(d$time)/12)
+    for(i in implementations) {
         
-    # Are the answer values numerically correct?    
-    d$val$time <- floor(d$val$time)
-    dummyans <- aggregate(value~lon+lat+time, data=d, FUN=mean)
-    expect_equal(dummyans$value, res$val$value)
+        d <- cmip5data(years, loadAs=i)
+        res <- makeAnnualStat(d, verbose=F)
+        
+        # Is 'res' correct type and size?
+        expect_is(res,"cmip5data", info=i)
+        
+        # Did unchanging info get copied correctly?
+        expect_equal(res$lon, d$lon, info=i)
+        expect_equal(res$lat, d$lat, info=i)
+        expect_equal(res$valUnit, d$valUnit, info=i)
+        expect_equal(res$files, d$files, info=i)
+        
+        # numPerYear set and provenance updated?
+        expect_is(res$numPerYear, "integer", info=i)
+        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)
+        
+        # Do years match what we expect?
+        expect_equal(res$time, years, info=i)
+        
+        # Is the answer data correctly sized?
+        expect_equal(RCMIP5:::nvals(res), RCMIP5:::nvals(d)/12, info=i)
+        expect_equal(length(res$time), length(d$time)/12, info=i)
+        
+        # Are the answer values numerically correct?    
+        ref <- cmip5data(years, loadAs="data.frame")
+        ref$val$time <- floor(ref$val$time)
+        refans <- aggregate(value~lon+lat+time, data=ref$val, FUN=mean)
+        expect_equal(refans$value, RCMIP5:::vals(res), info=i)
+    }
 })
 
 test_that("makeAnnualStat handles annual data", {
     years <- 1850:1851
-    d <- cmip5data(years, monthly=F)
-    res <- makeAnnualStat(d, verbose=F)
     
-    # Is 'res' correct type and size?
-    expect_is(res, "cmip5data")
-    
-    # Did unchanging info get copied correctly?
-    expect_equal(res$lon, d$lon)
-    expect_equal(res$lat, d$lat)
-    expect_equal(res$valUnit, d$valUnit)
-    expect_equal(res$files, d$files)
-    
-    # Provenance updated?
-    expect_more_than(nrow(res$provenance), nrow(d$provenance))
-    
-    # Do years match what we expect?
-    expect_equal(res$time, years)
-    
-    # Is the answer value array correct (unchanged except for time)?
-    expect_equal(d$val[c("lon", "lat", "Z", "value")], 
-                 res$val[c("lon", "lat", "Z", "value")])
+    for(i in implementations) {
+        
+        d <- cmip5data(years, monthly=F)
+        res <- makeAnnualStat(d, verbose=F)
+        
+        # Is 'res' correct type and size?
+        expect_is(res, "cmip5data", info=i)
+        
+        # Did unchanging info get copied correctly?
+        expect_equal(res$lon, d$lon, info=i)
+        expect_equal(res$lat, d$lat, info=i)
+        expect_equal(res$valUnit, d$valUnit, info=i)
+        expect_equal(res$files, d$files, info=i)
+        
+        # Provenance updated?
+        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)
+        
+        # Do years match what we expect?
+        expect_equal(res$time, years, info=i)
+        
+        # Are the answer values numerically correct?    
+        ref <- cmip5data(years, loadAs="data.frame")
+        ref$val$time <- floor(ref$val$time)
+        refans <- aggregate(value~lon+lat+time, data=ref$val, FUN=mean)
+        expect_equal(refans$value, RCMIP5:::vals(res), info=i)
+    }
 })
 
 test_that("makeAnnualStat handles 4-dimensional data", {
     years <- 1850:1851
-    d <- cmip5data(years, Z=T)
-    res <- makeAnnualStat(d, verbose=F)
     
-    # Do years match what we expect?
-    expect_equal(res$time, years)
-    
-    # Is the answer value data frame correctly sized?
-    expect_equal(nrow(res$val), nrow(d$val)/12)
-    expect_equal(length(res$time), length(d$time)/12)
-    
-    # Are the answer values numerically correct?    
-    d$val$time <- floor(d$val$time)
-    dummyans <- aggregate(value~lon+lat+Z+time, data=d, FUN=mean)
-    expect_equal(dummyans$value, res$val$value)
+    for(i in implementations) {
+        d <- cmip5data(years, Z=T, loadAs=i)
+        res <- makeAnnualStat(d, verbose=F)
+        
+        # Do years match what we expect?
+        expect_equal(res$time, years, info=i)
+        
+        # Is the answer value data correctly sized?
+        expect_equal(RCMIP5:::nvals(res), RCMIP5:::nvals(d)/12, info=i)
+        expect_equal(length(res$time), length(d$time)/12, info=i)
+        
+        # Are the answer values numerically correct?    
+        ref <- cmip5data(years, Z=T, loadAs="data.frame")
+        ref$val$time <- floor(ref$val$time)
+        refans <- aggregate(value~lon+lat+Z+time, data=ref, FUN=mean)
+        expect_equal(refans$value, RCMIP5:::vals(res), info=i)
+    }
 })
 
 test_that("makeAnnualStat handles custom function and dots", {
     years <- 1850:1851
     llsize <- 2
-    d <- cmip5data(years, lonsize=llsize, latsize=llsize)
+    
+    # TODO: need to finish implementation testing for this and case below
+    #    for(i in implementations) {
+    d <- cmip5data(years, lonsize=llsize, latsize=llsize)#, loadAs=i)
     
     # All data 1, except December, which is 2
     d$val$value <- 1
@@ -121,19 +141,24 @@ test_that("makeAnnualStat handles custom function and dots", {
     # Are the result values correct?    
     expect_equal(res1$val$value, ans$value)
     expect_equal(res2$val$value, ans$value)
+    #    }
 })
 
 test_that("makeAnnualStat computes numPerYear correctly", {
     years <- 1850:1851
-    d <- cmip5data(years)
     
-    res1 <- makeAnnualStat(d)
-    expect_equal(res1$numPerYear, c(12, 12))
-    
-    # Get rid of first month. makeAnnualStat should drop this month when completeYears is TRUE
-    d$val <- d$val[d$val$time != d$val$time[1],] 
-    res2 <- makeAnnualStat(d, filterNum=TRUE)
-    expect_equal(res2$numPerYear, c(12))
-    res3 <- makeAnnualStat(d, filterNum=FALSE)
-    expect_equal(res3$numPerYear, c(11, 12))
+    for(i in implementations) {
+        d <- cmip5data(years) #, loadAs=i)
+        
+        res1 <- makeAnnualStat(d)
+        expect_equal(res1$numPerYear, c(12, 12), info=i)
+        
+        # Get rid of first month. makeAnnualStat should drop this month when completeYears is TRUE
+        #    d <- filterDimensions(d, months = c(2:12))
+        d$val <- d$val[d$val$time != d$val$time[1],] 
+        res2 <- makeAnnualStat(d, filterNum=TRUE)
+        expect_equal(res2$numPerYear, c(12), info=i)
+        res3 <- makeAnnualStat(d, filterNum=FALSE)
+        expect_equal(res3$numPerYear, c(11, 12), info=i)
+    }
 })

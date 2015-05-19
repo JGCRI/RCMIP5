@@ -36,7 +36,7 @@ small.file <- list(model='HadGEM2-ES', experiment='historical', variable='nbp', 
 
 ```{r RCMIP5small, cache=TRUE}
 
-profileRCMIP5 <- function(file.info){
+profileRCMIP5 <- function(file.info) {
     variableTime <- system.time(firstVar <- loadCMIP5(model=file.info$model, variable=file.info$variable, experiment=file.info$experiment, ensemble=file.info$ensemble[[1]], domain=file.info$domain[[1]], path=file.info$path))[3]
     
     mergeTime <- system.time(mergeVar <- loadCMIP5(model=file.info$model, variable=file.info$variable, experiment=file.info$experiment, domain=file.info$domain[[1]], path=file.info$path))[3]
@@ -54,13 +54,13 @@ profileRCMIP5 <- function(file.info){
     row.names(temp) <- NULL
     
     return(temp)
-}
+    }
 
 report.df <- profileRCMIP5(small.file)
 ```
 
 ```{r CMIP5Array, cache=TRUE}
-profileRCMIP5Array <- function(file.info){
+profileRCMIP5Array <- function(file.info) {
     variableTime <- system.time(firstVar <- loadCMIP5(model=file.info$model, variable=file.info$variable, experiment=file.info$experiment, ensemble=file.info$ensemble[[1]], domain=file.info$domain[[1]], path=file.info$path, loadAs='array'))[3]
     
     mergeTime <- system.time(mergeVar <- loadCMIP5(model=file.info$model, variable=file.info$variable, experiment=file.info$experiment, domain=file.info$domain[[1]], path=file.info$path, loadAs='array'))[3]
@@ -76,7 +76,7 @@ profileRCMIP5Array <- function(file.info){
     row.names(temp) <- NULL
     
     return(temp)
-}
+    }
 
 
 report.df <- rbind(report.df, profileRCMIP5Array(small.file))
@@ -84,68 +84,68 @@ report.df <- rbind(report.df, profileRCMIP5Array(small.file))
 ```
 
 ```{r arraySmall, cache=TRUE}
-loadNCDF <- function(filename, varStr){
+loadNCDF <- function(filename, varStr) {
     nc <- nc_open(filename, write=FALSE)
     ans <- ncvar_get(nc, varid=varStr)
     
     dimNames <- unlist(lapply(nc$var[[varStr]]$dim, FUN=function(x) { x$name }))
-    if('time' %in% dimNames){
-    # Get the time unit (e.g. 'days since 1860')
-    timeName <- dimNames[length(dimNames)]
-    timeUnit <- ncatt_get(nc, timeName, 'units')$value
-    # Get the type of calendar used (e.g. 'noleap')
-    calendarStr <- ncatt_get(nc, timeName, 'calendar')$value
-    calendarUnitsStr <- ncatt_get(nc, timeName, 'units')$value
-            
-    # Extract the number of days in a year
-    if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)) {
-        calendarDayLength <- as.numeric(regmatches(calendarStr,
-                                                   regexpr('\\d{3}', calendarStr)))
+    if('time' %in% dimNames) {
+        # Get the time unit (e.g. 'days since 1860')
+        timeName <- dimNames[length(dimNames)]
+        timeUnit <- ncatt_get(nc, timeName, 'units')$value
+        # Get the type of calendar used (e.g. 'noleap')
+        calendarStr <- ncatt_get(nc, timeName, 'calendar')$value
+        calendarUnitsStr <- ncatt_get(nc, timeName, 'units')$value
+        
+        # Extract the number of days in a year
+        if(grepl('^[^\\d]*\\d{3}[^\\d]day', calendarStr)) {
+            calendarDayLength <- as.numeric(regmatches(calendarStr,
+                                                       regexpr('\\d{3}', calendarStr)))
+            } else {
+                calendarDayLength <- 365
+                }
+        
+        # Extract the year we are references in calendar
+        # Set the default to year 1, month 1, day 1, hour 0, min 0, sec 0
+        defaultCalendarArr <- c(1, 1, 1, 0, 0, 0)
+        
+        # Split the calandar unit string based on a '-', space, or ':'
+        # ...this allows us to deal with YYYY-MM-DD hh:mm:ss, YYYY-MM-DD, or
+        # ...YYYY-M-D
+        calendarArr <- unlist(strsplit(calendarUnitsStr, split='[- :]'))
+        
+        # Check that the time is going to be in days otherwise latter
+        # ...calculations for time array break
+        assert_that(any(grepl('day', calendarArr)))
+        
+        # extract just the digits
+        calendarArr <- as.numeric(calendarArr[grepl('^\\d+$', calendarArr)])
+        
+        # swap the default values with the extracted values, we assume
+        # ... that years are listed before months, before days, and so on
+        temp <- defaultCalendarArr
+        temp[1:length(calendarArr)] <- calendarArr
+        calendarArr <- temp
+        
+        # calculate the decimal starting year
+        startYr <- sum((calendarArr - c(0, 1, 1, 0, 0, 0))
+                       / c(1, 12, calendarDayLength, calendarDayLength*24,
+                           calendarDayLength*24*60, calendarDayLength*24*60*60))
+        
+        # Load the actual time
+        thisTimeRaw <- ncvar_get(nc, varid=timeName)
+        attributes(thisTimeRaw) <- NULL
+        
+        # convert from days (we assume the units are days) to years
+        thisTimeArr <- thisTimeRaw / calendarDayLength + startYr
         } else {
-            calendarDayLength <- 365
+            thisTimeArr <- NULL
             }
-    
-    # Extract the year we are references in calendar
-    # Set the default to year 1, month 1, day 1, hour 0, min 0, sec 0
-    defaultCalendarArr <- c(1, 1, 1, 0, 0, 0)
-    
-    # Split the calandar unit string based on a '-', space, or ':'
-    # ...this allows us to deal with YYYY-MM-DD hh:mm:ss, YYYY-MM-DD, or
-    # ...YYYY-M-D
-    calendarArr <- unlist(strsplit(calendarUnitsStr, split='[- :]'))
-    
-    # Check that the time is going to be in days otherwise latter
-    # ...calculations for time array break
-    assert_that(any(grepl('day', calendarArr)))
-    
-    # extract just the digits
-    calendarArr <- as.numeric(calendarArr[grepl('^\\d+$', calendarArr)])
-    
-    # swap the default values with the extracted values, we assume
-    # ... that years are listed before months, before days, and so on
-    temp <- defaultCalendarArr
-    temp[1:length(calendarArr)] <- calendarArr
-    calendarArr <- temp
-    
-    # calculate the decimal starting year
-    startYr <- sum((calendarArr - c(0, 1, 1, 0, 0, 0))
-                   / c(1, 12, calendarDayLength, calendarDayLength*24,
-                       calendarDayLength*24*60, calendarDayLength*24*60*60))
-    
-    # Load the actual time
-    thisTimeRaw <- ncvar_get(nc, varid=timeName)
-    attributes(thisTimeRaw) <- NULL
-    
-    # convert from days (we assume the units are days) to years
-    thisTimeArr <- thisTimeRaw / calendarDayLength + startYr
-    }else{
-        thisTimeArr <- NULL
-    }
     nc_close(nc)
     return(list(val=ans, time=thisTimeArr))
-}
+    }
 
-profileArray <- function(file.info){
+profileArray <- function(file.info) {
     variableTime <- system.time(firstVar <- loadNCDF(file.info$filename[[1]], varStr=file.info$variable))[3]
     
     mergeTime <- system.time(mergeVar <- (loadNCDF(file.info$filename[[1]], varStr=file.info$variable)$val + loadNCDF(file.info$filename[[2]], varStr=file.info$variable)$val)/2)[3]
@@ -154,12 +154,12 @@ profileArray <- function(file.info){
         {
             rawYrs <- table(floor(firstVar$time))
             yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
-            annualVar <- vapply(unique(yrs), FUN=function(yrNum){apply(firstVar$val[,,yrNum == yrs], c(1,2), mean)}, FUN.VALUE=firstVar$val[,,1])
+            annualVar <- vapply(unique(yrs), FUN=function(yrNum) {apply(firstVar$val[,,yrNum == yrs], c(1,2), mean)}, FUN.VALUE=firstVar$val[,,1])
             })[3]
     
     globalTime <- system.time({
         area.ls <- loadNCDF(file.info$areafile, 'areacella')
-        globalVar <- apply(annualVar, c(3), function(x){sum(x*area.ls$val, na.rm=TRUE)})
+        globalVar <- apply(annualVar, c(3), function(x) {sum(x*area.ls$val, na.rm=TRUE)})
         })[3]
     
     print(sprintf('annual global summary for %s-%s-%s', file.info$model, file.info$experiment, file.info$variable))
@@ -171,7 +171,7 @@ profileArray <- function(file.info){
                        loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
     row.names(temp) <- NULL
     return(temp)
-}
+    }
 
 report.df <- rbind(report.df, profileArray(small.file))
 ```
@@ -180,18 +180,18 @@ report.df <- rbind(report.df, profileArray(small.file))
 
 ```{r dataFrameSmall, cache=TRUE}
 
-toDF <- function(ncdfload){
+toDF <- function(ncdfload) {
     ans <- melt(ncdfload$val)
-    if(is.null(ncdfload$time)){
+    if(is.null(ncdfload$time)) {
         names(ans) <- c('lonIndex', 'latIndex', 'val')
-    }else{ 
-        ans$Var3 <- ncdfload$time[ans$Var3]
-        names(ans) <- c('lonIndex', 'latIndex', 'time', 'val')
-    }
+        } else { 
+            ans$Var3 <- ncdfload$time[ans$Var3]
+            names(ans) <- c('lonIndex', 'latIndex', 'time', 'val')
+            }
     return(ans)
-}
+    }
 
-profileDataframe <- function(file.info){
+profileDataframe <- function(file.info) {
     variableTime <- system.time(firstVar <- toDF(loadNCDF(file.info$filename[[1]], varStr=file.info$variable)))[3]
     
     mergeTime <- system.time({
@@ -205,10 +205,10 @@ profileDataframe <- function(file.info){
     
     annualTime <- system.time(
         {firstVar$yrs <- floor(firstVar$time)
-         annualVar <- ddply(firstVar, c('lonIndex', 'latIndex', 'yrs'), function(x){
-             if(length(x$val) != 12){
+         annualVar <- ddply(firstVar, c('lonIndex', 'latIndex', 'yrs'), function(x) {
+             if(length(x$val) != 12) {
                  return(data.frame(val=NA))
-                 }else{
+                 } else {
                      return(data.frame(val=mean(x$val)))
                      }
              firstVar$yrs <- NULL
@@ -218,7 +218,7 @@ profileDataframe <- function(file.info){
     globalTime <- system.time({
         area.ls <- toDF(loadNCDF(file.info$areafile, 'areacella'))
         globalVar <- merge(annualVar, area.ls, by=c('lonIndex', 'latIndex'))
-        globalVar <- ddply(globalVar, c('yrs'), function(x){
+        globalVar <- ddply(globalVar, c('yrs'), function(x) {
             data.frame(val=sum(x$val.x*x$val.y, na.rm=TRUE))
             })
         })[3]
@@ -228,12 +228,12 @@ profileDataframe <- function(file.info){
     print(globalVar$val)
     
     temp <- data.frame(method='ncdf-dataframe', 
-                 loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
-                 fileSize=file.info(file.info$filename[[1]])$size, 
-                 loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
-row.names(temp) <- NULL
+                       loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
+                       fileSize=file.info(file.info$filename[[1]])$size, 
+                       loadSize=object.size(firstVar)[[1]], annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
+    row.names(temp) <- NULL
     return(temp)
-}
+    }
 
 report.df <- rbind(report.df, profileDataframe(small.file))
 ```
@@ -241,37 +241,37 @@ report.df <- rbind(report.df, profileDataframe(small.file))
 ```{r rasterInMemory, cache=TRUE}
 #file.info <- small.file
 
-profileRasterInMemory <- function(file.info){
+profileRasterInMemory <- function(file.info) {
     variableTime <- system.time(firstVar <- stack(file.info$filename[[1]]))[3]
     
     mergeTime <- system.time({
-            firstVar <- stack(file.info$filename[[1]])
-            secondVar <- stack(file.info$filename[[1]])                     
-            mergeVar <- (firstVar + secondVar)/2
-            })[3]
+        firstVar <- stack(file.info$filename[[1]])
+        secondVar <- stack(file.info$filename[[1]])                     
+        mergeVar <- (firstVar + secondVar)/2
+        })[3]
     
     annualTime <- system.time({
         yrs <- as.numeric(substr(names(firstVar), 2, 5))
         annualVar <- stackApply(firstVar, yrs - yrs[1] + 1, mean)
         names(annualVar) <- unique(yrs)
-    })[3]
+        })[3]
     
     globalTime <- system.time({
         areaVar <- raster(file.info$areafile, varname='areacella')
         globalVar <- cellStats(annualVar*areaVar, stat='sum')
         names(globalVar) <- names(annualVar)
-    })[3]
+        })[3]
     
     print(sprintf('annual global summary for %s-%s-%s', file.info$model, file.info$experiment, file.info$variable))
     print(globalVar)
     
     temp <- data.frame(method='raster', 
-                     loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
-                     fileSize=file.info(file.info$filename[[1]])$size, 
-                     fileReadSize=object.size(firstVar)[[1]], inMemSize= object.size(mergeVar)[[1]], 
-                     annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
+                       loadTime=variableTime, mergeTime=mergeTime, annualTime=annualTime, globalTime=globalTime, 
+                       fileSize=file.info(file.info$filename[[1]])$size, 
+                       fileReadSize=object.size(firstVar)[[1]], inMemSize= object.size(mergeVar)[[1]], 
+                       annualSize = object.size(annualVar)[[1]], globalSize = object.size(globalVar)[[1]])
     return(temp)
-}
+    }
 #report.df <- profileRasterInMemory(small.file)
 report.df <- merge(report.df, profileRasterInMemory(small.file), all=TRUE)
 
