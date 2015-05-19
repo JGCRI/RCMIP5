@@ -11,18 +11,18 @@
 #' @note This is an internal RCMIP5 function and not exported.
 calcGridArea<- function(lon, lat, verbose=FALSE) {
 
-    ##Deal with backwards compatibility for old 1D arrays of lon and lat
+    # Deal with backwards compatibility for old 1D arrays of lon and lat
     if(length(dim(lon)) == 0){
         lon <- matrix(lon, nrow=length(lon), ncol=length(lat))
-        
     }
-    if(length(dim(lat))==0){
+    if(length(dim(lat)) == 0){
         lat <- matrix(lat, nrow=dim(lon)[1], ncol=dim(lon)[2], byrow=TRUE)
     }
     
     # Sanity checks - parameter classes and lengths
-    assert_that(length(dim(lat)) == 2 | all(dim(lat)[-2:-1] == 1))
+    assert_that(is.numeric(lon) & is.numeric(lat))
     assert_that(length(dim(lon)) == 2 | all(dim(lon)[-2:-1] == 1))
+    assert_that(length(dim(lat)) == 2 | all(dim(lat)[-2:-1] == 1))
     assert_that(is.flag(verbose))
 
     if(verbose) cat('Calculating grid cell areas...\n')
@@ -64,7 +64,7 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     # ... => (R*cos(lat))*deltaLon
     return( R*(maxLat-minLat) * (R*cos(lat))*deltaLon)
 
-    #old formulation for reference (updated 29 September 2014)
+    # Old formulation for reference (updated 29 September 2014)
     # ...no significant difference but harder to explain
     #R^2*(sin(maxLat)-sin(minLat))*deltaLon
 
