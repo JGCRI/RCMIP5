@@ -9,13 +9,13 @@ Description: Working with CMIP5 data can be tricky, forcing scientists to write
     and (v) produce easy-to-work-with graphical and data summaries.
 Imports:
     abind (>= 1.4),
-    dplyr (>= 0.3),
+    dplyr (>= 0.4.1),
     assertthat (>= 0.1),
     digest
 Depends:
     R (>= 3.1.0)
 Suggests:
-    ggplot2 (>= 0.9),
+    ggplot2 (>= 1.0.1),
     ncdf4 (>= 1.9),
     ncdf (>= 1.6),
     testthat (>= 0.9),
