@@ -9,7 +9,7 @@ library(testthat)
 #   library(testthat)
 #   test_file("tests/testthat/test_calcGridArea.R")
 
-context("Calculating global grid areas")
+context("calcGridArea")
 
 test_that("Test 1 degree grids", {
     area <- RCMIP5:::calcGridArea(lon=0:359+0.5, lat=-90:89+0.5)
