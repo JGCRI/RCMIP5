@@ -32,7 +32,10 @@ test_that("makeZStat computes Z means", {
     # Did unchanging info get copied correctly?
     expect_equal(res$valUnit, d$valUnit)
     expect_equal(res$files, d$files)
-
+    expect_equal(res$lon, d$lon)
+    expect_equal(res$lat, d$lat)
+    expect_equal(res$time, d$time)
+    
     # Depth removed, and other info updated?
     expect_null(res$Z)
     expect_is(res$numZs, "integer")

@@ -1,5 +1,7 @@
-RCMIP5 1.x
+RCMIP5 1.2
 ===========
+
+* Code handles irregular spatial grids.
 
 * Now use `assertthat` for pre- and post-assertions.
 

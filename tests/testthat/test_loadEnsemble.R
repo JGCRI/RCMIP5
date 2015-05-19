@@ -117,7 +117,7 @@ test_that("loadEnsemble handles 2D lon and lat", {
 })
 
 test_that("loadEnsemble handles data with time length=1", {
-
+    
     skip_on_cran()
     
     path <- "../../sampledata"
@@ -138,7 +138,7 @@ test_that("loadEnsemble handles time-only data", {
     
     path <- "../../sampledata"
     if(!file.exists(path)) skip("Path doesn't exist")
-        
+    
     # This is a real CMIP5 file with no lon or lat, just time
     # loadEnsemble should read OK, and add extra lon/lat dimensions of length 1
     d <- loadEnsemble("co2mass", "GFDL-ESM2M", "historical", domain="Amon", ensemble="r1i1p1",
@@ -149,7 +149,7 @@ test_that("loadEnsemble handles time-only data", {
 })
 
 test_that("loadEnsemble detects overlapping files", {
-        
+    
     path <- "testdata_overlap"
     # These two files (saved by saveNetCDF) have overlapping time periods
     
