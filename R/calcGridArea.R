@@ -62,7 +62,7 @@ calcGridArea<- function(lon, lat, verbose=FALSE) {
     # Calculate the north/south edges by assuming the arc length of longitude
     # ...is the lattitude corrected radius (R*cos(lat)) times the change in lon
     # ... => (R*cos(lat))*deltaLon
-    return( R*(maxLat-minLat) * (R*cos(lat))*deltaLon)
+    return( abs(R*(maxLat-minLat) * (R*cos(lat))*deltaLon))
 
     # Old formulation for reference (updated 29 September 2014)
     # ...no significant difference but harder to explain

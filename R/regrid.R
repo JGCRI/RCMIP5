@@ -69,13 +69,12 @@ getProjectionMatrix <- function(orgArea, projArea){
                           value=areaFrac[which(areaFrac != 0)]))
     } )
         
-    projectionMatrix <- sparseMatrix(j = projectionMatrix$projIndex, i = projectionMatrix$orgIndex, 
+    projectionMatrix <- Matrix::sparseMatrix(j = projectionMatrix$projIndex, i = projectionMatrix$orgIndex, 
                                          x=projectionMatrix$value)
     
     return(projectionMatrix)   
 }
 
-<<<<<<< HEAD
 #' Project the values of one \code{\link{cmip5data}} object to a new grid
 #' 
 #' 
@@ -91,7 +90,6 @@ getProjectionMatrix <- function(orgArea, projArea){
 #' where the area of a grid cell is assumed to be proportional to the degree area of that cell and
 #' neighboring cells are assumed to have the same area to degree ratios. This will NOT hold in large grids.
 #' Nor is the area weighting scheme appropreate for all variable types and grid shifts. Use with caution.
-#' @examples
 #' @seealso \code{\link{getProjectionMatrix}}
 #' @export
 regrid <- function(orgVar, projLat, projLon, 
@@ -150,51 +148,21 @@ regrid <- function(orgVar, projLat, projLon,
     }
     
     #project the lat/lon for each level/time slice
+
     projVar$val <- apply(orgVar$val, c(3,4), function(myMap){
         temp <- myMap*orgArea$val[,,1,1]
-        dim(temp) <- c(1, prod(dim(orgArea$val)))
+        temp <- temp[TRUE]
         ans <- as.numeric(temp%*%projectionMatrix)
-        #print(sum(temp[TRUE], na.rm=TRUE))
-        #print(sum(ans[TRUE], na.rm=TRUE))
-        #assert_that(sum(temp[TRUE], na.rm=TRUE) - sum(ans[TRUE], na.rm=TRUE) < 1e-6*sum(temp[TRUE], na.rm=TRUE))
-        return(ans/projArea$val[TRUE])
+        dim(ans) <- dim(projVar$lat)
+        ans <- ans/projArea$val[,,1,1]
+        return(ans)
     })
     dim(projVar$val) <- c(dim(projVar$lat), dim(orgVar$val)[c(3,4)])
     
     projVar$projectionMatrix <- projectionMatrix
-    projVar <- addProvenance(projVar, paste('Shifting grid size from [', dim(orgVar$val), '] to [', dim(projVar$val), ']', collapse = ', '))
+    projVar <- addProvenance(cmip5data(projVar), 
+                             paste('Shifting grid size from [', 
+                                   paste(dim(orgVar$val), collapse = ', '), '] to [', paste(dim(projVar$val), collapse = ', '), ']'))
     return(projVar)
 }
-=======
-#orgCmip5 <- loadCMIP5(path='sampledata/fx/', experiment='historical',
-#                      variable='areacella', model='HadGEM2-ES')
-#orgLon <- cmip5obj$lon
-#orgLat <- cmip5obj$lat
-#check (?make) orginal area file
-#if(is.null(org_area)) {
-#   org_area <- calcGridArea(lon=orgLon, lat=orgLat)
-#}
 
-#lon_mtr <- matrix(orgLon, nrow=length(orgLon),ncol=length(orgLat), byrow=TRUE)
-#lat_mtr <- matrix(orgLat, nrow=length(orgLon),ncol=length(orgLat))
-
-#dump orginal area and values to data frame
-
-#calculate upper and lower bounds of bands
-#...wrapping lower bounds are negative
-#...wrapping upper bounds are positive
-
-#make projection grid area
-
-#dump grid area to data frame
-
-#for each projected grid calculate overlap percent of each orginal grid
-#and save thsi into a column of the transfer matrix
-##...if the lower bound is greater then upper bound (lat or lon) => 0
-##...if the upper bound is less then the lower bound (lat or lon) => 0
-##...otherwise overlap is product of (org-proj)/org for lat and lon
-
-#Apply the transfer matrix to every time-depth/lev
-
-#return regridded matrix
->>>>>>> master
