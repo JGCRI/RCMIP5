@@ -44,11 +44,11 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
             }
             myDim <- dim(x$val)
             x$val <- vapply(yrs, 
-                            FUN=function(yrNum) {
+                            FUN=function(yrNum, ...) {
                                 temp <- x$val[,,,yrNum == floor(x$time)]
                                 myDim[4] <- sum(yrNum == floor(x$time))
                                 dim(temp) <- myDim
-                                temp <- apply(temp, c(1,2,3), FUN)#, ...)
+                                temp <- apply(temp, c(1,2,3), FUN, ...)
                                 myDim[4] <- 1
                                 dim(temp) <- myDim
                                 return(temp)}, 
