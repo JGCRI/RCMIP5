@@ -456,7 +456,7 @@ vals <- function(x) {
     if(is.data.frame(x$val)) {
         x$val$value
     } else if(is.array(x$val)) {
-        x$val
+        as.numeric(x$val)
     } else
         stop("Unknown data implementation")
 } # vals
@@ -470,11 +470,5 @@ vals <- function(x) {
 #' @keywords internal
 #' @note This is an internal RCMIP5 function and not exported.
 nvals <- function(x) {
-    assert_that(class(x)=="cmip5data")
-    if(is.data.frame(x$val)) {
-        nrow(x$val)
-    } else if(is.array(x$val)) {
-        prod(dim(x$val))
-    } else
-        stop("Unknown data implementation")
+    length(vals(x))
 } # nvals

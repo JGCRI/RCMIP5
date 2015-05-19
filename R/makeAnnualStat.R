@@ -56,7 +56,7 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
             myDim[4] <- length(yrs)
             dim(x$val) <- myDim
             x$time <- yrs
-            x$numPerYear <- rawYrs[as.numeric(names(rawYrs)) %in% yrs]
+            x$numPerYear <- as.integer(rawYrs[as.numeric(names(rawYrs)) %in% yrs])
             x$debug$AnnualFreqTable <- rawYrs
         } else {
             
