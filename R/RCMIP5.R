@@ -443,3 +443,39 @@ cmip5.weighted.mean <- function(x, w=rep(1, length(x)), na.rm=TRUE) {
     if(na.rm) na <- is.na(x) | is.na(w)
     sum((x*w)[!na]) / sum(w[!na])
 } # cmip5.weighted.mean
+
+#' Return data values
+#'
+#' @param x A \code{\link{cmip5data}} object
+#' @return Data values in \code{x}.
+#' @details Abstracts away getting values, the method for which
+#' varies depending on backend implementation.
+#' @keywords internal
+#' @note This is an internal RCMIP5 function and not exported.
+vals <- function(x) {
+    assert_that(class(x)=="cmip5data")
+    if(is.data.frame(x$val)) {
+        x$val$value
+    } else if(is.array(x$val)) {
+        x$val
+    } else
+        stop("Unknown data implementation")
+} # vals
+
+#' Return number of data values
+#'
+#' @param x A \code{\link{cmip5data}} object
+#' @return Number of data values in \code{x}.
+#' @details Abstracts away getting number of values, the method for which
+#' varies depending on backend implementation.
+#' @keywords internal
+#' @note This is an internal RCMIP5 function and not exported.
+nvals <- function(x) {
+    assert_that(class(x)=="cmip5data")
+    if(is.data.frame(x$val)) {
+        nrow(x$val)
+    } else if(is.array(x$val)) {
+        length(x$val)
+    } else
+        stop("Unknown data implementation")
+} # nvals
