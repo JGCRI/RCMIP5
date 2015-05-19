@@ -1,3 +1,4 @@
+
 #' Compute global statistic of a variable
 #' 
 #' Calculates a global summary for CMIP5 data, usually weighted by the 

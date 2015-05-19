@@ -44,12 +44,12 @@ makeMonthlyStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
         if(sortData) {
             if(verbose) cat("Sorting data...\n")    
             x$val <- group_by(x$val, lon, lat, Z, time) %>%
-            arrange()
+                arrange()
         }
         
         monthIndex <- floor((x$val$time %% 1) * 12 + 1)
         x$val$month <- monthIndex  
-                
+        
         # Instead of "summarise(value=FUN(value, ...))", we use the do()
         # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
         # the ellipses cause big problems. This solution thanks to Dennis
@@ -62,12 +62,12 @@ makeMonthlyStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
         
         # dplyr doesn't (yet) have a 'drop=FALSE' option, and the summarise
         # command above may have removed some lon/lat combinations
-        if(length(unique(x$val$lon)) < length(x$lon) |
-               length(unique(x$val$lat)) < length(x$lat)) {
+        if(length(unique(x$val$lon)) < length(unique(as.numeric(x$lon))) |
+               length(unique(x$val$lat)) < length(unique(as.numeric(x$lat)))) {
             if(verbose) cat("Replacing missing lon/lat combinations\n")
             
             # Fix this by generating all lon/lat pairs and combining with answer
-            full_data <- tbl_df(expand.grid(lon=x$lon, lat=x$lat))
+            full_data <- tbl_df(data.frame(lon=x$lon, lat=x$lat))
             x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
         }
     }) # system.time

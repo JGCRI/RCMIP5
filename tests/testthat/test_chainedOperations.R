@@ -27,7 +27,7 @@ test_that("monthly data", {
     expect_equal(nrow(d12$val), prod(1, 1, 1, ysize-1))
     
     # filter, global stat, annual stat
-    d20 <- filterDimensions(d, years=years[-1)], verbose=F)
+    d20 <- filterDimensions(d, years=years[-1], verbose=F)
     expect_equal(nrow(d20$val), prod(lsize, lsize, 1, (ysize-1)*12))
     d21 <- makeGlobalStat(d20, verbose=F)
     expect_equal(nrow(d21$val), prod(1, 1, 1, (ysize-1)*12))
@@ -38,14 +38,14 @@ test_that("monthly data", {
     expect_equal(d12$val, d22$val)
     
     # filter, monthly stat, global stat
-    d30 <- filterDimensions(d, years=years[-1)], verbose=F)
+    d30 <- filterDimensions(d, years=years[-1], verbose=F)
     d31 <- makeMonthlyStat(d30, verbose=F)
     expect_equal(nrow(d31$val), prod(lsize, lsize, 1, 12))
     d32 <- makeGlobalStat(d31, verbose=F)
     expect_equal(nrow(d32$val), prod(1, 1, 1, 12))
     
     # filter, global stat, annual stat
-    d40 <- filterDimensions(d, years=years[-1)], verbose=F)
+    d40 <- filterDimensions(d, years=years[-1], verbose=F)
     d41 <- makeGlobalStat(d40, verbose=F)
     expect_equal(nrow(d41$val), prod(1, 1, 1, (ysize-1)*12))
     d42 <- makeMonthlyStat(d41, verbose=F)
@@ -63,7 +63,7 @@ test_that("annual data", {
     expect_equal(nrow(d$val), prod(lsize, lsize, 1, ysize))
     
     # filter, annual stat, global stat
-    d10 <- filterDimensions(d, years=years[-1)], verbose=F)
+    d10 <- filterDimensions(d, years=years[-1], verbose=F)
     expect_equal(nrow(d10$val), prod(lsize, lsize, 1, ysize-1))
     d11 <- makeAnnualStat(d10, verbose=F)
     expect_equal(nrow(d11$val), prod(lsize, lsize, 1, ysize-1))
@@ -71,7 +71,7 @@ test_that("annual data", {
     expect_equal(nrow(d12$val), prod(1, 1, 1, ysize-1))
     
     # filter, global stat, annual stat
-    d20 <- filterDimensions(d, years=years[-1)], verbose=F)
+    d20 <- filterDimensions(d, years=years[-1], verbose=F)
     expect_equal(nrow(d20$val), prod(lsize, lsize, 1, ysize-1))
     d21 <- makeGlobalStat(d20, verbose=F)
     expect_equal(nrow(d21$val), prod(1, 1, 1, ysize-1))
@@ -91,7 +91,7 @@ test_that("four-D data", {
     expect_equal(nrow(d$val), prod(lsize, lsize, zsize, ysize*12))
     
     # filter, annual stat, global stat
-    d10 <- filterDimensions(d, Zs=d$Z[-1)], verbose=F)
+    d10 <- filterDimensions(d, Zs=d$Z[-1], verbose=F)
     expect_equal(nrow(d10$val), prod(lsize, lsize, zsize-1, ysize*12))
     d11 <- makeAnnualStat(d10, verbose=F)
     expect_equal(nrow(d11$val), prod(lsize, lsize, zsize-1, ysize))
@@ -99,7 +99,7 @@ test_that("four-D data", {
     expect_equal(nrow(d12$val), prod(1, 1, zsize-1, ysize))
     
     # filter, global stat, annual stat
-    d20 <- filterDimensions(d, Zs=d$Z[-1)], verbose=F)
+    d20 <- filterDimensions(d, Zs=d$Z[-1], verbose=F)
     expect_equal(nrow(d20$val), prod(lsize, lsize, zsize-1, ysize*12))
     d21 <- makeGlobalStat(d20, verbose=F)
     expect_equal(nrow(d21$val), prod(1, 1, zsize-1, ysize*12))
@@ -110,7 +110,7 @@ test_that("four-D data", {
     expect_equal(d12$val, d22$val)
     
     # filter, monthly stat, global stat
-    d30 <- filterDimensions(d, Zs=d$Z[-1)], verbose=F)    
+    d30 <- filterDimensions(d, Zs=d$Z[-1], verbose=F)    
     expect_equal(nrow(d30$val), prod(lsize, lsize, zsize-1, ysize*12))    
     d31 <- makeMonthlyStat(d30, verbose=F)
     expect_equal(nrow(d31$val), prod(lsize, lsize, zsize-1, 12))
@@ -120,7 +120,7 @@ test_that("four-D data", {
     expect_equal(nrow(d33$val), prod(1, 1, 1, 12))
     
     # filter, global stat, annual stat
-    d40 <- filterDimensions(d, Zs=d$Z[-1)], verbose=F)    
+    d40 <- filterDimensions(d, Zs=d$Z[-1], verbose=F)    
     expect_equal(nrow(d40$val), prod(lsize, lsize, zsize-1, ysize*12))    
     d41 <- makeGlobalStat(d40, verbose=F)
     expect_equal(nrow(d41$val), prod(1, 1, zsize-1, ysize*12))        
