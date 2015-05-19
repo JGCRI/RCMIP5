@@ -12,7 +12,7 @@ library(testthat)
 context("Calculating global grid areas")
 
 test_that("Test 1 degree grids", {
-    area <- calcGridArea(lon=0:359+0.5, lat=-90:89+0.5)
+    area <- RCMIP5:::calcGridArea(lon=0:359+0.5, lat=-90:89+0.5)
     
     #check global area
     expect_less_than(abs(sum(area[TRUE])-5.10072e14)/5.10072e14, 1e-5)
@@ -38,6 +38,6 @@ test_that("Test global totals with real data", {
     path <- "../../sampledata"
     d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F, loadAs='array')
     
-    area <- calcGridArea(lat=d$lat, lon=d$lon)
+    area <- RCMIP5:::calcGridArea(lat=d$lat, lon=d$lon)
     expect_less_than(max(as.numeric(abs(area-d$val[,,1,1])/d$val[,,1,1])), 1e-3)
 })
