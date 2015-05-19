@@ -16,10 +16,7 @@ export(makeAnnualStat)
 export(makeGlobalStat)
 export(makeMonthlyStat)
 export(makeZStat)
-<<<<<<< HEAD
-=======
 export(regrid)
->>>>>>> regrid
 export(saveNetCDF)
 export(worldPlot)
 import(Matrix)

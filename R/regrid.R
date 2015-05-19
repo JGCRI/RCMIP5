@@ -75,16 +75,6 @@ getProjectionMatrix <- function(orgArea, projArea){
     return(projectionMatrix)   
 }
 
-<<<<<<< HEAD
-#orgCmip5 <- loadCMIP5(path='sampledata/fx/', experiment='historical',
-#                      variable='areacella', model='HadGEM2-ES')
-#orgLon <- cmip5obj$lon
-#orgLat <- cmip5obj$lat
-#check (?make) orginal area file
-#if(is.null(org_area)) {
-#   org_area <- calcGridArea(lon=orgLon, lat=orgLat)
-#}
-=======
 #' Project the values of one \code{\link{cmip5data}} object to a new grid
 #' 
 #' 
@@ -158,8 +148,6 @@ regrid <- function(orgVar, projLat, projLon,
     }
     
     #project the lat/lon for each level/time slice
->>>>>>> regrid
-
     projVar$val <- apply(orgVar$val, c(3,4), function(myMap){
         temp <- myMap*orgArea$val[,,1,1]
         temp <- temp[TRUE]

@@ -35,11 +35,6 @@ test_that("Test 1 degree grids", {
 })
 
 test_that("Test global totals with real data", {
-<<<<<<< HEAD
-    skip_on_cran()
-=======
-    #skip_on_cran()
->>>>>>> regrid
     path <- "../../sampledata"
     if(!file.exists(path)) skip("Path doesn't exist")
 
