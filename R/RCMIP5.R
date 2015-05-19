@@ -177,18 +177,17 @@ cmip5data <- function(x=list(),
         }
         
         # Create the data array
-        finalDim <- c(length(result$lon[,1]), length(result$lat[1,]),
-                      length(result$Z), length(result$time))
-        finalDim <- finalDim[finalDim > 0]
+        finalDim <- c(max(1, length(result$lon[,1])), 
+                      max(1, length(result$lat[1,])),
+                      max(1, length(result$Z)), 
+                      max(1, length(result$time)))
+        
         if(randomize) {
             result$val <- runif(n=prod(finalDim))
         } else {
             result$val <- rep(1, prod(finalDim))
         } 
         dim(result$val) <- finalDim
-
-        # TODO: KTB - probably want to call restoreMissingDimensions here?
-        # The array isn't guaranteed to be four-dimensional
         
         # Miscellany
         result$valUnit <- "unit"
@@ -475,7 +474,7 @@ nvals <- function(x) {
     if(is.data.frame(x$val)) {
         nrow(x$val)
     } else if(is.array(x$val)) {
-        length(x$val)
+        prod(dim(x$val))
     } else
         stop("Unknown data implementation")
 } # nvals
