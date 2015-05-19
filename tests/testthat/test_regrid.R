@@ -38,13 +38,14 @@ test_that('regrid returns expected values for simple case', {
 })
 
 test_that('regrid test for data', {
+    path='../../sampledata'
     numProjLon <- 360
     numProjLat <- 180
     projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, nrow=numProjLon, ncol=numProjLat)
     projLat <- matrix(seq(-90, 90-180/numProjLon, by=180/numProjLon) + 180/numProjLon/2, nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
     
-    orgVar <- loadCMIP5(experiment='historical', variable='nbp', model='HadGEM2-ES', loadAs='array')
-    orgArea <- loadCMIP5(experiment='historical', variable='areacella', model='HadGEM2-ES', loadAs='array')
+    orgVar <- loadCMIP5(path=path, experiment='historical', variable='nbp', model='HadGEM2-ES', loadAs='array')
+    orgArea <- loadCMIP5(path=path, experiment='historical', variable='areacella', model='HadGEM2-ES', loadAs='array')
     d <- regrid(orgVar = orgVar, projLat=projLat, projLon=projLon, 
            orgArea = orgArea,
            verbose=FALSE)

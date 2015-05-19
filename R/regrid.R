@@ -1,7 +1,35 @@
-#This is the alternate regridding algorithm
-#library(Matrix) #sparse matrix
-#library(plyr) 
-getProjectionMatrix <- function(orgArea, projArea, verbose=FALSE){
+#' Calculate projection matrix to translate one grid to another
+#' 
+#' The bulk of the computational time for regridding is in calculating the 
+#' area-weighted projection matrix. This functions allows you to pre calculate the 
+#' projection matrix to speed up regridding.
+#' 
+#' @param orgArea A \code{\link{cmip5data}} object or list with lat (latitude) and log (longitude) matricies
+#' of the orginal grid
+#' @param projArea A \code{\link{cmip5data}} object or list with lat (latitude) and log (longitude) matricies
+#' of the projection grid
+#' @details This function calculates the projection matrix to shift one global grid to a second.
+#' The relative contribution of an old grid to the new grid is calculated via an area weighting scheme
+#' where the area of a grid cell is assumed to be proportional to the degree area of that cell and
+#' neighboring cells are assumed to have the same area to degree ratios. This will NOT hold in large grids.
+#' Nor is the area weighting scheme appropreate for all variable types and grid shifts. Use with caution.
+#' @examples
+#' numOrgLon <- 3
+#' numOrgLat <- 3
+#' orgLon <- matrix(seq(0, 360-360/numOrgLon, by=360/numOrgLon) + 360/numOrgLon/2, nrow=numOrgLon, ncol=numOrgLat)
+#' orgLat <- matrix(seq(-90, 90-180/numOrgLat, by=180/numOrgLat) + 180/numOrgLat/2, nrow=numOrgLon, ncol=numOrgLat, byrow=TRUE)
+#' orgArea <- list(lon = orgLon, lat=orgLat)
+#' 
+#' numProjLon <- 2
+#' numProjLat <- 2
+#' projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, nrow=numProjLon, ncol=numProjLat)
+#' projLat <- matrix(seq(-90, 90-180/numProjLon, by=180/numProjLon) + 180/numProjLon/2, nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
+#' projArea <- list(lon = projLon, lat=projLat)
+#' 
+#' transferMatrix <- getProjectionMatrix(orgArea = orgArea, projArea=projArea)
+#' @seealso \code{\link{regrid}}
+#' @export
+getProjectionMatrix <- function(orgArea, projArea){
     
     assert_that(all(!apply(orgArea$lon, c(2), is.unsorted)), all(!apply(orgArea$lat, c(1), is.unsorted)))
     assert_that(all(!apply(projArea$lon, c(2), is.unsorted)), all(!apply(projArea$lat, c(1), is.unsorted)))
@@ -47,51 +75,80 @@ getProjectionMatrix <- function(orgArea, projArea, verbose=FALSE){
     return(projectionMatrix)   
 }
 
-
+#' Project the values of one \code{\link{cmip5data}} object to a new grid
+#' 
+#' 
+#' 
+#' @param orgar A \code{\link{cmip5data}} object to be regridded
+#' @param projArea A \code{\link{cmip5data}} object or list with lat (latitude) and log (longitude) matricies
+#' of the projection grid
+#' @return A \code{\link{cmip5data}} object, whose \code{val} is the area-weighted regrided
+#' variable passed in \code{orgVar} parameter. A \code{projectionMatrix} field is also added
+#' recording projection matrix used in regridding; this can be reused for later variables with the same regridding.
+#' @details This function calculates the projection matrix to shift one global grid to a second.
+#' The relative contribution of an old grid to the new grid is calculated via an area weighting scheme
+#' where the area of a grid cell is assumed to be proportional to the degree area of that cell and
+#' neighboring cells are assumed to have the same area to degree ratios. This will NOT hold in large grids.
+#' Nor is the area weighting scheme appropreate for all variable types and grid shifts. Use with caution.
+#' @examples
+#' @seealso \code{\link{getProjectionMatrix}}
+#' @export
 regrid <- function(orgVar, projLat, projLon, 
                    orgArea=NULL, projArea=NULL,
                    projectionMatrix=NULL, verbose=FALSE){
     
-    if(is.null(orgArea)){
-        orgArea <- orgVar
-        orgArea$val <- calcGridArea(lon=orgVar$lon[,1], lat=orgVar$lat[1,])
-        dim(orgArea$val) <- c(dim(orgArea$val), 1,1)
-    }
-    
-    assert_that(identical(orgArea$lat, orgVar$lat), identical(orgArea$lon, orgVar$lon))
-    
-    if(all(orgArea$lon <= 180 & orgArea$lon >= -180)){
-        orgArea$lon <- orgArea$lon + 180
-    }
-    
-    numOrgLat <- dim(orgArea$val)[2]
-    numOrgLon <- dim(orgArea$val)[1]
+    numOrgLat <- dim(orgVar$val)[2]
+    numOrgLon <- dim(orgVar$val)[1]
     
     #Deal with legacy where the lat/lon were stored as vectors not arrays
     if(identical(class(orgArea$lon), 'numeric')){
         orgArea$lon <- matrix(orgArea$lon, nrow=numOrgLon, ncol=numOrgLat)
         orgArea$lat <- matrix(orgArea$lat, nrow=numOrgLon, ncol=numOrgLat, byrow=TRUE)
     }
+    if(identical(class(orgVar$lon), 'numeric')){
+        orgVar$lon <- matrix(orgVar$lon, nrow=numOrgLon, ncol=numOrgLat)
+        orgVar$lat <- matrix(orgVar$lat, nrow=numOrgLon, ncol=numOrgLat, byrow=TRUE)
+    }
     
+    #check that relevant lat/lon are matricies
+    assert_that(is.matrix(orgVar$lon), is.matrix(orgVar$lat), is.matrix(projLat), is.matrix(projLon))
+        
+    #Pull the orginal area if it isn't provided
+    if(is.null(orgArea)){
+        orgArea <- orgVar
+        orgArea$val <- calcGridArea(lon=orgVar$lon[,1], lat=orgVar$lat[1,])
+        if(length(dim(orgArea$val)) == 2) dim(orgArea$val) <- c(dim(orgArea$val), 1,1)
+    }
+    
+    #check that the area is for the correct variable
+    assert_that(identical(orgArea$lat, orgVar$lat), identical(orgArea$lon, orgVar$lon))
+    
+    #force lon to 0-360 if it's on -180-180
+    orgArea$lon[orgArea$lon < 0] <- orgArea$lon[orgArea$lon < 0] + 360 
+    
+    #check that the lat/lon is sorted
     assert_that(all(!apply(orgArea$lon, c(2), is.unsorted)), all(!apply(orgArea$lat, c(1), is.unsorted)))
     
-    stepLon <- 360/numProjLon
-    stepLat <- 180/numProjLat
-    projVar <- orgVar
+    #copy the orginal variable for historical purposes
+    projVar <- orgVar[setdiff(names(orgVar), c('val', 'lon', 'lat'))]
+    
     projVar$lon <- projLon
     projVar$lat <- projLat
     if(is.null(projArea)){
         projArea <- list(lon=projLon, lat=projLat, val= calcGridArea(lon=projLon[,1], lat=projVar$lat[1,]))
     }
     
+    #force a 4D array for the area
     ifelse(length(dim(projArea$val)) == 2,  dim(projArea$val) <- c(dim(projArea$val), 1, 1), dim(projArea$val) <- dim(projArea$val))
     ifelse(length(dim(orgArea$val)) == 2,  dim(orgArea$val) <- c(dim(orgArea$val), 1, 1), dim(orgArea$val) <- dim(orgArea$val))
     
+    #if the projection matrix is undefined then pull it
     if(is.null(projectionMatrix) | 
            !all(dim(projectionMatrix) == c(prod(dim(orgArea$lat)[1:2]), prod(dim(projVar$lat)[1:2])))){
         projectionMatrix <- getProjectionMatrix(orgArea, projVar)   
     }
     
+    #project the lat/lon for each level/time slice
     projVar$val <- apply(orgVar$val, c(3,4), function(myMap){
         temp <- myMap*orgArea$val[,,1,1]
         dim(temp) <- c(1, prod(dim(orgArea$val)))

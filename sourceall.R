@@ -38,7 +38,7 @@ source(sprintf("%s/saveNetCDF.R", RDirPath))
 #...these are bloated and have lots of room
 #...for optimization but do provide a starting point.
 source(sprintf("%s/calcGridArea.R", RDirPath))
-#source(sprintf("%s/regridVal.R", RDirPath))
+source(sprintf("%s/regrid.R", RDirPath))
 #source(sprintf("%s/regridData.R", RDirPath))
 
 #source('%s/world.plot.R')
