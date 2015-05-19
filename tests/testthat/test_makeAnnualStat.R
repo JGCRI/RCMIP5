@@ -12,7 +12,7 @@ library(testthat)
 
 context("makeAnnualStat")
 
-implementations <- c("data.frame") #, "array")
+implementations <- c("data.frame", "array")
 
 test_that("makeAnnualStat handles bad input", {
     expect_error(makeAnnualStat(1))                         # non-list d
