@@ -35,7 +35,10 @@ test_that("Test 1 degree grids", {
 })
 
 test_that("Test global totals with real data", {
+    skip_on_cran()
     path <- "../../sampledata"
+    if(!file.exists(path)) skip("Path doesn't exist")
+
     d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F, loadAs='array')
     
     area <- RCMIP5:::calcGridArea(lat=d$lat, lon=d$lon)

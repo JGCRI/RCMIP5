@@ -43,7 +43,6 @@ test_that("loadCMIP5 handles no files found", {            # no NetCDF files fou
 })
 
 test_that("loadCMIP5 loads monthly data", {
-    
     skip_on_cran()
     
     for(i in implementations) {
@@ -59,9 +58,7 @@ test_that("loadCMIP5 loads monthly data", {
 })
 
 test_that("loadCMIP5 loads annual data", {
-    
     skip_on_cran()
-    
     path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
     
@@ -83,7 +80,6 @@ test_that("loadEnsemble checks unique domain", {
 })
 
 test_that("loadCMIP5 handles spatial mismatches between ensembles", {
-    
     path <- "testdata_mismatch"
     
     # Test data created by
@@ -96,7 +92,6 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
 })
 
 test_that("loadCMIP5 can load using both ncdf and ncdf4", {
-    
     skip_on_cran()
     if(suppressWarnings(!require(ncdf, quietly=T))) skip("ncdf not available")
     if(suppressWarnings(!require(ncdf4, quietly=T))) skip("ncdf4 not available")
@@ -117,7 +112,6 @@ test_that("loadCMIP5 can load using both ncdf and ncdf4", {
 })
 
 test_that("loadCMIP5 can load area files", {
-    
     path <- "../../sampledata/fx"
     if(!file.exists(path)) skip("Path doesn't exist")
     
@@ -132,8 +126,9 @@ test_that("loadCMIP5 can load area files", {
 })
 
 test_that("Converts to and reads arrays formats agree", {
-    #skip_on_cran()
+    skip_on_cran()
     path <- "../../sampledata"
+    if(!file.exists(path)) skip("Path doesn't exist")
     
     d <- loadCMIP5(path=path, variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1')
     darray <-  loadCMIP5(path=path, variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1', loadAs='array')
@@ -142,9 +137,7 @@ test_that("Converts to and reads arrays formats agree", {
 })
 
 test_that("loadCMIP5 correctly extracts start year", {
-    
     skip_on_cran()
-    
     path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
     
@@ -157,9 +150,7 @@ test_that("loadCMIP5 correctly extracts start year", {
 })
 
 test_that("loadCMIP5 handles YearRange", {
-    
     skip_on_cran()
-    
     path <- "../../sampledata/monthly"
     if(!file.exists(path)) skip("Path doesn't exist")
     
@@ -186,9 +177,7 @@ test_that("loadCMIP5 handles YearRange", {
 })
 
 test_that("loadCMIP5 handles ZRange", {
-    
     skip_on_cran()
-    
     path <- "../../sampledata/annual"
     if(!file.exists(path)) skip("Path doesn't exist")
     
@@ -203,7 +192,6 @@ test_that("loadCMIP5 handles ZRange", {
 })
 
 test_that("loadCMIP5 handles FUN correctly", {
-    
     path <- "testdata_twoensembles"
     # These two files (saved by saveNetCDF) have all 1's and 2's,
     # respectively, in their data
