@@ -50,8 +50,8 @@ getProjectionMatrix <- function(orgArea, projArea) {
     orgEnds <- extractBounds(lat=orgArea$lat, lon=orgArea$lon)
     projEnds <- extractBounds(lat=projArea$lat, lon=projArea$lon)
     
-    lodf <- list()  # List Of Data Frames (initially empty)
-    for(projIndex in seq_along(prod(dim(projArea$lat)))) {
+    projectionMatrix <- data.frame()  # List Of Data Frames (initially empty)
+    for(projIndex in 1:prod(dim(projArea$lat))) {
         latOverlap <- (pmin(projEnds$maxLat[projIndex], orgEnds$maxLat[TRUE]) - 
                            pmax(projEnds$minLat[projIndex], orgEnds$minLat[TRUE])) /
             (orgEnds$maxLat[TRUE]-orgEnds$minLat[TRUE])
@@ -63,13 +63,12 @@ getProjectionMatrix <- function(orgArea, projArea) {
         lonOverlap[lonOverlap < 0] <- 0
         
         areaFrac <- latOverlap * lonOverlap
-        
-        lodf[[projIndex]] <- data.frame(projIndex =projIndex,
+
+        projectionMatrix <- rbind(projectionMatrix, 
+                      data.frame(projIndex =projIndex,
                                         orgIndex=which(areaFrac != 0), 
-                                        value=areaFrac[which(areaFrac != 0)])
+                                        value=areaFrac[which(areaFrac != 0)]))
     }
-    
-    projectionMatrix <- do.call("rbind", lodf)  # combine into one data frame
     
     Matrix::sparseMatrix(j = projectionMatrix$projIndex, i = projectionMatrix$orgIndex, 
                          x=projectionMatrix$value)
