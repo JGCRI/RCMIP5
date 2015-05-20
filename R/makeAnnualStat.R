@@ -59,7 +59,6 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
             x$numPerYear <- as.integer(rawYrs[as.numeric(names(rawYrs)) %in% yrs])
             x$debug$AnnualFreqTable <- rawYrs
         } else {
-            
             # Suppress stupid NOTEs from R CMD CHECK
             lon <- lat <- Z <- time <- year <- value <- `.` <- NULL
             

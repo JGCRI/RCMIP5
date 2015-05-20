@@ -116,32 +116,41 @@ test_that("makeAnnualStat handles custom function and dots", {
     years <- 1850:1851
     llsize <- 2
     
-    # TODO: need to finish implementation testing for this and case below
-    #    for(i in implementations) {
-    d <- cmip5data(years, lonsize=llsize, latsize=llsize)#, loadAs=i)
-    
-    # All data 1, except December, which is 2
-    d$val$value <- 1
-    d$val$value[round(d$val$time %% 1, 3)==.958] <- 2
-    
-    # Weights are all 1 except December, which is 11
-    w <- c(rep(1, 11), 11)
-    
-    # Compute correct answer
-    d$val$year <- floor(d$val$time)
-    ans <- aggregate(value~lon+lat+year, data=d$val, FUN=weighted.mean, w=w)
-    
-    res1 <- makeAnnualStat(d, verbose=F, sortData=F, filterNum=T, FUN=weighted.mean, w)
-    expect_is(res1, "cmip5data")
-    
-    myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
-    res2 <- makeAnnualStat(d, verbose=F, sortData=F, filterNum=T, FUN=myfunc, w)
-    expect_is(res1, "cmip5data")
-    
-    # Are the result values correct?    
-    expect_equal(res1$val$value, ans$value)
-    expect_equal(res2$val$value, ans$value)
-    #    }
+    for(i in implementations) {
+        d <- cmip5data(years, lonsize=llsize, latsize=llsize, loadAs=i)
+        
+        # All data 1, except December, which is 2
+        if(is.data.frame(d$val)) {
+            d$val$value <- 1
+            d$val$value[round(d$val$time %% 1, 3)==.958] <- 2        
+        } else if(is.array(d$val)) {
+            d$val <- array(1, dim=dim(d$val))
+            d$val[,,,round(d$time %% 1, 3)==.958] <- 2                
+        }
+        
+        # Weights are all 1 except December, which is 11
+        w <- c(rep(1, 11), 11)
+        
+        # Compute correct answer
+        ref <- cmip5data(years, lonsize=llsize, latsize=llsize, loadAs="data.frame")
+        ref$val$value <- 1
+        ref$val$value[round(ref$val$time %% 1, 3)==.958] <- 2        
+        ref$val$year <- floor(ref$val$time)
+        ans <- aggregate(value~lon+lat+year, data=ref$val, FUN=weighted.mean, w=w)
+        
+        res1 <- makeAnnualStat(d, verbose=F, sortData=F, filterNum=T, FUN=weighted.mean, w)
+        expect_is(res1, "cmip5data", info=i)
+        expect_is(res1$val, i, info=i)
+        
+        myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
+        res2 <- makeAnnualStat(d, verbose=F, sortData=F, filterNum=T, FUN=myfunc, w)
+        expect_is(res2, "cmip5data", info=i)
+        expect_is(res2$val, i, info=i)
+        
+        # Are the result values correct?    
+        expect_equal(RCMIP5:::vals(res1), ans$value, info=i)
+        expect_equal(RCMIP5:::vals(res2), ans$value, info=i)
+    }
 })
 
 test_that("makeAnnualStat computes numPerYear correctly", {
@@ -154,11 +163,12 @@ test_that("makeAnnualStat computes numPerYear correctly", {
         expect_equal(res1$numPerYear, c(12, 12), info=i)
         
         # Get rid of first month. makeAnnualStat should drop this month when completeYears is TRUE
-        #    d <- filterDimensions(d, months = c(2:12))
-        d$val <- d$val[d$val$time != d$val$time[1],] 
-        res2 <- makeAnnualStat(d, filterNum=TRUE)
-        expect_equal(res2$numPerYear, c(12), info=i)
-        res3 <- makeAnnualStat(d, filterNum=FALSE)
-        expect_equal(res3$numPerYear, c(11, 12), info=i)
+        if(i == "data.frame") {  # can't really run this test with arrays TODO: KTB?
+            d$val <- d$val[d$val$time != d$val$time[1],] 
+            res2 <- makeAnnualStat(d, filterNum=TRUE)
+            expect_equal(res2$numPerYear, c(12), info=i)
+            res3 <- makeAnnualStat(d, filterNum=FALSE)
+            expect_equal(res3$numPerYear, c(11, 12), info=i)            
+        }
     }
 })
