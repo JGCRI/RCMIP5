@@ -62,6 +62,9 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
         x <- addProvenance(x, "About to compute global stat. Grid areas from following data:")
         x <- addProvenance(x, area)
         areavals <- area$val
+        if(is.array(areavals)){
+            dim(areavals) <- dim(areavals)[c(1,2)]
+        }
     }
     if(verbose) cat("Area data length", nrow(areavals), "\n")    
     
@@ -69,7 +72,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
     timer <- system.time({ # time the main computation
         if(is.array(x$val)) {
             myDim <- dim(x$val)
-            x$val <- apply(x$val, c(3,4), function(xx) {FUN(xx, areavals, ...)})
+            x$val <- apply(x$val, c(3,4), function(xx) {FUN(xx, areavals, ...)}, ...)
             myDim[1:2] <- c(1,1)
             dim(x$val) <- myDim
         } else {
