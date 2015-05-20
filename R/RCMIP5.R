@@ -295,8 +295,8 @@ summary.cmip5data <- function(object, ...) {
     #        ans$type <- paste(ans$type, "(regridded)")
     #    }
     
-    ans$spatial <- paste0("lon [", length(object$lon),
-                          "] lat [", length(object$lat),
+    ans$spatial <- paste0("lon [", dim(object$lon)[1],
+                          "] lat [", dim(object$lat)[2],
                           "] Z [", length(object$Z), "]")
     
     ans$time <- paste0(object$debug$timeFreqStr, " [", length(object$time), "] ", object$debug$timeUnit)
