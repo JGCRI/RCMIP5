@@ -111,22 +111,27 @@ test_that("makeGlobalStat handles custom function and dots", {
         } else if(is.array(d$val)) {
             d$val <- array(1, dim=dim(d$val))
             d$val[ncol(d$lon),nrow(d$lat),,] <- 2
-            darea$val <- array(1, dim=dim(darea$val))
+            darea$val <- array(c(rep(1, llsize*llsize-1), llsize*llsize-1), dim=dim(darea$val))
         }
         
         # Compute correct answer
-        ans <- aggregate(value~time, data=d$val, FUN=weighted.mean, w=RCMIP5:::vals(darea))
+        ref <- cmip5data(years, lonsize=llsize, latsize=llsize, loadAs="data.frame")
+        ref$val$value <- 1
+        ref$val$value[ref$val$lon == max(ref$lon) & ref$val$lat == max(ref$lat)] <- 2    
+        refarea <- cmip5data(0, time=F, lonsize=llsize, latsize=llsize, loadAs="data.frame")
+        refarea$val$value <- c(rep(1, llsize*llsize-1), llsize*llsize-1)
+        ans <- aggregate(value~time, data=ref$val, FUN=weighted.mean, w=RCMIP5:::vals(refarea))
         
         res1 <- makeGlobalStat(d, darea, verbose=F, sortData=F, FUN=weighted.mean)
         expect_is(res1, "cmip5data", info=i)
         
         myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
         res2 <- makeGlobalStat(d, darea, verbose=F, sortData=F, FUN=myfunc)
-        expect_is(res1, "cmip5data", info=i)
+        expect_is(res2, "cmip5data", info=i)
         
         # Are the result values correct?    
-        expect_equal(RCMIP5:::vals(res1), RCMIP5:::vals(ans), info=i)    
-        expect_equal(RCMIP5:::vals(res2), RCMIP5:::vals(ans), info=i)
+        expect_equal(RCMIP5:::vals(res1), ans$value, info=i)    
+        expect_equal(RCMIP5:::vals(res2), ans$value, info=i)
     }
 })
 
