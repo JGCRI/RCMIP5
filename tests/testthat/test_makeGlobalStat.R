@@ -63,7 +63,7 @@ test_that("makeGlobalStat weights correctly", {
         
         # Are the answer values numerically correct?
         dummyans <- weighted.mean(RCMIP5:::vals(d), w=RCMIP5:::vals(darea))
-        expect_equal(dummyans, res$val$value, info=i)
+        expect_equal(dummyans, RCMIP5:::vals(res), info=i)
     }
 })
 
