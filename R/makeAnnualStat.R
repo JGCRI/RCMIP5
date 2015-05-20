@@ -52,7 +52,7 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
                                 myDim[4] <- 1
                                 dim(temp) <- myDim
                                 return(temp)}, 
-                            FUN.VALUE=x$val[,,,1])
+                            FUN.VALUE=x$val[,,,1], ...)
             myDim[4] <- length(yrs)
             dim(x$val) <- myDim
             x$time <- yrs
