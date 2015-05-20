@@ -342,6 +342,7 @@ print.summary.cmip5data <- function(x, ...) {
 #' @param ... Other parameters
 #' @param originalNames logical. Use original dimension names from file?
 #' @return The object converted to a data frame
+#' @method as.data.frame cmip5data
 #' @export
 #' @keywords internal
 as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
@@ -360,6 +361,7 @@ as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
 #' @param ... Other parameters
 #' @param drop logical. Drop degenerate dimensions?
 #' @return The object converted to an array
+#' @method as.array cmip5data
 #' @export
 #' @keywords internal
 as.array.cmip5data <- function(x, ..., drop=TRUE) {
