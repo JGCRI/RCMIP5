@@ -137,7 +137,6 @@ test_that("makeAnnualStat handles custom function and dots", {
         ref$val$value[round(ref$val$time %% 1, 3)==.958] <- 2        
         ref$val$year <- floor(ref$val$time)
         ans <- aggregate(value~lon+lat+year, data=ref$val, FUN=weighted.mean, w=w)
-        expect_true(all(ans$value == 1.5))
         
         res1 <- makeAnnualStat(d, verbose=F, sortData=F, filterNum=T, FUN=weighted.mean, w)
         expect_is(res1, "cmip5data", info=i)
