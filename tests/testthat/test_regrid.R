@@ -34,6 +34,10 @@ test_that('regrid returns expected values for simple case', {
     
     test <- regrid(orgVar, projLat, projLon, orgArea=orgArea, projArea=projArea)
     
+    #given specific values, test that we get the right answer
+    expect_equal(as.numeric(orgVar$val), c(1,2,3,1,2,3))
+    expect_equal(as.numeric(test$val), c(1,2,1,2,1,2) + 1/3*c(1,2,1,2,1,2))
+    
     expect_equal(sum(as.numeric(test$val[,,1,1]*projArea$val), na.rm=TRUE), 
                  sum(as.numeric(orgVar$val[,,1,1]*orgArea$val, na.rm=TRUE)))
 })
