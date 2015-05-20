@@ -21,7 +21,7 @@ worldPlot <- function(x, dates=unique(x$val$time), splitPacific=TRUE, capMinMax=
     assert_that(is.flag(capMinMax))
     assert_that(is.flag(verbose))
     length(dates) <- min(length(dates), 16)   # can't see anything smaller...
-    assert_that(require(ggplot2, quietly=T))
+    assert_that(requireNamespace('ggplot2', quietly=T))
     
     # Preliminaries
     lon <- x$lon

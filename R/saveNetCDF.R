@@ -35,7 +35,7 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     if(verbose) cat("Writing with names", dimNames, "\n")
     
     # loadEnsemble() handles both ncdf and ncdf4, but saveNetCDF only supports the latter
-    if(!require(ncdf4, quietly=!verbose)) {
+    if(!requireNamespace('ncdf4', quietly=!verbose)) {
         stop("This requires the 'ncdf4' package. Download it from CRAN or http://cirrus.ucsd.edu/~pierce/ncdf/")            
     }
     

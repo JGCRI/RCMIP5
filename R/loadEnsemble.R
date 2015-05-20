@@ -40,8 +40,8 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     assert_that(is.null(ZRange) | length(ZRange)==2 & is.numeric(ZRange))
     
     # We prefer to use the 'ncdf4' package, but if not installed can use 'ncdf'
-    if(force.ncdf | !require(ncdf4, quietly=!verbose)) {
-        if(require(ncdf, quietly=!verbose)) {
+    if(force.ncdf | !requireNamespace('ncdf4', quietly=!verbose)) {
+        if(requireNamespace('ncdf', quietly=!verbose)) {
             # The ncdf and ncdf4 functions are mostly parameter-identical.
             # ...This makes things easy: we redefine the ncdf4 function
             # ...names to their ncdf equivalents
