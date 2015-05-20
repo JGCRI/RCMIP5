@@ -11,6 +11,8 @@ library(testthat)
 
 context("Chained operations")
 
+implementations <- c("data.frame", "array")
+
 test_that("monthly data", {
     years <- 1851:1855
     ysize <- length(years)
