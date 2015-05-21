@@ -50,7 +50,7 @@ getProjectionMatrix <- function(orgArea, projArea) {
     orgEnds <- extractBounds(lat=orgArea$lat, lon=orgArea$lon)
     projEnds <- extractBounds(lat=projArea$lat, lon=projArea$lon)
     
-    #projectionMatrix <- data.frame()  # List Of Data Frames (initially empty)
+    lodf <- list()  # List Of Data Frames (initially empty)
     dimprod <- prod(dim(projArea$lat))
     pb <- txtProgressBar(min = 1, max = dimprod, style = 3) # for sanity
     tf <- tempfile()
@@ -68,11 +68,17 @@ getProjectionMatrix <- function(orgArea, projArea) {
         
         areaFrac <- latOverlap * lonOverlap
         
-        write.table(data.frame(projIndex =projIndex,
-                               orgIndex=which(areaFrac != 0), 
-                               value=areaFrac[which(areaFrac != 0)]),
-                    file=tf, append=!first, col.names=first, sep=",", row.names=FALSE)
-        first <- FALSE
+        # Third method - dplyr
+        lodf[[projIndex]] <- data.frame(projIndex =projIndex,
+                                        orgIndex=which(areaFrac != 0), 
+                                        value=areaFrac[which(areaFrac != 0)])
+        
+        # Second method - tempfile
+        #         write.table(data.frame(projIndex =projIndex,
+        #                                orgIndex=which(areaFrac != 0), 
+        #                                value=areaFrac[which(areaFrac != 0)]),
+        #                     file=tf, append=!first, col.names=first, sep=",", row.names=FALSE)
+        #         first <- FALSE
         
         # Old method - rbind'ing data frames
         #         projectionMatrix <- rbind(projectionMatrix, 
@@ -82,7 +88,11 @@ getProjectionMatrix <- function(orgArea, projArea) {
         setTxtProgressBar(pb, projIndex)
     }
     
-    projectionMatrix <- read.csv(tf)
+    # Third method - dplyr
+    projectionMatrix <- rbind_all(lodf)
+    
+    # Second method - tempfile
+    #projectionMatrix <- read.csv(tf)
     Matrix::sparseMatrix(j = projectionMatrix$projIndex, 
                          i = projectionMatrix$orgIndex, 
                          x = projectionMatrix$value)
