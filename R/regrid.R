@@ -53,23 +53,23 @@ getProjectionMatrix <- function(orgArea, projArea) {
     lodf <- list()  # List Of Data Frames (initially empty)
     dimprod <- prod(dim(projArea$lat))
     pb <- txtProgressBar(min = 1, max = dimprod, style = 3) # for sanity
-    tf <- tempfile()
-    first <- TRUE
+#    tf <- tempfile()
+#    first <- TRUE
     for(projIndex in seq_len(dimprod)) {
-        latOverlap <- (pmin(projEnds$maxLat[projIndex], orgEnds$maxLat[TRUE]) - 
-                           pmax(projEnds$minLat[projIndex], orgEnds$minLat[TRUE])) /
+        latOverlap <- (pmin.int(projEnds$maxLat[projIndex], orgEnds$maxLat[TRUE]) - 
+                           pmax.int(projEnds$minLat[projIndex], orgEnds$minLat[TRUE])) /
             (orgEnds$maxLat[TRUE]-orgEnds$minLat[TRUE])
         latOverlap[latOverlap < 0] <- 0
         
-        lonOverlap <- (pmin(projEnds$maxLon[projIndex], orgEnds$maxLon[TRUE]) - 
-                           pmax(projEnds$minLon[projIndex], orgEnds$minLon[TRUE])) /
+        lonOverlap <- (pmin.int(projEnds$maxLon[projIndex], orgEnds$maxLon[TRUE]) - 
+                           pmax.int(projEnds$minLon[projIndex], orgEnds$minLon[TRUE])) /
             (orgEnds$maxLon[TRUE]-orgEnds$minLon[TRUE])
         lonOverlap[lonOverlap < 0] <- 0
         
         areaFrac <- latOverlap * lonOverlap
         
         # Third method - dplyr
-        lodf[[projIndex]] <- data.frame(projIndex =projIndex,
+        lodf[[projIndex]] <- data.frame(projIndex=projIndex,
                                         orgIndex=which(areaFrac != 0), 
                                         value=areaFrac[which(areaFrac != 0)])
         
