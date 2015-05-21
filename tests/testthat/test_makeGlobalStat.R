@@ -139,6 +139,7 @@ test_that("makeGlobalStat sorts before computing", {
     years <- 1850:1851
     llsize <- 2
     
+    # Note this test is only applicable to the data.frame implementation
     d <- cmip5data(years, lonsize=llsize, latsize=llsize, monthly=F, loadAs="data.frame")
     darea <- cmip5data(0, time=F, lonsize=llsize, latsize=llsize, loadAs="data.frame")
     

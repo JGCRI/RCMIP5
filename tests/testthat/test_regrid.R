@@ -11,7 +11,9 @@ library(testthat)
 
 context("regrid")
 
-test_that("regrid handles bad input", {})
+test_that("regrid handles bad input", {
+    # TODO
+})
 
 test_that('regrid returns expected values for simple case', {
     numOrgLon <- 3
@@ -31,7 +33,6 @@ test_that('regrid returns expected values for simple case', {
     projArea$val <- projArea$val/sum(projArea$val, na.rm=TRUE)*sum(orgArea$val, na.rm=TRUE)
     transferMatrix <- getProjectionMatrix(orgArea = orgArea, projArea=projArea)
     
-    
     test <- regrid(orgVar, projLat, projLon, orgArea=orgArea, projArea=projArea)
     
     #given specific values, test that we get the right answer
@@ -50,7 +51,6 @@ test_that('regrid test for data', {
     projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, nrow=numProjLon, ncol=numProjLat)
     projLat <- matrix(seq(-90, 90-180/numProjLat, by=180/numProjLat) + 180/numProjLat/2, nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
     projArea <- list(lon = projLon, lat=projLat, val= calcGridArea(lon = projLon, lat=projLat))
-    
     
     orgVar <- loadCMIP5(path=path, experiment='historical', variable='nbp', model='HadGEM2-ES', loadAs='array')
     orgArea <- loadCMIP5(path=path, experiment='historical', variable='areacella', model='HadGEM2-ES', loadAs='array')
