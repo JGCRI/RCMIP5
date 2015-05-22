@@ -11,7 +11,7 @@ library(testthat)
 
 context("regrid")
 
-implementations <- c("data.frame", "array")
+implementations <- c("array")
 
 test_that("regrid handles bad input", {
     # TODO
@@ -47,6 +47,45 @@ test_that('regrid returns expected values for simple case', {
     
     expect_equal(sum(as.numeric(test$val[,,1,1]*projArea$val), na.rm=TRUE), 
                  sum(as.numeric(orgVar$val[,,1,1]*orgArea$val, na.rm=TRUE)))
+})
+
+test_that('all impmentation of regrid give same answer for global area within 1e-3', {
+    path <- "../../sampledata"
+    years <- 1850:1851
+    lonsize <- 20
+    latsize <- 30
+    
+    for(i in implementations){
+        d <- cmip5data(years, lonsize=lonsize, latsize=latsize, random=TRUE, loadAs=i)
+        numProjLon <- floor(dim(d$lon)[1]*0.9)
+        numProjLat <- floor(dim(d$lat)[2]*0.9)
+        projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, 
+                          nrow=numProjLon, ncol=numProjLat)
+        projLat <- matrix(seq(-90, 90-180/numProjLat, by=180/numProjLat) + 180/numProjLat/2, 
+                          nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
+        
+        regridd <- regrid(d, projLon=projLon, projLat=projLat) 
+        myfun <- function(x, w) sum(as.numeric(x) * as.numeric(w), na.rm=TRUE)
+        expect_equal(RCMIP5:::vals(makeGlobalStat(d, FUN=myfun)), 
+                     RCMIP5:::vals(makeGlobalStat(regridd, FUN=myfun)))
+        
+        orgArea <- loadCMIP5(path=path, experiment='historical', variable='areacella', model='GFDL-CM3', 
+                             loadAs=i)
+        orgVal <- orgArea
+        if(i %in% 'array') orgVal$val <- orgVal$val/orgVal$val
+        numProjLon <- floor(dim(d$lon)[1]*0.9)
+        numProjLat <- floor(dim(d$lat)[2]*0.9)
+        projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, 
+                          nrow=numProjLon, ncol=numProjLat)
+        projLat <- matrix(seq(-90, 90-180/numProjLat, by=180/numProjLat) + 180/numProjLat/2, 
+                          nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
+        regridArea <- regrid(orgVal, orgArea=orgArea, projLon=projLon, projLat=projLat) 
+        myfun <- function(x, w) sum(as.numeric(x) * as.numeric(w), na.rm=TRUE)
+        
+        orgGlobalArea <- RCMIP5:::vals(makeGlobalStat(orgVal, FUN=myfun))
+        regridGlobalArea <- RCMIP5:::vals(makeGlobalStat(regridArea, FUN=myfun))
+        expect_less_than(abs(orgGlobalArea-regridGlobalArea)/orgGlobalArea, 1e-3)
+    }
 })
 
 test_that('regrid test for data', {
