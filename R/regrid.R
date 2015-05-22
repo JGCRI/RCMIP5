@@ -1,13 +1,13 @@
 #' Calculate projection matrix to translate one grid to another
 #' 
-#' The bulk of the computational time for regridding is in calculating the 
+#' The bulk of the computational time for regridding lies in calculating the 
 #' area-weighted projection matrix. This functions allows you to pre-calculate the 
 #' projection matrix to speed up regridding.
 #' 
-#' @param orgArea A \code{\link{cmip5data}} object or list with lat (latitude) and log (longitude) matrices
-#' of the orginal grid
-#' @param projArea A \code{\link{cmip5data}} object or list with lat (latitude) and log (longitude) matrices
-#' of the projection grid
+#' @param orgArea A \code{\link{cmip5data}} object or list with \code\{lat} (latitude) 
+#' and \code{lon} (longitude) matrices of the orginal grid
+#' @param projArea A \code{\link{cmip5data}} object or list with \code\{lat} (latitude) 
+#' and \code{lon} (longitude) matrices of the projection grid
 #' @details This function calculates the projection matrix to shift one global grid to a second.
 #' The relative contribution of an old grid to the new grid is calculated via an area weighting scheme
 #' where the area of a grid cell is assumed to be proportional to the degree area of that cell and
@@ -29,7 +29,7 @@
 #' transferMatrix <- getProjectionMatrix(orgArea = orgArea, projArea=projArea)
 #' @seealso \code{\link{regrid}}
 #' @export
-getProjectionMatrix <- function(orgArea, projArea) {
+getProjectionMatrix <- function(orgArea, projArea, verbose=TRUE) {
     
     assert_that(all(!apply(orgArea$lon, c(2), is.unsorted)), all(!apply(orgArea$lat, c(1), is.unsorted)))
     assert_that(all(!apply(projArea$lon, c(2), is.unsorted)), all(!apply(projArea$lat, c(1), is.unsorted)))
@@ -52,9 +52,7 @@ getProjectionMatrix <- function(orgArea, projArea) {
     
     lodf <- list()  # List Of Data Frames (initially empty)
     dimprod <- prod(dim(projArea$lat))
-    pb <- txtProgressBar(min = 1, max = dimprod, style = 3) # for sanity
-#    tf <- tempfile()
-#    first <- TRUE
+    pb <- txtProgressBar(min = 1, max = dimprod, style = 3) # progress bar for sanity
     for(projIndex in seq_len(dimprod)) {
         latOverlap <- (pmin.int(projEnds$maxLat[projIndex], orgEnds$maxLat[TRUE]) - 
                            pmax.int(projEnds$minLat[projIndex], orgEnds$minLat[TRUE])) /
@@ -68,37 +66,21 @@ getProjectionMatrix <- function(orgArea, projArea) {
         
         areaFrac <- latOverlap * lonOverlap
         
-        # Third method - dplyr
-        lodf[[projIndex]] <- data.frame(projIndex=projIndex,
-                                        orgIndex=which(areaFrac != 0), 
-                                        value=areaFrac[which(areaFrac != 0)])
-        
-        # Second method - tempfile
-        #         write.table(data.frame(projIndex =projIndex,
-        #                                orgIndex=which(areaFrac != 0), 
-        #                                value=areaFrac[which(areaFrac != 0)]),
-        #                     file=tf, append=!first, col.names=first, sep=",", row.names=FALSE)
-        #         first <- FALSE
-        
-        # Old method - rbind'ing data frames
-        #         projectionMatrix <- rbind(projectionMatrix, 
-        #                       data.frame(projIndex =projIndex,
-        #                                         orgIndex=which(areaFrac != 0), 
-        #                                         value=areaFrac[which(areaFrac != 0)]))
-        setTxtProgressBar(pb, projIndex)
-    }
+        lodf[[projIndex]] <- data.frame(projIndex = projIndex,
+                                        orgIndex = which(areaFrac != 0), 
+                                        value = areaFrac[which(areaFrac != 0)])
+        if(verbose) setTxtProgressBar(pb, projIndex)
+    } # for
     
-    # Third method - dplyr
-    projectionMatrix <- rbind_all(lodf)
+    # Combine all results into a single data frame, and return sparse matrix
+    projectionMatrix <- dplyr::rbind_all(lodf)
     
-    # Second method - tempfile
-    #projectionMatrix <- read.csv(tf)
     Matrix::sparseMatrix(j = projectionMatrix$projIndex, 
                          i = projectionMatrix$orgIndex, 
                          x = projectionMatrix$value)
 } # getProjectionMatrix
 
-#' Project the values of one \code{\link{cmip5data}} object to a new grid
+#' Project the values of a \code{\link{cmip5data}} object onto a new grid
 #' 
 #' @param orgVar A \code{\link{cmip5data}} object to be regridded
 #' @param projLat TODO
@@ -120,12 +102,12 @@ getProjectionMatrix <- function(orgArea, projArea) {
 #' @export
 regrid <- function(orgVar, projLat, projLon, 
                    orgArea=NULL, projArea=NULL,
-                   projectionMatrix=NULL, verbose=FALSE) {
+                   projectionMatrix=NULL, verbose=TRUE) {
     
     numOrgLat <- dim(orgVar$val)[2]
     numOrgLon <- dim(orgVar$val)[1]
     
-    # Deal with legacy where the lat/lon were stored as vectors not arrays
+    # Deal with legacy where the lon/lat were stored as vectors not arrays
     if(identical(class(orgArea$lon), 'numeric')) {
         orgArea$lon <- matrix(orgArea$lon, nrow=numOrgLon, ncol=numOrgLat)
         orgArea$lat <- matrix(orgArea$lat, nrow=numOrgLon, ncol=numOrgLat, byrow=TRUE)
@@ -135,7 +117,7 @@ regrid <- function(orgVar, projLat, projLon,
         orgVar$lat <- matrix(orgVar$lat, nrow=numOrgLon, ncol=numOrgLat, byrow=TRUE)
     }
     
-    # Check that relevant lat/lon are matricies
+    # Check that relevant lon/lat are matricies
     assert_that(is.matrix(orgVar$lon), is.matrix(orgVar$lat), is.matrix(projLat), is.matrix(projLon))
     
     # Pull the orginal area if it isn't provided
@@ -151,7 +133,7 @@ regrid <- function(orgVar, projLat, projLon,
     # Force lon to 0-360 if it's on -180-180
     orgArea$lon[orgArea$lon < 0] <- orgArea$lon[orgArea$lon < 0] + 360 
     
-    # Check that the lat/lon is sorted
+    # Check that the lon/lat is sorted
     assert_that(all(!apply(orgArea$lon, c(2), is.unsorted)), all(!apply(orgArea$lat, c(1), is.unsorted)))
     
     # Copy the orginal variable for historical purposes
@@ -170,23 +152,22 @@ regrid <- function(orgVar, projLat, projLon,
     # If the projection matrix is undefined then pull it
     if(is.null(projectionMatrix) | 
            !all(dim(projectionMatrix) == c(prod(dim(orgArea$lat)[1:2]), prod(dim(projVar$lat)[1:2])))) {
-        projectionMatrix <- getProjectionMatrix(orgArea, projVar)   
+        projectionMatrix <- getProjectionMatrix(orgArea, projVar, verbose=verbose)   
     }
     
-    # Project the lat/lon for each level/time slice
+    # Project the lon/lat for each level/time slice
     projVar$val <- apply(orgVar$val, c(3,4), function(myMap) {
         temp <- myMap*orgArea$val[,,1,1]
         temp <- temp[TRUE]
         ans <- as.numeric(temp%*%projectionMatrix)
         dim(ans) <- dim(projVar$lat)
-        ans <- ans/projArea$val[,,1,1]
-        return(ans)
+        ans/projArea$val[,,1,1]
     })
     dim(projVar$val) <- c(dim(projVar$lat), dim(orgVar$val)[c(3,4)])
     
     projVar$projectionMatrix <- projectionMatrix
     addProvenance(cmip5data(projVar), 
-                  paste('Shifting grid size from [', 
-                        paste(dim(orgVar$val), collapse = ', '), '] to [', paste(dim(projVar$val), collapse = ', '), ']'))
+                  paste('Shifted grid size from [', 
+                        paste(dim(orgVar$val), collapse = ', '), '] to [',
+                        paste(dim(projVar$val), collapse = ', '), ']'))
 } # regrid
-
