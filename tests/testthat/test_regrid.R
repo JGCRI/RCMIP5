@@ -11,6 +11,8 @@ library(testthat)
 
 context("regrid")
 
+implementations <- c("data.frame", "array")
+
 test_that("regrid handles bad input", {
     # TODO
 })
@@ -56,7 +58,7 @@ test_that('regrid test for data', {
     numProjLat <- 180
     projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, nrow=numProjLon, ncol=numProjLat)
     projLat <- matrix(seq(-90, 90-180/numProjLat, by=180/numProjLat) + 180/numProjLat/2, nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
-    projArea <- list(lon = projLon, lat=projLat, val= calcGridArea(lon = projLon, lat=projLat))
+    projArea <- list(lon = projLon, lat=projLat, val= RCMIP5:::calcGridArea(lon = projLon, lat=projLat))
     
     orgVar <- loadCMIP5(path=path, experiment='historical', variable='nbp', model='HadGEM2-ES', loadAs='array')
     orgArea <- loadCMIP5(path=path, experiment='historical', variable='areacella', model='HadGEM2-ES', loadAs='array')
