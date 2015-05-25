@@ -52,7 +52,7 @@ filterDimensionLon <- function(x, lonRange=NULL, verbose=FALSE) {
     if(!is.null(lonRange)) {
         
         # Sanity checks
-        assert_that(is.numeric(lonRange) & length(lonRange == 2))
+        assert_that(is.numeric(lonRange) & length(lonRange) == 2)
         
         # Filter longitude dimension
         if(is.null(x[["lon"]])) {
@@ -86,7 +86,7 @@ filterDimensionLat <- function(x, latRange=NULL, verbose=FALSE) {
     if(!is.null(latRange)) {
         
         # Sanity checks
-        assert_that(is.numeric(latRange) & length(latRange == 2))
+        assert_that(is.numeric(latRange) & length(latRange) == 2)
         
         if(is.null(x[["lat"]])) {
             warning("No lat data found")
@@ -118,7 +118,7 @@ filterDimensionZ <- function(x, ZRange=NULL, verbose=FALSE) {
     if(!is.null(ZRange)) {
         
         # Sanity checks
-        assert_that(is.numeric(ZRange) & length(ZRange == 2))
+        assert_that(is.numeric(ZRange) & length(ZRange) == 2)
         
         if(is.null(x[["Z"]])) {
             warning("No Z data found")
@@ -155,7 +155,7 @@ filterDimensionTimeYears <- function(x, yearRange=NULL, verbose=FALSE) {
     if(!is.null(yearRange)) {
         
         # Sanity checks
-        assert_that(is.numeric(yearRange) & length(yearRange == 2))
+        assert_that(is.numeric(yearRange) & length(yearRange) == 2)
         yearRange <- floor(yearRange)
         
         if(is.null(x[["time"]])) {
@@ -193,7 +193,7 @@ filterDimensionTimeMonths <- function(x, monthRange=NULL, verbose=FALSE) {
     if(!is.null(monthRange)) {
         
         # Sanity checks
-        assert_that(is.numeric(monthRange) & length(monthRange == 2))
+        assert_that(is.numeric(monthRange) & length(monthRange) == 2)
         assert_that(all(monthRange %in% 1:12))
         
         if(is.null(x[["time"]])) {

@@ -4,9 +4,9 @@
 #' area-weighted projection matrix. This functions allows you to pre-calculate the 
 #' projection matrix to speed up regridding.
 #' 
-#' @param orgArea A \code{\link{cmip5data}} object or list with \code\{lat} (latitude) 
+#' @param orgArea A \code{\link{cmip5data}} object or list with \code{lat} (latitude) 
 #' and \code{lon} (longitude) matrices of the orginal grid
-#' @param projArea A \code{\link{cmip5data}} object or list with \code\{lat} (latitude) 
+#' @param projArea A \code{\link{cmip5data}} object or list with \code{lat} (latitude) 
 #' and \code{lon} (longitude) matrices of the projection grid
 #' @details This function calculates the projection matrix to shift one global grid to a second.
 #' The relative contribution of an old grid to the new grid is calculated via an area weighting scheme

@@ -16,7 +16,7 @@ implementations <- c("data.frame", "array")
 
 test_that("filterDimensions handles bad input", {
     expect_error(filterDimensions(1))                       # non-cmip5data x
-    d <- cmip5data(1, Z=T)
+    d <- cmip5data(1, Z=TRUE)
     expect_error(filterDimensions(d, lonRange='1'))              # non-numeric lonRange
     expect_error(filterDimensions(d, latRange='1'))              # non-numeric latRange
     expect_error(filterDimensions(d, ZRange='1'))              # non-numeric ZRange
