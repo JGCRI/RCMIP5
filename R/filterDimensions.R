@@ -202,12 +202,20 @@ filterDimensionTimeMonths <- function(x, monthRange=NULL, verbose=FALSE) {
             warning("A monthly filter can only be applied to monthly data")            
         }
         else {
-            fracmonths <- round((months-0.5) / 12, 2) # From Jan=1, Feb=2 to Jan 15=0.042, Feb15=0.123, etc.
-            monthfilter <- round(x$time %% 1, 2) %in% fracmonths
-            x$val <- filter(x$val, round(time %% 1, 2) %in% fracmonths)
+            fracmonths <- round((monthRange-0.5) / 12, 2) # From Jan=1, Feb=2 to Jan 15=0.042, Feb15=0.123, etc.
+            monthfilter <- round(x$time %% 1, 2) >= min(fracmonths) & round(x$time %% 1, 2) <= max(fracmonths)
+
+            if(is.array(x$val)) { # array code
+                x$val <- x$val[,,,monthfilter, drop = FALSE]
+            } else if(is.data.frame(x$val)) { # data frame code
+                time <- NULL  # Suppress stupid NOTEs from R CMD CHECK
+                x$val <- filter(x$val, round(time %% 1, 2) %in% fracmonths)
+            } else                 
+                stop("Unknown data type")
+            
             x$time <- x$time[monthfilter]
             x <- addProvenance(x, paste("Filtered for months in range [",
-                                        paste(range(months), collapse=', '), "]"))
+                                        paste(monthRange, collapse=', '), "]"))
             x$filtered <- TRUE
             if(verbose) cat("Filtered by month\n")
         }
