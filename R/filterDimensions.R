@@ -58,13 +58,19 @@ filterDimensionLon <- function(x, lonRange=NULL, verbose=FALSE) {
         if(is.null(x[["lon"]])) {
             warning("No lon data found")
         } else {
-            # Suppress stupid NOTEs from R CMD CHECK
-            lon <- NULL
+             if(is.array(x$val)) { # array code
+                x$val <- x$val[,,ZsInRange,]
+            } else if(is.data.frame(x$val)) { # data frame code
+                Z <- NULL  # Suppress stupid NOTEs from R CMD CHECK
+                x$val <- filter(x$val, lon >= min(lonRange) & lon <= max(lonRange))
+            } else 
+                stop("Unknown data type")
             
-            x$val <- filter(x$val, lon %in% lons)
-            x$lon <- x$lon[x$lon %in% lons]
+            lonColsInRange <- apply(x$lon, 1, function(x) any(x >= min(lonRange) & x <= max(lonRange)))
+            x$lon <- x$lon[, lonColsInRange]
+            x$lat <- x$lat[, lonColsInRange]
             x <- addProvenance(x, paste("Filtered for lons in range [",
-                                        paste(range(lons), collapse=', '), "]"))
+                                        paste(lonRange, collapse=', '), "]"))
             x$filtered <- TRUE
             if(verbose) cat("Filtered by lon\n")
         }
@@ -169,7 +175,7 @@ filterDimensionTimeYears <- function(x, yearRange=NULL, verbose=FALSE) {
                 x$val <- filter(x$val, floor(time) >= min(yearRange) & floor(time) <= max(yearRange))
             } else                 
                 stop("Unknown data type")
-                        
+            
             x$time <- x$time[yearsInRange]
             x <- addProvenance(x, paste("Filtered for years in range [",
                                         paste(yearRange, collapse=', '), "]"))
@@ -204,7 +210,7 @@ filterDimensionTimeMonths <- function(x, monthRange=NULL, verbose=FALSE) {
         else {
             fracmonths <- round((monthRange-0.5) / 12, 2) # From Jan=1, Feb=2 to Jan 15=0.042, Feb15=0.123, etc.
             monthfilter <- round(x$time %% 1, 2) >= min(fracmonths) & round(x$time %% 1, 2) <= max(fracmonths)
-
+            
             if(is.array(x$val)) { # array code
                 x$val <- x$val[,,,monthfilter, drop = FALSE]
             } else if(is.data.frame(x$val)) { # data frame code

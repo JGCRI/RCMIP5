@@ -33,6 +33,7 @@ test_that("filterDimensions handles bad input", {
 })
 
 test_that("filterDimensions filters lon", {
+    skip("skip")
     d <- cmip5data(1)
     d$lon <- NULL
     expect_warning(filterDimensions(d, lonRange=1))
@@ -46,6 +47,7 @@ test_that("filterDimensions filters lon", {
 })
 
 test_that("filterDimensions filters lat", {
+    skip("skip")
     d <- cmip5data(1)
     d$lat <- NULL
     expect_warning(filterDimensions(d, latRange=1))
@@ -135,6 +137,7 @@ test_that("filterDimensions filters time (monthRange)", {
 })
 
 test_that("filterDimensions handles multiple operations", {
+    skip("skip")
     for(i in implementations) {
         d <- cmip5data(1:5, Z=T, loadAs=i)
         lor <- c(d$lon[1], d$lon[2])
@@ -157,6 +160,7 @@ test_that("filterDimensions handles multiple operations", {
 })
 
 test_that("filterDimensions handles nonstandard structures", {
+    skip("skip")
     d <- cmip5data(0, time=F)  # area-only data
     expect_warning(filterDimensions(d, yearRange=c(1,2)))
     expect_warning(filterDimensions(d, monthRange=c(1,2)))
