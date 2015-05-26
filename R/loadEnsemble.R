@@ -125,7 +125,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     }
     
     # Go through and load the data
-    val <- c() # variable to temporarily holds main data
+    val <- c() # variable to temporarily hold main data
     timeRaw <- c()
     timeArr <- c()
     ZUnit <- NULL
@@ -197,7 +197,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
                 calendarDayLength <- 365
             }
             
-            # Extract the year we are references in calendar
+            # Extract the year we are referencing in calendar
             # Set the default to year 1, month 1, day 1, hour 0, min 0, sec 0
             defaultCalendarArr <- c(1, 1, 1, 0, 0, 0)
             
@@ -227,13 +227,10 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             # Load the actual time
             thisTimeRaw <- .ncvar_get(nc, varid=timeName)
             attributes(thisTimeRaw) <- NULL
+            assert_that(!any(duplicated(thisTimeRaw)))
             
             # convert from days (we assume the units are days) to years
             thisTimeArr <- thisTimeRaw / calendarDayLength + startYr
-            
-            if(any(duplicated(thisTimeRaw)))
-                stop("Duplicate values in this file's time data")
-            
         } else { # this is a fx variable. Set most things to NULL
             startYr <- NULL
             timeArr <- NULL
@@ -252,8 +249,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             ZArr <- .ncvar_get(nc, varid=dimNames[3])
             attributes(ZArr) <- NULL
             ZUnit <- .ncatt_get(nc, dimNames[3], 'units')$value
-            if(any(duplicated(ZArr)))
-                stop("Duplicate values in this file's Z data")
+            assert_that(!any(duplicated(ZArr)))
         }
         
         # Construct the 'start' and 'count' arrays for ncvar_get below
@@ -261,9 +257,9 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         ndims <- nc$var[[variable]]$ndims
         start <- rep(1, ndims)
         count <- rep(-1, ndims)
-
+        
         # If ZRange supplied, calculate filter for the data load below
-        # Note this is above the yearRange check so Z data don't get erased
+        # Note this is above the yearRange check so ZArr data don't get erased
         # by loading subsequent files with no data
         if(!is.null(ZRange) & !is.null(ZArr)) {
             Zinrange <- min(ZRange) <= ZArr & max(ZRange) >= ZArr
@@ -312,7 +308,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             thisTimeArr <- thisTimeArr[tstart:tend]
             thisTimeRaw <- thisTimeRaw[tstart:tend]
         } # if year range
-
+        
         # Update running time data
         if(!is.null(thisTimeRaw)) {
             # Any overlap between this file's time array and previous data?
@@ -326,7 +322,7 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         
         # Finally, load the actual data and its units
         vardata <- .ncvar_get(nc, varid=variable, start=start, count=count)
-        if(verbose) cat("- data", dim(vardata), "\n")
+        if(verbose) cat("- data", paste(dim(vardata), collapse=" x "), "\n")
         valUnit <- .ncatt_get(nc, variable, 'units')$value  # load units
         loadedFiles <- c(loadedFiles, basename(fileStr))
         
