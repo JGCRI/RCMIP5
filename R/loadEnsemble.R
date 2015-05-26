@@ -262,6 +262,27 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
         start <- rep(1, ndims)
         count <- rep(-1, ndims)
 
+        # If ZRange supplied, calculate filter for the data load below
+        # Note this is above the yearRange check so Z data don't get erased
+        # by loading subsequent files with no data
+        if(!is.null(ZRange) & !is.null(ZArr)) {
+            Zinrange <- min(ZRange) <= ZArr & max(ZRange) >= ZArr
+            if(any(Zinrange)) {
+                zstart <- min(which(Zinrange))
+                zend <- max(which(Zinrange))
+                # Modify the 'start' and 'count' arrays for ncvar_get below
+                ndims <- nc$var[[variable]]$ndims
+                start[ndims-1] <- zstart
+                count[ndims-1] <- zend - zstart + 1
+                ZArr <- ZArr[Zinrange]
+                if(verbose) cat("- loading only Z values", zstart, "-", zend, "\n")            
+            } else {
+                if(verbose) cat("- skipping file because not in ZRange\n")
+                .nc_close(nc)
+                next
+            }
+        }
+        
         # If yearRange supplied, calculate filter for the data load below
         if(!is.null(yearRange) & !is.null(thisTimeArr)) {
             # User has requested to load a temporal subset of the data.
@@ -292,25 +313,6 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
             thisTimeRaw <- thisTimeRaw[tstart:tend]
         } # if year range
 
-        # If ZRange supplied, calculate filter for the data load below
-        if(!is.null(ZRange) & !is.null(ZArr)) {
-            Zinrange <- min(ZRange) <= ZArr & max(ZRange) > ZArr
-            if(any(Zinrange)) {
-                zstart <- min(which(Zinrange))
-                zend <- max(which(Zinrange))
-                # Modify the 'start' and 'count' arrays for ncvar_get below
-                ndims <- nc$var[[variable]]$ndims
-                start[ndims-1] <- zstart
-                count[ndims-1] <- zend - zstart + 1
-                ZArr <- ZArr[Zinrange]
-                if(verbose) cat("- loading only Z values", zstart, "-", zend, "\n")            
-            } else {
-                if(verbose) cat("- skipping file because not in ZRange\n")
-                .nc_close(nc)
-                next
-            }
-        }
-        
         # Update running time data
         if(!is.null(thisTimeRaw)) {
             # Any overlap between this file's time array and previous data?
