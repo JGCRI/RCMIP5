@@ -24,6 +24,6 @@ More information about CMIP5 can be found on the [project home page](http://cmip
 * This package does *not* handle downloading (i.e. from nodes in the Earth System Grid Federation, http://esgf.org) the NetCDF data themselves. Sorry.
 * See http://cmip.llnl.gov/cmip5/publications/allpublications about registering CMIP5 manuscripts.
 * If you use this package/code in your work, please cite it! See `citation("RCMIP5")`.
-* Behind the scenes, RCMIP5 uses the [dplyr](http://cran.r-project.org/package=dplyr) package for heavy data lifting. It can also, and optionally, use an array implementation, depending on [abind](http://cran.r-project.org/web/packages/abind/index.html). Very generally, using arrays is more memory-efficient but slower.
+* Behind the scenes, RCMIP5 uses the [dplyr](http://cran.r-project.org/package=dplyr) package for heavy data lifting. It optionally can use an array implementation, depending on [abind](http://cran.r-project.org/web/packages/abind/index.html). Generally, using arrays is more memory-efficient but slower.
 * Want to get started? An extensive [vignette](http://cran.r-project.org/web/packages/RCMIP5/vignettes/atmospheric_co2.html) and demo are included with the package.
 
