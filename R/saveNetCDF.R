@@ -89,7 +89,6 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
     varlist[[length(varlist)+1]] <- valvar
     
     # Create the file and write mandatory variable
-    # Note we make sure data is sorted correctly first TODO
     if(verbose) cat("Creating and writing", file, "\n")
     nc <- ncdf4::nc_create(fqfn, varlist)    
     ncdf4::ncvar_put(nc, valvar, as.array(x))
