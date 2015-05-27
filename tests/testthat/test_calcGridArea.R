@@ -1,4 +1,4 @@
-# Testing code calcGridArea function
+# Testing code for calcGridArea function
 
 # Uses the testthat package
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
@@ -14,10 +14,10 @@ context("calcGridArea")
 test_that("Test 1 degree grids", {
     area <- RCMIP5:::calcGridArea(lon=0:359+0.5, lat=-90:89+0.5)
     
-    #check global area
+    # Check global area
     expect_less_than(abs(sum(area[TRUE])-5.10072e14)/5.10072e14, 1e-5)
     
-    #check grid area against arc lengths
+    # Check grid area against arc lengths
     #       LAT 	     LONG
     # 0° 	110.574 km 	111.320 km
     # 15° 	110.649 km 	107.550 km
