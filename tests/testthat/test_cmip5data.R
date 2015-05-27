@@ -150,3 +150,17 @@ test_that("cmip5data creates time-only data", {
         expect_is(d$time, "numeric", info=i)
     }
 })
+
+test_that("cmip5data creates irregular grids", {
+    for(i in implementations) {
+        d <- cmip5data(1, irregular=FALSE, verbose=F, loadAs=i)
+        # test that no rows/columns exhibit varying values
+        expect_true(all(apply(d$lon, 1, function(x) duplicated(x)[-1])), info=i)
+        expect_true(all(apply(d$lat, 2, function(x) duplicated(x)[-1])), info=i)
+        
+        d <- cmip5data(1, irregular=TRUE, verbose=F, loadAs=i)
+        # test that rows/columns have varying values
+        expect_true(sum(apply(d$lon, 1, function(x) duplicated(x)[-1])) > 0, info=i)
+        expect_true(sum(apply(d$lat, 2, function(x) duplicated(x)[-1])) > 0, info=i)
+    }
+})

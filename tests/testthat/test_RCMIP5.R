@@ -46,15 +46,15 @@ test_that("cmip5data summary method detects summaries", {
     expect_output(print(summary(dmz)), "Z summary")
     
     # All filter functions should be detected
-    df <- filterDimensions(d, years=2000:2002)
+    df <- filterDimensions(d, yearRange=floor(range(d$time)))
     expect_output(print(summary(df)), "filtered")
-    df <- filterDimensions(d, months=1:6)
+    df <- filterDimensions(d, monthRange=c(1,2))
     expect_output(print(summary(df)), "filtered")
-    df <- filterDimensions(d, lons=d$lon)
+    df <- filterDimensions(d, lonRange=range(d$lon))
     expect_output(print(summary(df)), "filtered")
-    df <- filterDimensions(d, lats=d$lat)
+    df <- filterDimensions(d, latRange=range(d$lat))
     expect_output(print(summary(df)), "filtered")
-    df <- filterDimensions(d, Zs=d$Z)
+    df <- filterDimensions(d, ZRange=range(d$Z))
     expect_output(print(summary(df)), "filtered")
 })
 

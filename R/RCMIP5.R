@@ -39,6 +39,7 @@ NULL
 #' @param time logical. Create time dimension?
 #' @param monthly logical. Monthly (if not, annual) data?
 #' @param randomize logical. Random sample data?
+#' @param irregular logical. Irregular lon/lat grid?
 #' @param verbose logical. Print info as we go?
 #' @param loadAs a string identifying possible structures for values. Currently: 'data.frame' and 'array' the only valid options.
 #' @return A cmip5data object, which is a list with the following fields:
@@ -77,7 +78,8 @@ cmip5data <- function(x=list(),
                       lonlat=TRUE, lonsize=10, latsize=10,
                       Z=FALSE, Zsize=5,
                       time=TRUE, monthly=TRUE,
-                      randomize=FALSE, verbose=FALSE, loadAs='data.frame') {
+                      randomize=FALSE, irregular=FALSE,
+                      verbose=FALSE, loadAs='data.frame') {
     
     # Sanity checks
     assert_that(is.flag(lonlat))
@@ -88,14 +90,13 @@ cmip5data <- function(x=list(),
     assert_that(is.flag(time))
     assert_that(is.flag(monthly))
     assert_that(is.flag(randomize))
+    assert_that(is.flag(irregular))
     assert_that(is.flag(verbose))
     assert_that(loadAs %in% c("data.frame", "array"))
     
-    if (is.list(x)) {          # If x is a list then we are done.
-        # Just cast it directly to a cmip5data object
+    if (is.list(x)) {  # If x is a list then cast it directly to a cmip5data object
         if(verbose) cat("Casting list to cmip5data\n")
         structure(x, class="cmip5data")
-        
     } else if(is.numeric(x)) {  # Create sample data
         if(verbose) cat("Creating new cmip5data\n")
         
@@ -131,6 +132,10 @@ cmip5data <- function(x=list(),
             # Convert to two dimensions
             result$lon <- array(result$lon, dim=c(lonsize, latsize))
             result$lat <- array(rep(result$lat, 1, each=lonsize), dim=c(lonsize, latsize))
+            if(irregular) {
+                result$lon <- result$lon + round(runif(lonsize * latsize), 1)
+                result$lat <- result$lat + round(runif(lonsize * latsize), 1)
+            }
             result$dimNames=c("lon", "lat")
             debug$lonUnit <- "degrees_east"
             debug$latUnit <- "degrees_north"
