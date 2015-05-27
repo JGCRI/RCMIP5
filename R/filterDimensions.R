@@ -1,4 +1,4 @@
-#' Filter dimensions, limiting to arbitrary lon/lat/Z/time
+#' Filter dimensions, limiting to arbitrary lon/lat/Z/time ranges
 #'
 #' We frequently want to filter CMIP5 data according to some predetermined
 #' criteria: only high-latitude cells, for example, or certain years, months,
@@ -58,17 +58,20 @@ filterDimensionLon <- function(x, lonRange=NULL, verbose=FALSE) {
         if(is.null(x[["lon"]])) {
             warning("No lon data found")
         } else {
-             if(is.array(x$val)) { # array code
-                x$val <- x$val[,,ZsInRange,]
+            lonRowsInRange <- apply(x$lon, 1, function(x) any(x >= min(lonRange) & x <= max(lonRange)))
+            if(is.array(x$val)) { # array code
+                # 'punch' NA holes (in case of irregular grid)
+                x$val[x$lon < min(lonRange) | x$lon > max(lonRange)] <- NA
+                x$val <- x$val[lonRowsInRange,,,, drop=FALSE] # trim grid
             } else if(is.data.frame(x$val)) { # data frame code
-                Z <- NULL  # Suppress stupid NOTEs from R CMD CHECK
+                lon <- NULL  # Suppress stupid NOTEs from R CMD CHECK
                 x$val <- filter(x$val, lon >= min(lonRange) & lon <= max(lonRange))
             } else 
                 stop("Unknown data type")
             
-            lonColsInRange <- apply(x$lon, 1, function(x) any(x >= min(lonRange) & x <= max(lonRange)))
-            x$lon <- x$lon[, lonColsInRange]
-            x$lat <- x$lat[, lonColsInRange]
+            # Trim any rows (longitude) completely outside of filter range
+            x$lon <- x$lon[lonRowsInRange,, drop=FALSE]
+            x$lat <- x$lat[lonRowsInRange,, drop=FALSE]
             x <- addProvenance(x, paste("Filtered for lons in range [",
                                         paste(lonRange, collapse=', '), "]"))
             x$filtered <- TRUE
@@ -88,22 +91,31 @@ filterDimensionLon <- function(x, lonRange=NULL, verbose=FALSE) {
 #' @keywords internal
 filterDimensionLat <- function(x, latRange=NULL, verbose=FALSE) {
     
-    # Filter latitude dimension
     if(!is.null(latRange)) {
         
         # Sanity checks
         assert_that(is.numeric(latRange) & length(latRange) == 2)
         
+        # Filter latitude dimension
         if(is.null(x[["lat"]])) {
             warning("No lat data found")
         } else {
-            # Suppress stupid NOTEs from R CMD CHECK
-            lat <- NULL
+            latColsInRange <- apply(x$lat, 2, function(x) any(x >= min(latRange) & x <= max(latRange)))
+            if(is.array(x$val)) { # array code
+                # 'punch' NA holes (in case of irregular grid)
+                x$val[x$lat < min(latRange) | x$lat > max(latRange)] <- NA
+                x$val <- x$val[,latColsInRange,,, drop=FALSE] # trim grid
+            } else if(is.data.frame(x$val)) { # data frame code
+                lat <- NULL  # Suppress stupid NOTEs from R CMD CHECK
+                x$val <- filter(x$val, lat >= min(latRange) & lat <= max(latRange))
+            } else 
+                stop("Unknown data type")
             
-            x$val <- filter(x$val, lat %in% lats)
-            x$lat <- x$lat[x$lat %in% lats]
+            # Trim any columns (latitude) completely outside of filter range
+            x$lon <- x$lon[,latColsInRange, drop=FALSE]
+            x$lat <- x$lat[,latColsInRange, drop=FALSE]
             x <- addProvenance(x, paste("Filtered for lats in range [",
-                                        paste(range(lats), collapse=', '), "]"))
+                                        paste(latRange, collapse=', '), "]"))
             x$filtered <- TRUE
             if(verbose) cat("Filtered by lat\n")
         }
