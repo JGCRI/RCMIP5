@@ -88,7 +88,9 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
     # d2$ensemble <- "dummyensemble2"
     # saveNetCDF(d1) and then d2
     # Rename files to avoid R CMD CHECK warning
-    expect_warning(loadCMIP5("dummyvar", "b", "c", domain="d", path=path, verbose=F))
+    for(i in implementations) {
+        expect_warning(loadCMIP5("dummyvar", "b", "c", domain="d", path=path, verbose=F))
+    }
 })
 
 test_that("loadCMIP5 can load using both ncdf and ncdf4", {
@@ -131,7 +133,7 @@ test_that("Converts to and reads arrays formats agree", {
     if(!file.exists(path)) skip("Path doesn't exist")
     
     d <- loadCMIP5(path=path, variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1')
-    darray <-  loadCMIP5(path=path, variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1', loadAs='array')
+    darray <- loadCMIP5(path=path, variable='nbp', model='HadGEM2-ES', experiment='historical', ensemble='r3i1p1', loadAs='array')
     
     expect_equal(as.array(d, drop=FALSE), darray$val)
 })
@@ -142,7 +144,6 @@ test_that("loadCMIP5 correctly extracts start year", {
     if(!file.exists(path)) skip("Path doesn't exist")
     
     for(i in implementations) {
-        
         d <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', ensemble='r3i1p1', 
                        yearRange=c(1, 2007), path=path, verbose=F, loadAs=i)
         expect_equal(d$debug$startYr, 1859+11/12)
@@ -195,19 +196,17 @@ test_that("loadCMIP5 handles FUN correctly", {
     path <- "testdata_twoensembles"
     # These two files (saved by saveNetCDF) have all 1's and 2's,
     # respectively, in their data
-    
     if(!file.exists(path)) skip("Path doesn't exist")
-    
-    d_mean <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F)
-    d_min <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=min)
-    d_max <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=max)
-    d_sum <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sum)
-    expect_error(loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sd))
-    
-    expect_equal(mean(d_mean$val$value), 1.5)
-    expect_equal(mean(d_min$val$value), 1)
-    expect_equal(mean(d_max$val$value), 2)
-    expect_equal(mean(d_sum$val$value), 3)
-    
-    # TODO: test array implementation
+    for(i in implementations) {        
+        d_mean <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, loadAs=i)
+        d_min <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=min, loadAs=i)
+        d_max <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=max, loadAs=i)
+        d_sum <- loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sum, loadAs=i)
+        expect_error(loadCMIP5('var', 'm', 'ex', path=path, verbose=F, FUN=sd, loadAs=i))
+        
+        expect_equal(mean(RCMIP5:::vals(d_mean)), 1.5, info=i)
+        expect_equal(mean(RCMIP5:::vals(d_min)), 1, info=i)
+        expect_equal(mean(RCMIP5:::vals(d_max)), 2, info=i)
+        expect_equal(mean(RCMIP5:::vals(d_sum)), 3, info=i)
+    }
 })
