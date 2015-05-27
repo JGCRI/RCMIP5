@@ -46,6 +46,8 @@ test_that('regrid returns expected values for simple case', {
 test_that('regrid test for data', {
     skip_on_cran()
     path='../../sampledata'
+    if(!file.exists(path)) skip("Path doesn't exist")
+    
     numProjLon <- 360
     numProjLat <- 180
     projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, nrow=numProjLon, ncol=numProjLat)
