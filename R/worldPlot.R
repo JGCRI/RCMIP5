@@ -13,7 +13,7 @@
 #' d <- cmip5data(1970:1975)   # sample data
 #' worldPlot(d)
 #' @export
-worldPlot <- function(x, dates=unique(x$val$time), splitPacific=TRUE, capMinMax=TRUE, verbose=FALSE) {
+worldPlot <- function(x, dates=unique(x$time), splitPacific=TRUE, capMinMax=TRUE, verbose=FALSE) {
  
     # Sanity checks
     assert_that(class(x)=="cmip5data")
@@ -26,7 +26,7 @@ worldPlot <- function(x, dates=unique(x$val$time), splitPacific=TRUE, capMinMax=
     # Preliminaries
     lon <- x$lon
     lat <- x$lat
-    val <- x$val
+    val <- as.data.frame(x)
     
     # Filter for Z and time
     if(length(unique(val$Z)) > 1) {
