@@ -51,6 +51,8 @@ test_that('regrid returns expected values for simple case', {
 
 test_that('all impmentation of regrid give same answer for global area within 1e-3', {
     path <- "../../sampledata"
+    if(!file.exists(path)) skip("Path doesn't exist")
+    
     years <- 1850:1851
     lonsize <- 20
     latsize <- 30
