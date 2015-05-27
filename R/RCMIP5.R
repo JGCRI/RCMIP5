@@ -205,7 +205,7 @@ cmip5data <- function(x=list(),
         if(loadAs == 'data.frame') {
             result$val <- convert_array_to_df(result, verbose)
         }
-
+        
         # Initialize provenance and return
         addProvenance(result, "Dummy data created")
     } else {
@@ -355,9 +355,13 @@ as.data.frame.cmip5data <- function(x, ..., originalNames=FALSE) {
     # Sanity checks
     assert_that(is.flag(originalNames))
     
-    # Suppress stupid NOTEs from R CMD CHECK
-    lon <- lat <- Z <- time <- NULL
-    dplyr::arrange(x$val, lon, lat, Z, time)
+    if(is.array(x$val)) {
+        convert_array_to_df(x) 
+    } else {
+        # Suppress stupid NOTEs from R CMD CHECK
+        lon <- lat <- Z <- time <- NULL
+        dplyr::arrange(x$val, lon, lat, Z, time)  
+    }
 } # as.data.frame.cmip5data
 
 #' Convert a cmip5data object to an array
@@ -374,21 +378,25 @@ as.array.cmip5data <- function(x, ..., drop=TRUE) {
     # Sanity checks
     assert_that(is.flag(drop))
     
-    dimList <- c(length(unique(x$val$lon)),
-                 length(unique(x$val$lat)),
-                 length(unique(x$val$Z)),
-                 length(unique(x$val$time)))
-    
-    # Remove degenerate dimensions
-    if(drop) {
-        dimList <- dimList[!dimList %in% 1]        
+    if(is.array(x$val)) {
+        adrop(x$val, drop=drop)
+    } else {
+        dimList <- c(length(unique(x$val$lon)),
+                     length(unique(x$val$lat)),
+                     length(unique(x$val$Z)),
+                     length(unique(x$val$time)))
+        
+        # Remove degenerate dimensions
+        if(drop) {
+            dimList <- dimList[!dimList %in% 1]        
+        }
+        
+        # Suppress stupid NOTEs from R CMD CHECK
+        lon <- lat <- Z <- time <- NULL
+        
+        # Note we sort data frame before converting to array!
+        array(dplyr::arrange(x$val, time, Z, lat, lon)$value, dim=dimList)
     }
-    
-    # Suppress stupid NOTEs from R CMD CHECK
-    lon <- lat <- Z <- time <- NULL
-    
-    # Note we sort data frame before converting to array!
-    array(dplyr::arrange(x$val, time, Z, lat, lon)$value, dim=dimList)
 } # as.array.cmip5data
 
 #' Make package datasets and write them to disk.
