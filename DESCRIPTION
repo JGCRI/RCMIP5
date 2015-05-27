@@ -21,7 +21,7 @@ Suggests:
     ncdf (>= 1.6),
     testthat (>= 0.9),
     knitr
-Version: 1.1.9010
+Version: 1.1.9020
 Authors@R: c( person("Ben", "Bond-Lamberty", role = c("aut")),
     person("Kathe", "Todd-Brown", role = c("aut", "cre"), email =
     "ktoddbrown@gmail.com") )
