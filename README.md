@@ -11,7 +11,7 @@ More information about CMIP5 can be found on the [project home page](http://cmip
 
 **Installing this package**
 
-* The RCMIP5 package can be installed from [CRAN](http://cran.r-project.org/package=RCMIP5) or directly from this repository, using the `devtools::install_github` command.
+* The RCMIP5 package can be installed from [CRAN](http://cran.r-project.org/package=RCMIP5), or directly from this repository using the `devtools::install_github` command.
 
 **Bug reports**
 
