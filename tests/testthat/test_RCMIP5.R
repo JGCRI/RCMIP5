@@ -68,7 +68,7 @@ i <- "data.frame"
 
 test_that("as.data.frame works", {
     for(i in implementations) {
-        df <- as.data.frame(cmip5data(2000:2002, Z=T))
+        df <- as.data.frame(cmip5data(2000:2002, Z=T, loadAs=i))
         expect_is(df, "data.frame", info=i)
         expect_equal(names(df), c("lon", "lat", "Z", "time", "value"), info=i)
     }
