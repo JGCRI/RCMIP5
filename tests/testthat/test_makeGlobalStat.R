@@ -132,6 +132,26 @@ test_that("makeGlobalStat handles custom function and dots", {
         # Are the result values correct?    
         expect_equal(RCMIP5:::vals(res1), ans$value, info=i)    
         expect_equal(RCMIP5:::vals(res2), ans$value, info=i)
+        
+        ##Insert NA and recalc w/ na.rm=TRUE
+        if(is.data.frame(d$val)) { 
+            d$val$value[1] <- NA
+        } else if(is.array(d$val)) {
+            d$val[1] <- NA
+        }
+        ref$val$value[1] <- NA
+        ans <- aggregate(value~time, data=ref$val, FUN=weighted.mean, w=RCMIP5:::vals(refarea), na.action=na.pass, na.rm=TRUE)
+        
+        res1 <- makeGlobalStat(d, darea, verbose=F, sortData=F, FUN=weighted.mean, na.rm=TRUE)
+        expect_is(res1, "cmip5data", info=i)
+        
+        myfunc <- function(x, w, ...) weighted.mean(x, w, ...)
+        res2 <- makeGlobalStat(d, darea, verbose=F, sortData=F, FUN=myfunc, na.rm=TRUE)
+        expect_is(res2, "cmip5data", info=i)
+        
+        # Are the result values correct?    
+        expect_equal(RCMIP5:::vals(res1), ans$value, info=i)    
+        expect_equal(RCMIP5:::vals(res2), ans$value, info=i)
     }
 })
 
