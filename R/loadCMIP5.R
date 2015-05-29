@@ -139,8 +139,8 @@ loadCMIP5 <- function(variable, model, experiment, ensemble='[^_]+', domain='[^_
     }
 
     assert_that(length(modelTemp$lon) == length(modelTemp$lat))
-    assert_that(length(dim(modelTemp$lon)) == 2)
-    assert_that(length(dim(modelTemp$lat)) == 2)
+    assert_that(length(dim(modelTemp$lon)) == 2 | is.null(modelTemp$lon))
+    assert_that(length(dim(modelTemp$lat)) == 2 | is.null(modelTemp$lat))
     
     # -----------------------------------------------------------------------------------------------
     # At this point we're all done with loading. Put data into final format and return

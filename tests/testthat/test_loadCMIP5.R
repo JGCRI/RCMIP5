@@ -57,6 +57,19 @@ test_that("loadCMIP5 loads monthly data", {
     }
 })
 
+test_that("loadCMIP5 loads global data", {
+    skip_on_cran()
+    for(i in implementations) {
+        path <- "../../sampledata/monthly"
+        if(!file.exists(path)) skip("Path doesn't exist")
+        
+        d <- loadCMIP5('co2mass', 'bcc-csm1-1-m', 'historical', path=path, verbose=F, 
+                       loadAs=i)     # test data set
+        expect_is(d, "cmip5data")
+        expect_is(d$val, i)  # val correct class
+    }
+})
+
 test_that("loadCMIP5 loads annual data", {
     skip_on_cran()
     path <- "../../sampledata/annual"
