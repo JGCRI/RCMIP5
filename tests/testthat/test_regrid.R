@@ -111,7 +111,7 @@ test_that('regrid test for data', {
            orgArea = orgArea, projectionMatrix = transferMatrix,
            verbose=FALSE)
     
-    ##debug looking at image
+    # debug looking at image
     #image(d$val[,,1,1])
     #image(orgVar$val[,,1,1])
     orgTotal <- sum(as.numeric(orgVar$val[,,1,1]*orgArea$val[,,1,1]), na.rm=TRUE)

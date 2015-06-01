@@ -133,7 +133,7 @@ test_that("makeGlobalStat handles custom function and dots", {
         expect_equal(RCMIP5:::vals(res1), ans$value, info=i)    
         expect_equal(RCMIP5:::vals(res2), ans$value, info=i)
         
-        ##Insert NA and recalc w/ na.rm=TRUE
+        # Insert NA and recalc w/ na.rm=TRUE
         if(is.data.frame(d$val)) { 
             d$val$value[1] <- NA
         } else if(is.array(d$val)) {
