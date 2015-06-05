@@ -33,12 +33,23 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
     assert_that(is.flag(sortData))
     assert_that(is.function(FUN))
     
+    
     # Main computation code
     timer <- system.time({  # time the main computation, below
         if(is.array(x$val)) {
             rawYrs <- table(floor(x$time))
             if(filterNum) {
-                yrs <- as.numeric(names(rawYrs)[rawYrs == 12])
+                if(verbose){
+                    print('Filtering based on number in annual aggregation: ')
+                    print(rawYrs)
+                    print('number required: ')
+                    print(as.numeric(names(table(rawYrs))[table(rawYrs) == max(table(rawYrs))]))
+                }
+                yrs <- as.numeric(names(rawYrs)[rawYrs == as.numeric(names(table(rawYrs))[table(rawYrs) == max(table(rawYrs))])])    
+                if(verbose){
+                    print('new years:')
+                    print(yrs)
+                }
             }else{
                 yrs <- as.numeric(names(rawYrs))
             }
