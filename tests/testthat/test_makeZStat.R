@@ -12,7 +12,7 @@ library(testthat)
 
 context("makeZStat")
 
-implementations <- c("data.frame") #, "array")
+implementations <- c("data.frame", "array")
 
 test_that("makeZStat handles bad input", {
     expect_error(makeZStat(1))                         # non-list d
@@ -71,7 +71,7 @@ test_that("makeZStat handles custom function and dots", {
         w <- c(rep(1, length(d$Z)-1), length(d$Z)-1)
         
         # Compute correct answer
-        ans <- aggregate(value~lon+lat+time, data=d$val, FUN=weighted.mean, w=w)
+        ans <- aggregate(value~lon+lat+time, data=as.data.frame(d), FUN=weighted.mean, w=w)
         
         res1 <- makeZStat(d, verbose=F, sortData=F, FUN=weighted.mean, w)
         expect_is(res1, "cmip5data", info=i)
