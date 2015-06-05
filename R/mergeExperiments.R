@@ -68,7 +68,11 @@ mergeExperiments <- function(x, y, verbose=FALSE) {
     if(verbose) cat("Merging\n")
     x <- addProvenance(x, "Merging with another experiment:")
     x$time <- c(x$time, y$time)
-    x$val <- rbind(x$val, y$val)
+    if(is.array(x$val)){
+        x$val <- abind(x$val, y$val, along=4)
+    }else{
+        x$val <- rbind(x$val, y$val)
+    }
     x$files <- c(x$files, y$files)
     x$experiment <- paste(x$experiment, y$experiment, sep=".")
     x <- addProvenance(x, y)
