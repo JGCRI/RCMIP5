@@ -28,7 +28,7 @@ test_that("makeAnnualStat handles monthly data", {
     
     for(i in implementations) {
         
-        d <- cmip5data(years, loadAs=i)
+        d <- cmip5data(years, randomize=TRUE, loadAs=i)
         res <- makeAnnualStat(d, verbose=F)
         
         # Is 'res' correct type and size?
@@ -52,10 +52,11 @@ test_that("makeAnnualStat handles monthly data", {
         expect_equal(length(res$time), length(d$time)/12, info=i)
         
         # Are the answer values numerically correct?    
-        ref <- cmip5data(years, loadAs="data.frame")
-        ref$val$time <- floor(ref$val$time)
-        refans <- aggregate(value~lon+lat+time, data=ref$val, FUN=mean)
-        expect_equal(refans$value, RCMIP5:::vals(res), info=i)
+        ref <- as.data.frame(d)
+        ref$time <- floor(ref$time)
+        refans <- aggregate(value~lon+lat+time, data=ref, FUN=mean)
+        refans <- merge(refans, as.data.frame(res), by=c('lon', 'lat', 'time'))
+        expect_equal(refans$value.x, refans$value.y, info=i)
     }
 })
 
@@ -64,7 +65,7 @@ test_that("makeAnnualStat handles annual data", {
     
     for(i in implementations) {
         
-        d <- cmip5data(years, monthly=F)
+        d <- cmip5data(years, monthly=F, randomize=TRUE, loadAs=i)
         res <- makeAnnualStat(d, verbose=F)
         
         # Is 'res' correct type and size?
@@ -83,10 +84,11 @@ test_that("makeAnnualStat handles annual data", {
         expect_equal(res$time, years, info=i)
         
         # Are the answer values numerically correct?    
-        ref <- cmip5data(years, loadAs="data.frame")
-        ref$val$time <- floor(ref$val$time)
-        refans <- aggregate(value~lon+lat+time, data=ref$val, FUN=mean)
-        expect_equal(refans$value, RCMIP5:::vals(res), info=i)
+        ref <- as.data.frame(d)
+        ref$time <- floor(ref$time)
+        refans <- aggregate(value~lon+lat+time, data=ref, FUN=mean)
+        refans <- merge(refans, as.data.frame(res), by=c('lon', 'lat', 'time'))
+        expect_equal(refans$value.x, refans$value.y, info=i)
     }
 })
 
@@ -94,7 +96,7 @@ test_that("makeAnnualStat handles 4-dimensional data", {
     years <- 1850:1851
     
     for(i in implementations) {
-        d <- cmip5data(years, Z=T, loadAs=i)
+        d <- cmip5data(years, Z=T, randomize=TRUE, loadAs=i)
         res <- makeAnnualStat(d, verbose=F)
         
         # Do years match what we expect?
@@ -105,10 +107,12 @@ test_that("makeAnnualStat handles 4-dimensional data", {
         expect_equal(length(res$time), length(d$time)/12, info=i)
         
         # Are the answer values numerically correct?    
-        ref <- cmip5data(years, Z=T, loadAs="data.frame")
-        ref$val$time <- floor(ref$val$time)
+        ref <- as.data.frame(d)
+        ref$time <- floor(ref$time)
         refans <- aggregate(value~lon+lat+Z+time, data=ref, FUN=mean)
-        expect_equal(refans$value, RCMIP5:::vals(res), info=i)
+        refans <- merge(refans, as.data.frame(res), by=c('lon', 'lat', 'Z', 'time'))
+        expect_equal(refans$value.x, refans$value.y, info=i)
+        
     }
 })
 
@@ -157,7 +161,7 @@ test_that("makeAnnualStat computes numPerYear correctly", {
     years <- 1850:1851
     
     for(i in implementations) {
-        d <- cmip5data(years) #, loadAs=i)
+        d <- cmip5data(years, loadAs=i)
         
         res1 <- makeAnnualStat(d)
         expect_equal(res1$numPerYear, c(12, 12), info=i)
