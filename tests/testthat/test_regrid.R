@@ -11,7 +11,7 @@ library(testthat)
 
 context("regrid")
 
-implementations <- c("array")
+implementations <- c("array", "data.frame")
 
 test_that("regrid handles bad input", {
     # TODO
@@ -49,7 +49,7 @@ test_that('regrid returns expected values for simple case', {
                  sum(as.numeric(orgVar$val[,,1,1]*orgArea$val, na.rm=TRUE)))
 })
 
-test_that('all impmentation of regrid give same answer for global area within 1e-3', {
+test_that('regrid give same answer for global area within 1e-3', {
     path <- "../../sampledata"
     if(!file.exists(path)) skip("Path doesn't exist")
     
@@ -69,12 +69,12 @@ test_that('all impmentation of regrid give same answer for global area within 1e
         regridd <- regrid(d, projLon=projLon, projLat=projLat) 
         myfun <- function(x, w) sum(as.numeric(x) * as.numeric(w), na.rm=TRUE)
         expect_equal(RCMIP5:::vals(makeGlobalStat(d, FUN=myfun)), 
-                     RCMIP5:::vals(makeGlobalStat(regridd, FUN=myfun)))
+                     RCMIP5:::vals(makeGlobalStat(regridd, FUN=myfun)), info=i)
         
         orgArea <- loadCMIP5(path=path, experiment='historical', variable='areacella', model='GFDL-CM3', 
                              loadAs=i)
         orgVal <- orgArea
-        if(i %in% 'array') orgVal$val <- orgVal$val/orgVal$val
+        #if(i %in% 'array') orgVal$val <- orgVal$val/orgVal$val
         numProjLon <- floor(dim(d$lon)[1]*0.9)
         numProjLat <- floor(dim(d$lat)[2]*0.9)
         projLon <- matrix(seq(0, 360-360/numProjLon, by=360/numProjLon) + 360/numProjLon/2, 
@@ -86,7 +86,7 @@ test_that('all impmentation of regrid give same answer for global area within 1e
         
         orgGlobalArea <- RCMIP5:::vals(makeGlobalStat(orgVal, FUN=myfun))
         regridGlobalArea <- RCMIP5:::vals(makeGlobalStat(regridArea, FUN=myfun))
-        expect_less_than(abs(orgGlobalArea-regridGlobalArea)/orgGlobalArea, 1e-3)
+        expect_less_than(abs(orgGlobalArea-regridGlobalArea)/orgGlobalArea, 1e-3, info=i)
     }
 })
 
@@ -101,8 +101,8 @@ test_that('regrid test for data', {
     projLat <- matrix(seq(-90, 90-180/numProjLat, by=180/numProjLat) + 180/numProjLat/2, nrow=numProjLon, ncol=numProjLat, byrow=TRUE)
     projArea <- list(lon = projLon, lat=projLat, val= RCMIP5:::calcGridArea(lon = projLon, lat=projLat))
     
-    orgVar <- loadCMIP5(path=path, experiment='historical', variable='nbp', model='HadGEM2-ES', loadAs='array')
-    orgArea <- loadCMIP5(path=path, experiment='historical', variable='areacella', model='HadGEM2-ES', loadAs='array')
+    orgVar <- loadCMIP5(path=path, experiment='historical', variable='nbp', model='HadGEM2-ES', loadAs=i)
+    orgArea <- loadCMIP5(path=path, experiment='historical', variable='areacella', model='HadGEM2-ES', loadAs=i)
     orgVar$val[is.na(orgVar$val)] <- 0
     orgArea$val[is.na(orgArea$val)] <- 0
     
