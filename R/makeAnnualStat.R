@@ -80,17 +80,23 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
                     arrange()            
             }
             
-            x$val$year <- floor(x$val$time) 
-            
             # Instead of "summarise(value=FUN(value, ...))", we use the do()
             # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
             # the ellipses cause big problems. This solution thanks to Dennis
             # Murphy on the manipulatr listesrv.
-            x$val <- group_by(x$val, lon, lat, Z, year) %>%
+            x$val <- x$val %>%
+                # start by taking spatial mean, in case there are multiple data per spatial point
+                # looking at you, IPSL-CM5A-MR
+                group_by(lon, lat, Z, time) %>%
+                summarise(value=mean(value, na.rm=TRUE)) %>% 
+                # now move on to year summary
+                mutate(year = floor(time)) %>%
+                group_by(lon, lat, Z, year) %>%
                 do(data.frame(value = FUN(.$value, ...),
                               counts = length(.$value))) %>%
                 ungroup()
             freqTable <- unique(x$val[,c('year', 'counts')])
+            assert_that(max(freqTable$counts) <= 12) # shouldn't be more than 12 months per year
             
             if(filterNum) {
                 if(verbose) {

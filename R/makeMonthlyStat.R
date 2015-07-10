@@ -70,7 +70,13 @@ makeMonthlyStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
             # call below, because the former doesn't work (as of dplyr 0.3.0.9000):
             # the ellipses cause big problems. This solution thanks to Dennis
             # Murphy on the manipulatr listesrv.
-            x$val <- group_by(x$val, lon, lat, Z, month) %>%
+            x$val <- x$val %>%
+                # start by taking spatial mean, in case there are multiple data per spatial point
+                # looking at you, IPSL-CM5A-MR
+                group_by(lon, lat, Z, time, month) %>%
+                summarise(value=mean(value, na.rm=TRUE)) %>% 
+                # now move on to year summary
+                group_by(lon, lat, Z, month) %>%
                 do(data.frame(value = FUN(.$value, ...))) %>%
                 ungroup()
             x$val$time <- x$val$month

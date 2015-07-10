@@ -174,8 +174,8 @@ convert_array_to_df <- function(x, verbose=FALSE) {
     
     if(verbose) cat("Converting to data frame\n")
     lon <- lat <- Z <- time <- NA
-    if(!is.null(x$lon)) lon <- x$lon
-    if(!is.null(x$lat)) lat <- x$lat
+    if(!is.null(x$lon)) lon <- as.vector(x$lon)
+    if(!is.null(x$lat)) lat <- as.vector(x$lat)
     if(!is.null(x$Z)) Z <- x$Z
     if(!is.null(x$time)) time <- x$time
     # R uses "column major order" - the first subscript moves fastest
@@ -184,6 +184,8 @@ convert_array_to_df <- function(x, verbose=FALSE) {
                      'lat'=rep(lat, times=length(Z) * length(time)),
                      'Z'=rep(Z, each=length(lon)),
                      'time'=rep(time, each=length(Z) * length(lon)))
+    
+    assert_that(nrow(df) == length(x$val)) # right?
     
     df$value <- as.numeric(x$val)
     tbl_df(df) # wrap as a dplyr tbl and return
