@@ -94,7 +94,7 @@ world.plot <- function(x, lon=NULL, lat=NULL, time=1, main=NULL, parList=NULL,
     if(is.null(col)) {
         if(centerZero) {
             # be smart about the color map if we want it zero centered
-            if(verbose){cat('centering colors \n')}
+            if(verbose) { cat('centering colors \n') }
             # col.gen <- colorRampPalette(c('violet', 'dark blue', 'beige',
             #                                'dark red', 'yellow'), space='rgb')
             col.gen <- colorRampPalette(c('dark red', 'beige', 'dark green'),
@@ -120,7 +120,7 @@ world.plot <- function(x, lon=NULL, lat=NULL, time=1, main=NULL, parList=NULL,
     # Replace any values above/below the max/min with the max/min and
     # ...change the break labels were appropreate
     if(any(val<minNum, na.rm=TRUE)) {
-        if(showRange){
+        if(showRange) {
             breakLabels[1] <- paste('[', signif( trueMin, digits=2), 'to', breakLabels[2], ']')
         } else {
             breakLabels[1] <- paste(breakLabels[2], '-')

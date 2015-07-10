@@ -25,7 +25,7 @@ test_that("makeMonthlyStat handles bad input", {
 
 test_that("makeMonthlyStat handles monthly data", {
     years <- 1850:1851
-    for(i in implementations){
+    for(i in implementations) {
         d <- cmip5data(years, randomize=TRUE, loadAs=i)
         res <- makeMonthlyStat(d, verbose=F)
         
@@ -60,7 +60,7 @@ test_that("makeMonthlyStat handles monthly data", {
 
 test_that("makeMonthlyStat handles annual data", {
     years <- 1850:1851
-    for(i in implementations){
+    for(i in implementations) {
         d <- cmip5data(years, monthly=F, loadAs=i)
         expect_error(makeMonthlyStat(d, verbose=F), info=i)
     }
@@ -68,7 +68,7 @@ test_that("makeMonthlyStat handles annual data", {
 
 test_that("makeMonthlyStat handles 4-dimensional data", {
     years <- 1850:1851
-    for(i in implementations){
+    for(i in implementations) {
         d <- cmip5data(years, Z=T, randomize=TRUE, loadAs=i)
         res <- makeMonthlyStat(d, verbose=F)
         
@@ -102,8 +102,8 @@ test_that("makeMonthlyStat handles custom function and dots", {
     d$val$month <- floor((d$val$time %% 1) * 12 + 1)
     ans <- aggregate(value~lon+lat+month, data=d$val, FUN=weighted.mean, w=w)
     
-    for(i in implementations){
-        if(i %in% 'array'){
+    for(i in implementations) {
+        if(i %in% 'array') {
             d$val <- as.array(d, drop=FALSE)
         }
         

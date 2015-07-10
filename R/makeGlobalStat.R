@@ -64,7 +64,7 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
         x <- addProvenance(x, "About to compute global stat. Grid areas from following data:")
         x <- addProvenance(x, area)
         areavals <- area$val
-        if(is.array(areavals)){
+        if(is.array(areavals)) {
             dim(areavals) <- dim(areavals)[c(1,2)]
         }
     }

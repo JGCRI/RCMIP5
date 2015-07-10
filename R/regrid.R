@@ -135,16 +135,16 @@ regrid <- function(orgVar, projLat, projLon,
         if(length(dim(orgArea$val)) == 2) dim(orgArea$val) <- c(dim(orgArea$val), 1,1)
     }
     
-    if(is.data.frame(orgVar$val)){
+    if(is.data.frame(orgVar$val)) {
         if(verbose) cat('Casting orgVar from data.frame [', dim(orgVar$val), '] ')
         orgVar$val <- as.array(orgVar, drop=FALSE)
         if(verbose) cat('to an array [', dim(orgVar$val), ']\n')
         castToDataFrame <- TRUE 
-    }else{
+    } else {
         if(verbose) cat('Orginal value in array\n')
         castToDataFrame <- FALSE
     }
-    if(is.data.frame(orgArea$val)){
+    if(is.data.frame(orgArea$val)) {
         if(verbose) cat('casting orgArea from data.frame [', dim(orgArea$val), '] ')
         orgArea$val <- as.array(orgArea, drop=FALSE)
         if(verbose) cat('to an array [', dim(orgArea$val), ']\n')
@@ -170,7 +170,7 @@ regrid <- function(orgVar, projLat, projLon,
         projArea <- list(lon=projLon, lat=projLat, val= calcGridArea(lon=projLon[,1], lat=projVar$lat[1,]))
     }
         
-    if(is.data.frame(projArea)){
+    if(is.data.frame(projArea)) {
         if(verbose) cat('Casting projection area to array.\n')
         projArea$val <- as.array(projArea, drop=FALSE)
     }
@@ -178,7 +178,7 @@ regrid <- function(orgVar, projLat, projLon,
     if(verbose) cat('Ensure dimentions: orgArea$val [',dim(orgArea$val),']\n')
     # Force a 4D array for the area
     ifelse(length(dim(projArea$val)) == 2,  dim(projArea$val) <- c(dim(projArea$val), 1, 1), dim(projArea$val) <- dim(projArea$val))
-    if(length(dim(orgArea$val)) == 2){
+    if(length(dim(orgArea$val)) == 2) {
         dim(orgArea$val) <- c(dim(orgArea$val), 1, 1)
     }
     
@@ -205,7 +205,7 @@ regrid <- function(orgVar, projLat, projLon,
     
     projVar$projectionMatrix <- projectionMatrix
     
-    if(castToDataFrame){
+    if(castToDataFrame) {
         if(verbose) cat('recast projVar as data frame\n')
         projVar$val <- as.data.frame(projVar)
     }

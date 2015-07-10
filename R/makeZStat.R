@@ -34,12 +34,12 @@ makeZStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
     
     # Main computation code
     timer <- system.time({  # time the main computation, below
-        if(is.array(x$val)){
+        if(is.array(x$val)) {
             newDim <- dim(x$val)
             newDim[3] <- 1
             x$val <- apply(x$val, c(1,2,4), FUN, ...)
             dim(x$val) <- newDim
-        }else{
+        } else {
             # Suppress stupid NOTEs from R CMD CHECK
             lon <- lat <- Z <- time <- value <- `.` <- NULL
             

@@ -15,7 +15,7 @@ context("mergeExperiments")
 implementations <- c("data.frame", "array")
 
 test_that("RCMIP5:::mergeExperiments.R handles bad input", {  
-    for(i in implementations){
+    for(i in implementations) {
         x <- cmip5data(loadAs=i)
         expect_error(RCMIP5:::mergeExperiments())                             # non-cmip5data
         expect_error(RCMIP5:::mergeExperiments(1))                            # non-cmip5data
@@ -27,7 +27,7 @@ test_that("RCMIP5:::mergeExperiments.R handles bad input", {
 })
 
 test_that("RCMIP5:::mergeExperiments identifies ancillary problems", {
-    for(i in implementations){
+    for(i in implementations) {
         y <- cmip5data(2, loadAs=i)
         
         x <- cmip5data(1, loadAs=i)
@@ -64,7 +64,7 @@ test_that("RCMIP5:::mergeExperiments identifies ancillary problems", {
 })
 
 test_that("RCMIP5:::mergeExperiments identifies time problems", {
-    for(i in implementations){
+    for(i in implementations) {
         x <- cmip5data(1, loadAs=i)
         y <- cmip5data(2, loadAs=i)    
         x$debug$timeFreqStr <- paste0(y$debug$timeFreqStr, "x")
@@ -81,7 +81,7 @@ test_that("RCMIP5:::mergeExperiments identifies time problems", {
 })
 
 test_that("RCMIP5:::mergeExperiments merges monthly data", {
-    for(i in implementations){
+    for(i in implementations) {
         x <- cmip5data(1:5, randomize=TRUE, loadAs=i)
         y <- cmip5data(6:10, randomize=TRUE, loadAs=i)    
         res <- RCMIP5:::mergeExperiments(x, y, verbose=F)
@@ -101,7 +101,7 @@ test_that("RCMIP5:::mergeExperiments merges monthly data", {
 })
 
 test_that("RCMIP5:::mergeExperiments merges annual data", {
-    for(i in implementations){
+    for(i in implementations) {
         x <- cmip5data(1:5, monthly=F, randomize=TRUE, loadAs=i)
         y <- cmip5data(6:10, monthly=F, randomize=TRUE, loadAs=i)    
         res <- RCMIP5:::mergeExperiments(x, y, verbose=F)
@@ -112,7 +112,7 @@ test_that("RCMIP5:::mergeExperiments merges annual data", {
 })
 
 test_that("RCMIP5:::mergeExperiments merges 4-dimensional data", {
-    for(i in implementations){
+    for(i in implementations) {
         x <- cmip5data(1:5, Z=T, randomize=TRUE, loadAs=i)
         y <- cmip5data(6:10, Z=T, randomize=TRUE, loadAs=i)    
         res <- RCMIP5:::mergeExperiments(x, y, verbose=F)

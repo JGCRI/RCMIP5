@@ -12,10 +12,10 @@
 calcGridArea<- function(lon, lat, verbose=FALSE) {
 
     # Deal with backwards compatibility for old 1D arrays of lon and lat
-    if(length(dim(lon)) == 0){
+    if(length(dim(lon)) == 0) {
         lon <- matrix(lon, nrow=length(lon), ncol=length(lat))
     }
-    if(length(dim(lat)) == 0){
+    if(length(dim(lat)) == 0) {
         lat <- matrix(lat, nrow=dim(lon)[1], ncol=dim(lon)[2], byrow=TRUE)
     }
     

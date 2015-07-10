@@ -57,7 +57,7 @@ test_that('regrid give same answer for global area within 1e-3', {
     lonsize <- 20
     latsize <- 30
     
-    for(i in implementations){
+    for(i in implementations) {
         d <- cmip5data(years, lonsize=lonsize, latsize=latsize, random=TRUE, loadAs=i)
         numProjLon <- floor(dim(d$lon)[1]*0.9)
         numProjLat <- floor(dim(d$lat)[2]*0.9)
