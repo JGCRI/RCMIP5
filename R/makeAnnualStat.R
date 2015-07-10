@@ -39,18 +39,18 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
         if(is.array(x$val)) {
             rawYrs <- table(floor(x$time))
             if(filterNum) {
-                if(verbose){
+                if(verbose) {
                     print('Filtering based on number in annual aggregation: ')
                     print(rawYrs)
                     print('number required: ')
                     print(as.numeric(names(table(rawYrs))[table(rawYrs) == max(table(rawYrs))]))
                 }
                 yrs <- as.numeric(names(rawYrs)[rawYrs == as.numeric(names(table(rawYrs))[table(rawYrs) == max(table(rawYrs))])])    
-                if(verbose){
+                if(verbose) {
                     print('new years:')
                     print(yrs)
                 }
-            }else{
+            } else {
                 yrs <- as.numeric(names(rawYrs))
             }
             myDim <- dim(x$val)
@@ -119,7 +119,7 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
                 if(verbose) cat("Replacing missing lon/lat combinations\n")
                 
                 # Fix this by generating all lon/lat pairs and combining with answer
-                full_data <- tbl_df(data.frame(lon=x$lon, lat=x$lat))
+                full_data <- tbl_df(data.frame(lon=as.vector(x$lon), lat=as.vector(x$lat)))
                 x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
             }
             x$time <- sort(freqTable$year)

@@ -36,7 +36,7 @@ makeMonthlyStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
     
     # Main computation code
     timer <- system.time({ # time the main computation, below
-        if(is.array(x$val)){
+        if(is.array(x$val)) {
             
             monthNum <- floor((x$time-floor(x$time)) * 12) + 1
             newDim <- dim(x$val)
@@ -44,7 +44,7 @@ makeMonthlyStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
             #aggFUN <- FUN
             x$time <- sort(unique(monthNum))
             x$numYears <- as.data.frame(table(monthNum))$Freq
-            x$val <- vapply(x$time, FUN=function(monthIndex, ...){
+            x$val <- vapply(x$time, FUN=function(monthIndex, ...) {
                 newDim <- dim(x$val)
                 temp <- x$val[,,,monthNum==monthIndex]
                 newDim[4] <- sum(monthNum == monthIndex)
@@ -52,7 +52,7 @@ makeMonthlyStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
                 return(apply(temp, c(1,2,3), FUN, ...))
             }, FUN.VALUE=x$val[,,,1], ...)
             dim(x$val) <- newDim
-        }else{
+        } else {
             # Suppress stupid NOTEs from R CMD CHECK
             lon <- lat <- Z <- time <- month <- value <- `.` <- NULL
             
@@ -83,12 +83,12 @@ makeMonthlyStat <- function(x, verbose=FALSE, sortData=FALSE, FUN=mean, ...) {
                 if(verbose) cat("Replacing missing lon/lat combinations\n")
                 
                 # Fix this by generating all lon/lat pairs and combining with answer
-                full_data <- tbl_df(data.frame(lon=x$lon, lat=x$lat))
+                full_data <- tbl_df(data.frame(lon=as.vector(x$lon), lat=as.vector(x$lat)))
                 x$val <- left_join(full_data, x$val, by=c("lon", "lat"))
             }
             x$time <- 1:12
             x$numYears <- as.data.frame(table(floor(monthIndex)))$Freq
-        }#if(array) else
+        } #if(array) else
     }) # system.time
     
     if(verbose) cat('\nTook', timer[3], 's\n')
