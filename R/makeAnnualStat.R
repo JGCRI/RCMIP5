@@ -8,8 +8,8 @@
 #' @param x A \code{\link{cmip5data}} object
 #' @param verbose logical. Print info as we go?
 #' @param sortData logical. Sort \code{x} and \code{area} before computing?
-#' @param filterNum logical. Only keep the years which share the most common time number of entries.
-#' For example, only keep years with 12 months.
+#' @param filterNum logical. Only keep the years which share the most common count.
+#' For example, only keep years with 12 months and discard those with 11 or fewer.
 #' @param FUN function. Function to apply across months of year
 #' @param ... Other arguments passed on to \code{FUN}
 #' @return A \code{\link{cmip5data}} object, whose \code{val} field is the annual
@@ -38,20 +38,20 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
     timer <- system.time({  # time the main computation, below
         if(is.array(x$val)) {
             rawYrs <- table(floor(x$time))
+            yrs <- as.numeric(names(rawYrs))
+            mostCommonCount <- as.numeric(names(table(rawYrs))[table(rawYrs) == max(table(rawYrs))])
             if(filterNum) {
                 if(verbose) {
                     print('Filtering based on number in annual aggregation: ')
                     print(rawYrs)
-                    print('number required: ')
-                    print(as.numeric(names(table(rawYrs))[table(rawYrs) == max(table(rawYrs))]))
+                    print('count required: ')
+                    print(mostCommonCount)
                 }
-                yrs <- as.numeric(names(rawYrs)[rawYrs == as.numeric(names(table(rawYrs))[table(rawYrs) == max(table(rawYrs))])])    
+                yrs <- as.numeric(names(rawYrs)[rawYrs == mostCommonCount])    
                 if(verbose) {
                     print('new years:')
                     print(yrs)
                 }
-            } else {
-                yrs <- as.numeric(names(rawYrs))
             }
             myDim <- dim(x$val)
             x$val <- vapply(yrs, 
