@@ -2,6 +2,8 @@ RCMIP5: Tools for Manipulating and Summarizing CMIP5 Data
 =======
 
 [![Build Status](https://travis-ci.org/JGCRI/RCMIP5.png?branch=master)](https://travis-ci.org/JGCRI/RCMIP5)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/RCMIP5)](http://cran.r-project.org/web/packages/RCMIP5)
+![CRAN_Downloads_Badge](http://cranlogs.r-pkg.org/badges/RCMIP5)
 
 This package provides R functions for exploring, manipulating, and summarizing model outputs from the Coupled Model Intercomparison Project Phase 5 (CMIP5).
 
