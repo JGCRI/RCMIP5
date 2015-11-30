@@ -25,7 +25,7 @@ loadEnsemble(variable, model, experiment, ensemble, domain, path = ".",
 
 \item{verbose}{logical. Print info as we go?}
 
-\item{force.ncdf}{Force use of the less-desirable ncdf package for testing?}
+\item{force.ncdf}{[[decrepit]] Force use of the less-desirable ncdf package for testing?}
 
 \item{yearRange}{numeric of length 2. If supplied, load only these years of data inclusively between these years.}
 

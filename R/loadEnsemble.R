@@ -11,7 +11,7 @@
 #' @param path optional root of directory tree
 #' @param recursive logical. Recurse into directories?
 #' @param verbose logical. Print info as we go?
-#' @param force.ncdf Force use of the less-desirable ncdf package for testing?
+#' @param force.ncdf [[decrepit]] Force use of the less-desirable ncdf package for testing? 
 #' @param yearRange numeric of length 2. If supplied, load only these years of data inclusively between these years.
 #' @param ZRange numeric of length 2. If supplied, load only Z data within this range.
 #' @return A \code{\link{cmip5data}} object, or \code{NULL} if nothing loaded
@@ -40,24 +40,15 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     assert_that(is.null(ZRange) | length(ZRange)==2 & is.numeric(ZRange))
     
     # We prefer to use the 'ncdf4' package, but if not installed can use 'ncdf'
-    if(force.ncdf | !requireNamespace('ncdf4', quietly=!verbose)) {
-        if(requireNamespace('ncdf', quietly=!verbose)) {
-            # The ncdf and ncdf4 functions are mostly parameter-identical.
-            # ...This makes things easy: we redefine the ncdf4 function
-            # ...names to their ncdf equivalents
-            .nc_open <- ncdf::open.ncdf
-            .ncatt_get <- ncdf::att.get.ncdf
-            .ncvar_get <- ncdf::get.var.ncdf
-            .nc_close <- ncdf::close.ncdf
-        } else {
-            stop("No NetCDF (either 'ncdf4' or 'ncdf') package is available")
-        }
-    } else {
-        .nc_open <- ncdf4::nc_open
-        .ncatt_get <- ncdf4::ncatt_get
-        .ncvar_get <- ncdf4::ncvar_get
-        .nc_close <- ncdf4::nc_close
+    if(force.ncdf) {
+       warning('force.ncdf is ignored now. ncdf4 is a required package')
     }
+    requireNamespace('ncdf4', quietly=!verbose)
+    .nc_open <- ncdf4::nc_open
+    .ncatt_get <- ncdf4::ncatt_get
+    .ncvar_get <- ncdf4::ncvar_get
+    .nc_close <- ncdf4::nc_close
+    
     
     # List all files that match specifications
     fileList <- list.files(path=path, full.names=TRUE, recursive=recursive)
@@ -348,8 +339,10 @@ loadEnsemble <- function(variable, model, experiment, ensemble, domain,
     } # for filenames
     
     # If nothing loaded...
-    if(length(val) == 0) return(NULL)
-    
+    if(length(val) == 0){
+        warning('Nothing was found, returning NULL')
+        return(NULL)
+    }
     x <- cmip5data(list(files=loadedFiles, val=unname(val), valUnit=valUnit,
                         lat=latArr, lon=lonArr, Z=ZArr, time=timeArr,
                         variable=variable, model=model, domain=domain,

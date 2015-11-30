@@ -18,7 +18,6 @@ Depends:
 Suggests:
     ggplot2 (>= 1.0.1),
     ncdf4 (>= 1.9),
-    ncdf (>= 1.6),
     testthat (>= 0.9),
     knitr
 Version: 1.1.9030
