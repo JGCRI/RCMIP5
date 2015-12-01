@@ -1,3 +1,8 @@
+RCMIP5 1.3a
+==========
+
+* Remove ncdf package dependency, ncdf4 is now required.
+
 RCMIP5 1.2
 ===========
 
