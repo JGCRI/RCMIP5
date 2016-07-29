@@ -38,7 +38,6 @@ test_that("loadCMIP5 handles no files found", {            # no NetCDF files fou
     w <- getOption('warn')
     options(warn=-1)
     expect_warning(loadCMIP5("","","",path=("testdata_none")))
-    expect_is(loadCMIP5("","","",path=("testdata_none")),"NULL")
     options(warn=w)
 })
 
@@ -103,26 +102,6 @@ test_that("loadCMIP5 handles spatial mismatches between ensembles", {
     # Rename files to avoid R CMD CHECK warning
     for(i in implementations) {
         expect_warning(loadCMIP5("dummyvar", "b", "c", domain="d", path=path, verbose=F))
-    }
-})
-
-test_that("loadCMIP5 can load using both ncdf and ncdf4", {
-    skip_on_cran()
-    if(suppressWarnings(!require(ncdf, quietly=T))) skip("ncdf not available")
-    if(suppressWarnings(!require(ncdf4, quietly=T))) skip("ncdf4 not available")
-    
-    path <- "../../sampledata/monthly"
-    if(!file.exists(path)) skip("Path doesn't exist")
-    
-    for(i in implementations) {
-        d1 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F, ensemble='r3i1p1',
-                        yearRange=c(2029, 2030), loadAs=i)  # ncdf4
-        d2 <- loadCMIP5('nbp', 'HadGEM2-ES', 'rcp85', path=path, verbose=F,  ensemble='r3i1p1',
-                        force.ncdf=TRUE, yearRange=c(2029, 2030), loadAs=i) # ncdf
-        expect_equal(d1$val, d2$val)
-        expect_equal(names(d1), names(d2))
-        expect_is(d1$val, i)
-        expect_is(d2$val, i)
     }
 })
 

@@ -33,7 +33,6 @@ test_that("loadEnsemble handles no files found", {            # no NetCDF files 
     w <- getOption('warn')
     options(warn=-1)
     expect_warning(RCMIP5:::loadEnsemble("","","","","", path=("testdata_none")))
-    expect_is(RCMIP5:::loadEnsemble("","","","","", path=("testdata_none")), "NULL")
     options(warn=w)
 })
 
@@ -60,11 +59,6 @@ test_that("loadEnsemble loads annual data", {
     
     d <- RCMIP5:::loadEnsemble('co3', 'HadGEM2-ES', 'rcp85', 'r1i1p1', '[^_]+', path=path, verbose=F)
     expect_is(d, "cmip5data")
-})
-
-test_that("loadEnsemble catches malformed lon/lat/Z/time data", {
-    # These is a real CMIP5 file with problems
-    expect_error(RCMIP5:::loadEnsemble('ph','MPI-ESM-LR','historical','r1i1p1', '[^_]+', path=path, verbose=F))        
 })
 
 test_that("loadEnsemble loads 4D data", {

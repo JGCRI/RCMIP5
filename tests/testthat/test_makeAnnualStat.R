@@ -41,8 +41,8 @@ test_that("makeAnnualStat handles monthly data", {
         expect_equal(res$files, d$files, info=i)
         
         # numPerYear set and provenance updated?
-        expect_is(res$numPerYear, "integer", info=i)
-        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)
+        expect_is(res$numPerYear, "integer") #, info=i)
+        expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=i)
         
         # Do years match what we expect?
         expect_equal(res$time, years, info=i)
@@ -78,7 +78,7 @@ test_that("makeAnnualStat handles annual data", {
         expect_equal(res$files, d$files, info=i)
         
         # Provenance updated?
-        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)
+        expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=i)
         
         # Do years match what we expect?
         expect_equal(res$time, years, info=i)

@@ -105,7 +105,7 @@ makeAnnualStat <- function(x, verbose=FALSE, sortData=FALSE, filterNum=TRUE, FUN
                     print('number required: ')
                     print(freqTable$year[which.max(freqTable$counts)] )
                 }
-                x$val <- x$val[x$val$count == max(freqTable$counts),]
+                x$val <- x$val[x$val$counts == max(freqTable$counts),]
                 x$numPerYear <- freqTable$counts[freqTable$counts == max(freqTable$counts)]
             } else {
                 x$numPerYear <- freqTable$counts[order(freqTable$year)]

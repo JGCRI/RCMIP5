@@ -18,7 +18,7 @@ Depends:
 Suggests:
     ggplot2 (>= 1.0.1),
     ncdf4 (>= 1.9),
-    testthat (>= 0.9),
+    testthat (>= 1.0.2),
     knitr
 Version: 1.1.9030
 Authors@R: c( person("Ben", "Bond-Lamberty", role = c("aut")),

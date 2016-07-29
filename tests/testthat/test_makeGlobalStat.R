@@ -41,7 +41,7 @@ test_that("makeGlobalStat handles monthly data", {
         expect_null(res$lon, info=i)
         expect_null(res$lat, info=i)
         expect_is(res$numCells, "integer", info=i)
-        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)
+        expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=i)
         
         # Does time match what we expect?
         expect_equal(res$time, d$time, info=i)
@@ -176,7 +176,7 @@ test_that("makeGlobalStat sorts before computing", {
     res1 <- makeGlobalStat(d, darea, verbose=F, sortData=TRUE)
     expect_is(res1, "cmip5data")
     
-    # makeGlobalStat should be sorted darea correctly before calculating
+    # makeGlobalStat should sort darea correctly before calculating
     # Are the result values correct?    
     expect_equal(res1$val$value, ans$value)
     

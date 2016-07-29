@@ -82,14 +82,13 @@ makeGlobalStat <- function(x, area=NULL, verbose=FALSE, sortData=FALSE,
             lon <- lat <- Z <- time <- value <- `.` <- NULL
             
             # The data may be (but hopefully are not) out of order, and if 
-            # the user specifies to `sortData`, arrange everything so that 
+            # the user specifies `sortData`, arrange everything so that 
             # area and data order is guaranteed to match. This is expensive, though
             if(sortData) {
                 if(verbose) cat("Sorting data...\n")
-                areavals <- group_by(areavals, lon, lat) %>%
-                    arrange()
-                x$val <- group_by(x$val, Z, time, lon, lat) %>% 
-                    arrange()            
+                areavals <- arrange(areavals, lon, lat)
+                x$val <- group_by(x$val, Z, time) %>% 
+                    arrange(lon, lat)            
             } else if(missing(sortData) & !missing(area)) {
                 warning("Note: 'area' supplied but 'sortData' unspecified; no sorting performed")
             }

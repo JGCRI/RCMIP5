@@ -46,7 +46,7 @@ test_that("filterDimensions filters lon", {
         expect_equal(dim(d$lat)[1]-1, dim(res$lat)[1], info=i) #  one row gone
         expect_equal(d$Z, res$Z, info=i)
         expect_equal(d$time, res$time, info=i)
-        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)     
+        expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=i)     
         
         # Were data filtered correctly?
         if(i == "data.frame") {
@@ -100,7 +100,7 @@ test_that("filterDimensions filters lat", {
         expect_equal(dim(d$lat)[2]-1, dim(res$lat)[2], info=i) #  one row gone
         expect_equal(d$Z, res$Z, info=i)
         expect_equal(d$time, res$time, info=i)
-        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)     
+        expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=i)     
         
         # Were data filtered correctly?
         if(i == "data.frame") {
@@ -123,7 +123,7 @@ test_that("filterDimensions filters Z", {
         res <- filterDimensions(d, ZRange=zf)
         expect_true(res$filtered, info=i)
         expect_equal(range(res$Z), zf, info=i)
-        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)
+        expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=i)
         
         # Were data filtered correctly?
         if(i == "data.frame") {
@@ -150,7 +150,7 @@ test_that("filterDimensions filters time (yearRange)", {
             res <- filterDimensions(d, yearRange=yf)
             expect_true(res$filtered, info=i)
             expect_equal(range(floor(res$time)), yf, info=info)  # only yearRange in filter
-            expect_more_than(nrow(res$provenance), nrow(d$provenance), info=info)  # provenance bigger
+            expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=info)  # provenance bigger
             
             # Were data filtered correctly?
             if(i == "data.frame") {
@@ -175,7 +175,7 @@ test_that("filterDimensions filters time (monthRange)", {
         res <- filterDimensions(d, monthRange=mf)
         expect_true(res$filtered, info=i)
         expect_equal(length(unique(round(res$time %% 1, 2))), length(mf), info=i)  # only monthRange in filter
-        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)  # and provenance bigger
+        expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=i)  # and provenance bigger
         
         # Were data filtered correctly?
         if(i == "data.frame") {

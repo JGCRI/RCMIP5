@@ -4,6 +4,8 @@
 # See http://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf
 library(testthat)
 
+options(dplyr.show_progress = FALSE)
+
 # To run this code:
 #   source("makeZStat.R")
 #   source("RCMIP5.R") # for cmip5data
@@ -43,7 +45,7 @@ test_that("makeZStat computes Z means", {
         # Depth removed, and other info updated?
         expect_null(res$Z, info=i)
         expect_is(res$numZs, "integer", info=i)
-        expect_more_than(nrow(res$provenance), nrow(d$provenance), info=i)
+        expect_gt(nrow(res$provenance), nrow(d$provenance)) #, info=i)
         
         # Is the answer value array correctly sized?
         expect_equal(RCMIP5:::nvals(res), RCMIP5:::nvals(d)/length(d$Z), info=i)

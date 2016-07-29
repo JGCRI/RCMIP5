@@ -15,7 +15,7 @@ test_that("Test 1 degree grids", {
     area <- RCMIP5:::calcGridArea(lon=0:359+0.5, lat=-90:89+0.5)
     
     # Check global area
-    expect_less_than(abs(sum(area[TRUE])-5.10072e14)/5.10072e14, 1e-5)
+    expect_lt(abs(sum(area[TRUE])-5.10072e14)/5.10072e14, 1e-5)
     
     # Check grid area against arc lengths
     #       LAT 	     LONG
@@ -28,9 +28,9 @@ test_that("Test 1 degree grids", {
     # 90° 	111.694 km 	0.000 km
 
     # 0 - 0 will have an area of (110.574 * 111.320)*10^6 = 1.23091e10
-    expect_less_than((abs(110.574 * 111.320)*10^6 - max(area))/(110.574 * 111.320 *10^6), 1e-2)
+    expect_lt((abs(110.574 * 111.320)*10^6 - max(area))/(110.574 * 111.320 *10^6), 1e-2)
     # an area at 75 lat will be 111.618 * 28.902 * 1e6
-    expect_less_than((abs(111.618 * 28.902 * 1e6) - mean(c(area[1, -90:89+0.5 == 74.5], area[1, -90:89+0.5 == 75.5])))/ abs(111.618 * 28.902 * 1e6), 1e-2)
+    expect_lt((abs(111.618 * 28.902 * 1e6) - mean(c(area[1, -90:89+0.5 == 74.5], area[1, -90:89+0.5 == 75.5])))/ abs(111.618 * 28.902 * 1e6), 1e-2)
     
 })
 
@@ -41,5 +41,5 @@ test_that("Test global totals with real data", {
     d <- loadCMIP5('areacella', 'GFDL-CM3', 'historical', path=path, verbose=F, loadAs='array')
     
     area <- RCMIP5:::calcGridArea(lat=d$lat, lon=d$lon)
-    expect_less_than(max(as.numeric(abs(area-d$val[,,1,1])/d$val[,,1,1])), 1e-3)
+    expect_lt(max(as.numeric(abs(area-d$val[,,1,1])/d$val[,,1,1])), 1e-3)
 })
