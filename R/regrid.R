@@ -8,6 +8,7 @@
 #' and \code{lon} (longitude) matrices of the orginal grid
 #' @param projArea A \code{\link{cmip5data}} object or list with \code{lat} (latitude) 
 #' and \code{lon} (longitude) matrices of the projection grid
+#' @param verbose logical. Print info as we go?
 #' @details This function calculates the projection matrix to shift one global grid to a second.
 #' The relative contribution of an old grid to the new grid is calculated via an area weighting scheme
 #' where the area of a grid cell is assumed to be proportional to the degree area of that cell and
@@ -78,7 +79,7 @@ getProjectionMatrix <- function(orgArea, projArea, verbose=FALSE) {
     } # for
     
     # Combine all results into a single data frame, and return sparse matrix
-    projectionMatrix <- dplyr::rbind_all(lodf)
+    projectionMatrix <- dplyr::bind_rows(lodf)
     
     Matrix::sparseMatrix(j = projectionMatrix$projIndex, 
                          i = projectionMatrix$orgIndex, 

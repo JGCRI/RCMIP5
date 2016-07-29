@@ -8,5 +8,6 @@ sourceall.R
 ToddBrown/
 unused/
 profiler/
+data/
 
 ^\.travis\.yml$

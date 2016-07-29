@@ -9,7 +9,7 @@ Description: Working with CMIP5 data can be tricky, forcing scientists to write
     and (v) produce easy-to-work-with graphical and data summaries.
 Imports:
     abind (>= 1.4),
-    dplyr (>= 0.4.1),
+    dplyr (>= 0.5),
     assertthat (>= 0.1),
     digest,
     Matrix
@@ -20,10 +20,11 @@ Suggests:
     ncdf4 (>= 1.9),
     testthat (>= 1.0.2),
     knitr
-Version: 1.1.9030
+Version: 1.2
 Authors@R: c( person("Ben", "Bond-Lamberty", role = c("aut")),
     person("Kathe", "Todd-Brown", role = c("aut", "cre"), email =
     "ktoddbrown@gmail.com") )
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 LazyData: true
+RoxygenNote: 5.0.1
