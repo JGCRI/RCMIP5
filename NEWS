@@ -1,12 +1,10 @@
-RCMIP5 1.3a
-==========
-
-* Remove ncdf package dependency, ncdf4 is now required.
 
 RCMIP5 1.2
 ===========
 
 * Code handles irregular spatial grids.
+
+* Remove ncdf package dependency, ncdf4 is now required.
 
 * Now use `assertthat` for pre- and post-assertions.
 
@@ -17,6 +15,8 @@ RCMIP5 1.2
 * Data sorting now optional for all stat operations (#112).
 
 * New `ZRange` parameter allows `loadCMIP5` to only load parts of files.
+
+* Updates for `dplyr` 0.5 and `testthat` 1.0.
 
 
 RCMIP5 1.1

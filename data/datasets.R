@@ -1,3 +1,4 @@
+# MOVE THIS FILE TO R/ AND DELETE THIS LINE
 #' Global summaries of selected CMIP5 variables.
 #'
 #' Description.
