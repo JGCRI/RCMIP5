@@ -37,4 +37,3 @@ getFileInfo('.', recursive=FALSE)
 \seealso{
 \code{\link{checkTimePeriod}}
 }
-

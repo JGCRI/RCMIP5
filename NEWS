@@ -1,4 +1,9 @@
 
+RCMIP5 1.2.1
+===========
+* Fix `saveNetCDF` bug (#149)
+
+
 RCMIP5 1.2
 ===========
 

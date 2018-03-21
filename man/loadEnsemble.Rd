@@ -49,4 +49,3 @@ the \code{val} component as a multidimensional array, not a data frame.
 This is an internal RCMIP5 function and not exported.
 }
 \keyword{internal}
-
