@@ -76,8 +76,8 @@ saveNetCDF <- function(x, file=NULL, path="./", verbose=FALSE, saveProvenance=TR
         if(verbose) cat("Defining time dimension...")
         assert_that(!is.null(x$debug$timeUnit))
         assert_that(!is.null(x$debug$timeRaw))
-        assert_that(!is.null(x$calendarStr))
-        timedim <- ncdf4::ncdim_def(dimNames[length(dimNames)], x$debug$timeUnit, x$debug$timeRaw, calendar=x$calendarStr)
+        assert_that(!is.null(x$debug$calendarStr))
+        timedim <- ncdf4::ncdim_def(dimNames[length(dimNames)], x$debug$timeUnit, x$debug$timeRaw, calendar=x$debug$calendarStr)
         dimlist[[length(dimlist)+1]] <- timedim     
     }
     

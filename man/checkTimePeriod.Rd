@@ -45,4 +45,3 @@ checkTimePeriod(getFileInfo())
 \seealso{
 \code{\link{getFileInfo}}
 }
-

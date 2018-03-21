@@ -27,4 +27,3 @@ Taylor et al., 2012:
   Meteorological Society, 93, 485-498.
   \url{http://dx.doi.org/10.1175/BAMS-D-11-00094.1}
 }
-

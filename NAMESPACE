@@ -24,9 +24,3 @@ import(abind)
 import(assertthat)
 import(digest)
 import(dplyr)
-
-  importFrom("grDevices", "rainbow")
-  importFrom("stats", "quantile", "runif")
-  importFrom("utils", "capture.output", "object.size", "packageVersion",
-             "setTxtProgressBar", "txtProgressBar", "write.csv")
-  
